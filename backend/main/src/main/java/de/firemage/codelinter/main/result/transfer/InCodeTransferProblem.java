@@ -29,4 +29,8 @@ public class InCodeTransferProblem implements TransferProblem {
     public String getDescription() {
         return this.problem.getDescription();
     }
+
+    public String getExplanation() {
+        return this.problem.getExplanation();
+    }
 }

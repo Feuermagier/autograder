@@ -1,15 +1,18 @@
 package de.firemage.codelinter.linter.spoon;
 
 import de.firemage.codelinter.linter.file.UploadedFile;
-import de.firemage.codelinter.linter.spoon.processor.AssertProcessor;
-import de.firemage.codelinter.linter.spoon.processor.CatchProcessor;
-import de.firemage.codelinter.linter.spoon.processor.IllegalExitProcessor;
+import de.firemage.codelinter.linter.spoon.check.AssertProcessor;
+import de.firemage.codelinter.linter.spoon.check.CatchProcessor;
+import de.firemage.codelinter.linter.spoon.check.Check;
+import de.firemage.codelinter.linter.spoon.check.IllegalExitProcessor;
+import de.firemage.codelinter.linter.spoon.check.VarProcessor;
+import de.firemage.codelinter.linter.spoon.check.reflect.ReflectImportCheck;
 import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
 import spoon.reflect.CtModel;
-import spoon.support.compiler.ZipFolder;
+import spoon.reflect.factory.Factory;
+import spoon.support.compiler.SpoonProgress;
 
-import java.io.File;
 import java.util.List;
 
 public class SpoonLinter {
@@ -18,25 +21,33 @@ public class SpoonLinter {
         launcher.addInputResource(file.getSpoonFile());
         launcher.getEnvironment().setShouldCompile(false);
         launcher.getEnvironment().setNoClasspath(false);
+        launcher.getEnvironment().setCommentEnabled(true);
         launcher.getEnvironment().setComplianceLevel(javaLevel);
 
         CtModel model;
         try {
             model = launcher.buildModel();
         } catch (ModelBuildingException e) {
-            throw new CompilationException("Failed to build a code model", e);
+            throw new CompilationException("Failed to parse the code", e);
         }
+        Factory factory = launcher.getFactory();
 
         ProblemLogger logger = new ProblemLogger();
 
-        CatchProcessor catchProcessor = new CatchProcessor(logger);
-        model.processWith(catchProcessor);
+        Check catchProcessor = new CatchProcessor(logger);
+        catchProcessor.check(model, factory);
 
-        IllegalExitProcessor exitProcessor = new IllegalExitProcessor(logger);
-        model.processWith(exitProcessor);
+        Check exitProcessor = new IllegalExitProcessor(logger);
+        exitProcessor.check(model, factory);
 
-        AssertProcessor assertProcessor = new AssertProcessor(logger);
-        model.processWith(assertProcessor);
+        Check assertProcessor = new AssertProcessor(logger);
+        assertProcessor.check(model, factory);
+
+        Check varProcessor = new VarProcessor(logger);
+        varProcessor.check(model, factory);
+
+        Check reflectImportCheck = new ReflectImportCheck(logger);
+        reflectImportCheck.check(model, factory);
 
         return logger.getProblems();
     }

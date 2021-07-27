@@ -15,7 +15,7 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
 
-public class UploadedFile {
+public class UploadedFile implements AutoCloseable {
 
     @Getter
     private final File file;
@@ -52,5 +52,10 @@ public class UploadedFile {
             entries.add(entryIterator.nextElement());
         }
         return entries.stream().map(entry -> new ZipDataSource(zipFile, entry)).collect(Collectors.toList());
+    }
+
+    @Override
+    public void close() throws IOException {
+        this.zipFile.close();
     }
 }

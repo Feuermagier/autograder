@@ -1,22 +1,20 @@
 package de.firemage.codelinter.main.result;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonInclude;
+
 import java.util.Optional;
 
-public class SuccessfulResult implements LintingResult {
-    private final SpoonResult spoonResult;
-    private final PMDResult pmdResult;
+public record SuccessfulResult(@JsonIgnore SpoonResult spoonResult,
+                               @JsonIgnore PMDResult pmdResult) implements LintingResult {
 
-
-    public SuccessfulResult(SpoonResult spoonResult, PMDResult pmdResult) {
-        this.spoonResult = spoonResult;
-        this.pmdResult = pmdResult;
-    }
-
-    public Optional<SpoonResult> getSpoonResult() {
+    @JsonInclude(value = JsonInclude.Include.NON_ABSENT)
+    public Optional<SpoonResult> getSpoon() {
         return Optional.ofNullable(this.spoonResult);
     }
 
-    public Optional<PMDResult> getPMDResult() {
+    @JsonInclude(value = JsonInclude.Include.NON_ABSENT)
+    public Optional<PMDResult> getPMD() {
         return Optional.ofNullable(this.pmdResult);
     }
 }

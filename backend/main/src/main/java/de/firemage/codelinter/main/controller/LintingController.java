@@ -10,6 +10,7 @@ import de.firemage.codelinter.main.upload.ClientUploadException;
 import de.firemage.codelinter.main.upload.InternalUploadException;
 import de.firemage.codelinter.main.upload.UploadService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -35,6 +36,7 @@ public class LintingController {
     }
 
     @PostMapping("/")
+    @CrossOrigin("http://localhost:5000")
     public LintingResult handleFileUpload(@RequestParam("file") MultipartFile file) {
         UploadedFile uploadedFile;
         try {
