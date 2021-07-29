@@ -57,6 +57,7 @@ export class InCodeProblem {
     readonly column: number;
     readonly line: number;
     readonly category: string;
-    readonly qualifiedClass: string;
+    readonly displayPath: string;
+    readonly filePath: string;
     readonly explanation: string;
 };

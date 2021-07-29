@@ -13,14 +13,14 @@
 	}
 </script>
 
-<div class="w-screen h-screen max-w-screen max-h-screen flex flex-col">
+<div class="w-screen h-screen max-w-screen max-h-screen flex flex-col bg-gray-100">
 	<header>
-		<div class="bg-primary text-gray-100 shadow-xl z-10">
+		<div class="bg-primary text-gray-100 shadow-lg mb-1">
 			<p class="px-4 py-4 font-medium text-xl">Simple Code Linter</p>
 		</div>
 	</header>
 	<main class="flex-grow min-h-0">
-		<div class="bg-gray-100 w-full h-full flex">
+		<div class="w-full h-full flex">
 			{#if result != null}
 				<ProblemView {result} />
 			{:else}

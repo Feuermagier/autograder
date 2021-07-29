@@ -1,5 +1,5 @@
 <div class="grid flex-grow place-items-center">
-    <div class="flex flex-col gap-1 rounded-md shadow-lg bg-white max-w-nearly-full max-h-nearly-full min-h-0">
+    <div class="flex flex-col gap-1 rounded-md shadow-lg bg-gray-100 max-w-nearly-full max-h-nearly-full min-h-0">
         <div
             class="flex bg-primary text-white p-2 rounded-t-md justify-center font-bold"
         >

@@ -1,17 +1,26 @@
 package de.firemage.codelinter.linter.spoon;
 
 import de.firemage.codelinter.linter.file.UploadedFile;
+import de.firemage.codelinter.linter.spoon.check.AbstractClassWithoutChildCheck;
 import de.firemage.codelinter.linter.spoon.check.AssertProcessor;
 import de.firemage.codelinter.linter.spoon.check.CatchProcessor;
 import de.firemage.codelinter.linter.spoon.check.Check;
+import de.firemage.codelinter.linter.spoon.check.DowncastCheck;
+import de.firemage.codelinter.linter.spoon.check.EmptyAbstractClassCheck;
 import de.firemage.codelinter.linter.spoon.check.IllegalExitProcessor;
+import de.firemage.codelinter.linter.spoon.check.LabelProcessor;
+import de.firemage.codelinter.linter.spoon.check.LambdaFlowComplexityCheck;
+import de.firemage.codelinter.linter.spoon.check.MethodFlowComplexityCheck;
+import de.firemage.codelinter.linter.spoon.check.ObjectTypeCheck;
+import de.firemage.codelinter.linter.spoon.check.UninstantiatedClassCheck;
+import de.firemage.codelinter.linter.spoon.check.UnusedVariableCheck;
 import de.firemage.codelinter.linter.spoon.check.VarProcessor;
 import de.firemage.codelinter.linter.spoon.check.reflect.ReflectImportCheck;
+import de.firemage.codelinter.linter.spoon.check.reflect.ReflectMethodCheck;
 import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
 import spoon.reflect.CtModel;
 import spoon.reflect.factory.Factory;
-import spoon.support.compiler.SpoonProgress;
 
 import java.util.List;
 
@@ -20,7 +29,7 @@ public class SpoonLinter {
         Launcher launcher = new Launcher();
         launcher.addInputResource(file.getSpoonFile());
         launcher.getEnvironment().setShouldCompile(false);
-        launcher.getEnvironment().setNoClasspath(false);
+        launcher.getEnvironment().setNoClasspath(true);
         launcher.getEnvironment().setCommentEnabled(true);
         launcher.getEnvironment().setComplianceLevel(javaLevel);
 
@@ -48,6 +57,36 @@ public class SpoonLinter {
 
         Check reflectImportCheck = new ReflectImportCheck(logger);
         reflectImportCheck.check(model, factory);
+
+        Check reflectMethodCheck = new ReflectMethodCheck(logger);
+        reflectMethodCheck.check(model, factory);
+
+        Check labelCheck = new LabelProcessor(logger);
+        labelCheck.check(model, factory);
+
+        Check methodComplexityCheck = new MethodFlowComplexityCheck(logger);
+        methodComplexityCheck.check(model, factory);
+
+        Check lambdaComplexityCheck = new LambdaFlowComplexityCheck(logger);
+        lambdaComplexityCheck.check(model, factory);
+
+        Check emptyAbstractClassCheck= new EmptyAbstractClassCheck(logger);
+        emptyAbstractClassCheck.check(model, factory);
+
+        Check uninstantiatedClassCheck = new UninstantiatedClassCheck(logger);
+        uninstantiatedClassCheck.check(model, factory);
+
+        Check abstractClassWithoutChildCheck = new AbstractClassWithoutChildCheck(logger);
+        abstractClassWithoutChildCheck.check(model, factory);
+
+        Check downcastCheck = new DowncastCheck(logger);
+        downcastCheck.check(model, factory);
+
+        Check unusedVariableCheck = new UnusedVariableCheck(logger);
+        unusedVariableCheck.check(model, factory);
+
+        Check objectUsedCheck = new ObjectTypeCheck(logger);
+        objectUsedCheck.check(model, factory);
 
         return logger.getProblems();
     }

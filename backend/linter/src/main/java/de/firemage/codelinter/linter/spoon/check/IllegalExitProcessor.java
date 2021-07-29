@@ -27,9 +27,9 @@ public class IllegalExitProcessor extends AbstractLoggingProcessor<CtInvocation<
         try {
             Method method = element.getExecutable().getActualMethod();
             if (method != null && method.equals(System.class.getMethod("exit", int.class))) {
-                addProblem(new InCodeProblem(element.getParent(CtClass.class), element.getPosition(), DESCRIPTION_SYSTEM, ProblemCategory.OTHER, EXPLANATION));
+                addProblem(new InCodeProblem(element, DESCRIPTION_SYSTEM, ProblemCategory.OTHER, EXPLANATION));
             } else if (method != null && method.equals(Runtime.class.getMethod("exit", int.class))) {
-                addProblem(new InCodeProblem(element.getParent(CtClass.class), element.getPosition(), DESCRIPTION_RUNTIME, ProblemCategory.OTHER, EXPLANATION));
+                addProblem(new InCodeProblem(element, DESCRIPTION_RUNTIME, ProblemCategory.OTHER, EXPLANATION));
             }
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);

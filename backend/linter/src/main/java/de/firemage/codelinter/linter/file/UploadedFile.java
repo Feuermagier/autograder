@@ -1,5 +1,6 @@
 package de.firemage.codelinter.linter.file;
 
+import com.github.javaparser.utils.SourceZip;
 import lombok.Getter;
 import net.sourceforge.pmd.util.datasource.ZipDataSource;
 import spoon.support.compiler.ZipFolder;
@@ -52,6 +53,10 @@ public class UploadedFile implements AutoCloseable {
             entries.add(entryIterator.nextElement());
         }
         return entries.stream().map(entry -> new ZipDataSource(zipFile, entry)).collect(Collectors.toList());
+    }
+
+    public SourceZip getJavaParserFile() {
+        return new SourceZip(this.file.toPath());
     }
 
     @Override

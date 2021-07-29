@@ -21,7 +21,7 @@ public class VarProcessor extends AbstractLoggingProcessor<CtLocalVariable<?>> {
     @Override
     public void process(CtLocalVariable<?> element) {
         if (element.isInferred()) {
-            addProblem(new InCodeProblem(element.getParent(CtClass.class), element.getPosition(), DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
         }
     }
 }

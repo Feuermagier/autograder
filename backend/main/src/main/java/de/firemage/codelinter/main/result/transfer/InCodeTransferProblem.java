@@ -10,8 +10,12 @@ public class InCodeTransferProblem implements TransferProblem {
         this.problem = problem;
     }
 
-    public String getQualifiedClass() {
-        return this.problem.getQualifiedClassName();
+    public String getDisplayPath() {
+        return this.problem.getDisplayPath();
+    }
+
+    public String getFilePath() {
+        return this.problem.getFilePath();
     }
 
     public int getLine() {

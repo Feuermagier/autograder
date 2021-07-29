@@ -19,7 +19,7 @@ public class CatchProcessor extends AbstractLoggingProcessor<CtCatch> {
     @Override
     public void process(CtCatch element) {
         if (element.getBody().getStatements().isEmpty()) {
-            addProblem(new InCodeProblem(element.getParent(CtClass.class), element.getPosition(), DESCRIPTION, ProblemCategory.EXCEPTION, EXPLANATION));
+            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.EXCEPTION, EXPLANATION));
         }
     }
 }

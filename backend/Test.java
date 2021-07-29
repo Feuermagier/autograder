@@ -1,8 +1,6 @@
-import java.io.File;
+public class Test {
 
-public final class Test {
-
-    void foo() {
-        assert 1 == 1;
+    public static void mai(String... args) {
+		Object o = new Object();
 	}
 }
