@@ -20,7 +20,7 @@ public class ReflectImportCheck extends AbstractCompilationUnitCheck {
     public void checkCompilationUnit(CtCompilationUnit compilationUnit) {
         compilationUnit.getImports().forEach(i -> {
             if (i.toString().contains("java.lang.reflect")) {
-                addProblem(new InCodeProblem(i, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+                addProblem(new SpoonInCodeProblem(i, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
             }
         });
     }

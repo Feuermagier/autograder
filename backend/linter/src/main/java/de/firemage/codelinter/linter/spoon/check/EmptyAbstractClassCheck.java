@@ -3,6 +3,7 @@ package de.firemage.codelinter.linter.spoon.check;
 import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 
@@ -19,7 +20,7 @@ public class EmptyAbstractClassCheck extends AbstractLoggingProcessor<CtClass<?>
     @Override
     public void process(CtClass<?> element) {
         if (element.isAbstract() && element.getMethods().stream().allMatch(CtMethod::isAbstract)) {
-            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
         }
     }
 }

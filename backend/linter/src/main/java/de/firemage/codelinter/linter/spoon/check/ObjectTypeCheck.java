@@ -3,6 +3,7 @@ package de.firemage.codelinter.linter.spoon.check;
 import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.declaration.CtVariable;
 
 public class ObjectTypeCheck extends AbstractLoggingProcessor<CtVariable<?>> {
@@ -20,7 +21,7 @@ public class ObjectTypeCheck extends AbstractLoggingProcessor<CtVariable<?>> {
     public void process(CtVariable<?> element) {
         if (element.getType().getQualifiedName().equals("java.lang.Object")
                 && !CheckUtil.isInEquals(element)) {
-            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
         }
     }
 }

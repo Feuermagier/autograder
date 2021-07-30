@@ -1,8 +1,8 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.visitor.Query;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -20,7 +20,7 @@ public class AbstractClassWithoutChildCheck extends AbstractLoggingProcessor<CtC
     @Override
     public void process(CtClass<?> element) {
         if (element.isAbstract() && !hasChildren(element)) {
-            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
         }
     }
 

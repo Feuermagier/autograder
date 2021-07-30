@@ -3,6 +3,7 @@ package de.firemage.codelinter.linter.spoon.check;
 import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
@@ -46,6 +47,6 @@ public class UnusedVariableCheck implements Check {
                 .filter(Predicate.not(usedVariables::contains))
                 .filter(Predicate.not(CtVariable::isImplicit))
                 .filter(v -> !(v instanceof CtParameter<?> && CheckUtil.isInMain(v)))
-                .forEach(v -> logger.addProblem(new InCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION)));
+                .forEach(v -> logger.addProblem(new SpoonInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION)));
     }
 }

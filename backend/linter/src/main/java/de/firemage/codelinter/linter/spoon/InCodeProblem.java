@@ -25,11 +25,11 @@ public class InCodeProblem implements Problem {
     @Getter
     private final String explanation;
 
-    public InCodeProblem(CtElement element, String description, ProblemCategory category, String explanation) {
-        this.displayPath = FormatUtil.formatPath(element);
-        this.filePath = element.getPosition().getFile().getPath();
-        this.line = element.getPosition().getLine();
-        this.column = element.getPosition().getColumn();
+    public InCodeProblem(String displayPath, String filePath, int line, int column, String description, ProblemCategory category, String explanation) {
+        this.displayPath = displayPath;
+        this.filePath = filePath;
+        this.line = line;
+        this.column = column;
         this.description = description;
         this.category = category;
         this.explanation = explanation;

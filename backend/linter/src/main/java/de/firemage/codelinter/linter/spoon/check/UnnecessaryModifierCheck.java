@@ -3,6 +3,7 @@ package de.firemage.codelinter.linter.spoon.check;
 import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.declaration.CtMethod;
 
 public class UnnecessaryModifierCheck extends AbstractLoggingProcessor<CtMethod<?>> {
@@ -19,10 +20,10 @@ public class UnnecessaryModifierCheck extends AbstractLoggingProcessor<CtMethod<
     @Override
     public void process(CtMethod<?> element) {
         if (element.isSynchronized()) {
-            addProblem(new InCodeProblem(element, SYNCHRONIZED_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, SYNCHRONIZED_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
         }
         if (element.isStrictfp()) {
-            addProblem(new InCodeProblem(element, STRICTFP_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, STRICTFP_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
         }
     }
 }

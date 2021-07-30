@@ -3,6 +3,7 @@ package de.firemage.codelinter.linter.spoon.check;
 import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtModifiable;
@@ -21,7 +22,7 @@ public class UninstantiatedClassCheck extends AbstractLoggingProcessor<CtClass<?
     @Override
     public void process(CtClass<?> element) {
         if (!element.isAbstract() && hasNonStaticMethod(element) && isNeverConstructed(element)) {
-            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
         }
     }
 

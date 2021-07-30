@@ -3,6 +3,7 @@ package de.firemage.codelinter.linter.spoon.check;
 import de.firemage.codelinter.linter.spoon.InCodeProblem;
 import de.firemage.codelinter.linter.spoon.ProblemCategory;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtCFlowBreak;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.declaration.CtElement;
@@ -32,7 +33,7 @@ public class LambdaFlowComplexityCheck extends AbstractLoggingProcessor<CtLambda
             }
         });
         if (breakingElements.size() > COMPLEXITY_THRESHOLD) {
-            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION));
         }
     }
 }

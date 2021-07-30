@@ -23,7 +23,7 @@ public class ReflectMethodCheck extends AbstractLoggingProcessor<CtInvocation<?>
         //TODO This checks only for uses of methods of java.lang.Class and not for other possible reflection uses
         if (element.getExecutable().getDeclaringType().getQualifiedName().equals("java.lang.Class") &&
                 !CheckUtil.isInEquals(element)) {
-            addProblem(new InCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
         }
     }
 }
