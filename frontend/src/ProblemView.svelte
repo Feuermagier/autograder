@@ -113,6 +113,17 @@ import Accordion from "./Accordion.svelte";
                                     <td class="px-6 py-4">{problem.category}</td>
                                     <td class="px-6 py-4">
                                         {problem.description}
+                                        <span class="has-tooltip">
+                                            <Fa
+                                                icon={faQuestionCircle}
+                                                class="inline"
+                                            />
+                                            <span
+                                                class="tooltip mt-5 border-2 border-gray-500 rounded bg-white shadow-md p-4 max-w-prose"
+                                            >
+                                                {problem.explanation}
+                                            </span>
+                                        </span>
                                     </td>
                                     {#if problem.type == IN_CODE_PROBLEM}
                                         <td class="px-6 py-4">

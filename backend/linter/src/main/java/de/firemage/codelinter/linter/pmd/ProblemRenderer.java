@@ -5,7 +5,9 @@ import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.Report;
 import net.sourceforge.pmd.RuleViolation;
 import net.sourceforge.pmd.renderers.AbstractIncrementingRenderer;
+import org.apache.commons.io.output.NullWriter;
 import java.io.IOException;
+import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -13,11 +15,11 @@ import java.util.List;
 
 @Slf4j
 public class ProblemRenderer extends AbstractIncrementingRenderer {
-    private final List<Problem> problems;
+    private final List<Problem> problems = new ArrayList<>();
 
     public ProblemRenderer() {
         super("Custom renderer", "Creates InCodeProblems");
-        problems = new ArrayList<>();
+        super.setWriter(new NullWriter());
     }
 
     @Override
