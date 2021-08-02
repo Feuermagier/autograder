@@ -17,5 +17,4 @@ target/
 
 # App
 logs/
-upload/
-
+./upload/

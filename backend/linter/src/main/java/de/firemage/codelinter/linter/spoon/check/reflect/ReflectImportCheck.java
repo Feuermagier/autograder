@@ -1,8 +1,9 @@
 package de.firemage.codelinter.linter.spoon.check.reflect;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import de.firemage.codelinter.linter.spoon.check.AbstractCompilationUnitCheck;
 import spoon.reflect.declaration.CtCompilationUnit;
 
@@ -20,7 +21,7 @@ public class ReflectImportCheck extends AbstractCompilationUnitCheck {
     public void checkCompilationUnit(CtCompilationUnit compilationUnit) {
         compilationUnit.getImports().forEach(i -> {
             if (i.toString().contains("java.lang.reflect")) {
-                addProblem(new SpoonInCodeProblem(i, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+                addProblem(new SpoonInCodeProblem(i, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.SEVERE));
             }
         });
     }

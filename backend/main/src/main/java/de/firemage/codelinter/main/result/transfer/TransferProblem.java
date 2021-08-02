@@ -1,8 +1,8 @@
 package de.firemage.codelinter.main.result.transfer;
 
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.Problem;
+import de.firemage.codelinter.linter.InCodeProblem;
+import de.firemage.codelinter.linter.Problem;
 
 @JsonTypeInfo(use = JsonTypeInfo.Id.NAME, property = "type")
 public interface TransferProblem {

@@ -1,7 +1,7 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtExpression;
@@ -23,7 +23,7 @@ public class DowncastCheck extends AbstractLoggingProcessor<CtExpression<?>> {
     public void process(CtExpression<?> element) {
         if (!CheckUtil.isInEquals(element)
                 && !element.getTypeCasts().stream().allMatch(c -> c.unbox().isPrimitive())) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.POSSIBLE_SEVERE));
         }
     }
 }

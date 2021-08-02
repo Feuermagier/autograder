@@ -1,7 +1,7 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtLabelledFlowBreak;
@@ -20,7 +20,7 @@ public class LabelProcessor extends AbstractLoggingProcessor<CtLabelledFlowBreak
     @Override
     public void process(CtLabelledFlowBreak element) {
         if (element.getTargetLabel() != null) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.SEVERE));
         }
     }
 }

@@ -49,7 +49,11 @@ public class LintingController {
 
         LintingResult result =  this.lintingService.lint(uploadedFile, new LintingConfig(true, true, 11));
 
-        this.uploadService.delete(uploadedFile);
+        try {
+            this.uploadService.delete(uploadedFile);
+        } catch (InternalUploadException e) {
+            return new InternalErrorResult(e.getMessage());
+        }
         return result;
     }
 }

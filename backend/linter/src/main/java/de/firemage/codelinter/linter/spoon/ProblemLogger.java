@@ -1,5 +1,6 @@
 package de.firemage.codelinter.linter.spoon;
 
+import de.firemage.codelinter.linter.Problem;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;

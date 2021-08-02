@@ -1,7 +1,7 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.CtModel;
@@ -14,9 +14,7 @@ import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.Query;
 import spoon.reflect.visitor.filter.TypeFilter;
 
-import java.util.HashMap;
 import java.util.HashSet;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.function.Predicate;
@@ -47,6 +45,6 @@ public class UnusedVariableCheck implements Check {
                 .filter(Predicate.not(usedVariables::contains))
                 .filter(Predicate.not(CtVariable::isImplicit))
                 .filter(v -> !(v instanceof CtParameter<?> && CheckUtil.isInMain(v)))
-                .forEach(v -> logger.addProblem(new SpoonInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION)));
+                .forEach(v -> logger.addProblem(new SpoonInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION, ProblemPriority.FIX_RECOMMENDED)));
     }
 }

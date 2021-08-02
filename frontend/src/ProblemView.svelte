@@ -9,9 +9,9 @@ import Accordion from "./Accordion.svelte";
 
     export let result: SuccesfulResult;
 
-    function formatInCodePosition(spoonProblem): string {
-        let problem = spoonProblem as InCodeProblem;
-        return problem.displayPath;
+    function formatInCodeProblem(problem): string {
+        let inCodeProblem = problem as InCodeProblem;
+        return inCodeProblem.displayPath;
     }
 </script>
 
@@ -66,7 +66,7 @@ import Accordion from "./Accordion.svelte";
                                     </td>
                                     {#if problem.type == IN_CODE_PROBLEM}
                                         <td class="px-6 py-4">
-                                            {formatInCodePosition(problem)}
+                                            {formatInCodeProblem(problem)}
                                         </td>
                                     {/if}
                                 </tr>
@@ -82,10 +82,50 @@ import Accordion from "./Accordion.svelte";
         {#if result.pmd}
             <Accordion open={false}>
                 <p slot="header" class="font-medium">PMD</p>
-                <div class="whitespace-pre-wrap" slot="content">
-                    <p>
-                        {result.pmd.result}
-                    </p>
+                <div slot="content">
+                    {#if result.pmd.problems.length > 0}
+                    <table class="min-w-full divide-y">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Type
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Problem
+                                </th>
+                                <th
+                                    scope="col"
+                                    class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
+                                >
+                                    Position
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody class="bg-white divide-y divide-gray-200">
+                            {#each result.pmd.problems as problem}
+                                <tr>
+                                    <td class="px-6 py-4">{problem.category}</td>
+                                    <td class="px-6 py-4">
+                                        {problem.description}
+                                    </td>
+                                    {#if problem.type == IN_CODE_PROBLEM}
+                                        <td class="px-6 py-4">
+                                            {formatInCodeProblem(problem)}
+                                        </td>
+                                    {/if}
+                                </tr>
+                            {/each}
+                        </tbody>
+                    </table>
+                {:else}
+                    <div class="bg-ok-green p-2">No problems found - good job!</div>
+                {/if}
                 </div>
             </Accordion>
         {/if}

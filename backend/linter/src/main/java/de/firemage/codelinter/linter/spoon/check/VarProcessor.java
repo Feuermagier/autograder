@@ -1,7 +1,7 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtLocalVariable;
@@ -22,7 +22,7 @@ public class VarProcessor extends AbstractLoggingProcessor<CtLocalVariable<?>> {
     @Override
     public void process(CtLocalVariable<?> element) {
         if (element.isInferred()) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
         }
     }
 }

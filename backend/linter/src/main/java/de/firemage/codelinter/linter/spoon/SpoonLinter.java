@@ -1,5 +1,6 @@
 package de.firemage.codelinter.linter.spoon;
 
+import de.firemage.codelinter.linter.Problem;
 import de.firemage.codelinter.linter.file.UploadedFile;
 import de.firemage.codelinter.linter.spoon.check.AbstractClassWithoutChildCheck;
 import de.firemage.codelinter.linter.spoon.check.AssertProcessor;

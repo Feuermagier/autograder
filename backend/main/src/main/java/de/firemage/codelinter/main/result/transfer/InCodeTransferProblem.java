@@ -1,7 +1,8 @@
 package de.firemage.codelinter.main.result.transfer;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.InCodeProblem;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 
 public class InCodeTransferProblem implements TransferProblem {
     private final InCodeProblem problem;
@@ -36,5 +37,9 @@ public class InCodeTransferProblem implements TransferProblem {
 
     public String getExplanation() {
         return this.problem.getExplanation();
+    }
+
+    public ProblemPriority getPriority() {
+        return this.problem.getPriority();
     }
 }

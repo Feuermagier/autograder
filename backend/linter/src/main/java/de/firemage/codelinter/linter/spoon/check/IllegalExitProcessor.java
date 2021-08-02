@@ -1,7 +1,7 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtInvocation;
@@ -28,9 +28,9 @@ public class IllegalExitProcessor extends AbstractLoggingProcessor<CtInvocation<
         try {
             Method method = element.getExecutable().getActualMethod();
             if (method != null && method.equals(System.class.getMethod("exit", int.class))) {
-                addProblem(new SpoonInCodeProblem(element, DESCRIPTION_SYSTEM, ProblemCategory.OTHER, EXPLANATION));
+                addProblem(new SpoonInCodeProblem(element, DESCRIPTION_SYSTEM, ProblemCategory.OTHER, EXPLANATION, ProblemPriority.SEVERE));
             } else if (method != null && method.equals(Runtime.class.getMethod("exit", int.class))) {
-                addProblem(new SpoonInCodeProblem(element, DESCRIPTION_RUNTIME, ProblemCategory.OTHER, EXPLANATION));
+                addProblem(new SpoonInCodeProblem(element, DESCRIPTION_RUNTIME, ProblemCategory.OTHER, EXPLANATION, ProblemPriority.SEVERE));
             }
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);

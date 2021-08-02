@@ -1,8 +1,9 @@
 package de.firemage.codelinter.linter.spoon.check.reflect;
 
-import de.firemage.codelinter.linter.spoon.InCodeProblem;
-import de.firemage.codelinter.linter.spoon.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemCategory;
+import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
+import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import de.firemage.codelinter.linter.spoon.check.AbstractLoggingProcessor;
 import de.firemage.codelinter.linter.spoon.check.CheckUtil;
 import spoon.reflect.code.CtInvocation;
@@ -23,7 +24,7 @@ public class ReflectMethodCheck extends AbstractLoggingProcessor<CtInvocation<?>
         //TODO This checks only for uses of methods of java.lang.Class and not for other possible reflection uses
         if (element.getExecutable().getDeclaringType().getQualifiedName().equals("java.lang.Class") &&
                 !CheckUtil.isInEquals(element)) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION));
+            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.SEVERE));
         }
     }
 }

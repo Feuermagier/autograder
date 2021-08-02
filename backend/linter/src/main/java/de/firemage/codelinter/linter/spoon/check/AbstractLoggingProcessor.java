@@ -1,6 +1,6 @@
 package de.firemage.codelinter.linter.spoon.check;
 
-import de.firemage.codelinter.linter.spoon.Problem;
+import de.firemage.codelinter.linter.Problem;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;

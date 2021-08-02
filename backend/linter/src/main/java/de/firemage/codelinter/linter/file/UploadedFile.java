@@ -4,7 +4,6 @@ import com.github.javaparser.utils.SourceZip;
 import lombok.Getter;
 import net.sourceforge.pmd.util.datasource.ZipDataSource;
 import spoon.support.compiler.ZipFolder;
-
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;

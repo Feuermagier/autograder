@@ -11,11 +11,11 @@ export class SuccesfulResult {
 };
 
 export class PMDResult {
-    readonly result: string;
+    readonly problems: Problem[];
 };
 
 export class SpoonResult {
-    readonly problems: SpoonProblem[];
+    readonly problems: Problem[];
 };
 
 export const COMPILATION_ERROR_RESULT = 'CompilationErrorResult';
@@ -43,11 +43,12 @@ export class NetworkErrorResult {
 
 ////////////////////// Spoon Problems /////////////////////////
 
-export interface SpoonProblem {
+export interface Problem {
     readonly type: string;
     readonly description: string;
     readonly category: string;
     readonly explanation: string;
+    readonly priority: string;
 };
 
 export const IN_CODE_PROBLEM = 'InCodeTransferProblem';
@@ -60,4 +61,5 @@ export class InCodeProblem {
     readonly displayPath: string;
     readonly filePath: string;
     readonly explanation: string;
+    readonly priority: string;
 };
