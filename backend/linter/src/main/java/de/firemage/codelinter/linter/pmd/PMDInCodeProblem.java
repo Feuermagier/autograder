@@ -7,9 +7,9 @@ import net.sourceforge.pmd.RulePriority;
 import net.sourceforge.pmd.RuleViolation;
 
 public class PMDInCodeProblem extends InCodeProblem {
-    public PMDInCodeProblem(RuleViolation violation) {
-        super(violation.getFilename(),
-                violation.getFilename(),
+    public PMDInCodeProblem(RuleViolation violation, String filename) {
+        super(filename + ":" + violation.getBeginLine(),
+                filename,
                 violation.getBeginLine(),
                 violation.getBeginColumn(),
                 violation.getRule().getName(),

@@ -7,7 +7,6 @@ import net.sourceforge.pmd.RuleViolation;
 import net.sourceforge.pmd.renderers.AbstractIncrementingRenderer;
 import org.apache.commons.io.output.NullWriter;
 import java.io.IOException;
-import java.io.Writer;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,6 +14,8 @@ import java.util.List;
 
 @Slf4j
 public class ProblemRenderer extends AbstractIncrementingRenderer {
+    private static final String PATH_END_ID = ".zip:";
+
     private final List<Problem> problems = new ArrayList<>();
 
     public ProblemRenderer() {
@@ -24,7 +25,8 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
 
     @Override
     public void renderFileViolations(Iterator<RuleViolation> violations) {
-        violations.forEachRemaining(violation -> problems.add(new PMDInCodeProblem(violation)));
+        violations.forEachRemaining(violation ->
+                problems.add(new PMDInCodeProblem(violation, determineFileName(violation.getFilename()))));
     }
 
     @Override
@@ -49,6 +51,12 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
     @Override
     public void flush() {
         // Do nothing for this renderer
+    }
+
+    @Override
+    protected String determineFileName(String inputFileName) {
+        String path = super.determineFileName(inputFileName);
+        return path.substring(path.indexOf(PATH_END_ID) + PATH_END_ID.length());
     }
 
     public List<Problem> getProblems() {

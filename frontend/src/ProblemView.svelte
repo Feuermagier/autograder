@@ -17,7 +17,7 @@ import Accordion from "./Accordion.svelte";
 
 <CenterCard>
     <p slot="header">Result</p>
-    <div slot="content" class="min-h-0 min-w-full w-3/4-screen flex flex-col gap-5 overflow-auto">
+    <div slot="content" class="min-h-0 min-w-full w-3/4-screen flex flex-col gap-5 overflow-auto relative">
         {#if result.spoon}
             <Accordion open={true}>
                 <p slot="header" class="font-medium">Problems</p>

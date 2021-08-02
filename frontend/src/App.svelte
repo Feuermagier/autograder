@@ -37,7 +37,7 @@
 
 	/* https://github.com/Cosbgn/tailwindcss-tooltips */
 	.tooltip {
-		@apply invisible absolute;
+		@apply invisible absolute ;
 	}
 
 	.has-tooltip:hover .tooltip {
