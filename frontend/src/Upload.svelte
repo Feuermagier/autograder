@@ -19,7 +19,7 @@
             ZIP-File and upload it here.
         </p>
         <div class="flex justify-center">
-            <input type="file" accept=".zip" bind:files class="p-4" />
+            <input type="file" accept=".zip" bind:files on:change={confirmFile} class="p-4" />
         </div>
         <div class="flex justify-end">
             <button
