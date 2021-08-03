@@ -7,6 +7,7 @@ import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.declaration.CtEnumValue;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.factory.Factory;
@@ -44,8 +45,8 @@ public class UnusedVariableCheck implements Check {
 
         Query.getElements(factory, new TypeFilter<>(CtVariable.class)).stream()
                 .filter(Predicate.not(usedVariables::contains))
-                .filter(Predicate.not(CtVariable::isImplicit))
                 .filter(Predicate.not(v -> v instanceof CtParameter<?>))
+                .filter(Predicate.not(v -> v instanceof CtEnumValue<?>))
                 .forEach(v -> logger.addProblem(new SpoonInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION, ProblemPriority.FIX_RECOMMENDED)));
     }
 }
