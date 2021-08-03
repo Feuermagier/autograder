@@ -15,7 +15,7 @@
 
 <CenterCard>
     <p slot="header">Upload</p>
-    <div slot="content" class="min-w-full">
+    <div slot="content" class="m-2">
         <p>
             Compress your whole <span class="font-mono">src</span>-folder into a
             ZIP-File and upload it here.

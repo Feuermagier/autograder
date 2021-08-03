@@ -26,7 +26,7 @@
                 </button>
             {/if}
         </div>
-        <div class="p-2 flex min-h-0">
+        <div class="flex min-h-0">
             <slot name="content"><p>Default content</p></slot>
         </div>
     </div>
