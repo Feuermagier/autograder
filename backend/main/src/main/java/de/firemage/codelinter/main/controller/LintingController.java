@@ -47,13 +47,9 @@ public class LintingController {
             return new InternalErrorResult(e.getMessage());
         }
 
-        LintingResult result =  this.lintingService.lint(uploadedFile, new LintingConfig(true, true, 11));
+        LintingResult result = this.lintingService.lint(uploadedFile, new LintingConfig(true, true, true, 11));
 
-        try {
-            this.uploadService.delete(uploadedFile);
-        } catch (InternalUploadException e) {
-            return new InternalErrorResult(e.getMessage());
-        }
+        this.uploadService.delete(uploadedFile);
         return result;
     }
 }

@@ -34,7 +34,7 @@ public class UploadServiceImpl implements UploadService {
 
     @Override
     public UploadedFile store(MultipartFile file) throws ClientUploadException, InternalUploadException {
-        Path destination = this.uploadDirectory.resolve(UUID.randomUUID() + ".zip");
+        Path destination = this.uploadDirectory.resolve(UUID.randomUUID().toString().replace("-", "_") + ".zip");
 
         // Additional security check. Not really necessary, but better check that the file is definitely at the
         // right place.
@@ -58,11 +58,7 @@ public class UploadServiceImpl implements UploadService {
     }
 
     @Override
-    public void delete(UploadedFile file) throws InternalUploadException {
-        try {
-            Files.delete(file.getFile().toPath());
-        } catch (IOException e) {
-            throw new InternalUploadException(e);
-        }
+    public void delete(UploadedFile file) {
+        file.delete();
     }
 }

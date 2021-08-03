@@ -5,5 +5,5 @@ import org.springframework.web.multipart.MultipartFile;
 
 public interface UploadService {
     UploadedFile store(MultipartFile file) throws ClientUploadException, InternalUploadException;
-    void delete(UploadedFile file) throws InternalUploadException;
+    void delete(UploadedFile file);
 }

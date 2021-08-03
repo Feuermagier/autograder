@@ -1,11 +1,19 @@
 package de.firemage.codelinter.linter.file;
 
 import com.github.javaparser.utils.SourceZip;
+import de.firemage.codelinter.linter.compiler.Compiler;
+import de.firemage.codelinter.linter.compiler.CompilerResult;
 import lombok.Getter;
 import net.sourceforge.pmd.util.datasource.ZipDataSource;
 import spoon.support.compiler.ZipFolder;
+import javax.tools.JavaCompiler;
+import javax.tools.ToolProvider;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -14,11 +22,18 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
+import java.util.zip.ZipInputStream;
 
 public class UploadedFile implements AutoCloseable {
 
     @Getter
     private final File file;
+
+    @Getter
+    private File jar;
+
+    @Getter
+    private String compilerErrorOutput;
 
     private final ZipFile zipFile;
 
@@ -34,6 +49,12 @@ public class UploadedFile implements AutoCloseable {
         } catch (ZipException e) {
             throw new ZipFormatException("Couldn't read the zip file", e);
         }
+    }
+
+    public void compile() throws IOException {
+        CompilerResult compilerResult = Compiler.createJar(file);
+        this.jar = compilerResult.jar();
+        this.compilerErrorOutput = compilerResult.errorOutput();
     }
 
     public ZipFolder getSpoonFile() {
@@ -61,5 +82,10 @@ public class UploadedFile implements AutoCloseable {
     @Override
     public void close() throws IOException {
         this.zipFile.close();
+    }
+
+    public void delete() {
+        this.file.delete();
+        this.jar.delete();
     }
 }

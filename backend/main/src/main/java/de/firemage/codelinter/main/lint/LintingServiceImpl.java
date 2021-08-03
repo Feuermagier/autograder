@@ -30,6 +30,19 @@ public class LintingServiceImpl implements LintingService {
     public LintingResult lint(UploadedFile file, LintingConfig config) {
         Linter linter = new Linter(file);
 
+        if (config.compile()) {
+            try {
+                file.compile();
+            } catch (IOException e) {
+                return new CompilationErrorResult(e.getMessage());
+            }
+
+            String out = file.getCompilerErrorOutput();
+            if (out != null && !out.isBlank()) {
+                return new CompilationErrorResult(out);
+            }
+        }
+
         SpoonResult spoonResult = null;
         if (config.enableSpoon()) {
             try {
