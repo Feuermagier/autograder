@@ -9,6 +9,7 @@ function createLinter() {
         setFile: (file: File) => {
             update(state => {
                 state.file = file;
+                state.loading = true;
                 return state;
             });
 
@@ -23,6 +24,7 @@ function createLinter() {
             })
                 .then(result => update(state => {
                     state.result = result;
+                    state.loading = false;
                     console.log(result);
                     return state;
                 }))
@@ -30,6 +32,7 @@ function createLinter() {
                     console.error('Error: ', error);
                     update(state => {
                         state.result = new NetworkErrorResult();
+                        state.loading = false;
                         return state;
                     });
                 });
@@ -43,6 +46,7 @@ function createLinter() {
 class LinterState {
     file: File;
     result: LinterResult;
+    loading: boolean;
 };
 
 export const linter = createLinter();
