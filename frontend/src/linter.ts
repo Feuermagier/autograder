@@ -2,7 +2,7 @@ import { writable } from "svelte/store";
 import { LinterResult, NetworkErrorResult } from "./types";
 
 function createLinter() {
-    const { subscribe, update } = writable(new LinterState());
+    const { subscribe, update, set } = writable(new LinterState());
 
     return {
         subscribe,
@@ -33,6 +33,9 @@ function createLinter() {
                         return state;
                     });
                 });
+        },
+        clear: () => {
+            set(new LinterState());
         }
     }
 }

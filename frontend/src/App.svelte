@@ -22,7 +22,7 @@
 	<main class="flex-grow min-h-0">
 		<div class="w-full h-full flex">
 			{#if result != null}
-				<ProblemView {result} />
+				<ProblemView {result} on:close={linter.clear} />
 			{:else}
 				<Upload />
 			{/if}

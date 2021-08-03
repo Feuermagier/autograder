@@ -11,7 +11,7 @@
     }
 </script>
 
-<CenterCard>
+<CenterCard hasCloseButton={true} on:close>
     <p slot="header">Result</p>
     <div
         slot="content"
