@@ -63,3 +63,10 @@ export class InCodeProblem {
     readonly explanation: string;
     readonly priority: string;
 };
+
+export namespace ProblemPriority {
+    export const SEVERE = 'SEVERE';
+    export const POSSIBLE_SEVERE = 'POSSIBLE_SEVERE';
+    export const FIX_RECOMMENDED = 'FIX_RECOMMENDED';
+    export const INFO = 'INFO';
+}
