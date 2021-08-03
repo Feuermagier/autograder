@@ -12,6 +12,7 @@ import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.Query;
+import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.HashSet;
@@ -20,9 +21,9 @@ import java.util.Set;
 import java.util.function.Predicate;
 
 public class UnusedVariableCheck implements Check {
-    public static final String DESCRIPTION = "Unused variable/parameter '%s'";
+    public static final String DESCRIPTION = "Unused variable '%s'";
     public static final String EXPLANATION = """
-            You don't use the variable or parameter, so why declare it?
+            You don't use the variable, so why declare it?
             """;
 
     private final ProblemLogger logger;
@@ -44,7 +45,7 @@ public class UnusedVariableCheck implements Check {
         Query.getElements(factory, new TypeFilter<>(CtVariable.class)).stream()
                 .filter(Predicate.not(usedVariables::contains))
                 .filter(Predicate.not(CtVariable::isImplicit))
-                .filter(v -> !(v instanceof CtParameter<?> && CheckUtil.isInMain(v)))
+                .filter(Predicate.not(v -> v instanceof CtParameter<?>))
                 .forEach(v -> logger.addProblem(new SpoonInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION, ProblemPriority.FIX_RECOMMENDED)));
     }
 }
