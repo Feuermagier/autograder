@@ -2,7 +2,13 @@
     import CenterCard from "./CenterCard.svelte";
     import Accordion from "./Accordion.svelte";
     import InCodeProblemView from "./InCodeProblemView.svelte";
-    import type { InCodeProblem, Problem, SuccesfulResult } from "./types";
+    import type {
+        CompilationDiagnostic,
+        InCodeProblem,
+        Problem,
+        SuccesfulResult,
+    } from "./types";
+    import DiagnosticsView from "./DiagnosticsView.svelte";
 
     export let result: SuccesfulResult;
 
@@ -15,10 +21,7 @@
 
 <CenterCard hasCloseButton={true} on:close>
     <p slot="header">Result</p>
-    <div
-        slot="content"
-        class="flex relative"
-    >
+    <div slot="content" class="flex relative">
         {#if disclaimerVisible}
             <div
                 class="absolute z-20 p-5 bg-gray-400 bg-opacity-90 w-full h-full flex flex-col justify-around items-center"
@@ -44,7 +47,28 @@
             </div>
         {/if}
 
-        <div class="overflow-auto w-3/4-screen flex flex-col space-y-5 relative m-2">
+        <div
+            class="overflow-auto w-3/4-screen flex flex-col space-y-5 relative m-2"
+        >
+            {#if result.compilation}
+                <Accordion open={true}>
+                    <p slot="header" class="font-medium">Compilation</p>
+                    <div slot="content">
+                        {#if result.compilation.diagnostics.length > 0}
+                        <div class="bg-error-red p-2">
+                            <p>You should fix those compilation warnings!</p>
+                        </div>
+                        <DiagnosticsView
+                            diagnostics={result.compilation.diagnostics}
+                        />
+                    {:else}
+                        <div class="bg-ok-green p-2">
+                            <p>There were no warnings.</p>
+                        </div>
+                    {/if}
+                    </div>
+                </Accordion>
+            {/if}
             {#if result.spoon}
                 <Accordion open={true}>
                     <p slot="header" class="font-medium">Problems</p>
@@ -55,7 +79,7 @@
                             />
                         {:else}
                             <div class="bg-ok-green p-2">
-                                No problems found - good job!
+                                <p>No problems found - good job!</p>
                             </div>
                         {/if}
                     </div>

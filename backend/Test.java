@@ -1,6 +1,6 @@
 public class Test {
 
-    public static void mai(String... args) {
-		Object o = new Object()
+    public static void main(String... args) {
+		int x = (int) 5;
 	}
 }

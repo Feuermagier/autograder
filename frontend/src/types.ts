@@ -8,6 +8,7 @@ export class SuccesfulResult {
     readonly type = SUCCESSFUL_RESULT;
     readonly spoon: SpoonResult;
     readonly pmd: PMDResult;
+    readonly compilation: CompilationResult;
 };
 
 export class PMDResult {
@@ -17,6 +18,10 @@ export class PMDResult {
 export class SpoonResult {
     readonly problems: Problem[];
 };
+
+export class CompilationResult {
+    readonly diagnostics: CompilationDiagnostic[];
+}
 
 export const COMPILATION_ERROR_RESULT = 'CompilationErrorResult';
 export class CompilationErrorResult {
@@ -41,7 +46,7 @@ export class NetworkErrorResult {
     readonly type = NETWORK_ERROR_RESULT;
 };
 
-////////////////////// Spoon Problems /////////////////////////
+////////////////////// Problems /////////////////////////
 
 export interface Problem {
     readonly type: string;
@@ -69,4 +74,13 @@ export namespace ProblemPriority {
     export const POSSIBLE_SEVERE = 'POSSIBLE_SEVERE';
     export const FIX_RECOMMENDED = 'FIX_RECOMMENDED';
     export const INFO = 'INFO';
+}
+
+//////////////////// Compilation ///////////////////////
+
+export class CompilationDiagnostic {
+    readonly message: string;
+    readonly line: number;
+    readonly column: number;
+    readonly className: string;
 }
