@@ -1,4 +1,6 @@
 package de.firemage.codelinter.main.lint;
 
-public record LintingConfig(boolean enableSpoon, boolean enablePMD, boolean compile, int javaLevel) {
+import de.firemage.codelinter.linter.compiler.JavaVersion;
+
+public record LintingConfig(boolean enableSpoon, boolean enablePMD, boolean compile, JavaVersion javaVersion) {
 }

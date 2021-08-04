@@ -1,15 +1,22 @@
 package de.firemage.codelinter.linter.compiler;
 
+import org.apache.commons.io.FileUtils;
+import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
+import javax.tools.JavaFileManager;
+import javax.tools.JavaFileObject;
 import javax.tools.ToolProvider;
 import java.io.BufferedInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.StringWriter;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Locale;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -19,25 +26,39 @@ import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public final class Compiler {
+    public static final Locale COMPILER_LOCALE = Locale.US;
+
     private Compiler() {
     }
 
-    public static CompilerResult createJar(File inputZip) throws IOException {
+    public static CompilationResult createJar(File inputZip, JavaVersion javaVersion) throws IOException, CompilationFailureException {
         String inFileName = inputZip.getName().replace(".zip", "");
         File zipOutput = new File(inputZip.getParentFile(), inFileName + "_unzipped");
-        List<File> sourceFiles = unzip(inputZip, zipOutput);
+        List<PhysicalFileObject> compilationUnits = unzip(inputZip, zipOutput).stream()
+                .map(PhysicalFileObject::new)
+                .collect(Collectors.toList());
 
-        // https://stackoverflow.com/questions/2946338/how-do-i-programmatically-compile-and-instantiate-a-java-class
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         File compilerOutput = new File(inputZip.getParentFile(), inFileName + "_compiled");
-        ByteArrayOutputStream standardOut = new ByteArrayOutputStream();
-        ByteArrayOutputStream errorOut = new ByteArrayOutputStream();
-        List<String> arguments = sourceFiles.stream()
-                .map(File::getAbsolutePath)
-                .collect(Collectors.toList());
-        arguments.add(0, "-d");
-        arguments.add(1, compilerOutput.getAbsolutePath());
-        compiler.run(null, null, errorOut, arguments.toArray(String[]::new));
+        DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
+        StringWriter output = new StringWriter();
+        JavaFileManager fileManager = new SeparateBinaryFileManager(
+                compiler.getStandardFileManager(diagnosticCollector, Locale.US, StandardCharsets.UTF_8),
+                compilerOutput);
+        boolean successful = compiler.getTask(
+                output,
+                fileManager,
+                diagnosticCollector,
+                Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial", "--release=" + javaVersion.getVersionString()),
+                null,
+                compilationUnits).call();
+        output.flush();
+        output.close();
+        FileUtils.deleteDirectory(zipOutput);
+
+        if (!successful) {
+            throw new CompilationFailureException(diagnosticCollector.getDiagnostics(), "_unzipped/");
+        }
 
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
@@ -45,8 +66,11 @@ public final class Compiler {
         JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar));
         addToJar(compilerOutput, jarOut);
         jarOut.close();
+        FileUtils.deleteDirectory(compilerOutput);
 
-        return new CompilerResult(jar, standardOut.toString(), errorOut.toString());
+        return new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
+                .map(d -> new CompilationDiagnostic(d, "_unzipped/"))
+                .collect(Collectors.toList()));
     }
 
     private static List<File> unzip(File input, File destination) throws IOException {

@@ -1,5 +1,6 @@
 package de.firemage.codelinter.main.controller;
 
+import de.firemage.codelinter.linter.compiler.JavaVersion;
 import de.firemage.codelinter.linter.file.UploadedFile;
 import de.firemage.codelinter.main.lint.LintingConfig;
 import de.firemage.codelinter.main.lint.LintingService;
@@ -47,7 +48,11 @@ public class LintingController {
             return new InternalErrorResult(e.getMessage());
         }
 
-        LintingResult result = this.lintingService.lint(uploadedFile, new LintingConfig(true, true, true, 11));
+        LintingResult result = this.lintingService.lint(uploadedFile, new LintingConfig(
+                true,
+                true,
+                true,
+                JavaVersion.JAVA_11));
 
         this.uploadService.delete(uploadedFile);
         return result;

@@ -2,10 +2,13 @@ package de.firemage.codelinter.main.lint;
 
 import de.firemage.codelinter.linter.Linter;
 import de.firemage.codelinter.linter.Problem;
+import de.firemage.codelinter.linter.compiler.CompilationDiagnostic;
+import de.firemage.codelinter.linter.compiler.CompilationFailureException;
 import de.firemage.codelinter.linter.file.UploadedFile;
 import de.firemage.codelinter.linter.pmd.PMDRuleset;
 import de.firemage.codelinter.linter.spoon.CompilationException;
 import de.firemage.codelinter.main.result.CompilationErrorResult;
+import de.firemage.codelinter.main.result.CompilationResult;
 import de.firemage.codelinter.main.result.InternalErrorResult;
 import de.firemage.codelinter.main.result.LintingResult;
 import de.firemage.codelinter.main.result.PMDConfig;
@@ -30,23 +33,20 @@ public class LintingServiceImpl implements LintingService {
     public LintingResult lint(UploadedFile file, LintingConfig config) {
         Linter linter = new Linter(file);
 
+        CompilationResult compilationResult = null;
         if (config.compile()) {
             try {
-                file.compile();
-            } catch (IOException e) {
+                List<CompilationDiagnostic> diagnostics = file.compile(config.javaVersion());
+                compilationResult = CompilationResult.fromDiagnostics(diagnostics);
+            } catch (IOException | CompilationFailureException e) {
                 return new CompilationErrorResult(e.getMessage());
-            }
-
-            String out = file.getCompilerErrorOutput();
-            if (out != null && !out.isBlank()) {
-                return new CompilationErrorResult(out);
             }
         }
 
         SpoonResult spoonResult = null;
         if (config.enableSpoon()) {
             try {
-                List<Problem> problems = linter.executeSpoonLints(config.javaLevel());
+                List<Problem> problems = linter.executeSpoonLints(config.javaVersion());
                 spoonResult = SpoonResult.fromProblems(problems);
             } catch (CompilationException e) {
                 return new CompilationErrorResult(e.getMessage());
@@ -63,6 +63,6 @@ public class LintingServiceImpl implements LintingService {
             }
         }
 
-        return new SuccessfulResult(spoonResult, pmdResult);
+        return new SuccessfulResult(spoonResult, pmdResult, compilationResult);
     }
 }

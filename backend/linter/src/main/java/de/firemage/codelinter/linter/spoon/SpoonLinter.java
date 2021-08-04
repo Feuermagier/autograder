@@ -1,6 +1,7 @@
 package de.firemage.codelinter.linter.spoon;
 
 import de.firemage.codelinter.linter.Problem;
+import de.firemage.codelinter.linter.compiler.JavaVersion;
 import de.firemage.codelinter.linter.file.UploadedFile;
 import de.firemage.codelinter.linter.spoon.check.AbstractClassWithoutChildCheck;
 import de.firemage.codelinter.linter.spoon.check.AssertProcessor;
@@ -26,13 +27,13 @@ import spoon.reflect.factory.Factory;
 import java.util.List;
 
 public class SpoonLinter {
-    public List<Problem> lint(UploadedFile file, int javaLevel) throws CompilationException {
+    public List<Problem> lint(UploadedFile file, JavaVersion javaVersion) throws CompilationException {
         Launcher launcher = new Launcher();
         launcher.addInputResource(file.getSpoonFile());
         launcher.getEnvironment().setShouldCompile(false);
         launcher.getEnvironment().setNoClasspath(true);
         launcher.getEnvironment().setCommentEnabled(true);
-        launcher.getEnvironment().setComplianceLevel(javaLevel);
+        launcher.getEnvironment().setComplianceLevel(javaVersion.getVersionNumber());
 
         CtModel model;
         try {

@@ -1,19 +1,16 @@
 package de.firemage.codelinter.linter.file;
 
 import com.github.javaparser.utils.SourceZip;
+import de.firemage.codelinter.linter.compiler.CompilationDiagnostic;
 import de.firemage.codelinter.linter.compiler.Compiler;
-import de.firemage.codelinter.linter.compiler.CompilerResult;
+import de.firemage.codelinter.linter.compiler.CompilationFailureException;
+import de.firemage.codelinter.linter.compiler.CompilationResult;
+import de.firemage.codelinter.linter.compiler.JavaVersion;
 import lombok.Getter;
 import net.sourceforge.pmd.util.datasource.ZipDataSource;
 import spoon.support.compiler.ZipFolder;
-import javax.tools.JavaCompiler;
-import javax.tools.ToolProvider;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
@@ -22,7 +19,6 @@ import java.util.stream.Collectors;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipException;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipInputStream;
 
 public class UploadedFile implements AutoCloseable {
 
@@ -31,9 +27,6 @@ public class UploadedFile implements AutoCloseable {
 
     @Getter
     private File jar;
-
-    @Getter
-    private String compilerErrorOutput;
 
     private final ZipFile zipFile;
 
@@ -51,10 +44,10 @@ public class UploadedFile implements AutoCloseable {
         }
     }
 
-    public void compile() throws IOException {
-        CompilerResult compilerResult = Compiler.createJar(file);
-        this.jar = compilerResult.jar();
-        this.compilerErrorOutput = compilerResult.errorOutput();
+    public List<CompilationDiagnostic> compile(JavaVersion version) throws IOException, CompilationFailureException {
+        CompilationResult compilationResult = Compiler.createJar(file, version);
+        this.jar = compilationResult.jar();
+        return compilationResult.diagnostics();
     }
 
     public ZipFolder getSpoonFile() {
@@ -86,6 +79,9 @@ public class UploadedFile implements AutoCloseable {
 
     public void delete() {
         this.file.delete();
-        this.jar.delete();
+
+        if (this.jar != null) {
+            this.jar.delete();
+        }
     }
 }
