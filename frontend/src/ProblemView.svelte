@@ -56,7 +56,7 @@
                     <div slot="content">
                         {#if result.compilation.diagnostics.length > 0}
                         <div class="bg-error-red p-2">
-                            <p>You should fix those compilation warnings!</p>
+                            <p>You should fix those compilation warnings! Reproduce them using 'javac -Xlint:all -Xlint:-serial -Xlint:-process'</p>
                         </div>
                         <DiagnosticsView
                             diagnostics={result.compilation.diagnostics}
