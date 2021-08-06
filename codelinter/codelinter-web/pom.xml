@@ -9,9 +9,9 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>de.firemage.codelinter</groupId>
-	<artifactId>main</artifactId>
+	<artifactId>codelinter-web</artifactId>
 	<version>1.0-SNAPSHOT</version>
-	<name>codelinter-backend-main</name>
+	<name>codelinter-web</name>
 
 	<properties>
 		<java.version>16</java.version>
@@ -20,7 +20,7 @@
 		<!-- Internal -->
 		<dependency>
 			<groupId>de.firemage.codelinter</groupId>
-			<artifactId>linter</artifactId>
+			<artifactId>codelinter-core</artifactId>
 			<version>1.0-SNAPSHOT</version>
 		</dependency>
 

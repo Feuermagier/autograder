@@ -5,16 +5,16 @@
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.firemage.codelinter</groupId>
-    <artifactId>codelinter-backend</artifactId>
+    <artifactId>codelinter-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <modules>
-		<module>main</module>
-        <module>linter</module>
+        <module>codelinter-core</module>
+        <module>codelinter-web</module>
     </modules>
 
     <name>codelinter</name>
-    <url>https://firemage.de</url>
+    <url>https://codelinter.firemage.de</url>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

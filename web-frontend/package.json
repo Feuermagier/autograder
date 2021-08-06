@@ -1,5 +1,5 @@
 {
-  "name": "codelinter-frontend",
+  "name": "codelinter-web-frontend",
   "version": "1.0.0",
   "private": true,
   "scripts": {
