@@ -5,18 +5,17 @@ import de.firemage.codelinter.linter.ProblemCategory;
 import de.firemage.codelinter.linter.ProblemPriority;
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.annotations.Confidence;
-import java.io.File;
 
 public class SpotbugsInCodeProblem extends InCodeProblem {
     private final BugInstance bug;
 
-    public SpotbugsInCodeProblem(BugInstance bug, File root) {
+    public SpotbugsInCodeProblem(BugInstance bug) {
         super(bug.getPrimaryClass().getSourceFileName(),
                 bug.getPrimarySourceLineAnnotation().getStartLine(),
                 -1,
-                bug.getMessage(),
+                bug.getAbridgedMessage(),
                 ProblemCategory.OTHER,
-                bug.getBugPattern().getShortDescription(),
+                bug.getBugPattern().getDetailText(),
                 mapPriority(Confidence.getConfidence(bug.getPriority()))
         );
         this.bug = bug;
@@ -33,6 +32,6 @@ public class SpotbugsInCodeProblem extends InCodeProblem {
 
     @Override
     public String getDisplayLocation() {
-        return this.bug.getPrimaryClass().getSourceFileName();
+        return this.bug.getPrimaryClass().getSlashedClassName();
     }
 }

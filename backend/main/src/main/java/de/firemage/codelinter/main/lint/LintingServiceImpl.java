@@ -16,12 +16,14 @@ import de.firemage.codelinter.main.result.PMDResult;
 import de.firemage.codelinter.main.result.SpoonResult;
 import de.firemage.codelinter.main.result.SpotbugsResult;
 import de.firemage.codelinter.main.result.SuccessfulResult;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.util.List;
 
 @Service
+@Slf4j
 public class LintingServiceImpl implements LintingService {
     private final PMDRuleset pmdRuleset;
 
@@ -36,9 +38,12 @@ public class LintingServiceImpl implements LintingService {
             CompilationResult compilationResult = null;
             if (config.compile()) {
                 try {
+                    log.debug("Starting compilation...");
                     List<CompilationDiagnostic> diagnostics = linter.compile(config.javaVersion());
                     compilationResult = CompilationResult.fromDiagnostics(diagnostics);
+                    log.debug("Finished compilation");
                 } catch (IOException | CompilationFailureException e) {
+                    log.debug("Compilation failed", e);
                     return new CompilationErrorResult(e.getMessage());
                 }
             }
@@ -46,8 +51,10 @@ public class LintingServiceImpl implements LintingService {
             SpotbugsResult spotbugsResult = null;
             if (config.enableSpotbugs()) {
                 try {
+                    log.debug("Executing SpotBugs..");
                     List<Problem> problems = linter.executeSpotbugsLints();
                     spotbugsResult = SpotbugsResult.fromProblems(problems);
+                    log.debug("SpotBugs analysis completed");
                 } catch (IOException | InterruptedException e) {
                     return new InternalErrorResult(e.getMessage());
                 }
@@ -56,8 +63,10 @@ public class LintingServiceImpl implements LintingService {
             SpoonResult spoonResult = null;
             if (config.enableSpoon()) {
                 try {
+                    log.debug("Executing Spoon lints...");
                     List<Problem> problems = linter.executeSpoonLints(config.javaVersion());
                     spoonResult = SpoonResult.fromProblems(problems);
+                    log.debug("Spoon lints completed");
                 } catch (CompilationException e) {
                     return new CompilationErrorResult(e.getMessage());
                 }
@@ -66,8 +75,10 @@ public class LintingServiceImpl implements LintingService {
             PMDResult pmdResult = null;
             if (config.enablePMD()) {
                 try {
+                    log.debug("Executing PMD...");
                     List<Problem> problems = linter.executePMDLints(this.pmdRuleset);
                     pmdResult = PMDResult.fromProblems(problems);
+                    log.debug("PMD analysis completed");
                 } catch (IOException e) {
                     return new InternalErrorResult(e.getMessage());
                 }

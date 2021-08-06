@@ -11,19 +11,13 @@ import edu.umd.cs.findbugs.SortedBugCollection;
 import edu.umd.cs.findbugs.annotations.Confidence;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import javax.annotation.CheckForNull;
-import java.io.File;
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class InCodeBugReporter extends AbstractBugReporter {
-    private final List<Problem> problems = new ArrayList<>();
     private final BugCollection bugCollection;
-    private final File root;
 
-    public InCodeBugReporter(File root, Project project) {
-        this.root = root;
+    public InCodeBugReporter(Project project) {
         super.setPriorityThreshold(Confidence.LOW.getConfidenceValue());
         super.setRankThreshold(BugRanker.VISIBLE_RANK_MAX);
         bugCollection = new SortedBugCollection(project);
@@ -32,9 +26,6 @@ public class InCodeBugReporter extends AbstractBugReporter {
     @Override
     protected void doReportBug(BugInstance bugInstance) {
         this.bugCollection.add(bugInstance);
-        if (!Confidence.getConfidence(bugInstance.getPriority()).equals(Confidence.IGNORE)) {
-            problems.add(new SpotbugsInCodeProblem(bugInstance, this.root));
-        }
     }
 
     @Override
@@ -65,7 +56,7 @@ public class InCodeBugReporter extends AbstractBugReporter {
 
     public List<Problem> getProblems() {
         return this.bugCollection.getCollection().stream()
-                .map(b -> new SpotbugsInCodeProblem(b, this.root))
+                .map(SpotbugsInCodeProblem::new)
                 .collect(Collectors.toList());
         //return Collections.unmodifiableList(this.problems);
     }

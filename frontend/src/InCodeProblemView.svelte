@@ -88,7 +88,7 @@
                         <span
                             class="tooltip mt-5 border-2 border-gray-500 rounded bg-white shadow-md p-4 max-w-prose"
                         >
-                            {problem.explanation}
+                            {@html problem.explanation}
                         </span>
                     </span>
                 </td>
