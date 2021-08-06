@@ -55,17 +55,21 @@
                     <p slot="header" class="font-medium">Compilation</p>
                     <div slot="content">
                         {#if result.compilation.diagnostics.length > 0}
-                        <div class="bg-error-red p-2">
-                            <p>You should fix those compilation warnings! Reproduce them using 'javac -Xlint:all -Xlint:-serial -Xlint:-process'</p>
-                        </div>
-                        <DiagnosticsView
-                            diagnostics={result.compilation.diagnostics}
-                        />
-                    {:else}
-                        <div class="bg-ok-green p-2">
-                            <p>There were no warnings.</p>
-                        </div>
-                    {/if}
+                            <div class="bg-error-red p-2">
+                                <p>
+                                    You should fix those compilation warnings!
+                                    Reproduce them using 'javac -Xlint:all
+                                    -Xlint:-serial -Xlint:-process'
+                                </p>
+                            </div>
+                            <DiagnosticsView
+                                diagnostics={result.compilation.diagnostics}
+                            />
+                        {:else}
+                            <div class="bg-ok-green p-2">
+                                <p>There were no warnings.</p>
+                            </div>
+                        {/if}
                     </div>
                 </Accordion>
             {/if}
@@ -92,6 +96,22 @@
                         {#if result.pmd.problems.length > 0}
                             <InCodeProblemView
                                 problems={castProblems(result.pmd.problems)}
+                            />
+                        {:else}
+                            <div class="bg-ok-green p-2">
+                                No problems found - good job!
+                            </div>
+                        {/if}
+                    </div>
+                </Accordion>
+            {/if}
+            {#if result.spotbugs}
+                <Accordion open={false}>
+                    <p slot="header" class="font-medium">SpotBugs</p>
+                    <div slot="content">
+                        {#if result.spotbugs.problems.length > 0}
+                            <InCodeProblemView
+                                problems={castProblems(result.spotbugs.problems)}
                             />
                         {:else}
                             <div class="bg-ok-green p-2">

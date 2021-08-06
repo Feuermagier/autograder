@@ -8,6 +8,7 @@ export class SuccesfulResult {
     readonly type = SUCCESSFUL_RESULT;
     readonly spoon: SpoonResult;
     readonly pmd: PMDResult;
+    readonly spotbugs: SpotBugsResult;
     readonly compilation: CompilationResult;
 };
 
@@ -18,6 +19,10 @@ export class PMDResult {
 export class SpoonResult {
     readonly problems: Problem[];
 };
+
+export class SpotBugsResult {
+    readonly problems: Problem[];
+}
 
 export class CompilationResult {
     readonly diagnostics: CompilationDiagnostic[];
