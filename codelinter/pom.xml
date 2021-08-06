@@ -11,6 +11,7 @@
     <modules>
         <module>codelinter-core</module>
         <module>codelinter-web</module>
+        <module>codelinter-cmd</module>
     </modules>
 
     <name>codelinter</name>
