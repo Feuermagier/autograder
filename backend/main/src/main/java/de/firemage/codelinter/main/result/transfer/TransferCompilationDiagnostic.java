@@ -22,6 +22,6 @@ public class TransferCompilationDiagnostic {
     }
 
     public String getClassName() {
-        return this.diagnostic.className();
+        return this.diagnostic.path();
     }
 }

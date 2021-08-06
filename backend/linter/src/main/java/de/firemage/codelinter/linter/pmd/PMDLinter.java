@@ -24,7 +24,7 @@ public class PMDLinter {
         RuleSetLoader ruleSetLoader = RuleSetLoader.fromPmdConfig(config);
         List<RuleSet> ruleSets = ruleSetLoader.loadFromResources(Arrays.asList(config.getRuleSets().split(",")));
 
-        ProblemRenderer renderer = new ProblemRenderer();
+        ProblemRenderer renderer = new ProblemRenderer(file.getFile());
         renderer.start();
         PMD.processFiles(config, ruleSets, file.getPMDFiles(), Collections.singletonList(renderer));
         renderer.end();

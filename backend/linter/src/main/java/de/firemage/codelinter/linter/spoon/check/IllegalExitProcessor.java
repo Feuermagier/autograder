@@ -5,7 +5,6 @@ import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtInvocation;
-import spoon.reflect.declaration.CtClass;
 import spoon.support.SpoonClassNotFoundException;
 
 import java.lang.reflect.Method;
@@ -28,9 +27,9 @@ public class IllegalExitProcessor extends AbstractLoggingProcessor<CtInvocation<
         try {
             Method method = element.getExecutable().getActualMethod();
             if (method != null && method.equals(System.class.getMethod("exit", int.class))) {
-                addProblem(new SpoonInCodeProblem(element, DESCRIPTION_SYSTEM, ProblemCategory.OTHER, EXPLANATION, ProblemPriority.SEVERE));
+                addProblem(element, DESCRIPTION_SYSTEM, ProblemCategory.OTHER, EXPLANATION, ProblemPriority.SEVERE);
             } else if (method != null && method.equals(Runtime.class.getMethod("exit", int.class))) {
-                addProblem(new SpoonInCodeProblem(element, DESCRIPTION_RUNTIME, ProblemCategory.OTHER, EXPLANATION, ProblemPriority.SEVERE));
+                addProblem(element, DESCRIPTION_RUNTIME, ProblemCategory.OTHER, EXPLANATION, ProblemPriority.SEVERE);
             }
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);

@@ -13,7 +13,6 @@ import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.Query;
-import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.HashSet;
@@ -47,6 +46,6 @@ public class UnusedVariableCheck implements Check {
                 .filter(Predicate.not(usedVariables::contains))
                 .filter(Predicate.not(v -> v instanceof CtParameter<?>))
                 .filter(Predicate.not(v -> v instanceof CtEnumValue<?>))
-                .forEach(v -> logger.addProblem(new SpoonInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION, ProblemPriority.FIX_RECOMMENDED)));
+                .forEach(v -> logger.addInCodeProblem(v, String.format(DESCRIPTION, v.getSimpleName()), ProblemCategory.OTHER, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
     }
 }

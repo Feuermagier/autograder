@@ -5,7 +5,6 @@ import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtAssert;
-import spoon.reflect.declaration.CtClass;
 
 public class AssertProcessor extends AbstractLoggingProcessor<CtAssert<?>> {
     private static final String DESCRIPTION = "Used 'assert'";
@@ -21,6 +20,6 @@ public class AssertProcessor extends AbstractLoggingProcessor<CtAssert<?>> {
 
     @Override
     public void process(CtAssert<?> element) {
-        addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+        addProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
     }
 }

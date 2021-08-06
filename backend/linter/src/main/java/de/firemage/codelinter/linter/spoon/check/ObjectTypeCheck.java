@@ -21,7 +21,7 @@ public class ObjectTypeCheck extends AbstractLoggingProcessor<CtVariable<?>> {
     public void process(CtVariable<?> element) {
         if (element.getType().getQualifiedName().equals("java.lang.Object")
                 && !CheckUtil.isInEquals(element)) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.SEVERE));
+            addProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.SEVERE);
         }
     }
 }

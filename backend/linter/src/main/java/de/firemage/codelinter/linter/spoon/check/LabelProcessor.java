@@ -20,7 +20,7 @@ public class LabelProcessor extends AbstractLoggingProcessor<CtLabelledFlowBreak
     @Override
     public void process(CtLabelledFlowBreak element) {
         if (element.getTargetLabel() != null) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.SEVERE));
+            addProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.SEVERE);
         }
     }
 }

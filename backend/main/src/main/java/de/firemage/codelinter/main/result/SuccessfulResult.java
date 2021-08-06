@@ -6,7 +6,8 @@ import java.util.Optional;
 
 public record SuccessfulResult(@JsonIgnore SpoonResult spoonResult,
                                @JsonIgnore PMDResult pmdResult,
-                               @JsonIgnore CompilationResult compilationResult) implements LintingResult {
+                               @JsonIgnore CompilationResult compilationResult,
+                               @JsonIgnore SpotbugsResult spotbugsResult) implements LintingResult {
 
     @JsonInclude(value = JsonInclude.Include.NON_ABSENT)
     public Optional<SpoonResult> getSpoon() {
@@ -21,5 +22,10 @@ public record SuccessfulResult(@JsonIgnore SpoonResult spoonResult,
     @JsonInclude(value = JsonInclude.Include.NON_ABSENT)
     public Optional<CompilationResult> getCompilation() {
         return Optional.ofNullable(this.compilationResult);
+    }
+
+    @JsonInclude(value = JsonInclude.Include.NON_ABSENT)
+    public Optional<SpotbugsResult> getSpotbugs() {
+        return Optional.ofNullable(this.spotbugsResult);
     }
 }

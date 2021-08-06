@@ -43,7 +43,7 @@ public class SpoonLinter {
         }
         Factory factory = launcher.getFactory();
 
-        ProblemLogger logger = new ProblemLogger();
+        ProblemLogger logger = new ProblemLogger(file.getFile());
 
         Check catchProcessor = new CatchProcessor(logger);
         catchProcessor.check(model, factory);

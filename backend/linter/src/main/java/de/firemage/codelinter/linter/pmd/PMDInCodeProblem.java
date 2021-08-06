@@ -1,21 +1,28 @@
 package de.firemage.codelinter.linter.pmd;
 
 import de.firemage.codelinter.linter.InCodeProblem;
+import de.firemage.codelinter.linter.PathUtil;
 import de.firemage.codelinter.linter.ProblemCategory;
 import de.firemage.codelinter.linter.ProblemPriority;
 import net.sourceforge.pmd.RulePriority;
 import net.sourceforge.pmd.RuleViolation;
+import java.io.File;
 
 public class PMDInCodeProblem extends InCodeProblem {
-    public PMDInCodeProblem(RuleViolation violation, String filename) {
-        super(filename + ":" + violation.getBeginLine(),
-                filename,
+
+    private final RuleViolation violation;
+    private final File root;
+
+    public PMDInCodeProblem(RuleViolation violation, File root) {
+        super(PathUtil.getSanitizedPath(violation.getFilename(), root),
                 violation.getBeginLine(),
                 violation.getBeginColumn(),
                 violation.getRule().getName(),
                 ProblemCategory.OTHER,
                 violation.getDescription(),
                 mapPMDPriority(violation.getRule().getPriority()));
+        this.violation = violation;
+        this.root = root;
     }
 
     private static ProblemPriority mapPMDPriority(RulePriority priority) {
@@ -24,5 +31,10 @@ public class PMDInCodeProblem extends InCodeProblem {
             case MEDIUM, MEDIUM_LOW -> ProblemPriority.FIX_RECOMMENDED;
             case LOW -> ProblemPriority.INFO;
         };
+    }
+
+    @Override
+    public String getDisplayLocation() {
+        return PathUtil.getSanitizedPath(this.violation.getFilename(), this.root) + ":" + this.violation.getBeginLine();
     }
 }

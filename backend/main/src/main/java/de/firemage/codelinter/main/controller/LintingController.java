@@ -39,22 +39,24 @@ public class LintingController {
     @PostMapping("/")
     @CrossOrigin("http://localhost:5000")
     public LintingResult handleFileUpload(@RequestParam("file") MultipartFile file) {
-        UploadedFile uploadedFile;
         try {
-            uploadedFile = this.uploadService.store(file);
+            UploadedFile uploadedFile = this.uploadService.store(file);
+
+            LintingResult result = this.lintingService.lint(uploadedFile, new LintingConfig(
+                    true,
+                    true,
+                    true,
+                    true,
+                    JavaVersion.JAVA_11));
+
+            this.uploadService.delete(uploadedFile);
+            return result;
+
         } catch (ClientUploadException e) {
             return new FileClientErrorResult(e.getMessage());
         } catch (InternalUploadException e) {
+            e.printStackTrace();
             return new InternalErrorResult(e.getMessage());
         }
-
-        LintingResult result = this.lintingService.lint(uploadedFile, new LintingConfig(
-                true,
-                true,
-                true,
-                JavaVersion.JAVA_11));
-
-        this.uploadService.delete(uploadedFile);
-        return result;
     }
 }

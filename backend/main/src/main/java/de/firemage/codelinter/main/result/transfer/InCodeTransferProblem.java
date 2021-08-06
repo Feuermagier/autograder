@@ -12,7 +12,7 @@ public class InCodeTransferProblem implements TransferProblem {
     }
 
     public String getDisplayPath() {
-        return this.problem.getDisplayPath();
+        return this.problem.getDisplayLocation();
     }
 
     public String getFilePath() {

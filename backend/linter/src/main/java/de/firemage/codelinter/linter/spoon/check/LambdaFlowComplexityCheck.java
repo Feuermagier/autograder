@@ -33,7 +33,7 @@ public class LambdaFlowComplexityCheck extends AbstractLoggingProcessor<CtLambda
             }
         });
         if (breakingElements.size() > COMPLEXITY_THRESHOLD) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
     }
 }

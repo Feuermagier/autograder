@@ -1,11 +1,8 @@
 package de.firemage.codelinter.linter;
 
 import lombok.Getter;
-import spoon.reflect.declaration.CtElement;
 
-public class InCodeProblem implements Problem {
-    @Getter
-    private final String displayPath;
+public abstract class InCodeProblem implements Problem {
 
     @Getter
     private final String filePath;
@@ -28,8 +25,7 @@ public class InCodeProblem implements Problem {
     @Getter
     private final ProblemPriority priority;
 
-    public InCodeProblem(String displayPath, String filePath, int line, int column, String description, ProblemCategory category, String explanation, ProblemPriority priority) {
-        this.displayPath = displayPath;
+    public InCodeProblem(String filePath, int line, int column, String description, ProblemCategory category, String explanation, ProblemPriority priority) {
         this.filePath = filePath;
         this.line = line;
         this.column = column;

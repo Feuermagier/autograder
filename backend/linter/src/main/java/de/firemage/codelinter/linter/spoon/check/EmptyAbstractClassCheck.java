@@ -20,7 +20,7 @@ public class EmptyAbstractClassCheck extends AbstractLoggingProcessor<CtClass<?>
     @Override
     public void process(CtClass<?> element) {
         if (element.isAbstract() && element.getMethods().stream().allMatch(CtMethod::isAbstract)) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
     }
 }

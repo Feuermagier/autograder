@@ -21,7 +21,7 @@ public class AbstractClassWithoutChildCheck extends AbstractLoggingProcessor<CtC
     @Override
     public void process(CtClass<?> element) {
         if (element.isAbstract() && !hasChildren(element)) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
     }
 

@@ -5,7 +5,6 @@ import de.firemage.codelinter.linter.ProblemPriority;
 import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import de.firemage.codelinter.linter.spoon.SpoonInCodeProblem;
 import spoon.reflect.code.CtCatch;
-import spoon.reflect.declaration.CtClass;
 
 public class CatchProcessor extends AbstractLoggingProcessor<CtCatch> {
     private static final String DESCRIPTION = "Empty catch block";
@@ -20,7 +19,7 @@ public class CatchProcessor extends AbstractLoggingProcessor<CtCatch> {
     @Override
     public void process(CtCatch element) {
         if (element.getBody().getStatements().isEmpty()) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.EXCEPTION, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, DESCRIPTION, ProblemCategory.EXCEPTION, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
     }
 }

@@ -22,7 +22,7 @@ public class UninstantiatedClassCheck extends AbstractLoggingProcessor<CtClass<?
     @Override
     public void process(CtClass<?> element) {
         if (!element.isAbstract() && hasNonStaticMethod(element) && isNeverConstructed(element)) {
-            addProblem(new SpoonInCodeProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
     }
 

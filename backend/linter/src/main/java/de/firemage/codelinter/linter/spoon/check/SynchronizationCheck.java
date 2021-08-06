@@ -4,6 +4,7 @@ import de.firemage.codelinter.linter.spoon.ProblemLogger;
 import spoon.reflect.CtModel;
 import spoon.reflect.factory.Factory;
 
+// TODO
 public class SynchronizationCheck implements Check {
 
     private final ProblemLogger logger;

@@ -1,87 +1,53 @@
 package de.firemage.codelinter.linter.file;
 
-import com.github.javaparser.utils.SourceZip;
-import de.firemage.codelinter.linter.compiler.CompilationDiagnostic;
-import de.firemage.codelinter.linter.compiler.Compiler;
-import de.firemage.codelinter.linter.compiler.CompilationFailureException;
-import de.firemage.codelinter.linter.compiler.CompilationResult;
-import de.firemage.codelinter.linter.compiler.JavaVersion;
 import lombok.Getter;
-import net.sourceforge.pmd.util.datasource.ZipDataSource;
-import spoon.support.compiler.ZipFolder;
+import net.sourceforge.pmd.util.datasource.FileDataSource;
+import org.apache.commons.io.FileUtils;
+import spoon.support.compiler.FileSystemFolder;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Enumeration;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
-import java.util.zip.ZipEntry;
-import java.util.zip.ZipException;
-import java.util.zip.ZipFile;
+import java.util.stream.Stream;
 
-public class UploadedFile implements AutoCloseable {
+public class UploadedFile {
 
     @Getter
     private final File file;
 
-    @Getter
-    private File jar;
-
-    private final ZipFile zipFile;
-
-    public UploadedFile(File file) throws ZipFormatException, IOException {
-        if (!file.isFile()) {
-            throw new IllegalArgumentException("The file must be a real file and not a folder");
+    public UploadedFile(File file) {
+        if (!file.isDirectory()) {
+            throw new IllegalArgumentException("The file must be a directory");
         }
 
         this.file = file;
-
-        try {
-            this.zipFile = new ZipFile(file);
-        } catch (ZipException e) {
-            throw new ZipFormatException("Couldn't read the zip file", e);
-        }
     }
 
-    public List<CompilationDiagnostic> compile(JavaVersion version) throws IOException, CompilationFailureException {
-        CompilationResult compilationResult = Compiler.createJar(file, version);
-        this.jar = compilationResult.jar();
-        return compilationResult.diagnostics();
+    public List<File> getJavaFiles() throws IOException {
+        return streamFiles().collect(Collectors.toList());
     }
 
-    public ZipFolder getSpoonFile() {
-        try {
-            return new ZipFolder(this.file);
-        } catch (IOException e) {
-            // This cannot happen because we check all necessary conditions in the constructor
-            throw new IllegalStateException("Spoon wasn't able convert the zip file to a zip folder", e);
-        }
+    public Stream<File> streamFiles() throws IOException {
+        return Files.walk(this.file.toPath())
+                .filter(p -> p.toString().endsWith(".java"))
+                .filter(p -> !p.toString().endsWith("package-info.java"))
+                .map(Path::toFile);
     }
 
-    public Collection<ZipDataSource> getPMDFiles() {
-        List<ZipEntry> entries = new ArrayList<>();
-        Enumeration<? extends ZipEntry> entryIterator = this.zipFile.entries();
-        while (entryIterator.hasMoreElements()) {
-            entries.add(entryIterator.nextElement());
-        }
-        return entries.stream().map(entry -> new ZipDataSource(zipFile, entry)).collect(Collectors.toList());
+    public FileSystemFolder getSpoonFile() {
+        return new FileSystemFolder(this.file);
     }
 
-    public SourceZip getJavaParserFile() {
-        return new SourceZip(this.file.toPath());
+    public List<FileDataSource> getPMDFiles() throws IOException {
+        return Files.walk(this.file.toPath())
+                .filter(p -> p.toString().endsWith(".java"))
+                .map(p -> new FileDataSource(p.toFile()))
+                .collect(Collectors.toList());
     }
 
-    @Override
-    public void close() throws IOException {
-        this.zipFile.close();
-    }
-
-    public void delete() {
-        this.file.delete();
-
-        if (this.jar != null) {
-            this.jar.delete();
-        }
+    public void delete() throws IOException {
+        FileUtils.deleteDirectory(this.file);
     }
 }

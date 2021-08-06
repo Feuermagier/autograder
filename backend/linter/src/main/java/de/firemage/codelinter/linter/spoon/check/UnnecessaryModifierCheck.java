@@ -20,10 +20,10 @@ public class UnnecessaryModifierCheck extends AbstractLoggingProcessor<CtMethod<
     @Override
     public void process(CtMethod<?> element) {
         if (element.isSynchronized()) {
-            addProblem(new SpoonInCodeProblem(element, SYNCHRONIZED_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, SYNCHRONIZED_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
         if (element.isStrictfp()) {
-            addProblem(new SpoonInCodeProblem(element, STRICTFP_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED));
+            addProblem(element, STRICTFP_DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
         }
     }
 }
