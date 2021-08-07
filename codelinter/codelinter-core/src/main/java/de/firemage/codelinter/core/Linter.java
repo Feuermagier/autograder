@@ -33,8 +33,8 @@ public class Linter implements AutoCloseable {
         return new PMDLinter().lint(this.file, ruleset);
     }
 
-    public List<CompilationDiagnostic> compile(JavaVersion javaVersion) throws IOException, CompilationFailureException {
-        CompilationResult result = Compiler.compileToJar(this.file, javaVersion);
+    public List<CompilationDiagnostic> compile(JavaVersion javaVersion, File tmpLocation) throws IOException, CompilationFailureException {
+        CompilationResult result = Compiler.compileToJar(this.file, tmpLocation, javaVersion);
         this.jar = result.jar();
         return result.diagnostics();
     }

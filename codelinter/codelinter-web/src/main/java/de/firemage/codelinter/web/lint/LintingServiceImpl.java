@@ -39,7 +39,7 @@ public class LintingServiceImpl implements LintingService {
             if (config.compile()) {
                 try {
                     log.debug("Starting compilation...");
-                    List<CompilationDiagnostic> diagnostics = linter.compile(config.javaVersion());
+                    List<CompilationDiagnostic> diagnostics = linter.compile(config.javaVersion(), file.getFile().getParentFile());
                     compilationResult = CompilationResult.fromDiagnostics(diagnostics);
                     log.debug("Finished compilation");
                 } catch (IOException | CompilationFailureException e) {

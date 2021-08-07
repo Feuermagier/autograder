@@ -1,6 +1,7 @@
 package de.firemage.codelinter.core.compiler;
 
 import lombok.Getter;
+import java.util.Arrays;
 
 public enum JavaVersion {
     JAVA_7("7", 7),
@@ -24,5 +25,17 @@ public enum JavaVersion {
     JavaVersion(String versionString, int versionNumber) {
         this.versionString = versionString;
         this.versionNumber = versionNumber;
+    }
+
+    public static JavaVersion fromString(String s) {
+        return Arrays.stream(JavaVersion.class.getEnumConstants())
+                .filter(v -> v.getVersionString().equals(s))
+                .findAny()
+                .orElseThrow(() -> new IllegalArgumentException("Unknown java version"));
+    }
+
+    public static boolean isValidJavaVersion(String s) {
+        return Arrays.stream(JavaVersion.class.getEnumConstants())
+                .anyMatch(v -> v.getVersionString().equals(s));
     }
 }

@@ -29,16 +29,15 @@ public final class Compiler {
     private Compiler() {
     }
 
-    public static CompilationResult compileToJar(UploadedFile input, JavaVersion javaVersion) throws IOException, CompilationFailureException {
+    public static CompilationResult compileToJar(UploadedFile input, File tmpLocation, JavaVersion javaVersion) throws IOException, CompilationFailureException {
         String inputName = input.getFile().getName();
-        File inputParent = input.getFile().getParentFile();
 
         List<PhysicalFileObject> compilationUnits = input.streamFiles()
                 .map(PhysicalFileObject::new)
                 .collect(Collectors.toList());
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        File compilerOutput = new File(inputParent, inputName + "_compiled");
+        File compilerOutput = new File(tmpLocation, inputName + "_compiled");
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
         JavaFileManager fileManager = new SeparateBinaryFileManager(
@@ -60,7 +59,7 @@ public final class Compiler {
 
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        File jar = new File(inputParent, inputName + ".jar");
+        File jar = new File(tmpLocation, inputName + ".jar");
         JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar));
         addToJar(compilerOutput, jarOut);
         jarOut.close();
