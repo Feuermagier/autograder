@@ -37,6 +37,6 @@ public abstract class InCodeProblem implements Problem {
 
     @Override
     public String toString() {
-        return "InCodeProblem at " + getDisplayLocation() + ":" + line + ". " + description;
+        return "InCodeProblem at " + getDisplayLocation() + ": " + description;
     }
 }

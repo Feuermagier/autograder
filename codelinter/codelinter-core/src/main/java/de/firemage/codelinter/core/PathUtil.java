@@ -17,7 +17,7 @@ public final class PathUtil {
 
     public static String getSanitizedPath(String path, File root) {
         String sanitizedRoot = root.getAbsolutePath().replace("\\", "/") + "/";
-        String sanitizedPath = path.replace("\\", "/");
+        String sanitizedPath = path.replace("\\", "/").replace(".java", "");
         return sanitizedPath.substring(sanitizedPath.indexOf(sanitizedRoot) + sanitizedRoot.length());
     }
 }

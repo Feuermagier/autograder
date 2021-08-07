@@ -32,6 +32,6 @@ public class SpotbugsInCodeProblem extends InCodeProblem {
 
     @Override
     public String getDisplayLocation() {
-        return this.bug.getPrimaryClass().getSlashedClassName();
+        return this.bug.getPrimaryClass().getSlashedClassName() + ":" + this.getLine();
     }
 }
