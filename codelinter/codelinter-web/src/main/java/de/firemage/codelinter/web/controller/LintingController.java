@@ -47,6 +47,7 @@ public class LintingController {
                     true,
                     true,
                     true,
+                    true,
                     JavaVersion.JAVA_11));
 
             this.uploadService.delete(uploadedFile);

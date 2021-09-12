@@ -31,13 +31,15 @@ public class Application implements Callable<Integer> {
 
     @Parameters(index = "0", description = "The root folder which contains the files to check")
     private File file;
-    @Option(names = {"-p", "--pmd"}, description = "Enable PMD checks")
+    @Option(names = {"-p", "--pmd"}, description = "Enable PMD checks.")
     private boolean enablePMD;
     @Option(names = {"-c", "--compile"}, description = "Enable compilation. This requires an installed JDK on your machine.")
     private boolean enableCompilation;
     @Option(names = {"-s", "--spotbugs"}, description = "Enable SpotBugs checks. You can't enable SpotBugs without enabling compilation.")
     private boolean enableSpotBugs;
-    @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version")
+    @Option(names = {"-cpd", "--copy-paste-detection"}, description = "Enable copy-paste detection.")
+    private boolean enableCPD;
+    @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version.")
     private String javaVersion;
     @Spec
     private CommandSpec spec;
@@ -119,6 +121,21 @@ public class Application implements Callable<Integer> {
                 } catch (InterruptedException e) {
                     CmdUtil.printlnErr(e.getMessage());
                     return MISC_EXIT_CODE;
+                }
+            }
+
+            if (enableCPD) {
+                try {
+                    CmdUtil.beginSection("Copy/Paste Detection");
+                    ProgressAnimation progress = new ProgressAnimation("Executing CPD...");
+                    progress.start();
+                    List<Problem> problems = linter.executeCPDLints();
+                    progress.finish("Completed CPD");
+                    printProblems(problems);
+                    CmdUtil.endSection();
+                } catch (IOException e) {
+                    CmdUtil.println(e.getMessage());
+                    return IO_EXIT_CODE;
                 }
             }
         }

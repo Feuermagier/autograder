@@ -5,6 +5,7 @@ import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import edu.umd.cs.findbugs.BugInstance;
 import edu.umd.cs.findbugs.annotations.Confidence;
+import java.io.File;
 
 public class SpotbugsInCodeProblem extends InCodeProblem {
     private final BugInstance bug;
@@ -32,6 +33,6 @@ public class SpotbugsInCodeProblem extends InCodeProblem {
 
     @Override
     public String getDisplayLocation() {
-        return this.bug.getPrimaryClass().getSlashedClassName() + ":" + this.getLine();
+        return this.bug.getPrimaryClass().getSourceFileName() + ":" + this.getLine();
     }
 }

@@ -9,6 +9,7 @@ export class SuccesfulResult {
     readonly spoon: SpoonResult;
     readonly pmd: PMDResult;
     readonly spotbugs: SpotBugsResult;
+    readonly cpd: CPDResult;
     readonly compilation: CompilationResult;
 };
 
@@ -21,6 +22,10 @@ export class SpoonResult {
 };
 
 export class SpotBugsResult {
+    readonly problems: Problem[];
+}
+
+export class CPDResult {
     readonly problems: Problem[];
 }
 

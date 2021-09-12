@@ -1,6 +1,7 @@
 package de.firemage.codelinter.core.spotbugs;
 
 import de.firemage.codelinter.core.Problem;
+import de.firemage.codelinter.core.file.UploadedFile;
 import edu.umd.cs.findbugs.DetectorFactoryCollection;
 import edu.umd.cs.findbugs.FindBugs2;
 import edu.umd.cs.findbugs.Project;
@@ -22,7 +23,7 @@ public class SpotbugsLinter {
         userPreferences.setEffort(UserPreferences.EFFORT_DEFAULT);
         userPreferences.enableAllDetectors(true);
 
-        // Disable debug detectors (those are using System.out for spamming)
+        // Disable debug detectors (these are spamming System.out)
         userPreferences.enableDetector(DetectorFactoryCollection.instance().getFactory("TestingGround"), false);
         userPreferences.enableDetector(DetectorFactoryCollection.instance().getFactory("CheckCalls"), false);
         userPreferences.enableDetector(DetectorFactoryCollection.instance().getFactory("Noise"), false);

@@ -11,6 +11,7 @@ import edu.umd.cs.findbugs.SortedBugCollection;
 import edu.umd.cs.findbugs.annotations.Confidence;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import javax.annotation.CheckForNull;
+import java.io.File;
 import java.util.List;
 import java.util.stream.Collectors;
 

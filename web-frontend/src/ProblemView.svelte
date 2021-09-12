@@ -89,6 +89,22 @@
                     </div>
                 </Accordion>
             {/if}
+            {#if result.cpd}
+            <Accordion open={false}>
+                <p slot="header" class="font-medium">Copy/Paste Detection</p>
+                <div slot="content">
+                    {#if result.cpd.problems.length > 0}
+                        <InCodeProblemView
+                            problems={castProblems(result.cpd.problems)}
+                        />
+                    {:else}
+                        <div class="bg-ok-green p-2">
+                            No problems found - good job!
+                        </div>
+                    {/if}
+                </div>
+            </Accordion>
+        {/if}
             {#if result.pmd}
                 <Accordion open={false}>
                     <p slot="header" class="font-medium">PMD</p>

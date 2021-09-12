@@ -7,6 +7,7 @@ import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.pmd.PMDRuleset;
 import de.firemage.codelinter.core.spoon.CompilationException;
+import de.firemage.codelinter.web.result.CPDResult;
 import de.firemage.codelinter.web.result.CompilationErrorResult;
 import de.firemage.codelinter.web.result.CompilationResult;
 import de.firemage.codelinter.web.result.InternalErrorResult;
@@ -84,7 +85,19 @@ public class LintingServiceImpl implements LintingService {
                 }
             }
 
-            return new SuccessfulResult(spoonResult, pmdResult, compilationResult, spotbugsResult);
+            CPDResult cpdResult = null;
+            if (config.enableCPD()) {
+                try {
+                    log.debug("Executing CPD...");
+                    List<Problem> problems = linter.executeCPDLints();
+                    cpdResult = CPDResult.fromProblems(problems);
+                    log.debug("CPD completed");
+                } catch (IOException e) {
+                    return new InternalErrorResult(e.getMessage());
+                }
+            }
+
+            return new SuccessfulResult(spoonResult, pmdResult, compilationResult, spotbugsResult, cpdResult);
         }
     }
 }

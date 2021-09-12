@@ -5,6 +5,7 @@ import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.compiler.CompilationResult;
 import de.firemage.codelinter.core.compiler.Compiler;
 import de.firemage.codelinter.core.compiler.JavaVersion;
+import de.firemage.codelinter.core.cpd.CPDLinter;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.pmd.PMDLinter;
 import de.firemage.codelinter.core.pmd.PMDRuleset;
@@ -45,6 +46,10 @@ public class Linter implements AutoCloseable {
         }
 
         return new SpotbugsLinter().lint(this.jar);
+    }
+
+    public List<Problem> executeCPDLints() throws IOException {
+        return new CPDLinter().lint(this.file);
     }
 
     @Override
