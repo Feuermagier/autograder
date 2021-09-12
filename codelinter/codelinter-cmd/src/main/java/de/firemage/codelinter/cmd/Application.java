@@ -33,9 +33,7 @@ public class Application implements Callable<Integer> {
     private File file;
     @Option(names = {"-p", "--pmd"}, description = "Enable PMD checks.")
     private boolean enablePMD;
-    @Option(names = {"-c", "--compile"}, description = "Enable compilation. This requires an installed JDK on your machine.")
-    private boolean enableCompilation;
-    @Option(names = {"-s", "--spotbugs"}, description = "Enable SpotBugs checks. You can't enable SpotBugs without enabling compilation.")
+    @Option(names = {"-s", "--spotbugs"}, description = "Enable SpotBugs checks.")
     private boolean enableSpotBugs;
     @Option(names = {"-cpd", "--copy-paste-detection"}, description = "Enable copy-paste detection.")
     private boolean enableCPD;
@@ -51,9 +49,6 @@ public class Application implements Callable<Integer> {
 
     @Override
     public Integer call() {
-        if (enableCompilation && !enableSpotBugs) {
-            throw new ParameterException(this.spec.commandLine(), "You cannot enable SpotBugs without enabling compilation");
-        }
 
         if (!JavaVersion.isValidJavaVersion(javaVersion)) {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
@@ -61,7 +56,23 @@ public class Application implements Callable<Integer> {
 
         try (Linter linter = new Linter(new UploadedFile(file))) {
             try {
-                CmdUtil.beginSection("Custom");
+                CmdUtil.beginSection("Compilation");
+                ProgressAnimation progress = new ProgressAnimation("Compiling...");
+                progress.start();
+                List<CompilationDiagnostic> diagnostics = linter.compile(JavaVersion.fromString(javaVersion), getTmpDirectory());
+                progress.finish("Completed compilation");
+                diagnostics.forEach(d -> CmdUtil.println(d.toString()));
+                CmdUtil.endSection();
+            } catch (IOException e) {
+                CmdUtil.println(e.getMessage());
+                return IO_EXIT_CODE;
+            } catch (CompilationFailureException e) {
+                CmdUtil.println(e.getMessage());
+                return COMPILATION_EXIT_CODE;
+            }
+
+            try {
+                CmdUtil.beginSection("Custom Lints");
                 ProgressAnimation progress = new ProgressAnimation("Executing custom lints...");
                 progress.start();
                 List<Problem> problems = linter.executeSpoonLints(JavaVersion.fromString(javaVersion));
@@ -85,24 +96,6 @@ public class Application implements Callable<Integer> {
                 } catch (IOException e) {
                     CmdUtil.printlnErr(e.getMessage());
                     return IO_EXIT_CODE;
-                }
-            }
-
-            if (enableCompilation) {
-                try {
-                    CmdUtil.beginSection("Compilation");
-                    ProgressAnimation progress = new ProgressAnimation("Compiling...");
-                    progress.start();
-                    List<CompilationDiagnostic> diagnostics = linter.compile(JavaVersion.fromString(javaVersion), getTmpDirectory());
-                    progress.finish("Completed compilation");
-                    diagnostics.forEach(d -> CmdUtil.println(d.toString()));
-                    CmdUtil.endSection();
-                } catch (IOException e) {
-                    CmdUtil.println(e.getMessage());
-                    return IO_EXIT_CODE;
-                } catch (CompilationFailureException e) {
-                    CmdUtil.println(e.getMessage());
-                    return COMPILATION_EXIT_CODE;
                 }
             }
 

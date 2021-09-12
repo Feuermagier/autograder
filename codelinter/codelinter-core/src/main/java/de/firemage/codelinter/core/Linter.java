@@ -27,7 +27,10 @@ public class Linter implements AutoCloseable {
     }
 
     public List<Problem> executeSpoonLints(JavaVersion javaVersion) throws CompilationException {
-        return new SpoonLinter().lint(this.file, javaVersion);
+        if (this.jar == null) {
+            throw new IllegalStateException("You have to call compile() before executing Spoon lints");
+        }
+        return new SpoonLinter().lint(this.file, javaVersion, this.jar);
     }
 
     public List<Problem> executePMDLints(PMDRuleset ruleset) throws IOException {

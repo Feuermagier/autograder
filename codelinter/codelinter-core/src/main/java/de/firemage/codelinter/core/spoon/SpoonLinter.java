@@ -23,14 +23,15 @@ import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
 import spoon.reflect.CtModel;
 import spoon.reflect.factory.Factory;
-
+import java.io.File;
 import java.util.List;
 
 public class SpoonLinter {
-    public List<Problem> lint(UploadedFile file, JavaVersion javaVersion) throws CompilationException {
+    public List<Problem> lint(UploadedFile file, JavaVersion javaVersion, File jar) throws CompilationException {
         Launcher launcher = new Launcher();
         launcher.addInputResource(file.getSpoonFile());
         launcher.getEnvironment().setShouldCompile(false);
+        launcher.getEnvironment().setSourceClasspath(new String[] {jar.getAbsolutePath()});
         launcher.getEnvironment().setNoClasspath(true);
         launcher.getEnvironment().setCommentEnabled(true);
         launcher.getEnvironment().setComplianceLevel(javaVersion.getVersionNumber());
@@ -72,7 +73,7 @@ public class SpoonLinter {
         Check lambdaComplexityCheck = new LambdaFlowComplexityCheck(logger);
         lambdaComplexityCheck.check(model, factory);
 
-        Check emptyAbstractClassCheck= new EmptyAbstractClassCheck(logger);
+        Check emptyAbstractClassCheck = new EmptyAbstractClassCheck(logger);
         emptyAbstractClassCheck.check(model, factory);
 
         Check uninstantiatedClassCheck = new UninstantiatedClassCheck(logger);
