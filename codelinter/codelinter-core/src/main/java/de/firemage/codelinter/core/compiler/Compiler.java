@@ -14,6 +14,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -61,7 +62,7 @@ public final class Compiler {
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         File jar = new File(tmpLocation, inputName + ".jar");
         JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar));
-        addToJar(compilerOutput, jarOut);
+        addToJar(compilerOutput.toPath().normalize(), compilerOutput, jarOut);
         jarOut.close();
         FileUtils.deleteDirectory(compilerOutput);
 
@@ -72,40 +73,41 @@ public final class Compiler {
 
 
     // https://stackoverflow.com/questions/1281229/how-to-use-jaroutputstream-to-create-a-jar-file/1281295#1281295
-    private static void addToJar(File source, JarOutputStream target) throws IOException {
+    private static void addToJar(Path root, File source, JarOutputStream target) throws IOException {
+        String relativePath = root.relativize(source.toPath().normalize()).toString().replace("\\", "/");
         BufferedInputStream in = null;
         try {
             if (source.isDirectory()) {
-                String name = source.getPath().replace("\\", "/");
-                if (!name.isEmpty()) {
-                    if (!name.endsWith("/"))
-                        name += "/";
-                    JarEntry entry = new JarEntry(name);
+                if (!relativePath.isEmpty()) {
+                    if (!relativePath.endsWith("/"))
+                        relativePath += "/";
+                    JarEntry entry = new JarEntry(relativePath);
                     entry.setTime(source.lastModified());
                     target.putNextEntry(entry);
                     target.closeEntry();
                 }
-                for (File nestedFile : source.listFiles())
-                    addToJar(nestedFile, target);
-                return;
-            }
+                for (File nestedFile : source.listFiles()) {
+                    addToJar(root, nestedFile, target);
+                }
+            } else {
+                JarEntry entry = new JarEntry(relativePath);
+                entry.setTime(source.lastModified());
+                target.putNextEntry(entry);
+                in = new BufferedInputStream(new FileInputStream(source));
 
-            JarEntry entry = new JarEntry(source.getPath().replace("\\", "/"));
-            entry.setTime(source.lastModified());
-            target.putNextEntry(entry);
-            in = new BufferedInputStream(new FileInputStream(source));
-
-            byte[] buffer = new byte[1024];
-            while (true) {
-                int count = in.read(buffer);
-                if (count == -1)
-                    break;
-                target.write(buffer, 0, count);
+                byte[] buffer = new byte[1024];
+                while (true) {
+                    int count = in.read(buffer);
+                    if (count == -1)
+                        break;
+                    target.write(buffer, 0, count);
+                }
+                target.closeEntry();
             }
-            target.closeEntry();
         } finally {
-            if (in != null)
+            if (in != null) {
                 in.close();
+            }
         }
     }
 }

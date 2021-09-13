@@ -4,8 +4,6 @@ import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
 import spoon.reflect.code.CtInvocation;
-import spoon.support.SpoonClassNotFoundException;
-
 import java.lang.reflect.Method;
 
 public class IllegalExitProcessor extends AbstractLoggingProcessor<CtInvocation<Void>> {
@@ -32,8 +30,6 @@ public class IllegalExitProcessor extends AbstractLoggingProcessor<CtInvocation<
             }
         } catch (NoSuchMethodException e) {
             throw new IllegalStateException(e);
-        } catch (SpoonClassNotFoundException e) {
-            // Workaround; see https://github.com/INRIA/spoon/issues/4066
         }
     }
 }
