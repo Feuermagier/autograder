@@ -84,6 +84,21 @@ public class Application implements Callable<Integer> {
                 return COMPILATION_EXIT_CODE;
             }
 
+            if (enableCPD) {
+                try {
+                    CmdUtil.beginSection("Copy/Paste Detection");
+                    ProgressAnimation progress = new ProgressAnimation("Executing CPD...");
+                    progress.start();
+                    List<Problem> problems = linter.executeCPDLints();
+                    progress.finish("Completed CPD");
+                    printProblems(problems);
+                    CmdUtil.endSection();
+                } catch (IOException e) {
+                    CmdUtil.println(e.getMessage());
+                    return IO_EXIT_CODE;
+                }
+            }
+
             if (enablePMD) {
                 try {
                     CmdUtil.beginSection("PMD");
@@ -114,21 +129,6 @@ public class Application implements Callable<Integer> {
                 } catch (InterruptedException e) {
                     CmdUtil.printlnErr(e.getMessage());
                     return MISC_EXIT_CODE;
-                }
-            }
-
-            if (enableCPD) {
-                try {
-                    CmdUtil.beginSection("Copy/Paste Detection");
-                    ProgressAnimation progress = new ProgressAnimation("Executing CPD...");
-                    progress.start();
-                    List<Problem> problems = linter.executeCPDLints();
-                    progress.finish("Completed CPD");
-                    printProblems(problems);
-                    CmdUtil.endSection();
-                } catch (IOException e) {
-                    CmdUtil.println(e.getMessage());
-                    return IO_EXIT_CODE;
                 }
             }
         }
