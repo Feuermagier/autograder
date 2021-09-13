@@ -16,12 +16,26 @@
         <java.version>16</java.version>
     </properties>
 
+    <repositories>
+        <repository>
+            <id>jitpack.io</id>
+            <url>https://jitpack.io</url>
+        </repository>
+    </repositories>
+
     <dependencies>
         <!-- Spoon -->
+        <!--
         <dependency>
             <groupId>fr.inria.gforge.spoon</groupId>
             <artifactId>spoon-core</artifactId>
-            <version>9.1.0-beta-19</version>
+            <version>9.2.0-beta-3</version>
+        </dependency>
+        -->
+        <dependency>
+            <groupId>com.github.Feuermagier</groupId>
+            <artifactId>spoon</artifactId>
+            <version>ea3ba67</version>
         </dependency>
 
         <!-- JavaParser -->

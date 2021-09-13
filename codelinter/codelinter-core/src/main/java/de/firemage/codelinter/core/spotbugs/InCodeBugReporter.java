@@ -59,6 +59,5 @@ public class InCodeBugReporter extends AbstractBugReporter {
         return this.bugCollection.getCollection().stream()
                 .map(SpotbugsInCodeProblem::new)
                 .collect(Collectors.toList());
-        //return Collections.unmodifiableList(this.problems);
     }
 }

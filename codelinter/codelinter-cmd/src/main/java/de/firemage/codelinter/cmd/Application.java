@@ -82,6 +82,9 @@ public class Application implements Callable<Integer> {
             } catch (CompilationException e) {
                 CmdUtil.printlnErr(e.getMessage());
                 return COMPILATION_EXIT_CODE;
+            } catch (IOException e) {
+                CmdUtil.printlnErr(e.getMessage());
+                return IO_EXIT_CODE;
             }
 
             if (enableCPD) {
@@ -131,6 +134,9 @@ public class Application implements Callable<Integer> {
                     return MISC_EXIT_CODE;
                 }
             }
+        } catch (IOException e) {
+            CmdUtil.printlnErr(e.getMessage());
+            return IO_EXIT_CODE;
         }
 
         return 0;

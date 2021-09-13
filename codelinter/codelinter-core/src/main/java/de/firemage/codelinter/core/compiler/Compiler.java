@@ -2,6 +2,7 @@ package de.firemage.codelinter.core.compiler;
 
 import de.firemage.codelinter.core.file.UploadedFile;
 import org.apache.commons.io.FileUtils;
+
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
 import javax.tools.JavaFileManager;
@@ -61,9 +62,9 @@ public final class Compiler {
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
         File jar = new File(tmpLocation, inputName + ".jar");
-        JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar));
-        addToJar(compilerOutput.toPath().normalize(), compilerOutput, jarOut);
-        jarOut.close();
+        try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar))) {
+            addToJar(compilerOutput.toPath().normalize(), compilerOutput, jarOut);
+        }
         FileUtils.deleteDirectory(compilerOutput);
 
         return new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()

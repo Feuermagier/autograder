@@ -15,6 +15,7 @@ import de.firemage.codelinter.core.spotbugs.SpotbugsLinter;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Files;
 import java.util.List;
 
 public class Linter implements AutoCloseable {
@@ -26,7 +27,7 @@ public class Linter implements AutoCloseable {
         this.file = file;
     }
 
-    public List<Problem> executeSpoonLints(JavaVersion javaVersion) throws CompilationException {
+    public List<Problem> executeSpoonLints(JavaVersion javaVersion) throws CompilationException, IOException {
         if (this.jar == null) {
             throw new IllegalStateException("You have to call compile() before executing Spoon lints");
         }
@@ -47,7 +48,6 @@ public class Linter implements AutoCloseable {
         if (this.jar == null) {
             throw new IllegalStateException("You have to call compile() before executing Spotbugs");
         }
-
         return new SpotbugsLinter().lint(this.jar);
     }
 
@@ -56,9 +56,7 @@ public class Linter implements AutoCloseable {
     }
 
     @Override
-    public void close() {
-        if (this.jar != null) {
-            this.jar.delete();
-        }
+    public void close() throws IOException {
+        Files.deleteIfExists(this.jar.toPath());
     }
 }

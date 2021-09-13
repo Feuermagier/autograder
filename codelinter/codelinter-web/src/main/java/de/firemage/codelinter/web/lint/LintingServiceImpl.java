@@ -70,6 +70,8 @@ public class LintingServiceImpl implements LintingService {
                     log.debug("Spoon lints completed");
                 } catch (CompilationException e) {
                     return new CompilationErrorResult(e.getMessage());
+                } catch (IOException e) {
+                    return new InternalErrorResult(e.getMessage());
                 }
             }
 
@@ -98,6 +100,8 @@ public class LintingServiceImpl implements LintingService {
             }
 
             return new SuccessfulResult(spoonResult, pmdResult, compilationResult, spotbugsResult, cpdResult);
+        } catch (IOException e) {
+            return new InternalErrorResult(e.getMessage());
         }
     }
 }
