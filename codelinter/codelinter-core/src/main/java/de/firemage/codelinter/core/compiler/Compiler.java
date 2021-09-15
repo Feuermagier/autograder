@@ -56,7 +56,9 @@ public final class Compiler {
         output.close();
 
         if (!successful) {
-            throw new CompilationFailureException(diagnosticCollector.getDiagnostics(), input.getFile());
+            throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
+                    .map(d -> new CompilationDiagnostic(d, input.getFile()))
+                    .toList(), input.getFile());
         }
 
         Manifest manifest = new Manifest();
@@ -69,7 +71,7 @@ public final class Compiler {
 
         return new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
                 .map(d -> new CompilationDiagnostic(d, input.getFile()))
-                .collect(Collectors.toList()));
+                .toList());
     }
 
 

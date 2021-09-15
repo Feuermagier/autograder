@@ -8,16 +8,17 @@ import de.firemage.codelinter.core.compiler.JavaVersion;
 import de.firemage.codelinter.core.cpd.CPDLinter;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.pmd.PMDLinter;
-import de.firemage.codelinter.core.pmd.PMDRuleset;
 import de.firemage.codelinter.core.spoon.CompilationException;
 import de.firemage.codelinter.core.spoon.SpoonLinter;
 import de.firemage.codelinter.core.spotbugs.SpotbugsLinter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.io.File;
 import java.io.IOException;
-import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.List;
 
+@Slf4j
 public class Linter implements AutoCloseable {
     private final UploadedFile file;
 
@@ -34,7 +35,7 @@ public class Linter implements AutoCloseable {
         return new SpoonLinter().lint(this.file, javaVersion, this.jar);
     }
 
-    public List<Problem> executePMDLints(PMDRuleset ruleset) throws IOException {
+    public List<Problem> executePMDLints(Path ruleset) throws IOException {
         return new PMDLinter().lint(this.file, ruleset);
     }
 
@@ -56,7 +57,11 @@ public class Linter implements AutoCloseable {
     }
 
     @Override
-    public void close() throws IOException {
-        Files.deleteIfExists(this.jar.toPath());
+    public void close() {
+        if (this.jar != null) {
+            if (!this.jar.delete()) {
+                log.warn("Could not delete jar file '" + this.jar.getAbsolutePath() + "'");
+            }
+        }
     }
 }

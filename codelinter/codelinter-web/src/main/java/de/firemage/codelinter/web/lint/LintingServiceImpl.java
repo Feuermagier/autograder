@@ -5,32 +5,34 @@ import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.compiler.CompilationDiagnostic;
 import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.file.UploadedFile;
-import de.firemage.codelinter.core.pmd.PMDRuleset;
 import de.firemage.codelinter.core.spoon.CompilationException;
 import de.firemage.codelinter.web.result.CPDResult;
 import de.firemage.codelinter.web.result.CompilationErrorResult;
 import de.firemage.codelinter.web.result.CompilationResult;
 import de.firemage.codelinter.web.result.InternalErrorResult;
 import de.firemage.codelinter.web.result.LintingResult;
-import de.firemage.codelinter.web.result.PMDConfig;
 import de.firemage.codelinter.web.result.PMDResult;
+import de.firemage.codelinter.web.result.RuleConfig;
 import de.firemage.codelinter.web.result.SpoonResult;
 import de.firemage.codelinter.web.result.SpotbugsResult;
 import de.firemage.codelinter.web.result.SuccessfulResult;
+import de.firemage.codelinter.web.result.transfer.TransferCompilationDiagnostic;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 @Service
 @Slf4j
 public class LintingServiceImpl implements LintingService {
-    private final PMDRuleset pmdRuleset;
+    private final Path pmdRuleset;
 
     @Autowired
-    public LintingServiceImpl(PMDConfig pmdConfig) {
-        this.pmdRuleset = pmdConfig.getRuleset();
+    public LintingServiceImpl(RuleConfig config) {
+        this.pmdRuleset = config.getPMDRuleset();
     }
 
     @Override
@@ -43,9 +45,11 @@ public class LintingServiceImpl implements LintingService {
                     List<CompilationDiagnostic> diagnostics = linter.compile(config.javaVersion(), file.getFile().getParentFile());
                     compilationResult = CompilationResult.fromDiagnostics(diagnostics);
                     log.debug("Finished compilation");
-                } catch (IOException | CompilationFailureException e) {
+                } catch (CompilationFailureException e) {
                     log.debug("Compilation failed", e);
-                    return new CompilationErrorResult(e.getMessage());
+                    return new CompilationErrorResult(e.getMessage(), e.getDiagnostics().stream()
+                            .map(TransferCompilationDiagnostic::new)
+                            .toList());
                 }
             }
 
@@ -56,7 +60,8 @@ public class LintingServiceImpl implements LintingService {
                     List<Problem> problems = linter.executeSpotbugsLints();
                     spotbugsResult = SpotbugsResult.fromProblems(problems);
                     log.debug("SpotBugs analysis completed");
-                } catch (IOException | InterruptedException e) {
+                } catch (InterruptedException e) {
+                    e.printStackTrace();
                     return new InternalErrorResult(e.getMessage());
                 }
             }
@@ -70,37 +75,32 @@ public class LintingServiceImpl implements LintingService {
                     log.debug("Spoon lints completed");
                 } catch (CompilationException e) {
                     return new CompilationErrorResult(e.getMessage());
-                } catch (IOException e) {
-                    return new InternalErrorResult(e.getMessage());
                 }
             }
 
             PMDResult pmdResult = null;
             if (config.enablePMD()) {
-                try {
+
                     log.debug("Executing PMD...");
                     List<Problem> problems = linter.executePMDLints(this.pmdRuleset);
                     pmdResult = PMDResult.fromProblems(problems);
                     log.debug("PMD analysis completed");
-                } catch (IOException e) {
-                    return new InternalErrorResult(e.getMessage());
-                }
+
             }
 
             CPDResult cpdResult = null;
             if (config.enableCPD()) {
-                try {
+
                     log.debug("Executing CPD...");
                     List<Problem> problems = linter.executeCPDLints();
                     cpdResult = CPDResult.fromProblems(problems);
                     log.debug("CPD completed");
-                } catch (IOException e) {
-                    return new InternalErrorResult(e.getMessage());
-                }
+
             }
 
             return new SuccessfulResult(spoonResult, pmdResult, compilationResult, spotbugsResult, cpdResult);
         } catch (IOException e) {
+            e.printStackTrace();
             return new InternalErrorResult(e.getMessage());
         }
     }

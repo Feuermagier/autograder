@@ -12,15 +12,16 @@ import net.sourceforge.pmd.cpd.CPDConfiguration;
 import net.sourceforge.pmd.cpd.JavaLanguage;
 import net.sourceforge.pmd.cpd.Language;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
 public class PMDLinter {
 
-    public List<Problem> lint(UploadedFile file, PMDRuleset ruleset) throws IOException {
+    public List<Problem> lint(UploadedFile file, Path ruleset) throws IOException {
         PMDConfiguration config = new PMDConfiguration();
-        config.setRuleSets(ruleset.path());
+        config.setRuleSets(ruleset.toString());
         config.setMinimumPriority(RulePriority.LOW);
         config.setIgnoreIncrementalAnalysis(true);
         config.setReportShortNames(true);

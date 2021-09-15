@@ -6,7 +6,6 @@ import de.firemage.codelinter.core.compiler.CompilationDiagnostic;
 import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.compiler.JavaVersion;
 import de.firemage.codelinter.core.file.UploadedFile;
-import de.firemage.codelinter.core.pmd.PMDRuleset;
 import de.firemage.codelinter.core.spoon.CompilationException;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -17,6 +16,7 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.concurrent.Callable;
 
@@ -107,7 +107,7 @@ public class Application implements Callable<Integer> {
                     CmdUtil.beginSection("PMD");
                     ProgressAnimation progress = new ProgressAnimation("Executing PMD...");
                     progress.start();
-                    List<Problem> problems = linter.executePMDLints(new PMDRuleset("ruleset.xml"));
+                    List<Problem> problems = linter.executePMDLints(Paths.get("config/ruleset.xml"));
                     progress.finish("Completed PMD analysis");
                     printProblems(problems);
                     CmdUtil.endSection();

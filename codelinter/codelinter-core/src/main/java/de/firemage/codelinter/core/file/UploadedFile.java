@@ -1,9 +1,11 @@
 package de.firemage.codelinter.core.file;
 
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.util.datasource.FileDataSource;
 import org.apache.commons.io.FileUtils;
 import spoon.support.compiler.FileSystemFolder;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
@@ -12,6 +14,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@Slf4j
 public class UploadedFile {
 
     @Getter

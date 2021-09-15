@@ -51,7 +51,7 @@
             class="overflow-auto w-3/4-screen flex flex-col space-y-5 relative m-2"
         >
             {#if result.compilation}
-                <Accordion open={true}>
+                <Accordion open={true} expandable={result.compilation.diagnostics.length > 0}>
                     <p slot="header" class="font-medium">Compilation</p>
                     <div slot="content">
                         {#if result.compilation.diagnostics.length > 0}
@@ -74,8 +74,8 @@
                 </Accordion>
             {/if}
             {#if result.spoon}
-                <Accordion open={true}>
-                    <p slot="header" class="font-medium">Problems</p>
+                <Accordion open={true} expandable={result.spoon.problems.length > 0}>
+                    <p slot="header" class="font-medium">Custom Checks</p>
                     <div slot="content">
                         {#if result.spoon.problems.length > 0}
                             <InCodeProblemView
@@ -90,7 +90,7 @@
                 </Accordion>
             {/if}
             {#if result.cpd}
-            <Accordion open={false}>
+            <Accordion open={false} expandable={result.cpd.problems.length > 0}>
                 <p slot="header" class="font-medium">Copy/Paste Detection</p>
                 <div slot="content">
                     {#if result.cpd.problems.length > 0}
@@ -106,7 +106,7 @@
             </Accordion>
         {/if}
             {#if result.pmd}
-                <Accordion open={false}>
+                <Accordion open={false} expandable={result.pmd.problems.length > 0}>
                     <p slot="header" class="font-medium">PMD</p>
                     <div slot="content">
                         {#if result.pmd.problems.length > 0}
@@ -122,7 +122,7 @@
                 </Accordion>
             {/if}
             {#if result.spotbugs}
-                <Accordion open={false}>
+                <Accordion open={false} expandable={result.spotbugs.problems.length > 0}>
                     <p slot="header" class="font-medium">SpotBugs</p>
                     <div slot="content">
                         {#if result.spotbugs.problems.length > 0}

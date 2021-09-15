@@ -37,6 +37,7 @@ export const COMPILATION_ERROR_RESULT = 'CompilationErrorResult';
 export class CompilationErrorResult {
     readonly type = COMPILATION_ERROR_RESULT;
     readonly description: string;
+    readonly diagnostics: CompilationDiagnostic[];
 };
 
 export const FILE_CLIENT_ERROR_RESULT = 'FileClientErrorResult';
