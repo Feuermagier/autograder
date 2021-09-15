@@ -3,6 +3,7 @@ package de.firemage.codelinter.core.spoon.check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
+import de.firemage.codelinter.core.spoon.SpoonGlobalProblem;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
@@ -19,8 +20,17 @@ public abstract class AbstractLoggingProcessor<E extends CtElement> extends Abst
         this.logger.addInCodeProblem(element, description, category, explanation, priority);
     }
 
+    protected void addProblem(String description, ProblemCategory category, String explanation, ProblemPriority priority) {
+        this.logger.addProblem(new SpoonGlobalProblem(description, category, explanation, priority));
+    }
+
     @Override
     public void check(CtModel model, Factory factory) {
         model.processWith(this);
+        processingFinished();
+    }
+
+    protected void processingFinished() {
+
     }
 }

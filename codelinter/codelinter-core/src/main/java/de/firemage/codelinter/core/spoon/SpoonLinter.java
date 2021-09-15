@@ -9,11 +9,13 @@ import de.firemage.codelinter.core.spoon.check.CatchProcessor;
 import de.firemage.codelinter.core.spoon.check.Check;
 import de.firemage.codelinter.core.spoon.check.DowncastCheck;
 import de.firemage.codelinter.core.spoon.check.EmptyAbstractClassCheck;
+import de.firemage.codelinter.core.spoon.check.ForEachProcessor;
 import de.firemage.codelinter.core.spoon.check.IllegalExitProcessor;
 import de.firemage.codelinter.core.spoon.check.LabelProcessor;
 import de.firemage.codelinter.core.spoon.check.LambdaFlowComplexityCheck;
 import de.firemage.codelinter.core.spoon.check.MethodFlowComplexityCheck;
 import de.firemage.codelinter.core.spoon.check.ObjectTypeCheck;
+import de.firemage.codelinter.core.spoon.check.TooManySubclassesCheck;
 import de.firemage.codelinter.core.spoon.check.UninstantiatedClassCheck;
 import de.firemage.codelinter.core.spoon.check.UnusedVariableCheck;
 import de.firemage.codelinter.core.spoon.check.VarProcessor;
@@ -97,6 +99,10 @@ public class SpoonLinter {
 
             Check objectUsedCheck = new ObjectTypeCheck(logger);
             objectUsedCheck.check(model, factory);
+
+            Check tooManySubclassCheck = new TooManySubclassesCheck(logger);
+            tooManySubclassCheck.check(model, factory);
+
             return logger.getProblems();
         }
 

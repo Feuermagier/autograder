@@ -10,6 +10,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class CPDLinter {
+    //TODO This number is completely arbitrary
     private static final int MINIMUM_TOKEN_COUNT = 100;
 
     public List<Problem> lint(UploadedFile file) throws IOException {

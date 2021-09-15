@@ -80,6 +80,15 @@ export class InCodeProblem {
     readonly priority: string;
 };
 
+export const GLOBAL_PROBLEM = 'GlobalTransferProblem';
+export class GlobalProblem {
+    readonly type = GLOBAL_PROBLEM;
+    readonly description: string;
+    readonly explanation: string;
+    readonly category: string;
+    readonly priority: string;
+}
+
 export namespace ProblemPriority {
     export const SEVERE = 'SEVERE';
     export const POSSIBLE_SEVERE = 'POSSIBLE_SEVERE';
