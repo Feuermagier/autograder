@@ -27,4 +27,9 @@ public class GlobalProblem implements Problem {
     public String getDisplayLocation() {
         return "<GLOBAL>";
     }
+
+    @Override
+    public String toString() {
+        return "GlobalProblem: " + description;
+    }
 }

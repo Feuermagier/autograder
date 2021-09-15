@@ -14,6 +14,7 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
+
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Paths;
@@ -63,9 +64,6 @@ public class Application implements Callable<Integer> {
                 progress.finish("Completed compilation");
                 diagnostics.forEach(d -> CmdUtil.println(d.toString()));
                 CmdUtil.endSection();
-            } catch (IOException e) {
-                CmdUtil.println(e.getMessage());
-                return IO_EXIT_CODE;
             } catch (CompilationFailureException e) {
                 CmdUtil.println(e.getMessage());
                 return COMPILATION_EXIT_CODE;
@@ -82,39 +80,26 @@ public class Application implements Callable<Integer> {
             } catch (CompilationException e) {
                 CmdUtil.printlnErr(e.getMessage());
                 return COMPILATION_EXIT_CODE;
-            } catch (IOException e) {
-                CmdUtil.printlnErr(e.getMessage());
-                return IO_EXIT_CODE;
             }
 
             if (enableCPD) {
-                try {
-                    CmdUtil.beginSection("Copy/Paste Detection");
-                    ProgressAnimation progress = new ProgressAnimation("Executing CPD...");
-                    progress.start();
-                    List<Problem> problems = linter.executeCPDLints();
-                    progress.finish("Completed CPD");
-                    printProblems(problems);
-                    CmdUtil.endSection();
-                } catch (IOException e) {
-                    CmdUtil.println(e.getMessage());
-                    return IO_EXIT_CODE;
-                }
+                CmdUtil.beginSection("Copy/Paste Detection");
+                ProgressAnimation progress = new ProgressAnimation("Executing CPD...");
+                progress.start();
+                List<Problem> problems = linter.executeCPDLints();
+                progress.finish("Completed CPD");
+                printProblems(problems);
+                CmdUtil.endSection();
             }
 
             if (enablePMD) {
-                try {
-                    CmdUtil.beginSection("PMD");
-                    ProgressAnimation progress = new ProgressAnimation("Executing PMD...");
-                    progress.start();
-                    List<Problem> problems = linter.executePMDLints(Paths.get("config/ruleset.xml"));
-                    progress.finish("Completed PMD analysis");
-                    printProblems(problems);
-                    CmdUtil.endSection();
-                } catch (IOException e) {
-                    CmdUtil.printlnErr(e.getMessage());
-                    return IO_EXIT_CODE;
-                }
+                CmdUtil.beginSection("PMD");
+                ProgressAnimation progress = new ProgressAnimation("Executing PMD...");
+                progress.start();
+                List<Problem> problems = linter.executePMDLints(Paths.get("config/ruleset.xml"));
+                progress.finish("Completed PMD analysis");
+                printProblems(problems);
+                CmdUtil.endSection();
             }
 
             if (enableSpotBugs) {
@@ -126,9 +111,6 @@ public class Application implements Callable<Integer> {
                     progress.finish("Completed SpotBugs analysis");
                     printProblems(problems);
                     CmdUtil.endSection();
-                } catch (IOException e) {
-                    CmdUtil.println(e.getMessage());
-                    return IO_EXIT_CODE;
                 } catch (InterruptedException e) {
                     CmdUtil.printlnErr(e.getMessage());
                     return MISC_EXIT_CODE;
