@@ -19,6 +19,7 @@ import de.firemage.codelinter.core.spoon.check.TooManySubclassesCheck;
 import de.firemage.codelinter.core.spoon.check.UninstantiatedClassCheck;
 import de.firemage.codelinter.core.spoon.check.UnusedVariableCheck;
 import de.firemage.codelinter.core.spoon.check.VarProcessor;
+import de.firemage.codelinter.core.spoon.check.VisibilityCheck;
 import de.firemage.codelinter.core.spoon.check.reflect.ReflectImportCheck;
 import de.firemage.codelinter.core.spoon.check.reflect.ReflectMethodCheck;
 import spoon.Launcher;
@@ -102,6 +103,9 @@ public class SpoonLinter {
 
             Check tooManySubclassCheck = new TooManySubclassesCheck(logger);
             tooManySubclassCheck.check(model, factory);
+
+            Check visibilityCheck = new VisibilityCheck(logger);
+            visibilityCheck.check(model, factory);
 
             return logger.getProblems();
         }
