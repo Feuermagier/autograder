@@ -1,11 +1,8 @@
 public class Test {
-	public int x;
+	public String x = "abc";
 	
-	public int getX() {
-		return this.x;
-	}
-	
-	public int getY() {
-		return x;
+	void foo() {
+		String a = "";
+		String b = "x";
 	}
 }

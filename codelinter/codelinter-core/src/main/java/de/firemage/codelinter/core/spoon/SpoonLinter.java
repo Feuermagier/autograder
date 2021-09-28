@@ -13,6 +13,7 @@ import de.firemage.codelinter.core.spoon.check.ForEachProcessor;
 import de.firemage.codelinter.core.spoon.check.IllegalExitProcessor;
 import de.firemage.codelinter.core.spoon.check.LabelProcessor;
 import de.firemage.codelinter.core.spoon.check.LambdaFlowComplexityCheck;
+import de.firemage.codelinter.core.spoon.check.MagicStringCheck;
 import de.firemage.codelinter.core.spoon.check.MethodFlowComplexityCheck;
 import de.firemage.codelinter.core.spoon.check.ObjectTypeCheck;
 import de.firemage.codelinter.core.spoon.check.TooManySubclassesCheck;
@@ -106,6 +107,9 @@ public class SpoonLinter {
 
             Check visibilityCheck = new VisibilityCheck(logger);
             visibilityCheck.check(model, factory);
+
+            Check magicStringCheck = new MagicStringCheck(logger);
+            magicStringCheck.check(model, factory);
 
             return logger.getProblems();
         }
