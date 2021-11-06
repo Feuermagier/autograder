@@ -12,6 +12,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
+import spoon.reflect.reference.CtTypeReference;
 
 public final class CheckUtil {
 
@@ -71,6 +72,17 @@ public final class CheckUtil {
                 .filter(m -> m.getSimpleName().equals("get" + toUpperCamelCase(field.getSimpleName())))
                 .filter(m -> m.getParameters().isEmpty())
                 .anyMatch(m -> m.getBody().equals(simpleBody));
+    }
+
+    public static boolean isException(CtTypeReference<?> type) {
+        CtTypeReference<?> currentType = type;
+        while (currentType != null && !currentType.getQualifiedName().equals("java.lang.Object")) {
+            if (currentType.getQualifiedName().equals("java.lang.Throwable")) {
+                return true;
+            }
+            currentType = currentType.getSuperclass();
+        }
+        return false;
     }
 
     public static String toUpperCamelCase(String in) {
