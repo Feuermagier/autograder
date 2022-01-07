@@ -30,6 +30,7 @@ public class ProgressAnimation {
                 }
             }
         });
+        this.outputThread.setDaemon(true);
     }
 
     public ProgressAnimation() {

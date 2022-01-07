@@ -96,7 +96,7 @@ public class Application implements Callable<Integer> {
                 CmdUtil.beginSection("PMD");
                 ProgressAnimation progress = new ProgressAnimation("Executing PMD...");
                 progress.start();
-                List<Problem> problems = linter.executePMDLints(Paths.get("config/ruleset.xml"));
+                List<Problem> problems = linter.executePMDLints(Paths.get("config/pmd.xml"));
                 progress.finish("Completed PMD analysis");
                 printProblems(problems);
                 CmdUtil.endSection();
