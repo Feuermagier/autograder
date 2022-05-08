@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon.check;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
@@ -11,15 +12,17 @@ import spoon.reflect.visitor.Query;
 import java.util.List;
 
 public class LambdaFlowComplexityCheck extends AbstractLoggingProcessor<CtLambda<?>> {
-    public static final int COMPLEXITY_THRESHOLD = 6; //TODO Arbitrary number
     private static final String DESCRIPTION = "Overly complex lambda";
     private static final String EXPLANATION = """
             The lambda contains many flow breaking statements (return, throw, break, continue, yield).
             Therefore its control flow is not obvious.
             Consider creating helper methods""";
 
-    public LambdaFlowComplexityCheck(ProblemLogger logger) {
-        super(logger);
+    private final int complexityThreshold;
+
+    public LambdaFlowComplexityCheck(Check check, int complexityThreshold) {
+        super(check);
+        this.complexityThreshold = complexityThreshold;
     }
 
     @Override
@@ -31,8 +34,8 @@ public class LambdaFlowComplexityCheck extends AbstractLoggingProcessor<CtLambda
                 return false;
             }
         });
-        if (breakingElements.size() > COMPLEXITY_THRESHOLD) {
-            addProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.FIX_RECOMMENDED);
+        if (breakingElements.size() > this.complexityThreshold) {
+            addProblem(element, EXPLANATION);
         }
     }
 }

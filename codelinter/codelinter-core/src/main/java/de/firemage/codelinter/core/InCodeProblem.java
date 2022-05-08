@@ -1,42 +1,34 @@
 package de.firemage.codelinter.core;
 
 import lombok.Getter;
+import java.nio.file.Path;
 
 public abstract class InCodeProblem implements Problem {
 
     @Getter
-    private final String filePath;
+    private final Check check;
 
     @Getter
-    private final int line;
-
-    @Getter
-    private final int column;
-
-    @Getter
-    private final String description;
-
-    @Getter
-    private final ProblemCategory category;
+    private final CodePosition position;
 
     @Getter
     private final String explanation;
 
-    @Getter
-    private final ProblemPriority priority;
 
-    public InCodeProblem(String filePath, int line, int column, String description, ProblemCategory category, String explanation, ProblemPriority priority) {
-        this.filePath = filePath;
-        this.line = line;
-        this.column = column;
-        this.description = description;
-        this.category = category;
+    public InCodeProblem(Check check, CodePosition position, String explanation) {
+        this.check = check;
+        this.position = position;
         this.explanation = explanation;
-        this.priority = priority;
     }
 
     @Override
-    public String toString() {
-        return "InCodeProblem at " + getDisplayLocation() + ": " + description;
+    public String getDisplayLocation(Path root) {
+        // TODO
+        return root.relativize(this.position.file()) + ":" + this.position.startLine();
+    }
+
+    @Override
+    public String displayAsString(Path root) {
+        return this.getDisplayLocation(root) + " " + getExplanation();
     }
 }

@@ -1,39 +1,49 @@
 package de.firemage.codelinter.core.pmd;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.file.UploadedFile;
-import net.sourceforge.pmd.PMD;
 import net.sourceforge.pmd.PMDConfiguration;
+import net.sourceforge.pmd.PmdAnalysis;
+import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.RulePriority;
 import net.sourceforge.pmd.RuleSet;
-import net.sourceforge.pmd.RuleSetLoader;
-import net.sourceforge.pmd.cpd.CPD;
-import net.sourceforge.pmd.cpd.CPDConfiguration;
-import net.sourceforge.pmd.cpd.JavaLanguage;
-import net.sourceforge.pmd.cpd.Language;
+import net.sourceforge.pmd.lang.LanguageRegistry;
+import net.sourceforge.pmd.lang.rule.xpath.XPathVersion;
 import java.io.IOException;
-import java.nio.file.Path;
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public class PMDLinter {
 
-    public List<Problem> lint(UploadedFile file, Path ruleset) throws IOException {
+    public List<Problem> lint(UploadedFile file, List<PMDCheck> checks) throws IOException {
         PMDConfiguration config = new PMDConfiguration();
-        config.setRuleSets(ruleset.toString());
+
         config.setMinimumPriority(RulePriority.LOW);
         config.setIgnoreIncrementalAnalysis(true);
         config.setReportShortNames(true);
+        config.setDefaultLanguageVersion(LanguageRegistry.findLanguageByTerseName("java").getVersion(file.getVersion().getVersionString()));
 
-        RuleSetLoader ruleSetLoader = RuleSetLoader.fromPmdConfig(config);
-        List<RuleSet> ruleSets = ruleSetLoader.loadFromResources(Arrays.asList(config.getRuleSets().split(",")));
+        Map<Class<? extends Rule>, Check> idMap = new HashMap<>();
+        List<Rule> rules = new ArrayList<>();
 
-        ProblemRenderer renderer = new ProblemRenderer(file.getFile());
-        renderer.start();
-        PMD.processFiles(config, ruleSets, file.getPMDFiles(), Collections.singletonList(renderer));
-        renderer.end();
-        renderer.flush();
+        for (PMDCheck check : checks) {
+            for (Rule rule : check.getRules()) {
+                idMap.put(rule.getClass(), check);
+                rules.add(rule);
+            }
+        }
+
+        ProblemRenderer renderer = new ProblemRenderer(idMap);
+
+        try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
+            pmd.addRuleSet(RuleSet.create("Codelinter Configuration (Generated)", "", null, List.of(), List.of(), rules));
+            pmd.addRenderer(renderer);
+            pmd.files().addDirectory(file.getFile());
+            pmd.performAnalysis();
+        }
 
         return renderer.getProblems();
     }

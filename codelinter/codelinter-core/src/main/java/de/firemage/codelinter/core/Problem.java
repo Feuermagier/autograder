@@ -1,13 +1,13 @@
 package de.firemage.codelinter.core;
 
-public interface Problem {
-    String getDescription();
+import java.nio.file.Path;
 
-    ProblemCategory getCategory();
+public interface Problem {
+    Check getCheck();
 
     String getExplanation();
 
-    ProblemPriority getPriority();
+    String getDisplayLocation(Path root);
 
-    String getDisplayLocation();
+    String displayAsString(Path root);
 }

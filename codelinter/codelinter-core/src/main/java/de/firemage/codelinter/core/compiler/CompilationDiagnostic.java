@@ -4,11 +4,12 @@ import de.firemage.codelinter.core.PathUtil;
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.File;
+import java.nio.file.Path;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public record CompilationDiagnostic(String path, int line, int column, String message) {
-    protected CompilationDiagnostic(Diagnostic<? extends JavaFileObject> diagnostic, File root) {
+    protected CompilationDiagnostic(Diagnostic<? extends JavaFileObject> diagnostic, Path root) {
         this(PathUtil.getSanitizedPath(diagnostic.getSource().toUri(), root),
                 (int) diagnostic.getLineNumber(),
                 (int) diagnostic.getColumnNumber(),

@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon.check.reflect;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
@@ -14,8 +15,8 @@ public class ReflectMethodCheck extends AbstractLoggingProcessor<CtInvocation<?>
             Boilerplate code is always better then possibly breaking OOP best practices. Reflection includes
             methods like Class.forName(), Class.getMethod(), ...""";
 
-    public ReflectMethodCheck(ProblemLogger logger) {
-        super(logger);
+    public ReflectMethodCheck(Check check) {
+        super(check);
     }
 
     @Override
@@ -23,7 +24,7 @@ public class ReflectMethodCheck extends AbstractLoggingProcessor<CtInvocation<?>
         //TODO This checks only for uses of methods of java.lang.Class and not for other possible reflection uses
         if (element.getExecutable().getDeclaringType().getQualifiedName().equals("java.lang.Class") &&
                 !CheckUtil.isInEquals(element)) {
-            addProblem(element, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.SEVERE);
+            addProblem(element, DESCRIPTION);
         }
     }
 }

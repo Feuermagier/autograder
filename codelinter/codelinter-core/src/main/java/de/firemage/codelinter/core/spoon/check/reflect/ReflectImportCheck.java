@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon.check.reflect;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
@@ -12,15 +13,15 @@ public class ReflectImportCheck extends AbstractCompilationUnitCheck {
             Using Java reflection indicates bad design in the context of programming lectures.
             Boilerplate code is always better then possibly breaking OOP best practices.""";
 
-    public ReflectImportCheck(ProblemLogger logger) {
-        super(logger);
+    public ReflectImportCheck(Check check) {
+        super(check);
     }
 
     @Override
     public void checkCompilationUnit(CtCompilationUnit compilationUnit) {
         compilationUnit.getImports().forEach(i -> {
             if (i.toString().contains("java.lang.reflect")) {
-                addProblem(i, DESCRIPTION, ProblemCategory.JAVA_FEATURE, EXPLANATION, ProblemPriority.SEVERE);
+                addProblem(i, DESCRIPTION);
             }
         });
     }

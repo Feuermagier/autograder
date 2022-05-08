@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon.check;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
@@ -19,8 +20,8 @@ public class TooManySubclassesCheck extends AbstractLoggingProcessor<CtClass<?>>
     private int totalTypeCount = 0;
     private int typeWithParentCount = 0;
 
-    public TooManySubclassesCheck(ProblemLogger logger) {
-        super(logger);
+    public TooManySubclassesCheck(Check check) {
+        super(check);
     }
 
     @Override
@@ -34,7 +35,7 @@ public class TooManySubclassesCheck extends AbstractLoggingProcessor<CtClass<?>>
     @Override
     protected void processingFinished() {
         if (typeWithParentCount / ((double) totalTypeCount) > ALLOWED_INHERITANCE_RATIO) {
-            addProblem(DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.POSSIBLE_SEVERE);
+            addProblem(DESCRIPTION);
         }
     }
 }

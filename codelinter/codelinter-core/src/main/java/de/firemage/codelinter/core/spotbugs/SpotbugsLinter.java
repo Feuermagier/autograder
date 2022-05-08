@@ -8,12 +8,13 @@ import edu.umd.cs.findbugs.config.UserPreferences;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class SpotbugsLinter {
-    public List<Problem> lint(File jar) throws IOException, InterruptedException {
+    public List<Problem> lint(Path jar) throws IOException, InterruptedException {
         try (Project project = new Project()) {
-            project.addFile(jar.getAbsolutePath());
+            project.addFile(jar.toAbsolutePath().toFile().toString());
             InCodeBugReporter reporter = new InCodeBugReporter(project);
 
             try (FindBugs2 findBugs = new FindBugs2()) {
@@ -23,6 +24,7 @@ public class SpotbugsLinter {
                 UserPreferences userPreferences = UserPreferences.createDefaultUserPreferences();
                 userPreferences.setEffort(UserPreferences.EFFORT_DEFAULT);
                 userPreferences.enableAllDetectors(true);
+                //userPreferences.enableDetector(DetectorFactoryCollection.instance().getFactory(), );
                 // Disable debug detectors (these are spamming System.out)
                 userPreferences.enableDetector(DetectorFactoryCollection.instance().getFactory("TestingGround"), false);
                 userPreferences.enableDetector(DetectorFactoryCollection.instance().getFactory("CheckCalls"), false);

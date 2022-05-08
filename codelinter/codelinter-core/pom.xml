@@ -13,7 +13,7 @@
     <name>codelinter-core</name>
 
     <properties>
-        <java.version>16</java.version>
+        <java.version>18</java.version>
     </properties>
 
     <repositories>
@@ -36,7 +36,7 @@
         <dependency>
             <groupId>com.github.Feuermagier</groupId>
             <artifactId>spoon</artifactId>
-            <version>ea3ba67</version>
+            <version>be9318a2</version>
         </dependency>
 
         <!-- JavaParser -->
@@ -50,14 +50,8 @@
         <!-- PMD -->
         <dependency>
             <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-core</artifactId>
-            <version>6.36.0</version>
-            <type>pom</type>
-        </dependency>
-        <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
             <artifactId>pmd-java</artifactId>
-            <version>6.36.0</version>
+            <version>6.45.0</version>
         </dependency>
 
         <!-- Spotbugs -->
@@ -73,6 +67,15 @@
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
             <version>2.11.0</version>
+        </dependency>
+
+
+        <!-- Config -->
+        <!-- https://mvnrepository.com/artifact/com.fasterxml.jackson.core/jackson-databind -->
+        <dependency>
+            <groupId>com.fasterxml.jackson.core</groupId>
+            <artifactId>jackson-databind</artifactId>
+            <version>2.13.2.2</version>
         </dependency>
 
     </dependencies>

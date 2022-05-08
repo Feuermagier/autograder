@@ -1,33 +1,37 @@
 package de.firemage.codelinter.core.spoon.check;
 
-import de.firemage.codelinter.core.ProblemCategory;
-import de.firemage.codelinter.core.ProblemPriority;
+import de.firemage.codelinter.core.Check;
+import de.firemage.codelinter.core.GlobalProblem;
+import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
-import de.firemage.codelinter.core.spoon.SpoonGlobalProblem;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
+import java.util.List;
 
-public abstract class AbstractLoggingProcessor<E extends CtElement> extends AbstractProcessor<E> implements Check {
+public abstract class AbstractLoggingProcessor<E extends CtElement> extends AbstractProcessor<E> implements CodeProcessor {
     private final ProblemLogger logger;
+    private final Check check;
 
-    public AbstractLoggingProcessor(ProblemLogger logger) {
-        this.logger = logger;
+    protected AbstractLoggingProcessor(Check check) {
+        this.check = check;
+        this.logger = new ProblemLogger(check);
     }
 
-    protected void addProblem(CtElement element, String description, ProblemCategory category, String explanation, ProblemPriority priority) {
-        this.logger.addInCodeProblem(element, description, category, explanation, priority);
+    protected void addProblem(CtElement element, String explanation) {
+        this.logger.addInCodeProblem(element, explanation);
     }
 
-    protected void addProblem(String description, ProblemCategory category, String explanation, ProblemPriority priority) {
-        this.logger.addProblem(new SpoonGlobalProblem(description, category, explanation, priority));
+    protected void addProblem(String explanation) {
+        this.logger.addProblem(new GlobalProblem(this.check, explanation));
     }
 
     @Override
-    public void check(CtModel model, Factory factory) {
+    public List<Problem> check(CtModel model, Factory factory) {
         model.processWith(this);
         processingFinished();
+        return this.logger.getProblems();
     }
 
     protected void processingFinished() {

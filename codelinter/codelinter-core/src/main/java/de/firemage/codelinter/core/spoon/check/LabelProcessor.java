@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon.check;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
@@ -12,14 +13,14 @@ public class LabelProcessor extends AbstractLoggingProcessor<CtLabelledFlowBreak
             Many people have written about the problems of GOTO, so PLEASE don't use labels.
             If you are still not convinced, google 'go to statements considered harmful'""";
 
-    public LabelProcessor(ProblemLogger logger) {
-        super(logger);
+    public LabelProcessor(Check check) {
+        super(check);
     }
 
     @Override
     public void process(CtLabelledFlowBreak element) {
         if (element.getTargetLabel() != null) {
-            addProblem(element, DESCRIPTION, ProblemCategory.CONTROL_FLOW, EXPLANATION, ProblemPriority.SEVERE);
+            addProblem(element, EXPLANATION);
         }
     }
 }

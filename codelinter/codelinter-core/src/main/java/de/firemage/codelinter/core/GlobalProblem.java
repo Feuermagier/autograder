@@ -1,35 +1,33 @@
 package de.firemage.codelinter.core;
 
 import lombok.Getter;
+import java.nio.file.Path;
 
 public class GlobalProblem implements Problem {
 
     @Getter
-    private final String description;
-
-    @Getter
-    private final ProblemCategory category;
+    private final Check check;
 
     @Getter
     private final String explanation;
 
-    @Getter
-    private final ProblemPriority priority;
-
-    public GlobalProblem(String description, ProblemCategory category, String explanation, ProblemPriority priority) {
-        this.description = description;
-        this.category = category;
+    public GlobalProblem(Check check, String explanation) {
+        this.check = check;
         this.explanation = explanation;
-        this.priority = priority;
     }
 
     @Override
-    public String getDisplayLocation() {
+    public String getDisplayLocation(Path root) {
         return "<GLOBAL>";
     }
 
     @Override
+    public String displayAsString(Path root) {
+        return this.getExplanation();
+    }
+
+    @Override
     public String toString() {
-        return "GlobalProblem: " + description;
+        return "GlobalProblem: " + getExplanation();
     }
 }

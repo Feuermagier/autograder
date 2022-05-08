@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.file;
 
+import de.firemage.codelinter.core.compiler.JavaVersion;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.util.datasource.FileDataSource;
@@ -18,39 +19,43 @@ import java.util.stream.Stream;
 public class UploadedFile {
 
     @Getter
-    private final File file;
+    private final Path file;
 
-    public UploadedFile(File file) {
-        if (!file.isDirectory()) {
+    @Getter
+    private final JavaVersion version;
+
+    public UploadedFile(Path file, JavaVersion version) {
+        if (!file.toFile().isDirectory()) {
             throw new IllegalArgumentException("The file must be a directory");
         }
 
         this.file = file;
+        this.version = version;
     }
 
     public List<File> getJavaFiles() throws IOException {
-        return streamFiles().collect(Collectors.toList());
+        return streamFiles().toList();
     }
 
     public Stream<File> streamFiles() throws IOException {
-        return Files.walk(this.file.toPath())
+        return Files.walk(this.file)
                 .filter(p -> p.toString().endsWith(".java"))
                 .filter(p -> !p.toString().endsWith("package-info.java"))
                 .map(Path::toFile);
     }
 
     public FileSystemFolder getSpoonFile() {
-        return new FileSystemFolder(this.file);
+        return new FileSystemFolder(this.file.toFile());
     }
 
     public List<FileDataSource> getPMDFiles() throws IOException {
-        return Files.walk(this.file.toPath())
+        return Files.walk(this.file)
                 .filter(p -> p.toString().endsWith(".java"))
                 .map(p -> new FileDataSource(p.toFile()))
-                .collect(Collectors.toList());
+                .toList();
     }
 
     public void delete() throws IOException {
-        FileUtils.deleteDirectory(this.file);
+        FileUtils.deleteDirectory(this.file.toFile());
     }
 }

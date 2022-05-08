@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon.check;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
 import de.firemage.codelinter.core.spoon.ProblemLogger;
@@ -12,15 +13,15 @@ public class ObjectTypeCheck extends AbstractLoggingProcessor<CtVariable<?>> {
             If you want to allow multiple incompatible types, consider Generics.
             """;
 
-    public ObjectTypeCheck(ProblemLogger logger) {
-        super(logger);
+    public ObjectTypeCheck(Check check) {
+        super(check);
     }
 
     @Override
     public void process(CtVariable<?> element) {
         if (element.getType().getQualifiedName().equals("java.lang.Object")
                 && !CheckUtil.isInEquals(element)) {
-            addProblem(element, DESCRIPTION, ProblemCategory.OOP, EXPLANATION, ProblemPriority.SEVERE);
+            addProblem(element, DESCRIPTION);
         }
     }
 }

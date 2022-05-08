@@ -1,36 +1,36 @@
 package de.firemage.codelinter.core.cpd;
 
-import de.firemage.codelinter.core.InCodeProblem;
+import de.firemage.codelinter.core.Check;
+import de.firemage.codelinter.core.CodePosition;
+import de.firemage.codelinter.core.MultiPositionProblem;
 import de.firemage.codelinter.core.PathUtil;
-import de.firemage.codelinter.core.ProblemCategory;
-import de.firemage.codelinter.core.ProblemPriority;
+import net.sourceforge.pmd.cpd.Mark;
 import net.sourceforge.pmd.cpd.Match;
-import java.io.File;
+import java.nio.file.Path;
+import java.util.List;
 
-public class CPDInCodeProblem extends InCodeProblem {
+public class CPDInCodeProblem extends MultiPositionProblem {
 
     private final Match match;
-    private final File root;
+    private final Path root;
 
-    public CPDInCodeProblem(Match match, File root) {
-        super(match.getFirstMark().getFilename(),
-                match.getFirstMark().getBeginLine(),
-                match.getFirstMark().getBeginColumn(), formatMatch(match, root),
-                ProblemCategory.BAD_STYLE,
-                """
-                        Duplicated code is hard to maintain and should always be avoided.
-                        Try to create a helper method, a helper class or an utility class""",
-                ProblemPriority.FIX_RECOMMENDED);
+    public CPDInCodeProblem(Check check, Match match, Path root) {
+        super(check,
+                List.of(
+                        markToPosition(match.getFirstMark()),
+                        markToPosition(match.getSecondMark())
+                ),
+                formatMatch(match, root));
         this.match = match;
         this.root = root;
     }
 
-    private static String formatMatch(Match match, File root) {
+    private static String formatMatch(Match match, Path root) {
         return "Duplicated code (" + match.getLineCount() + " lines): "
                 + formatLocation(match, root);
     }
 
-    private static String formatLocation(Match match, File root) {
+    private static String formatLocation(Match match, Path root) {
         return PathUtil.getSanitizedPath(match.getFirstMark().getFilename(), root) + ":"
                 + match.getFirstMark().getBeginLine() + "-" + match.getFirstMark().getEndLine()
                 + " and "
@@ -38,8 +38,7 @@ public class CPDInCodeProblem extends InCodeProblem {
                 + match.getSecondMark().getBeginLine() + "-" + match.getSecondMark().getEndLine();
     }
 
-    @Override
-    public String getDisplayLocation() {
-        return formatLocation(this.match, root);
+    private static CodePosition markToPosition(Mark mark) {
+        return new CodePosition(Path.of(mark.getFilename()), mark.getBeginLine(), mark.getEndLine(), mark.getBeginColumn(), mark.getEndColumn());
     }
 }

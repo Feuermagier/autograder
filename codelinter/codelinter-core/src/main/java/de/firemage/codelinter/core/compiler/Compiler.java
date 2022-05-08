@@ -31,20 +31,20 @@ public final class Compiler {
     private Compiler() {
     }
 
-    public static CompilationResult compileToJar(UploadedFile input, File tmpLocation, JavaVersion javaVersion) throws IOException, CompilationFailureException {
-        String inputName = input.getFile().getName();
+    public static CompilationResult compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion) throws IOException, CompilationFailureException {
+        String inputName = input.getFile().getFileName().toString();
 
         List<PhysicalFileObject> compilationUnits = input.streamFiles()
                 .map(PhysicalFileObject::new)
                 .collect(Collectors.toList());
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        File compilerOutput = new File(tmpLocation, inputName + "_compiled");
+        Path compilerOutput = tmpLocation.resolve(inputName + "_compiled");
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
         JavaFileManager fileManager = new SeparateBinaryFileManager(
                 compiler.getStandardFileManager(diagnosticCollector, Locale.US, StandardCharsets.UTF_8),
-                compilerOutput);
+                compilerOutput.toFile());
         boolean successful = compiler.getTask(
                 output,
                 fileManager,
@@ -63,11 +63,11 @@ public final class Compiler {
 
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        File jar = new File(tmpLocation, inputName + ".jar");
-        try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar))) {
-            addToJar(compilerOutput.toPath().normalize(), compilerOutput, jarOut);
+        Path jar = tmpLocation.resolve(inputName + ".jar");
+        try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar.toFile()))) {
+            addToJar(compilerOutput.normalize(), compilerOutput.toFile(), jarOut);
         }
-        FileUtils.deleteDirectory(compilerOutput);
+        FileUtils.deleteDirectory(compilerOutput.toFile());
 
         return new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
                 .map(d -> new CompilationDiagnostic(d, input.getFile()))

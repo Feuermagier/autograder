@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core.spoon;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
@@ -11,14 +12,14 @@ import java.util.List;
 
 public class ProblemLogger {
     private final List<Problem> problems = new ArrayList<>();
-    private final File root;
+    private final Check check;
 
-    public ProblemLogger(File root) {
-        this.root = root;
+    public ProblemLogger(Check check) {
+        this.check = check;
     }
 
-    public void addInCodeProblem(CtElement element, String description, ProblemCategory category, String explanation, ProblemPriority priority) {
-        this.problems.add(new SpoonInCodeProblem(element, description, category, explanation, priority, this.root));
+    public void addInCodeProblem(CtElement element, String explanation) {
+        this.problems.add(new SpoonInCodeProblem(this.check, element, explanation));
     }
 
     public void addProblem(Problem problem) {

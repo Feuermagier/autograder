@@ -88,4 +88,8 @@ public final class CheckUtil {
     public static String toUpperCamelCase(String in) {
         return in.substring(0, 1).toUpperCase() + in.substring(1);
     }
+
+    public static boolean isBooleanOrWrapper(CtTypeReference<?> type) {
+        return type.getQualifiedName().equals("boolean") || type.getQualifiedName().equals("java.lang.Boolean");
+    }
 }

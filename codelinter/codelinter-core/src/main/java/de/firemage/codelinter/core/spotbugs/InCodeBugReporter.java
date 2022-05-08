@@ -1,6 +1,7 @@
 package de.firemage.codelinter.core.spotbugs;
 
 import de.firemage.codelinter.core.Problem;
+import de.firemage.codelinter.core.check.PlaceholderCheck;
 import edu.umd.cs.findbugs.AbstractBugReporter;
 import edu.umd.cs.findbugs.AnalysisError;
 import edu.umd.cs.findbugs.BugCollection;
@@ -13,6 +14,7 @@ import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import javax.annotation.CheckForNull;
 import java.io.File;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 public class InCodeBugReporter extends AbstractBugReporter {
@@ -57,7 +59,7 @@ public class InCodeBugReporter extends AbstractBugReporter {
 
     public List<Problem> getProblems() {
         return this.bugCollection.getCollection().stream()
-                .map(SpotbugsInCodeProblem::new)
+                .map(bug -> new SpotbugsInCodeProblem(new PlaceholderCheck(), bug))
                 .collect(Collectors.toList());
     }
 }

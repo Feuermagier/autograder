@@ -1,8 +1,10 @@
 package de.firemage.codelinter.core.pmd;
 
+import de.firemage.codelinter.core.Check;
 import de.firemage.codelinter.core.Problem;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.Report;
+import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.RuleViolation;
 import net.sourceforge.pmd.renderers.AbstractIncrementingRenderer;
 import org.apache.commons.io.output.NullWriter;
@@ -11,22 +13,23 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 public class ProblemRenderer extends AbstractIncrementingRenderer {
+    private final Map<Class<? extends Rule>, Check> checks;
     private final List<Problem> problems = new ArrayList<>();
-    private final File root;
 
-    public ProblemRenderer(File root) {
+    public ProblemRenderer(Map<Class<? extends Rule>, Check> checks) {
         super("Custom renderer", "Creates InCodeProblems");
+        this.checks = checks;
         super.setWriter(new NullWriter());
-        this.root = root;
     }
 
     @Override
     public void renderFileViolations(Iterator<RuleViolation> violations) {
         violations.forEachRemaining(violation ->
-                problems.add(new PMDInCodeProblem(violation, this.root)));
+                problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getClass()), violation)));
     }
 
     @Override

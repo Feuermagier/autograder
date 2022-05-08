@@ -1,9 +1,12 @@
 package de.firemage.codelinter.core.spoon;
 
+import de.firemage.codelinter.core.Check;
+import de.firemage.codelinter.core.CodePosition;
 import de.firemage.codelinter.core.InCodeProblem;
 import de.firemage.codelinter.core.PathUtil;
 import de.firemage.codelinter.core.ProblemCategory;
 import de.firemage.codelinter.core.ProblemPriority;
+import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -12,21 +15,25 @@ import java.io.File;
 
 public class SpoonInCodeProblem extends InCodeProblem {
     private final CtElement element;
-    private final File root;
 
-    public SpoonInCodeProblem(CtElement element, String description, ProblemCategory category, String explanation, ProblemPriority priority, File root) {
-        super(element.getPosition().getFile().getPath(),
-                element.getPosition().getLine(),
-                element.getPosition().getColumn(),
-                description,
-                category,
-                explanation,
-                priority);
+    public SpoonInCodeProblem(Check check, CtElement element, String explanation) {
+        super(check, mapSourceToCode(element.getPosition()), explanation);
 
         this.element = element;
-        this.root = root;
     }
 
+    private static CodePosition mapSourceToCode(SourcePosition position) {
+        // TODO not sure if this is correct
+        return new CodePosition(
+                position.getFile().toPath(),
+                position.getLine(),
+                position.getEndLine(),
+                position.getColumn(),
+                position.getEndColumn()
+        );
+    }
+
+    /*
     @Override
     public String getDisplayLocation() {
         if (element == null) {
@@ -44,4 +51,5 @@ public class SpoonInCodeProblem extends InCodeProblem {
             }
         }
     }
+    */
 }
