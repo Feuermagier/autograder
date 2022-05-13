@@ -7,6 +7,7 @@ import de.firemage.codelinter.core.compiler.CompilationResult;
 import de.firemage.codelinter.core.compiler.Compiler;
 import de.firemage.codelinter.core.compiler.JavaVersion;
 import de.firemage.codelinter.core.cpd.CPDLinter;
+import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.pmd.PMDCheck;
 import de.firemage.codelinter.core.pmd.PMDLinter;
@@ -57,6 +58,9 @@ public class Linter {
         if (!spoonChecks.isEmpty()) {
             problems.addAll(new SpoonLinter().lint(file, result.jar(), spoonChecks));
         }
+
+        DynamicAnalysis dynamicAnalysis = new DynamicAnalysis(result.jar());
+        dynamicAnalysis.run();
 
 
         result.jar().toFile().delete();

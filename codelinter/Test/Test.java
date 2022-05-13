@@ -1,15 +1,13 @@
 import java.util.*;
 
 public class Test {
+	public static void main(String[] args) {
+		new Test().bar();
+	}
+
 	public Object bar() {
-		Object y = new Object();
-		boolean b = y == new Object();
-		if (b) {
-			return null;
-		} else {
-			y = new Object();
-		}
-    	return y;
+		foo();
+		return null;
 	}
 
 	public Object foo() {

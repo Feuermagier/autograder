@@ -14,6 +14,7 @@ import de.firemage.codelinter.core.check.unnecessary.EmptyNonCatchBlockCheck;
 import de.firemage.codelinter.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.compiler.JavaVersion;
+import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.spoon.CompilationException;
 import picocli.CommandLine;
@@ -65,7 +66,7 @@ public class Application implements Callable<Integer> {
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
             List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), List.of(
-                    new MethodShouldBeAbstractCheck()
+                    //new MethodShouldBeAbstractCheck()
             ));
             progress.finish("Completed checks");
             printProblems(problems);
