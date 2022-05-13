@@ -1,50 +1,80 @@
 package de.firemage.codelinter.core.spoon.analysis;
 
-import java.util.Set;
+import spoon.reflect.code.BinaryOperatorKind;
+import spoon.reflect.code.UnaryOperatorKind;
 
-public class ObjectValueSet implements ValueSet<ObjectValueSet> {
-    private boolean containsNull;
-    private boolean containsInstance;
+public final record ObjectValueSet(boolean containsNull, boolean containsInstance) implements ValueSet {
 
-    public ObjectValueSet(boolean empty) {
-        if (empty) {
-            this.containsInstance = false;
-            this.containsNull = false;
+    @Override
+    public ObjectValueSet intersect(ValueSet other) {
+        if (other instanceof ObjectValueSet otherSet) {
+            return new ObjectValueSet(this.containsNull && otherSet.containsNull,
+                this.containsInstance && otherSet.containsInstance);
         } else {
-            this.containsInstance = true;
-            this.containsNull = true;
+            throw new IllegalArgumentException();
         }
     }
 
-    public boolean containsNull() {
-        return this.containsNull;
-    }
-
-    public boolean containsInstance() {
-        return this.containsInstance;
-    }
-
-    public void includeNull() {
-        this.containsNull = true;
-    }
-
-    public void includeInstance() {
-        this.containsInstance = true;
+    @Override
+    public ObjectValueSet combine(ValueSet other) {
+        if (other instanceof ObjectValueSet otherSet) {
+            return new ObjectValueSet(this.containsNull || otherSet.containsNull,
+                this.containsInstance || otherSet.containsInstance);
+        } else {
+            throw new IllegalArgumentException();
+        }
     }
 
     @Override
-    public ObjectValueSet intersect(ObjectValueSet other) {
-        ObjectValueSet result = new ObjectValueSet(true);
-        result.containsNull = this.containsNull && other.containsNull;
-        result.containsInstance = this.containsInstance && other.containsInstance;
-        return result;
+    public ObjectValueSet copy() {
+        return new ObjectValueSet(this.containsNull, this.containsInstance);
     }
 
     @Override
-    public ObjectValueSet combine(ObjectValueSet other) {
-        ObjectValueSet result = new ObjectValueSet(true);
-        result.containsNull = this.containsNull || other.containsNull;
-        result.containsInstance = this.containsInstance || other.containsInstance;
-        return result;
+    public ValueSet handleUnaryOperator(UnaryOperatorKind operator) {
+        throw new IllegalStateException();
+    }
+
+    @Override
+    public ValueSet handleBinaryOperatorAsSubset(BinaryOperatorKind operator, ValueSet other) {
+        if (other instanceof ObjectValueSet otherSet) {
+            return switch(operator) {
+                case EQ -> new BooleanValueSet(this.containsNull && otherSet.containsNull,
+                    (this.containsNull && otherSet.containsInstance) ||
+                        (this.containsInstance && otherSet.containsNull));
+                case NE -> new BooleanValueSet((this.containsNull && otherSet.containsInstance) ||
+                    (this.containsInstance && otherSet.containsNull), this.containsNull && otherSet.containsNull);
+                default -> throw new IllegalStateException();
+            };
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    public ValueSet handleBinaryOperatorAsSuperset(BinaryOperatorKind operator, ValueSet other) {
+        if (other instanceof ObjectValueSet otherSet) {
+            return switch(operator) {
+                case EQ -> new BooleanValueSet(
+                    (this.containsNull && otherSet.containsNull) ||
+                        (this.containsInstance && otherSet.containsInstance),
+                    this.containsInstance || otherSet.containsInstance);
+                case NE -> new BooleanValueSet(
+                    this.containsInstance || otherSet.containsInstance,
+                    (this.containsNull && otherSet.containsNull) ||
+                        (this.containsInstance && otherSet.containsInstance));
+                default -> throw new IllegalStateException();
+            };
+        } else {
+            throw new IllegalStateException();
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "ObjectValueSet{" +
+            "containsNull=" + containsNull +
+            ", containsInstance=" + containsInstance +
+            '}';
     }
 }

@@ -1,20 +1,28 @@
 package de.firemage.codelinter.core.spoon.analysis;
 
-public class MethodAnalysisResult {
-    private boolean canReturnNull = false;
+import spoon.reflect.reference.CtTypeReference;
 
-    /* package */ void markAsNullable() {
-        this.canReturnNull = true;
+public class MethodAnalysisResult {
+    private VariableState returnState = null;
+
+    public MethodAnalysisResult(CtTypeReference<?> type) {
+        //this.returnValues = VariableState.defaultForType(type);
     }
 
-    public boolean canReturnNull() {
-        return canReturnNull;
+    /* package */ void addReturnValue(VariableState state) {
+        if (this.returnState != null) {
+            this.returnState = new VariableState(returnState, state);
+        } else {
+            this.returnState = state;
+        }
+    }
+
+    public VariableState getReturnState() {
+        return this.returnState;
     }
 
     @Override
     public String toString() {
-        return "MethodAnalysisResult{" +
-                "canReturnNull=" + canReturnNull +
-                '}';
+        return this.returnState.toString();
     }
 }
