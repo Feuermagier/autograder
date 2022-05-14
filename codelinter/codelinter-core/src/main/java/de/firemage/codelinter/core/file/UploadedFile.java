@@ -55,6 +55,10 @@ public class UploadedFile {
                 .toList();
     }
 
+    public String getName() {
+        return this.file.getFileName().toString();
+    }
+
     public void delete() throws IOException {
         FileUtils.deleteDirectory(this.file.toFile());
     }

@@ -32,14 +32,13 @@ public final class Compiler {
     }
 
     public static CompilationResult compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion) throws IOException, CompilationFailureException {
-        String inputName = input.getFile().getFileName().toString();
 
         List<PhysicalFileObject> compilationUnits = input.streamFiles()
                 .map(PhysicalFileObject::new)
                 .collect(Collectors.toList());
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        Path compilerOutput = tmpLocation.resolve(inputName + "_compiled");
+        Path compilerOutput = tmpLocation.resolve(input.getName() + "_compiled");
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
         JavaFileManager fileManager = new SeparateBinaryFileManager(
@@ -63,8 +62,8 @@ public final class Compiler {
 
         Manifest manifest = new Manifest();
         manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        Path jar = tmpLocation.resolve(inputName + ".jar");
-        try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar.toFile()))) {
+        Path jar = tmpLocation.resolve(input.getName() + ".jar");
+        try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar.toFile()), manifest)) {
             addToJar(compilerOutput.normalize(), compilerOutput.toFile(), jarOut);
         }
         FileUtils.deleteDirectory(compilerOutput.toFile());

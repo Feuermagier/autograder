@@ -1,38 +1,34 @@
 package de.firemage.codelinter.core.dynamic;
 
 import de.firemage.codelinter.core.file.UploadedFile;
-import org.objectweb.asm.ClassReader;
-import org.objectweb.asm.ClassWriter;
-import org.objectweb.asm.util.CheckClassAdapter;
-import java.io.File;
+import de.firemage.codelinter.event.Event;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.jar.JarEntry;
-import java.util.jar.JarFile;
+import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 public class DynamicAnalysis {
-    private final JarFile jarFile;
+    private static final int TIMEOUT_SECONDS = 10;
+    private static final String COMMAND_PATTERN = "java -cp \"%s\" -javaagent:\"%s\"=\"%s\" %s";
+    private final Path tmpDirectory;
+    private final Path jar;
+    private final Path agent;
+    private final String mainClass;
 
-    public DynamicAnalysis(Path jar) throws IOException {
-        this.jarFile = new JarFile(jar.toFile());
+    public DynamicAnalysis(Path tmpDirectory, Path jar, Path agent, String mainClass) {
+        this.tmpDirectory = tmpDirectory;
+        this.jar = jar;
+        this.agent = agent;
+        this.mainClass = mainClass;
     }
 
-    public void run() throws IOException {
-        var iterator = this.jarFile.entries().asIterator();
-        while (iterator.hasNext()) {
-            instrumentFile(iterator.next());
+    public List<Event> run() throws IOException, InterruptedException {
+        Path outPath = this.tmpDirectory.resolve("codelinter_events.txt");
+        String command = String.format(COMMAND_PATTERN, this.jar, this.agent, outPath, this.mainClass.replace("/", "."));
+        Process container = Runtime.getRuntime().exec(command);
+        if (!container.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
+            container.destroyForcibly();
         }
-    }
-
-    private void instrumentFile(JarEntry jarEntry) throws IOException {
-        ClassReader reader = new ClassReader(this.jarFile.getInputStream(jarEntry));
-        ClassWriter writer = new ClassWriter(reader, ClassWriter.COMPUTE_FRAMES);
-        ClassInstrumentationVisitor classVisitor = new ClassInstrumentationVisitor(writer);
-        reader.accept(new CheckClassAdapter(classVisitor), ClassReader.EXPAND_FRAMES);
-        try (OutputStream out = Files.newOutputStream(Path.of("Test/Test.class"))) {
-            out.write(writer.toByteArray());
-        }
+        return Event.read(outPath);
     }
 }

@@ -18,3 +18,4 @@ target/
 # App
 logs/
 /upload/
+tmp/

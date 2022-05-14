@@ -66,7 +66,7 @@ public class Application implements Callable<Integer> {
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
             List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), List.of(
-                    //new MethodShouldBeAbstractCheck()
+                    new MethodShouldBeAbstractCheck()
             ));
             progress.finish("Completed checks");
             printProblems(problems);
@@ -86,7 +86,8 @@ public class Application implements Callable<Integer> {
     }
 
     private Path getTmpDirectory() {
-        return new File(System.getProperty("java.io.tmpdir")).toPath();
+        //return new File(System.getProperty("java.io.tmpdir")).toPath();
+        return Path.of("tmp");
     }
 
     private void printProblems(List<Problem> problems) {

@@ -17,7 +17,7 @@ import java.util.List;
 
 public class SpoonLinter {
     public List<Problem> lint(UploadedFile file, Path jar, List<SpoonCheck> checks) throws CompilationException, IOException {
-        // Use a custom class loader so because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
+        // Use a custom class loader because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
         try (URLClassLoader classLoader = new URLClassLoader(new URL[] {jar.toUri().toURL()}, Thread.currentThread().getContextClassLoader())) {
             Launcher launcher = new Launcher();
             launcher.addInputResource(file.getSpoonFile());
@@ -38,7 +38,6 @@ public class SpoonLinter {
 
             MethodAnalysis methodAnalysis = new MethodAnalysis(model);
             methodAnalysis.run();
-
             List<Problem> problems = new ArrayList<>();
             for (SpoonCheck check : checks) {
                 CodeProcessor processor = check.getProcessor().get();

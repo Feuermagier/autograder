@@ -13,7 +13,7 @@
     <name>codelinter-core</name>
 
     <properties>
-        <java.version>18</java.version>
+        <java.version>17</java.version>
     </properties>
 
     <repositories>
@@ -24,6 +24,12 @@
     </repositories>
 
     <dependencies>
+        <!-- Internal -->
+        <dependency>
+            <groupId>de.firemage.codelinter</groupId>
+            <artifactId>codelinter-event</artifactId>
+            <version>1.0-SNAPSHOT</version>
+        </dependency>
 
         <!-- Spoon -->
         <!--
