@@ -1,0 +1,113 @@
+> add track (1,1) -> (5,1)
+1
+> add track (10,10) -> (10,11)
+Error, track not connected to other track
+> list tracks
+t 1 (1,1) -> (5,1) 4
+> add switch (5,1) -> (8,1),(5,3)
+2
+> add track (5,3) -> (8,1)
+Error, creation not possible wrong position
+> add track (10,1) -> (8,1)
+3
+> add switch (10,-3) -> (10,1),(12,-3)
+4
+> add track (10,-3) -> (1,-3)
+5
+> add track (1,-3) -> (1,1)
+6
+> add track (5,3) -> (10,3)
+7
+> add track (10,3) -> (12,3)
+8
+> add switch (12,3) -> (12,-3),(14,3)
+9
+> add track (14,-1) -> (14,3)
+10
+> create engine steam T3 Emma 1 false true
+T3-Emma
+> list engines
+none s T3 Emma 1 false true
+> create engine electrical 103 118 3 true true
+103-118
+> list engines
+none e 103 118 3 true true
+none s T3 Emma 1 false true
+> delete rolling stock 3
+Error, rolling stock with ID 03 not found
+> delete rolling stock 103-118
+OK
+> create coach passenger 1 true true
+1
+> create coach passenger 1 true true
+2
+> list coaches
+1 none p 1 true true
+2 none p 1 true true
+> add train 1 W1
+passenger coach W1 added to train 1
+> list trains
+1 W1
+> show train 01
+____________________
+|  ___ ___ ___ ___ |
+|  |_| |_| |_| |_| |
+|__________________|
+|__________________|
+   (O)        (O)   
+> delete train 1
+OK
+> list trains
+No train exists
+> add train 1 T3-Emma
+steam engine T3-Emma added to train 1
+> add train 1 W1
+passenger coach W1 added to train 1
+> add train 1 W2
+passenger coach W2 added to train 1
+> list trains
+1 T3-Emma W1 W2
+> show train 01
+     ++      +------ ____________________ ____________________
+     ||      |+-+ |  |  ___ ___ ___ ___ | |  ___ ___ ___ ___ |
+   /---------|| | |  |  |_| |_| |_| |_| | |  |_| |_| |_| |_| |
+  + ========  +-+ |  |__________________| |__________________|
+ _|--/~\------/~\-+  |__________________| |__________________|
+//// \_/      \_/       (O)        (O)       (O)        (O)   
+> list engines
+1 s T3 Emma 1 false true
+> create train-set 403 145 4 true true
+403-145
+> add train 2 403-145
+train-set 403-145 added to train 2
+> set switch 4 position (10,1)
+OK
+> step 1
+Error, position of switches not set
+> set switch 2 position (8,1)
+OK
+> set switch 9 position (12,-3)
+OK
+> step 1
+OK
+> put train 1 at (1,1) in direction 1,0
+OK
+> put train 2 at (10,-2) in direction 0,1
+OK
+> step 2
+Train 1 at (3,1)
+Train 2 at (10,0)
+> step -2
+Train 1 at (1,1)
+Train 2 at (10,-2)
+> step 2
+Train 1 at (3,1)
+Train 2 at (10,0)
+> step 3
+Train 1 at (6,1)
+Train 2 at (8,1)
+> step 1
+Crash of train 1,2
+> put train 1 at (1,1) in direction 0,-1
+OK
+> exit

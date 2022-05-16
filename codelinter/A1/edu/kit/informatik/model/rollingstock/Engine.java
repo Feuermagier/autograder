@@ -61,7 +61,7 @@ public class Engine extends PoweredRollingStock {
             + getName() + StringConstants.SPACE
             + getLength() + StringConstants.SPACE
             + hasFrontCoupling() + StringConstants.SPACE
-            + hasBackCoupling() + StringConstants.SPACE;
+            + hasBackCoupling();
     }
 
     /**

@@ -190,6 +190,7 @@ public class Train {
             for (RollingStock part : parts) {
                 builder.append(part.getVisualRepresentation().getLine(i)).append(StringConstants.SPACE);
             }
+            builder.setLength(builder.length() - 1);
             if (i != 0) {
                 builder.append(StringConstants.NEW_LINE);
             }

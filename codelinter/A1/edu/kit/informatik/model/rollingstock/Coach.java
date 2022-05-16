@@ -66,7 +66,7 @@ public class Coach extends RollingStock {
             + type.getShortRepresentation() + StringConstants.SPACE
             + getLength() + StringConstants.SPACE
             + hasFrontCoupling() + StringConstants.SPACE
-            + hasBackCoupling() + StringConstants.SPACE;
+            + hasBackCoupling();
     }
 
     @Override
