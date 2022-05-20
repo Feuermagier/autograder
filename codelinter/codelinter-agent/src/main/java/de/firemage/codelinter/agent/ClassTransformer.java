@@ -1,7 +1,8 @@
-package de.firemage.codelinter.executor;
+package de.firemage.codelinter.agent;
 
 import org.objectweb.asm.ClassReader;
 import org.objectweb.asm.ClassWriter;
+
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
 

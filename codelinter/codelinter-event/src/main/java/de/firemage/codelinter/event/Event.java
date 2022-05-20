@@ -3,6 +3,8 @@ package de.firemage.codelinter.event;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -22,10 +24,14 @@ public interface Event {
     }
 
     static List<Event> read(Path path) throws IOException {
-        try (BufferedReader reader = Files.newBufferedReader(path, StandardCharsets.UTF_8)) {
+        return Event.read(Files.newInputStream(path));
+    }
+
+    static List<Event> read(InputStream inputStream) throws IOException {
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(inputStream))) {
             return reader.lines().map(line -> {
                 String[] parts = line.split(":");
-                return switch (parts[0]) {
+                return switch(parts[0]) {
                     case "RefRet" -> new ReferenceReturnEvent(parts[1], parts[2], parts[3], parts[4]);
                     default -> throw new IllegalStateException("Unknown event type '" + parts[0] + "'");
                 };

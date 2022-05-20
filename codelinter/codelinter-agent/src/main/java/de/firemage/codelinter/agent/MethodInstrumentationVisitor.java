@@ -1,4 +1,4 @@
-package de.firemage.codelinter.executor;
+package de.firemage.codelinter.agent;
 
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
@@ -8,6 +8,7 @@ import org.objectweb.asm.commons.Method;
 
 public class MethodInstrumentationVisitor extends AdviceAdapter {
     private final String className;
+
     public MethodInstrumentationVisitor(MethodVisitor visitor, int access, String name, String descriptor, String className) {
         super(Opcodes.ASM9, visitor, access, name, descriptor);
         this.className = className;
@@ -23,7 +24,9 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
             visitLdcInsn(this.getName());
             visitLdcInsn(this.methodDesc);
             loadLocal(returnValue);
-            invokeStatic(Type.getType("Lde/firemage/codelinter/executor/EventRecorder;"), new Method("recordReferenceReturn", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V"));
+            invokeStatic(Type.getType("Lde/firemage/codelinter/agent/EventRecorder;"),
+                new Method("recordReferenceReturn",
+                    "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V"));
         }
     }
 }

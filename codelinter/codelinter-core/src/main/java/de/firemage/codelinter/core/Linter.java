@@ -5,15 +5,14 @@ import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.compiler.CompilationResult;
 import de.firemage.codelinter.core.compiler.Compiler;
 import de.firemage.codelinter.core.cpd.CPDLinter;
-import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.integrated.IntegratedAnalysis;
 import de.firemage.codelinter.core.pmd.PMDCheck;
 import de.firemage.codelinter.core.pmd.PMDLinter;
 import de.firemage.codelinter.core.spoon.CompilationException;
 import de.firemage.codelinter.core.spoon.SpoonCheck;
-import de.firemage.codelinter.core.spoon.SpoonLinter;
 import lombok.extern.slf4j.Slf4j;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -23,7 +22,7 @@ import java.util.List;
 public class Linter {
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, List<Check> checks)
-            throws CompilationException, InterruptedException, CompilationFailureException, IOException {
+        throws CompilationException, InterruptedException, CompilationFailureException, IOException {
         CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
@@ -55,6 +54,10 @@ public class Linter {
         if (!spoonChecks.isEmpty()) {
             try (IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), tmpLocation)) {
                 analysis.runDynamicAnalysis();
+                analysis.getDynamicAnalysis().findEventsForMethod(analysis.getStaticAnalysis().findMethodBySignature(
+                        analysis.getStaticAnalysis().findClassByName("edu.kit.informatik.Simulation"),
+                        "createTrainSet(java.lang.String,java.lang.String,int,boolean,boolean)"))
+                    .forEach(e -> System.out.println(e.format()));
                 problems.addAll(analysis.lint(spoonChecks));
             }
         }

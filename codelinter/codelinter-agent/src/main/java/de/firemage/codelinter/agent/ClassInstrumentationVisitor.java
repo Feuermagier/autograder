@@ -1,4 +1,4 @@
-package de.firemage.codelinter.executor;
+package de.firemage.codelinter.agent;
 
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;

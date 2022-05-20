@@ -1,48 +1,63 @@
 package de.firemage.codelinter.core.dynamic;
 
 import de.firemage.codelinter.event.Event;
+import de.firemage.codelinter.event.MethodEvent;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.reference.CtArrayTypeReference;
+import spoon.reflect.reference.CtTypeReference;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
-import java.util.concurrent.TimeUnit;
+import java.util.stream.Stream;
 
 public class DynamicAnalysis {
-    private static final int TIMEOUT_SECONDS = 10;
-    private final Path tmpDirectory;
-    private final Path jar;
-    private final Path agent;
-    private final String mainClass;
 
-    public DynamicAnalysis(Path tmpDirectory, Path jar, Path agent, String mainClass) {
-        this.tmpDirectory = tmpDirectory;
-        this.jar = jar;
-        this.agent = agent;
-        this.mainClass = mainClass;
+    private final List<List<Event>> events;
+
+    public DynamicAnalysis(List<List<Event>> events) {
+        this.events = events;
     }
 
-    public List<Event> run() throws IOException, InterruptedException {
-        Path outPath = this.tmpDirectory.resolve("codelinter_events.txt");
-        String[] command = new String[] {
-            "java",
-            "-cp",
-            this.jar.toAbsolutePath().toString(),
-            "-javaagent:\"" + this.agent.toAbsolutePath() + "\"=\"" + outPath.toAbsolutePath() + "\"",
-            this.mainClass.replace("/", ".")
-        };
-        Process container = Runtime.getRuntime().exec(command);
-        if (!container.waitFor(TIMEOUT_SECONDS, TimeUnit.SECONDS)) {
-            container.destroyForcibly();
-            throw new IllegalStateException("Child JVM timed out");
-        }
-        if (container.exitValue() != 0) {
-            System.out.println(new String(container.getErrorStream().readAllBytes()));
-            throw new IllegalStateException("Child JVM exited with nonzero exit code " + container.exitValue());
-        }
+    public Stream<Event> getAllEvents() {
+        return this.events.stream().flatMap(Collection::stream);
+    }
 
-        List<Event> events = Event.read(outPath);
-        Files.deleteIfExists(outPath);
-        return events;
+    public Stream<MethodEvent> findEventsForMethod(CtMethod<?> method) {
+        String descriptor = createDescriptor(method);
+        return this.getAllEvents()
+            .filter(e -> e instanceof MethodEvent)
+            .map(e -> (MethodEvent) e)
+            .filter(e -> e.getOwningClass().equals(method.getDeclaringType().getQualifiedName().replace(".", "/")))
+            .filter(e -> e.getMethodName().equals(method.getSimpleName()))
+            .filter(e -> e.getMethodDescriptor().equals(descriptor));
+    }
+
+    private String createDescriptor(CtMethod<?> method) {
+        StringBuilder descriptor = new StringBuilder("(");
+        for (CtParameter<?> parameter : method.getParameters()) {
+            descriptor.append(internalizeType(parameter.getType()));
+        }
+        descriptor.append(")");
+        descriptor.append(internalizeType(method.getType()));
+        return descriptor.toString();
+    }
+
+    private String internalizeType(CtTypeReference<?> type) {
+        if (type.isArray()) {
+            return "[" + internalizeType(((CtArrayTypeReference<?>) type).getComponentType());
+        }
+        return switch(type.getQualifiedName()) {
+            case "byte" -> "B";
+            case "char" -> "C";
+            case "double" -> "D";
+            case "float" -> "F";
+            case "int" -> "I";
+            case "long" -> "J";
+            case "short" -> "S";
+            case "boolean" -> "Z";
+            case "void" -> "V";
+            default -> "L" + type.getQualifiedName().replace(".", "/") + ";";
+        };
     }
 }

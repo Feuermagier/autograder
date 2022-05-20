@@ -9,7 +9,7 @@
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
-    <artifactId>codelinter-executor</artifactId>
+    <artifactId>codelinter-agent</artifactId>
 
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
@@ -55,7 +55,7 @@
                         <transformer
                                 implementation="org.apache.maven.plugins.shade.resource.ManifestResourceTransformer">
                             <manifestEntries>
-                                <Main-Class>de.firemage.codelinter.executor.Main</Main-Class>
+                                <Premain-Class>de.firemage.codelinter.agent.AnalysisAgent</Premain-Class>
                             </manifestEntries>
                         </transformer>
                     </transformers>
@@ -79,5 +79,4 @@
             </plugin>
         </plugins>
     </build>
-
 </project>

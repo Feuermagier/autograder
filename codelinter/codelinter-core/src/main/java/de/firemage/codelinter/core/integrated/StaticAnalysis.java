@@ -5,6 +5,7 @@ import de.firemage.codelinter.core.spoon.CompilationException;
 import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
 import spoon.reflect.CtModel;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 
@@ -47,6 +48,24 @@ public class StaticAnalysis implements AutoCloseable {
 
     public CtModel getModel() {
         return model;
+    }
+
+    public CtClass<?> findClassByName(String name) {
+        CtClass<?> clazz = this.model.filterChildren(
+            child -> child instanceof CtClass<?> c && c.getQualifiedName().equals(name)).first();
+        if (clazz == null) {
+            throw new IllegalArgumentException("No class with name '" + name + "' found");
+        }
+        return clazz;
+    }
+
+    public CtMethod<?> findMethodBySignature(CtClass<?> clazz, String signature) {
+        CtMethod<?> result = this.model.filterChildren(
+            child -> child instanceof CtMethod<?> method && method.getSignature().equals(signature)).first();
+        if (result == null) {
+            throw new IllegalArgumentException("No method in class " + clazz.getQualifiedName() + " with signature '" + signature + "' found");
+        }
+        return result;
     }
 
     public CtMethod<Void> findMain() {

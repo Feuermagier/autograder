@@ -6,7 +6,7 @@
     <version>1.0-SNAPSHOT</version>
   </parent>
   <modelVersion>4.0.0</modelVersion>
-  <artifactId>codelinter-executor</artifactId>
+  <artifactId>codelinter-agent</artifactId>
   <build>
     <plugins>
       <plugin>
@@ -24,7 +24,7 @@
           <transformers>
             <transformer>
               <manifestEntries>
-                <Main-Class>de.firemage.codelinter.executor.Main</Main-Class>
+                <Premain-Class>de.firemage.codelinter.agent.AnalysisAgent</Premain-Class>
               </manifestEntries>
             </transformer>
           </transformers>

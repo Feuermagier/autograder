@@ -1,7 +1,8 @@
-package de.firemage.codelinter.executor;
+package de.firemage.codelinter.agent;
 
 import de.firemage.codelinter.event.Event;
 import de.firemage.codelinter.event.ReferenceReturnEvent;
+
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,6 +19,7 @@ public class EventRecorder {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+            System.out.println("AGENT: Wrinting events to " + outPath.toAbsolutePath());
         }));
     }
 
