@@ -19,7 +19,7 @@ public class EventRecorder {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-            System.out.println("AGENT: Wrinting events to " + outPath.toAbsolutePath());
+            System.out.println("AGENT: Writing events to " + outPath.toAbsolutePath());
         }));
     }
 

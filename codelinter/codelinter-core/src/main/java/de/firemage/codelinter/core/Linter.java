@@ -22,7 +22,7 @@ import java.util.List;
 public class Linter {
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, List<Check> checks)
-        throws CompilationException, InterruptedException, CompilationFailureException, IOException {
+        throws LinterException, InterruptedException, IOException {
         CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
 
         List<PMDCheck> pmdChecks = new ArrayList<>();

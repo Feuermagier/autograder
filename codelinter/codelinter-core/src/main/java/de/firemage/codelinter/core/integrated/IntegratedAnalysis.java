@@ -2,12 +2,12 @@ package de.firemage.codelinter.core.integrated;
 
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.dynamic.DockerConsoleRunner;
+import de.firemage.codelinter.core.dynamic.DockerRunnerException;
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
+import de.firemage.codelinter.core.dynamic.TestRunResult;
 import de.firemage.codelinter.core.file.UploadedFile;
-import de.firemage.codelinter.core.spoon.CompilationException;
 import de.firemage.codelinter.core.spoon.SpoonCheck;
 import de.firemage.codelinter.core.spoon.check.CodeProcessor;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -19,20 +19,20 @@ public class IntegratedAnalysis implements AutoCloseable {
     private final Path tmpLocation;
     private DynamicAnalysis dynamicAnalysis;
 
-    public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpLocation) throws CompilationException, IOException {
+    public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpLocation) throws ModelBuildException, IOException {
         this.jar = jar;
         this.tmpLocation = tmpLocation;
 
         this.staticAnalysis = new StaticAnalysis(file, jar);
     }
 
-    public void runDynamicAnalysis() throws IOException, InterruptedException {
-        DockerConsoleRunner runner = new DockerConsoleRunner(this.tmpLocation,
-            Path.of("codelinter-executor/target/codelinter-executor-1.0-SNAPSHOT.jar"),
-            Path.of("codelinter-agent/target/codelinter-agent-1.0-SNAPSHOT.jar"),
-            Path.of("tests"));
-        var events = runner.runTests(this.staticAnalysis, this.jar);
-        this.dynamicAnalysis = new DynamicAnalysis(events);
+    public void runDynamicAnalysis() throws IOException, InterruptedException, DockerRunnerException {
+        DockerConsoleRunner runner = new DockerConsoleRunner(
+                Path.of("codelinter-executor/target/codelinter-executor-1.0-SNAPSHOT.jar"),
+                Path.of("codelinter-agent/target/codelinter-agent-1.0-SNAPSHOT.jar"),
+                Path.of("tests"));
+        List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar);
+        this.dynamicAnalysis = new DynamicAnalysis(results);
     }
 
     public List<Problem> lint(List<SpoonCheck> checks) {

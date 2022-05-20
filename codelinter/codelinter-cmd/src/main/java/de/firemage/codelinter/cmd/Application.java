@@ -1,6 +1,7 @@
 package de.firemage.codelinter.cmd;
 
 import de.firemage.codelinter.core.Linter;
+import de.firemage.codelinter.core.LinterException;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.check.ForToForEachCheck;
 import de.firemage.codelinter.core.check.complexity.DiamondOperatorCheck;
@@ -74,7 +75,7 @@ public class Application implements Callable<Integer> {
         } catch (CompilationFailureException e) {
             CmdUtil.println(e.getMessage());
             return COMPILATION_EXIT_CODE;
-        } catch (CompilationException e) {
+        } catch (LinterException e) {
             e.printStackTrace();
         } catch (IOException e) {
             e.printStackTrace();

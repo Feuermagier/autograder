@@ -29,19 +29,27 @@ public class ConsoleExecutor {
             } else {
                 String output = pollOutput(containerOut);
                 if (!matchOutput(output, line)) {
+                    killVM(process, containerOut);
                     System.exit(1);
                 }
             }
         }
 
         if (!process.waitFor(5, TimeUnit.SECONDS)) {
-            process.destroyForcibly();
-            System.err.println("The child JVM did not exit after 5s");
+            System.err.println("EXEC:  The child JVM did not exit after 5s");
+            killVM(process, containerOut);
             System.exit(1);
         }
 
+        // Poll any remaining output
+        while (!containerOut.isEmpty()) {
+            System.out.println(containerOut.poll());
+        }
+
+        System.out.println("EXEC:  Child JVM exited");
+
         if (process.exitValue() != 0) {
-            System.err.println("The child JVM did not exit with exit code 0");
+            System.err.println("EXEC:  The child JVM did not exit with exit code 0");
             System.exit(1);
         }
     }
@@ -50,7 +58,7 @@ public class ConsoleExecutor {
         if (line.equals(output) || (line.startsWith("Error,") && output.startsWith("Error,"))) {
             return true;
         } else {
-            System.err.println("Invalid output, got '" + output + "', expected '" + line + "' ");
+            System.err.println("EXEC:  Invalid output, got '" + output + "', expected '" + line + "' ");
             return false;
         }
     }
@@ -68,9 +76,21 @@ public class ConsoleExecutor {
                 return result;
             }
             if (System.currentTimeMillis() - beforeTime > 5000) {
-                System.err.println("Did not receive any output after 5s");
+                System.err.println("EXEC:  Did not receive any output after 5s");
                 System.exit(1);
             }
+        }
+    }
+
+    private void killVM(Process process, Queue<String> containerOut) throws InterruptedException {
+        process.destroy();
+        if (!process.waitFor(5, TimeUnit.SECONDS)) {
+            process.destroyForcibly();
+        }
+
+        // Poll any remaining output
+        while (!containerOut.isEmpty()) {
+            System.out.println(containerOut.poll());
         }
     }
 

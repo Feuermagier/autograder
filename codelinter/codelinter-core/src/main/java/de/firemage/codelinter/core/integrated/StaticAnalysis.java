@@ -19,7 +19,7 @@ public class StaticAnalysis implements AutoCloseable {
     private final Factory factory;
     private final CtModel model;
 
-    public StaticAnalysis(UploadedFile file, Path jar) throws CompilationException, IOException {
+    public StaticAnalysis(UploadedFile file, Path jar) throws ModelBuildException, IOException {
 
         // Use a custom class loader because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
         this.classLoader =
@@ -37,7 +37,7 @@ public class StaticAnalysis implements AutoCloseable {
         try {
             this.model = launcher.buildModel();
         } catch (ModelBuildingException e) {
-            throw new CompilationException("Failed to parse the code", e);
+            throw new ModelBuildException("Failed to parse the code", e);
         }
         this.factory = launcher.getFactory();
     }

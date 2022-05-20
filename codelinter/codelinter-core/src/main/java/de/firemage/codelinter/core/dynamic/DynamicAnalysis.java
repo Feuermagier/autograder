@@ -6,31 +6,33 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtTypeReference;
-
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Stream;
 
 public class DynamicAnalysis {
 
-    private final List<List<Event>> events;
+    private final List<TestRunResult> results;
 
-    public DynamicAnalysis(List<List<Event>> events) {
-        this.events = events;
+    public DynamicAnalysis(List<TestRunResult> results) {
+        this.results = results;
+    }
+
+    public List<TestRunResult> getResults() {
+        return results;
     }
 
     public Stream<Event> getAllEvents() {
-        return this.events.stream().flatMap(Collection::stream);
+        return this.results.stream().flatMap(result -> result.events().stream());
     }
 
     public Stream<MethodEvent> findEventsForMethod(CtMethod<?> method) {
         String descriptor = createDescriptor(method);
         return this.getAllEvents()
-            .filter(e -> e instanceof MethodEvent)
-            .map(e -> (MethodEvent) e)
-            .filter(e -> e.getOwningClass().equals(method.getDeclaringType().getQualifiedName().replace(".", "/")))
-            .filter(e -> e.getMethodName().equals(method.getSimpleName()))
-            .filter(e -> e.getMethodDescriptor().equals(descriptor));
+                .filter(e -> e instanceof MethodEvent)
+                .map(e -> (MethodEvent) e)
+                .filter(e -> e.getOwningClass().equals(method.getDeclaringType().getQualifiedName().replace(".", "/")))
+                .filter(e -> e.getMethodName().equals(method.getSimpleName()))
+                .filter(e -> e.getMethodDescriptor().equals(descriptor));
     }
 
     private String createDescriptor(CtMethod<?> method) {
@@ -47,7 +49,7 @@ public class DynamicAnalysis {
         if (type.isArray()) {
             return "[" + internalizeType(((CtArrayTypeReference<?>) type).getComponentType());
         }
-        return switch(type.getQualifiedName()) {
+        return switch (type.getQualifiedName()) {
             case "byte" -> "B";
             case "char" -> "C";
             case "double" -> "D";
