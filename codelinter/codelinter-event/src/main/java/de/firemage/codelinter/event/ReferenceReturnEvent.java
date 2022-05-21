@@ -17,6 +17,10 @@ public class ReferenceReturnEvent implements MethodEvent {
         return this.returnedClass;
     }
 
+    public boolean returnedNull() {
+        return this.returnedClass.equals("null");
+    }
+
     @Override
     public String getOwningClass() {
         return this.clazz;

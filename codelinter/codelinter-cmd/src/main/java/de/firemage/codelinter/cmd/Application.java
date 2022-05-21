@@ -23,6 +23,7 @@ import de.firemage.codelinter.core.check.complexity.WrapperInstantiationCheck;
 import de.firemage.codelinter.core.check.debug.AssertCheck;
 import de.firemage.codelinter.core.check.debug.PrintStackTraceCheck;
 import de.firemage.codelinter.core.check.exceptions.EmptyCatchCheck;
+import de.firemage.codelinter.core.check.javadoc.JavadocReturnNullCheck;
 import de.firemage.codelinter.core.check.naming.BooleanMethodNameCheck;
 import de.firemage.codelinter.core.check.naming.LinguisticNamingCheck;
 import de.firemage.codelinter.core.check.oop.ConcreteCollectionCheck;
@@ -127,6 +128,8 @@ public class Application implements Callable<Integer> {
                 new PrintStackTraceCheck(),
                 // Exceptions
                 new EmptyCatchCheck(),
+                // Javadoc
+                new JavadocReturnNullCheck(),
                 // Naming
                 new BooleanMethodNameCheck(),
                 new LinguisticNamingCheck(),

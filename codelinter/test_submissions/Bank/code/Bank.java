@@ -19,7 +19,15 @@ public class Bank {
         return result;
     }
 
+    /**
+     * Returns the account with the specified id
+     * @param id The id
+     * @return The account
+     */
     public Account getAccount(int id) {
+        if (id >= this.accounts.size()) {
+            return null;
+        }
         return this.accounts.get(id);
     }
 }

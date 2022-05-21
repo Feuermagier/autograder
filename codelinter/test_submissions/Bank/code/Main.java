@@ -32,8 +32,13 @@ public class Main {
                     int id = Integer.parseInt(arguments[0]);
                     double amount = Double.parseDouble(arguments[1]);
                     Account account = bank.getAccount(id);
-                    account.deposit(amount);
-                    System.out.println(account.getBalance());
+                    if (account != null) {
+                        account.deposit(amount);
+                        System.out.println(account.getBalance());
+                    } else {
+                        System.out.println("Error, unknown account");
+                    }
+
                     break;
                 }
                 case "quit": {

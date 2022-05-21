@@ -46,7 +46,7 @@ public abstract class PMDCheck implements Check {
     protected static XPathRule createXPathRule(String name, String explanation, String expression) {
         XPathRule rule = new XPathRule(XPathVersion.XPATH_2_0, expression);
         rule.setName(name);
-        rule.setDescription(explanation);
+        rule.setMessage(explanation);
         rule.setLanguage(LanguageRegistry.findLanguageByTerseName("java"));
         return rule;
     }
