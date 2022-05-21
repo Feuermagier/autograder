@@ -7,6 +7,6 @@ public class UnnecessaryLocalBeforeReturnCheck extends PMDCheck {
     private static final String DESCRIPTION = "Unnecessary declaration of a local variable that is immediately returned";
 
     public UnnecessaryLocalBeforeReturnCheck() {
-        super(DESCRIPTION, new UnnecessaryLocalBeforeReturnRule());
+        super(DESCRIPTION, "Directly return this value", new UnnecessaryLocalBeforeReturnRule());
     }
 }

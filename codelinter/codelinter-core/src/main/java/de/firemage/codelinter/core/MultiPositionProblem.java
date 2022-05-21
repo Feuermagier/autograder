@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core;
 
+import de.firemage.codelinter.core.check.Check;
 import lombok.Getter;
 import java.nio.file.Path;
 import java.util.List;
@@ -21,13 +22,8 @@ public class MultiPositionProblem implements Problem {
     }
 
     @Override
-    public String getDisplayLocation(Path root) {
+    public String getDisplayLocation() {
         // TODO
         return "<location>";
-    }
-
-    @Override
-    public String displayAsString(Path root) {
-        return this.getDisplayLocation(root) + " " + this.getExplanation();
     }
 }

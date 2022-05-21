@@ -8,8 +8,7 @@ public class ForLoopVariableCheck extends PMDCheck {
 
     public ForLoopVariableCheck() {
         super(DESCRIPTION, List.of(
-                createXPathRule("multi variable for", "//ForInit/LocalVariableDeclaration[count(VariableDeclarator) > 1]"),
-                createXPathRule("for without variable declaration", "//ForStatement[not(ForInit)]")
+                createXPathRule("multi variable for", "Each for-loop should have exactly one control variable", "//ForInit/LocalVariableDeclaration[count(VariableDeclarator) > 1]")
         ));
     }
 }

@@ -7,6 +7,6 @@ public class IsEmptyReimplementationCheck extends PMDCheck {
     public static final String DESCRIPTION = "Use isEmpty() instead of size() == 0 or similar code";
 
     public IsEmptyReimplementationCheck() {
-        super(DESCRIPTION, new UseCollectionIsEmptyRule());
+        super(DESCRIPTION, "Use isEmpty()", new UseCollectionIsEmptyRule());
     }
 }

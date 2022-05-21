@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core;
 
+import de.firemage.codelinter.core.check.Check;
 import lombok.Getter;
 import java.nio.file.Path;
 
@@ -17,13 +18,8 @@ public class GlobalProblem implements Problem {
     }
 
     @Override
-    public String getDisplayLocation(Path root) {
-        return "<GLOBAL>";
-    }
-
-    @Override
-    public String displayAsString(Path root) {
-        return this.getExplanation();
+    public String getDisplayLocation() {
+        return "Global";
     }
 
     @Override

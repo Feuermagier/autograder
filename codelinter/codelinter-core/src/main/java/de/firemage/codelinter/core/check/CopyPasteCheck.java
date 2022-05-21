@@ -1,6 +1,5 @@
 package de.firemage.codelinter.core.check;
 
-import de.firemage.codelinter.core.Check;
 import lombok.Getter;
 
 public class CopyPasteCheck implements Check {
@@ -17,5 +16,10 @@ public class CopyPasteCheck implements Check {
         return """
                 Duplicated code.
                 """;
+    }
+
+    @Override
+    public String getLinter() {
+        return "CPD";
     }
 }

@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core;
 
+import de.firemage.codelinter.core.check.Check;
 import java.nio.file.Path;
 
 public interface Problem {
@@ -7,7 +8,5 @@ public interface Problem {
 
     String getExplanation();
 
-    String getDisplayLocation(Path root);
-
-    String displayAsString(Path root);
+    String getDisplayLocation();
 }

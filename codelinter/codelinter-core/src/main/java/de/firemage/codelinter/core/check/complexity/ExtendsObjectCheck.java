@@ -6,6 +6,6 @@ public class ExtendsObjectCheck extends PMDCheck {
     private static final String DESCRIPTION = "Explicitly extending Object is unnecessary";
 
     public ExtendsObjectCheck() {
-        super(DESCRIPTION, createXPathRule("extends object", "//ExtendsList/ClassOrInterfaceType[@Image='Object' or @Image='java.lang.Object']"));
+        super(DESCRIPTION, createXPathRule("extends object", "Unnecessary 'extends Object'", "//ExtendsList/ClassOrInterfaceType[@Image='Object' or @Image='java.lang.Object']"));
     }
 }

@@ -8,5 +8,6 @@ public class RedundantModifierCheck extends PMDCheck {
 
     public RedundantModifierCheck() {
         super(DESCRIPTION, new UnnecessaryModifierRule());
+        super.getRules().get(0).setMessage("Unnecessary modifier{0} on {1} ''{2}''{3}");
     }
 }

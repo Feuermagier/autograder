@@ -9,6 +9,6 @@ public class ForToForEachCheck extends PMDCheck {
             """;
 
     public ForToForEachCheck() {
-        super(DESCRIPTION, new ForLoopCanBeForeachRule());
+        super(DESCRIPTION, DESCRIPTION, new ForLoopCanBeForeachRule());
     }
 }

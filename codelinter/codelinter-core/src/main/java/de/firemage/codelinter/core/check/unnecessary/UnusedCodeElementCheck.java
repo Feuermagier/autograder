@@ -11,7 +11,7 @@ public class UnusedCodeElementCheck extends PMDCheck {
     private static final String DESCRIPTION = "Unused code element (local variable / parameter / private attribute / private method)";
 
     public UnusedCodeElementCheck() {
-        super(DESCRIPTION, List.of(
+        super(DESCRIPTION, "Not used", List.of(
                 new UnusedLocalVariableRule(),
                 new UnusedFormalParameterRule(),
                 new UnusedPrivateFieldRule(),

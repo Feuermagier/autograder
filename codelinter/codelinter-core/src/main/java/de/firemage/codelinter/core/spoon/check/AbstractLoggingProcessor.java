@@ -1,6 +1,6 @@
 package de.firemage.codelinter.core.spoon.check;
 
-import de.firemage.codelinter.core.Check;
+import de.firemage.codelinter.core.check.Check;
 import de.firemage.codelinter.core.GlobalProblem;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.spoon.ProblemLogger;

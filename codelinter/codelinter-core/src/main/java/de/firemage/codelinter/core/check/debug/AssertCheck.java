@@ -1,11 +1,12 @@
 package de.firemage.codelinter.core.check.debug;
 
-import de.firemage.codelinter.core.spoon.SpoonCheck;
-import de.firemage.codelinter.core.spoon.check.AssertProcessor;
-import de.firemage.codelinter.core.spoon.check.CodeProcessor;
-import java.util.function.Supplier;
+import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
+import de.firemage.codelinter.core.integrated.IntegratedCheck;
+import de.firemage.codelinter.core.integrated.StaticAnalysis;
+import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtAssert;
 
-public class AssertCheck extends SpoonCheck {
+public class AssertCheck extends IntegratedCheck {
     private static final String DESCRIPTION = """
             Assertions crash the entire program if they evaluate to false.
             Also they can be disabled, so never rely on them to e.g. check user input.
@@ -17,7 +18,12 @@ public class AssertCheck extends SpoonCheck {
     }
 
     @Override
-    public Supplier<? extends CodeProcessor> getProcessor() {
-        return () -> new AssertProcessor(this);
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+        staticAnalysis.processWith(new AbstractProcessor<CtAssert<?>>() {
+            @Override
+            public void process(CtAssert<?> element) {
+                addLocalProblem(element, "Assert used");
+            }
+        });
     }
 }

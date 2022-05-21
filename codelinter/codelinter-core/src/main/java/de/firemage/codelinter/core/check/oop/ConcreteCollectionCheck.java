@@ -8,6 +8,6 @@ public class ConcreteCollectionCheck extends PMDCheck {
 
     public ConcreteCollectionCheck() {
         // Checks for fields, parameters and return types
-        super(DESCRIPTION, new LooseCouplingRule());
+        super(DESCRIPTION, DESCRIPTION, new LooseCouplingRule());
     }
 }

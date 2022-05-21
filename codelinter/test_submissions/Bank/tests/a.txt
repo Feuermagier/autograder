@@ -1,0 +1,9 @@
+> add-account Max;Mustermann
+0
+> get-accounts Mustermann
+0;Max;Mustermann;0.0
+> deposit 0;10
+10.0
+> get-accounts Mustermann
+0;Max;Mustermann;10.0
+> quit

@@ -7,6 +7,6 @@ public class MissingOverrideAnnotationCheck extends PMDCheck {
     private static final String DESCRIPTION = "Missing @Override";
 
     public MissingOverrideAnnotationCheck() {
-        super(DESCRIPTION, new MissingOverrideRule());
+        super(DESCRIPTION, "Missing @Override", new MissingOverrideRule());
     }
 }

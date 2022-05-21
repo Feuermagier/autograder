@@ -27,9 +27,15 @@ public class ConsoleExecutor {
                 containerIn.write("\n".getBytes());
                 containerIn.flush();
             } else {
-                String output = pollOutput(containerOut);
+                String output = pollOutput(process, containerOut);
+                if (output == null) {
+                    pollAllOutput(containerOut);
+                    System.err.println("EXEC:  The child JVM exited unexpectedly");
+                    System.exit(1);
+                }
                 if (!matchOutput(output, line)) {
-                    killVM(process, containerOut);
+                    killVM(process);
+                    pollAllOutput(containerOut);
                     System.exit(1);
                 }
             }
@@ -37,14 +43,12 @@ public class ConsoleExecutor {
 
         if (!process.waitFor(5, TimeUnit.SECONDS)) {
             System.err.println("EXEC:  The child JVM did not exit after 5s");
-            killVM(process, containerOut);
+            killVM(process);
+            pollAllOutput(containerOut);
             System.exit(1);
         }
 
-        // Poll any remaining output
-        while (!containerOut.isEmpty()) {
-            System.out.println(containerOut.poll());
-        }
+        pollAllOutput(containerOut);
 
         System.out.println("EXEC:  Child JVM exited");
 
@@ -63,7 +67,7 @@ public class ConsoleExecutor {
         }
     }
 
-    private String pollOutput(Queue<String> queue) {
+    private String pollOutput(Process process, Queue<String> queue) throws InterruptedException {
         long beforeTime = System.currentTimeMillis();
         while (true) {
             if (!queue.isEmpty()) {
@@ -79,16 +83,21 @@ public class ConsoleExecutor {
                 System.err.println("EXEC:  Did not receive any output after 5s");
                 System.exit(1);
             }
+            if (!process.isAlive()) {
+                return null;
+            }
+            Thread.sleep(10);
         }
     }
 
-    private void killVM(Process process, Queue<String> containerOut) throws InterruptedException {
+    private void killVM(Process process) throws InterruptedException {
         process.destroy();
         if (!process.waitFor(5, TimeUnit.SECONDS)) {
             process.destroyForcibly();
         }
+    }
 
-        // Poll any remaining output
+    private void pollAllOutput(Queue<String> containerOut) {
         while (!containerOut.isEmpty()) {
             System.out.println(containerOut.poll());
         }

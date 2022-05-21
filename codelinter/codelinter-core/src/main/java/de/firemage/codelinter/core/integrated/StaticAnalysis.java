@@ -4,8 +4,10 @@ import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.spoon.CompilationException;
 import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
+import spoon.processing.Processor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.Factory;
 
@@ -13,13 +15,15 @@ import java.io.IOException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.function.Consumer;
 
 public class StaticAnalysis implements AutoCloseable {
     private final URLClassLoader classLoader;
     private final Factory factory;
     private final CtModel model;
 
-    public StaticAnalysis(UploadedFile file, Path jar) throws ModelBuildException, IOException {
+    public StaticAnalysis(UploadedFile file, Path jar, Consumer<String> statusConsumer) throws ModelBuildException, IOException {
+        statusConsumer.accept("Building the code model");
 
         // Use a custom class loader because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
         this.classLoader =
@@ -48,6 +52,10 @@ public class StaticAnalysis implements AutoCloseable {
 
     public CtModel getModel() {
         return model;
+    }
+
+    public <E extends CtElement> void processWith(Processor<E> processor) {
+        this.model.processWith(processor);
     }
 
     public CtClass<?> findClassByName(String name) {

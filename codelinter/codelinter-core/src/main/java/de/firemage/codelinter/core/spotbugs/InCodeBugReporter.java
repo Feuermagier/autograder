@@ -13,6 +13,7 @@ import edu.umd.cs.findbugs.annotations.Confidence;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import javax.annotation.CheckForNull;
 import java.io.File;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -57,9 +58,15 @@ public class InCodeBugReporter extends AbstractBugReporter {
         // Nothing to do here
     }
 
-    public List<Problem> getProblems() {
-        return this.bugCollection.getCollection().stream()
-                .map(bug -> new SpotbugsInCodeProblem(new PlaceholderCheck(), bug))
-                .collect(Collectors.toList());
+    public List<Problem> getProblems(List<SpotbugsCheck> checks) {
+        List<Problem> problems = new ArrayList<>();
+        for (BugInstance bug : this.bugCollection.getCollection()) {
+            for (SpotbugsCheck check : checks) {
+                if (check.getBug().equals(bug.getType())) {
+                    problems.add(new SpotbugsInCodeProblem(check, bug));
+                }
+            }
+        }
+        return problems;
     }
 }

@@ -28,6 +28,7 @@ import java.util.Base64;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Consumer;
 import java.util.stream.Stream;
 
 public class DockerConsoleRunner implements TestRunner {
@@ -45,9 +46,10 @@ public class DockerConsoleRunner implements TestRunner {
         this.tests = tests;
     }
 
-    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar) throws IOException, InterruptedException, DockerRunnerException {
+    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer) throws IOException, InterruptedException, DockerRunnerException {
         String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
+        statusConsumer.accept("Building the docker image");
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         DockerHttpClient client = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).sslConfig(config.getSSLConfig()).build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).withDockerHttpClient(client).build();
@@ -62,7 +64,6 @@ public class DockerConsoleRunner implements TestRunner {
                 .awaitImageId();
 
         try {
-
             List<Path> testCases;
             try (Stream<Path> files = Files.list(this.tests)) {
                 testCases = files.filter(Files::isRegularFile).toList();
@@ -70,6 +71,7 @@ public class DockerConsoleRunner implements TestRunner {
 
             List<TestRunResult> results = new ArrayList<>();
             for (Path testPath : testCases) {
+                statusConsumer.accept("Running test case " + testPath.getFileName());
                 results.add(executeTestCase(dockerClient, imageId, testPath, mainClass));
             }
 

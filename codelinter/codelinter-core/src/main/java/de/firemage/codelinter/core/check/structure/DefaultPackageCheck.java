@@ -6,6 +6,6 @@ public class DefaultPackageCheck extends PMDCheck {
     private static final String DESCRIPTION = "The default package should not be used";
 
     public DefaultPackageCheck() {
-        super(DESCRIPTION, createXPathRule("default package", "/CompilationUnit[not(./PackageDeclaration)]/TypeDeclaration[1]"));
+        super(DESCRIPTION, createXPathRule("default package", "Don't use the default package", "/CompilationUnit[not(./PackageDeclaration)]/TypeDeclaration[1]"));
     }
 }

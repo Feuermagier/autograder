@@ -7,6 +7,6 @@ public class RedundantReturnCheck extends PMDCheck {
     public static final String DESCRIPTION = "A void return at the end of a method is implicit";
 
     public RedundantReturnCheck() {
-        super(DESCRIPTION, new UnnecessaryReturnRule());
+        super(DESCRIPTION, "Unnecessary return", new UnnecessaryReturnRule());
     }
 }

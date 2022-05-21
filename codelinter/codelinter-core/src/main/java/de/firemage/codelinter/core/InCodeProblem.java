@@ -1,5 +1,6 @@
 package de.firemage.codelinter.core;
 
+import de.firemage.codelinter.core.check.Check;
 import lombok.Getter;
 import java.nio.file.Path;
 
@@ -22,13 +23,8 @@ public abstract class InCodeProblem implements Problem {
     }
 
     @Override
-    public String getDisplayLocation(Path root) {
+    public String getDisplayLocation() {
         // TODO
-        return root.relativize(this.position.file()) + ":" + this.position.startLine();
-    }
-
-    @Override
-    public String displayAsString(Path root) {
-        return this.getDisplayLocation(root) + " " + getExplanation();
+        return this.position.file() + ":" + this.position.startLine();
     }
 }

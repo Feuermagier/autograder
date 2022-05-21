@@ -1,6 +1,6 @@
 package de.firemage.codelinter.core.cpd;
 
-import de.firemage.codelinter.core.Check;
+import de.firemage.codelinter.core.check.Check;
 import de.firemage.codelinter.core.CodePosition;
 import de.firemage.codelinter.core.MultiPositionProblem;
 import de.firemage.codelinter.core.PathUtil;
@@ -39,6 +39,7 @@ public class CPDInCodeProblem extends MultiPositionProblem {
     }
 
     private static CodePosition markToPosition(Mark mark) {
+        // TODO mark.getFilename() is most likely not correct
         return new CodePosition(Path.of(mark.getFilename()), mark.getBeginLine(), mark.getEndLine(), mark.getBeginColumn(), mark.getEndColumn());
     }
 }

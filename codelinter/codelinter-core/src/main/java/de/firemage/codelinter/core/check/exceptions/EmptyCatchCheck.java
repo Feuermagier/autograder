@@ -8,6 +8,6 @@ public class EmptyCatchCheck extends PMDCheck {
             If you are sure that the caught exception will never be thrown, throw an IllegalStateException in the catch block.""";
 
     public EmptyCatchCheck() {
-        super(DESCRIPTION, createXPathRule("empty catch", "//CatchStatement[not(Block/BlockStatement)]"));
+        super(DESCRIPTION, createXPathRule("empty catch", "Empty catch block", "//CatchStatement[not(Block/BlockStatement)]"));
     }
 }

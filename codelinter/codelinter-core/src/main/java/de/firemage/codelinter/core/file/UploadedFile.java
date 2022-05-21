@@ -18,7 +18,6 @@ import java.util.stream.Stream;
 @Slf4j
 public class UploadedFile {
 
-    @Getter
     private final Path file;
 
     @Getter
@@ -31,6 +30,10 @@ public class UploadedFile {
 
         this.file = file;
         this.version = version;
+    }
+
+    public Path getFile() {
+        return file.toAbsolutePath();
     }
 
     public List<File> getJavaFiles() throws IOException {

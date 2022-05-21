@@ -3,10 +3,27 @@ package de.firemage.codelinter.cmd;
 import de.firemage.codelinter.core.Linter;
 import de.firemage.codelinter.core.LinterException;
 import de.firemage.codelinter.core.Problem;
+import de.firemage.codelinter.core.check.Check;
+import de.firemage.codelinter.core.check.ConstantsInInterfaceCheck;
+import de.firemage.codelinter.core.check.CopyPasteCheck;
+import de.firemage.codelinter.core.check.DoubleBraceInitializationCheck;
+import de.firemage.codelinter.core.check.EqualsContractCheck;
 import de.firemage.codelinter.core.check.ForToForEachCheck;
+import de.firemage.codelinter.core.check.MissingOverrideAnnotationCheck;
+import de.firemage.codelinter.core.check.api.IsEmptyReimplementationCheck;
+import de.firemage.codelinter.core.check.api.OldCollectionCheck;
 import de.firemage.codelinter.core.check.complexity.DiamondOperatorCheck;
+import de.firemage.codelinter.core.check.complexity.ExtendsObjectCheck;
 import de.firemage.codelinter.core.check.complexity.ForLoopVariableCheck;
-import de.firemage.codelinter.core.check.complexity.RedundantConstructorCheck;
+import de.firemage.codelinter.core.check.complexity.RedundantModifierCheck;
+import de.firemage.codelinter.core.check.complexity.RedundantReturnCheck;
+import de.firemage.codelinter.core.check.complexity.UnnecessaryLocalBeforeReturnCheck;
+import de.firemage.codelinter.core.check.complexity.UnusedImportCheck;
+import de.firemage.codelinter.core.check.complexity.WrapperInstantiationCheck;
+import de.firemage.codelinter.core.check.debug.AssertCheck;
+import de.firemage.codelinter.core.check.debug.PrintStackTraceCheck;
+import de.firemage.codelinter.core.check.exceptions.EmptyCatchCheck;
+import de.firemage.codelinter.core.check.naming.BooleanMethodNameCheck;
 import de.firemage.codelinter.core.check.naming.LinguisticNamingCheck;
 import de.firemage.codelinter.core.check.oop.ConcreteCollectionCheck;
 import de.firemage.codelinter.core.check.oop.MethodShouldBeAbstractCheck;
@@ -15,9 +32,7 @@ import de.firemage.codelinter.core.check.unnecessary.EmptyNonCatchBlockCheck;
 import de.firemage.codelinter.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.compiler.JavaVersion;
-import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.file.UploadedFile;
-import de.firemage.codelinter.core.spoon.CompilationException;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -25,7 +40,6 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
-import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -42,6 +56,8 @@ public class Application implements Callable<Integer> {
 
     @Parameters(index = "0", description = "The root folder which contains the files to check")
     private Path file;
+    @Parameters(index = "1", description = "The root folder which contains the tests to run")
+    private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version.")
     private String javaVersion;
     @Spec
@@ -66,9 +82,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), List.of(
-                    new MethodShouldBeAbstractCheck()
-            ));
+            List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText);
             progress.finish("Completed checks");
             printProblems(problems);
             CmdUtil.endSection();
@@ -86,6 +100,47 @@ public class Application implements Callable<Integer> {
         return 0;
     }
 
+    private List<Check> getChecks() {
+        return List.of(
+                // General
+                new ConstantsInInterfaceCheck(false),
+                new CopyPasteCheck(100),
+                new DoubleBraceInitializationCheck(),
+                new ForToForEachCheck(),
+                new MissingOverrideAnnotationCheck(),
+                new EqualsContractCheck(),
+                // API
+                new IsEmptyReimplementationCheck(),
+                new OldCollectionCheck(),
+                // Complexity
+                new DiamondOperatorCheck(),
+                new ExtendsObjectCheck(),
+                new ForLoopVariableCheck(),
+                //new RedundantConstructorCheck(), // Allow declaring empty constructors for documentation
+                new RedundantModifierCheck(),
+                new RedundantReturnCheck(),
+                new UnnecessaryLocalBeforeReturnCheck(),
+                new UnusedImportCheck(),
+                new WrapperInstantiationCheck(),
+                // Debug
+                new AssertCheck(),
+                new PrintStackTraceCheck(),
+                // Exceptions
+                new EmptyCatchCheck(),
+                // Naming
+                new BooleanMethodNameCheck(),
+                new LinguisticNamingCheck(),
+                // OOP
+                new ConcreteCollectionCheck(),
+                new MethodShouldBeAbstractCheck(),
+                // Structure
+                new DefaultPackageCheck(),
+                // Unnecessary
+                new EmptyNonCatchBlockCheck(),
+                new UnusedCodeElementCheck()
+        );
+    }
+
     private Path getTmpDirectory() {
         //return new File(System.getProperty("java.io.tmpdir")).toPath();
         return Path.of("tmp");
@@ -96,7 +151,14 @@ public class Application implements Callable<Integer> {
             CmdUtil.println("No problems found - good job!");
         } else {
             CmdUtil.println("Found " + problems.size() + " problem(s):");
-            problems.forEach(p -> CmdUtil.println(p.displayAsString(this.file.toAbsolutePath())));
+            problems.forEach(p -> CmdUtil.println(this.formatProblem(p)));
         }
+    }
+
+    private String formatProblem(Problem problem) {
+        return String.format("%s %s (%s)",
+                problem.getDisplayLocation(),
+                problem.getExplanation(),
+                problem.getCheck().getLinter());
     }
 }

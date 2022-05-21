@@ -1,24 +1,24 @@
-package de.firemage.codelinter.core.spoon;
+package de.firemage.codelinter.core.integrated;
 
 import de.firemage.codelinter.core.check.Check;
 import de.firemage.codelinter.core.CodePosition;
 import de.firemage.codelinter.core.InCodeProblem;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
+import java.nio.file.Path;
 
-public class SpoonInCodeProblem extends InCodeProblem {
+public class IntegratedInCodeProblem extends InCodeProblem {
     private final CtElement element;
 
-    public SpoonInCodeProblem(Check check, CtElement element, String explanation) {
-        super(check, mapSourceToCode(element.getPosition()), explanation);
+    public IntegratedInCodeProblem(Check check, CtElement element, String explanation, Path root) {
+        super(check, mapSourceToCode(element.getPosition(), root), explanation);
 
         this.element = element;
     }
 
-    private static CodePosition mapSourceToCode(SourcePosition position) {
-        // TODO not sure if this is correct
+    private static CodePosition mapSourceToCode(SourcePosition position, Path root) {
         return new CodePosition(
-                position.getFile().toPath(),
+                root.relativize(position.getFile().toPath()),
                 position.getLine(),
                 position.getEndLine(),
                 position.getColumn(),

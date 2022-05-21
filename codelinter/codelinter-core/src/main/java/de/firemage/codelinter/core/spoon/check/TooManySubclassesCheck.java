@@ -1,9 +1,6 @@
 package de.firemage.codelinter.core.spoon.check;
 
-import de.firemage.codelinter.core.Check;
-import de.firemage.codelinter.core.ProblemCategory;
-import de.firemage.codelinter.core.ProblemPriority;
-import de.firemage.codelinter.core.spoon.ProblemLogger;
+import de.firemage.codelinter.core.check.Check;
 import spoon.reflect.declaration.CtClass;
 
 public class TooManySubclassesCheck extends AbstractLoggingProcessor<CtClass<?>> {

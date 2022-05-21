@@ -3,7 +3,7 @@ package de.firemage.codelinter.core.check.complexity;
 import de.firemage.codelinter.core.pmd.PMDCheck;
 
 public class DiamondOperatorCheck extends PMDCheck {
-    private static final String DESCRIPTION = "Use the 'diamond operator': new Foo<>()";
+    private static final String DESCRIPTION = "Use the 'diamond operator' instead of repeating the generic type: new Foo<>()";
     private static final String QUERY = """
             (
             //VariableInitializer[preceding-sibling::VariableDeclaratorId[1]/@TypeInferred=false()]
@@ -20,6 +20,6 @@ public class DiamondOperatorCheck extends PMDCheck {
             """;
 
     public DiamondOperatorCheck() {
-        super(DESCRIPTION, createXPathRule("diamond operator", QUERY));
+        super(DESCRIPTION, createXPathRule("diamond operator", "Use the 'diamond operator'", QUERY));
     }
 }
