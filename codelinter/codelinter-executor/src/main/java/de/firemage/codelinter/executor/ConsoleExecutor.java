@@ -3,14 +3,46 @@ package de.firemage.codelinter.executor;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Queue;
 import java.util.Scanner;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 public class ConsoleExecutor {
-    public void execute(String mainClass, String test) throws IOException, InterruptedException {
-        Process process = Util.startJVM(mainClass);
+    public void execute(String mainClass, String test, boolean quitOnFailure) throws IOException, InterruptedException {
+        Iterator<String> lines = Arrays.stream(test.split("\n")).iterator();
+        List<String> args = parseHeader(lines);
+        if (executeTest(args, mainClass, lines, quitOnFailure)) {
+            System.err.println("EXEC:  Test success");
+        } else {
+            System.err.println("EXEC:  Test failure");
+        }
+    }
+
+    private List<String> parseHeader(Iterator<String> lines) {
+        List<String> args = null;
+        while (lines.hasNext()) {
+            String line = lines.next();
+            if (line.startsWith("--")) {
+                return args;
+            } else if (line.startsWith("name:")) {
+                System.out.println("EXEC:  Running test " + line.substring(6));
+            } else if (line.startsWith("comment:")) {
+                System.out.println("EXEC:  " + line.substring(9));
+            } else if (line.startsWith("args:")) {
+                args = List.of(line.substring(6).split(" "));
+            }
+        }
+        throw new IllegalStateException("Invalid test file: end of header missing");
+    }
+
+    private boolean executeTest(List<String> args, String mainClass, Iterator<String> lines, boolean quitOnFailure)
+        throws IOException, InterruptedException {
+
+        Process process = Util.startJVM(mainClass, args);
 
         OutputStream containerIn = process.getOutputStream();
 
@@ -19,14 +51,20 @@ public class ConsoleExecutor {
         outThread.setDaemon(true);
         outThread.start();
 
-        String[] lines = test.split("\n");
-        for (String line : lines) {
-            if (line.startsWith("> ")) {
-                System.out.println("IN:    " + line.substring(2) );
-                containerIn.write(line.substring(2).getBytes());
+        boolean failed = false;
+        while (lines.hasNext()) {
+            String line = lines.next();
+            if (line.startsWith("###")) {
+                // Comment - ignore
+            } else if (line.startsWith(">")) {
+                // Input
+                pollAllOutput(containerOut);
+                System.out.println("IN:    " + line.substring(1));
+                containerIn.write(line.substring(1).getBytes());
                 containerIn.write("\n".getBytes());
                 containerIn.flush();
             } else {
+                // Expected output
                 String output = pollOutput(process, containerOut);
                 if (output == null) {
                     pollAllOutput(containerOut);
@@ -34,9 +72,13 @@ public class ConsoleExecutor {
                     System.exit(1);
                 }
                 if (!matchOutput(output, line)) {
-                    killVM(process);
-                    pollAllOutput(containerOut);
-                    System.exit(1);
+                    failed = true;
+                    if (quitOnFailure) {
+                        killVM(process);
+                        pollAllOutput(containerOut);
+                        return false;
+                    }
+
                 }
             }
         }
@@ -45,7 +87,7 @@ public class ConsoleExecutor {
             System.err.println("EXEC:  The child JVM did not exit after 5s");
             killVM(process);
             pollAllOutput(containerOut);
-            System.exit(1);
+            return false;
         }
 
         pollAllOutput(containerOut);
@@ -54,12 +96,15 @@ public class ConsoleExecutor {
 
         if (process.exitValue() != 0) {
             System.err.println("EXEC:  The child JVM did not exit with exit code 0");
-            System.exit(1);
+            return false;
         }
+
+        return !failed;
     }
 
     private boolean matchOutput(String output, String line) {
-        if (line.equals(output) || (line.startsWith("Error,") && output.startsWith("Error,"))) {
+        if (line.equals(output) ||
+            (line.equals("!A!!R!^(E|e)rror.*") && (output.startsWith("Error") || output.startsWith("error")))) {
             return true;
         } else {
             System.err.println("EXEC:  Invalid output, got '" + output + "', expected '" + line + "' ");
@@ -99,7 +144,7 @@ public class ConsoleExecutor {
 
     private void pollAllOutput(Queue<String> containerOut) {
         while (!containerOut.isEmpty()) {
-            System.out.println(containerOut.poll());
+            System.out.println("OUT:   " + containerOut.poll());
         }
     }
 

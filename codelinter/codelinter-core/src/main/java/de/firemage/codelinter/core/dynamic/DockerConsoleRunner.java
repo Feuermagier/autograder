@@ -5,6 +5,7 @@ import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.WaitContainerResultCallback;
 import com.github.dockerjava.api.exception.DockerClientException;
+import com.github.dockerjava.api.exception.InternalServerErrorException;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -16,6 +17,7 @@ import de.firemage.codelinter.core.integrated.StaticAnalysis;
 import de.firemage.codelinter.event.Event;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
 import spoon.reflect.declaration.CtClass;
+
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -26,7 +28,6 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.List;
-import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -46,33 +47,52 @@ public class DockerConsoleRunner implements TestRunner {
         this.tests = tests;
     }
 
-    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer) throws IOException, InterruptedException, DockerRunnerException {
+    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer)
+        throws IOException, InterruptedException, DockerRunnerException {
         String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
         statusConsumer.accept("Building the docker image");
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
-        DockerHttpClient client = new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).sslConfig(config.getSSLConfig()).build();
+        DockerHttpClient client =
+            new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).sslConfig(config.getSSLConfig())
+                .build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).withDockerHttpClient(client).build();
         String imageId = dockerClient.buildImageCmd()
-                .withBaseDirectory(new File("."))
-                .withDockerfile(new File("Dockerfile"))
-                .withPull(true)
-                .withBuildArg("jarfile", Paths.get("").relativize(jar).toString().replace("\\", "/"))
-                .withBuildArg("executor", Paths.get("").relativize(this.executor).toString().replace("\\", "/"))
-                .withBuildArg("agent", Paths.get("").relativize(this.agent).toString().replace("\\", "/"))
-                .exec(new BuildImageResultCallback())
-                .awaitImageId();
+            .withBaseDirectory(new File("."))
+            .withDockerfile(new File("Dockerfile"))
+            .withPull(true)
+            .withBuildArg("jarfile", Paths.get("").relativize(jar).toString().replace("\\", "/"))
+            .withBuildArg("executor", Paths.get("").relativize(this.executor).toString().replace("\\", "/"))
+            .withBuildArg("agent", Paths.get("").relativize(this.agent).toString().replace("\\", "/"))
+            .exec(new BuildImageResultCallback())
+            .awaitImageId();
 
         try {
             List<Path> testCases;
-            try (Stream<Path> files = Files.list(this.tests)) {
-                testCases = files.filter(Files::isRegularFile).toList();
+            try (Stream<Path> files = Files.walk(this.tests)) {
+                testCases =
+                    files.filter(Files::isRegularFile).filter(f -> f.toString().endsWith(".protocol")).toList();
             }
 
             List<TestRunResult> results = new ArrayList<>();
             for (Path testPath : testCases) {
                 statusConsumer.accept("Running test case " + testPath.getFileName());
                 results.add(executeTestCase(dockerClient, imageId, testPath, mainClass));
+                TestRunResult result = null;
+                int retryCounter = 1;
+                while (result == null) {
+                    try {
+                        result = executeTestCase(dockerClient, imageId, testPath, mainClass);
+                    } catch (InternalServerErrorException ex) {
+                        System.err.println("Docker timed out - retrying...");
+                        Thread.sleep(100);
+                    }
+                    retryCounter++;
+                    if (retryCounter > 5) {
+                        throw new IllegalStateException("Failed to crate the container after 5 attempts");
+                    }
+                }
+                results.add(result);
             }
 
             return results;
@@ -82,21 +102,22 @@ public class DockerConsoleRunner implements TestRunner {
     }
 
     private TestRunResult executeTestCase(DockerClient dockerClient, String imageId, Path testFile, String mainClass)
-            throws IOException, InterruptedException, DockerRunnerException {
+        throws IOException, InterruptedException, DockerRunnerException {
 
         List<String> interactionLines = Files.readAllLines(testFile);
         String containerId = dockerClient
-                .createContainerCmd(imageId)
-                .withHostConfig(
+                    .createContainerCmd(imageId)
+                    .withHostConfig(
                         new HostConfig()
-                                .withCapDrop()
-                                .withNetworkMode("none")
-                                .withPidsLimit(2000L)
-                                .withMemory(200 * (1L << 20))
-                )
-                .withCmd(mainClass, Base64.getEncoder().encodeToString(String.join("\n", interactionLines).getBytes(StandardCharsets.UTF_8)))
-                .exec()
-                .getId();
+                            .withCapDrop()
+                            .withNetworkMode("none")
+                            .withPidsLimit(2000L)
+                            .withMemory(200 * (1L << 20))
+                    )
+                    .withCmd(mainClass, Base64.getEncoder()
+                        .encodeToString(String.join("\n", interactionLines).getBytes(StandardCharsets.UTF_8)), String.valueOf(false))
+                    .exec()
+                    .getId();
 
         try {
             dockerClient.startContainerCmd(containerId).exec();
@@ -105,9 +126,9 @@ public class DockerConsoleRunner implements TestRunner {
             int exitCode;
             try {
                 exitCode = dockerClient
-                        .waitContainerCmd(containerId)
-                        .exec(new WaitContainerResultCallback())
-                        .awaitStatusCode(TIMEOUT_SECONDS, TimeUnit.SECONDS);
+                    .waitContainerCmd(containerId)
+                    .exec(new WaitContainerResultCallback())
+                    .awaitStatusCode(TIMEOUT_SECONDS, TimeUnit.SECONDS);
             } catch (DockerClientException ex) {
                 throw new DockerRunnerException("The test container timed out", readLogs(dockerClient, containerId));
             }
@@ -118,16 +139,20 @@ public class DockerConsoleRunner implements TestRunner {
                 throw new DockerRunnerException("The executor failed", readLogs(dockerClient, containerId));
             }
 
+            String logs = readLogs(dockerClient, containerId);
+            System.out.println(System.lineSeparator());
+            System.out.println(logs);
+
             InputStream tar = dockerClient
-                    .copyArchiveFromContainerCmd(containerId, "/home/student/codelinter_events.txt")
-                    .exec();
+                .copyArchiveFromContainerCmd(containerId, "/home/student/codelinter_events.txt")
+                .exec();
             List<Event> events = Event.read(extractSingleFileFromTar(tar));
 
-            return new TestRunResult(events, status, readLogs(dockerClient, containerId));
+            return new TestRunResult(events, status, logs);
         } finally {
             dockerClient.removeContainerCmd(containerId)
-                    .withForce(true)
-                    .exec();
+                .withForce(true)
+                .exec();
         }
     }
 
@@ -142,15 +167,15 @@ public class DockerConsoleRunner implements TestRunner {
     private String readLogs(DockerClient client, String containerId) throws InterruptedException {
         StringBuilder log = new StringBuilder();
         client.logContainerCmd(containerId)
-                .withStdOut(true)
-                .withStdErr(true)
-                .exec(new ResultCallback.Adapter<>() {
-                    @Override
-                    public void onNext(Frame frame) {
-                        log.append(frame);
-                        log.append(System.lineSeparator());
-                    }
-                }).awaitCompletion();
+            .withStdOut(true)
+            .withStdErr(true)
+            .exec(new ResultCallback.Adapter<>() {
+                @Override
+                public void onNext(Frame frame) {
+                    log.append(frame);
+                    log.append(System.lineSeparator());
+                }
+            }).awaitCompletion();
         return log.toString();
     }
 }
