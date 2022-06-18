@@ -6,6 +6,7 @@ import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.WaitContainerResultCallback;
 import com.github.dockerjava.api.exception.DockerClientException;
 import com.github.dockerjava.api.exception.InternalServerErrorException;
+import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
 import com.github.dockerjava.core.DefaultDockerClientConfig;
@@ -97,7 +98,7 @@ public class DockerConsoleRunner implements TestRunner {
 
             return results;
         } finally {
-            dockerClient.removeImageCmd(imageId).exec();
+            dockerClient.removeImageCmd(imageId).withForce(true).exec();
         }
     }
 
@@ -143,10 +144,16 @@ public class DockerConsoleRunner implements TestRunner {
             System.out.println(System.lineSeparator());
             System.out.println(logs);
 
-            InputStream tar = dockerClient
-                .copyArchiveFromContainerCmd(containerId, "/home/student/codelinter_events.txt")
-                .exec();
-            List<Event> events = Event.read(extractSingleFileFromTar(tar));
+            List<Event> events;
+            try {
+                InputStream tar = dockerClient
+                    .copyArchiveFromContainerCmd(containerId, "/home/student/codelinter_events.txt")
+                    .exec();
+                events = Event.read(extractSingleFileFromTar(tar));
+            } catch (NotFoundException ex) {
+                System.err.println("No codelinter_events.txt found in the container");
+                events = List.of();
+            }
 
             return new TestRunResult(events, status, logs);
         } finally {

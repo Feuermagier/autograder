@@ -22,7 +22,7 @@ import java.util.function.Consumer;
 @Slf4j
 public class Linter {
 
-    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks, Consumer<String> statusConsumer)
+    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks, Consumer<String> statusConsumer, boolean disableDynamicAnalysis)
             throws LinterException, InterruptedException, IOException {
         statusConsumer.accept("Compiling");
         CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
@@ -66,7 +66,9 @@ public class Linter {
         if (!integratedChecks.isEmpty()) {
             statusConsumer.accept("Building the code model");
             try (IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), statusConsumer)) {
-                analysis.runDynamicAnalysis(tests, statusConsumer);
+                if (!disableDynamicAnalysis) {
+                    analysis.runDynamicAnalysis(tests, statusConsumer);
+                }
                 problems.addAll(analysis.lint(integratedChecks));
             }
         }

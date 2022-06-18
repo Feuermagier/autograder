@@ -25,6 +25,10 @@ public class DynamicAnalysis {
         return this.results.stream().flatMap(result -> result.events().stream());
     }
 
+    public <E extends Event> Stream<E> getEventsWithType(Class<E> type) {
+        return this.getAllEvents().filter(e -> e.getClass().equals(type)).map(e -> (E) e);
+    }
+
     public Stream<MethodEvent> findEventsForMethod(CtMethod<?> method) {
         String descriptor = createDescriptor(method);
         return this.getAllEvents()

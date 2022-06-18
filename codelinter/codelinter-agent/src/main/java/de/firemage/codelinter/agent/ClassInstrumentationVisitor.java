@@ -20,10 +20,6 @@ public class ClassInstrumentationVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
-        if (Type.getReturnType(descriptor).getSort() == Type.OBJECT) {
-            return new MethodInstrumentationVisitor(visitor, access, name, descriptor, this.name);
-        } else {
-            return visitor;
-        }
+        return new MethodInstrumentationVisitor(visitor, access, name, descriptor, this.name);
     }
 }

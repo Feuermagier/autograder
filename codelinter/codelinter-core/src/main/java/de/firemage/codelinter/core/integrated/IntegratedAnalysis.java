@@ -23,6 +23,7 @@ public class IntegratedAnalysis implements AutoCloseable {
         this.jar = jar;
 
         this.staticAnalysis = new StaticAnalysis(file, jar, statusConsumer);
+        this.dynamicAnalysis = new DynamicAnalysis(List.of());
     }
 
     public void runDynamicAnalysis(Path tests, Consumer<String> statusConsumer) throws IOException, InterruptedException, DockerRunnerException {

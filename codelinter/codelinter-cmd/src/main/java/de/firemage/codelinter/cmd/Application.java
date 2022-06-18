@@ -4,14 +4,19 @@ import de.firemage.codelinter.core.Linter;
 import de.firemage.codelinter.core.LinterException;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.check.Check;
+import de.firemage.codelinter.core.check.CompareObjectsNotStringsCheck;
+import de.firemage.codelinter.core.check.ConstantNamingAndAttributeCheck;
 import de.firemage.codelinter.core.check.ConstantsInInterfaceCheck;
 import de.firemage.codelinter.core.check.CopyPasteCheck;
+import de.firemage.codelinter.core.check.DontReassignParametersCheck;
 import de.firemage.codelinter.core.check.DoubleBraceInitializationCheck;
 import de.firemage.codelinter.core.check.EqualsContractCheck;
+import de.firemage.codelinter.core.check.FieldShouldBeLocalCheck;
 import de.firemage.codelinter.core.check.ForToForEachCheck;
 import de.firemage.codelinter.core.check.MissingOverrideAnnotationCheck;
 import de.firemage.codelinter.core.check.api.IsEmptyReimplementationCheck;
 import de.firemage.codelinter.core.check.api.OldCollectionCheck;
+import de.firemage.codelinter.core.check.api.StringIsEmptyReimplementationCheck;
 import de.firemage.codelinter.core.check.complexity.DiamondOperatorCheck;
 import de.firemage.codelinter.core.check.complexity.ExtendsObjectCheck;
 import de.firemage.codelinter.core.check.complexity.ForLoopVariableCheck;
@@ -83,7 +88,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText);
+            List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText, false);
             progress.finish("Completed checks");
             printProblems(problems);
             CmdUtil.endSection();
@@ -110,9 +115,14 @@ public class Application implements Callable<Integer> {
                 new ForToForEachCheck(),
                 new MissingOverrideAnnotationCheck(),
                 new EqualsContractCheck(),
+                new CompareObjectsNotStringsCheck(),
+                new ConstantNamingAndAttributeCheck(),
+                new DontReassignParametersCheck(),
+                new FieldShouldBeLocalCheck(),
                 // API
                 new IsEmptyReimplementationCheck(),
                 new OldCollectionCheck(),
+                new StringIsEmptyReimplementationCheck(),
                 // Complexity
                 new DiamondOperatorCheck(),
                 new ExtendsObjectCheck(),
@@ -159,7 +169,7 @@ public class Application implements Callable<Integer> {
     }
 
     private String formatProblem(Problem problem) {
-        return String.format("%s %s (%s)",
+        return String.format("%s %s (Source: %s)",
                 problem.getDisplayLocation(),
                 problem.getExplanation(),
                 problem.getCheck().getLinter());
