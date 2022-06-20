@@ -1,0 +1,5 @@
+de.firemage.codelinter.core.check.api.OldCollectionCheck
+Don't use old collections
+Test.java:14
+Test.java:16
+Test.java:19

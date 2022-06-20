@@ -2,6 +2,7 @@ package de.firemage.codelinter.core.check.oop;
 
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.integrated.IntegratedCheck;
+import de.firemage.codelinter.core.integrated.SpoonUtil;
 import de.firemage.codelinter.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtConstructorCall;
@@ -43,7 +44,7 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
                         continue;
                     }
 
-                    List<CtStatement> statements = method.getBody().getStatements();
+                    List<CtStatement> statements = SpoonUtil.getEffectiveStatements(method.getBody());
                     if (statements.isEmpty()) {
                         addLocalProblem(method, formatExplanation(method));
                     } else if (statements.size() == 1) {
@@ -53,9 +54,11 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
                                 && literal.getValue() == null) {
                             addLocalProblem(method, formatExplanation(method));
                         } else if (statement instanceof CtThrow ctThrow
-                                && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call
-                                && call.getType().getQualifiedName().equals("java.lang.UnsupportedOperationException")) {
-                            addLocalProblem(method, formatExplanation(method));
+                                && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call) {
+                            String type = call.getType().getQualifiedName();
+                            if (type.equals("java.lang.UnsupportedOperationException") || type.equals("java.lang.IllegalStateException")) {
+                                addLocalProblem(method, formatExplanation(method));
+                            }
                         }
                     }
                 }

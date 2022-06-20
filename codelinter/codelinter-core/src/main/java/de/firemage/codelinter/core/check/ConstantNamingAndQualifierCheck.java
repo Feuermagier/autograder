@@ -8,11 +8,11 @@ import de.firemage.codelinter.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 
-public class ConstantNamingAndAttributeCheck extends IntegratedCheck {
+public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
     private static final String DESCRIPTION =
         "Constants that are never written to should be 'static final' and have a UPPER_SNAKE_CASE name";
 
-    public ConstantNamingAndAttributeCheck() {
+    public ConstantNamingAndQualifierCheck() {
         super(DESCRIPTION);
     }
 

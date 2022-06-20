@@ -5,7 +5,7 @@ import de.firemage.codelinter.core.LinterException;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.check.Check;
 import de.firemage.codelinter.core.check.CompareObjectsNotStringsCheck;
-import de.firemage.codelinter.core.check.ConstantNamingAndAttributeCheck;
+import de.firemage.codelinter.core.check.ConstantNamingAndQualifierCheck;
 import de.firemage.codelinter.core.check.ConstantsInInterfaceCheck;
 import de.firemage.codelinter.core.check.CopyPasteCheck;
 import de.firemage.codelinter.core.check.DontReassignParametersCheck;
@@ -47,6 +47,7 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -101,6 +102,8 @@ public class Application implements Callable<Integer> {
             e.printStackTrace();
         } catch (InterruptedException e) {
             e.printStackTrace();
+        } catch (URISyntaxException e) {
+            e.printStackTrace();
         }
 
         return 0;
@@ -116,7 +119,7 @@ public class Application implements Callable<Integer> {
                 new MissingOverrideAnnotationCheck(),
                 new EqualsContractCheck(),
                 new CompareObjectsNotStringsCheck(),
-                new ConstantNamingAndAttributeCheck(),
+                new ConstantNamingAndQualifierCheck(),
                 new DontReassignParametersCheck(),
                 new FieldShouldBeLocalCheck(),
                 // API

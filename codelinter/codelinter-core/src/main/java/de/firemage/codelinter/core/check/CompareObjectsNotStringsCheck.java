@@ -35,13 +35,11 @@ public class CompareObjectsNotStringsCheck extends IntegratedCheck {
                     if (lhsType.isEmpty()) {
                         return;
                     }
-                    System.out.println(lhsType);
 
                     Optional<CtTypeReference<?>> rhsType = SpoonUtil.isToStringCall(invocation.getArguments().get(0));
                     if (rhsType.isEmpty()) {
                         return;
                     }
-                    System.out.println(rhsType);
 
                     if (lhsType.get().getQualifiedName().equals(rhsType.get().getQualifiedName())) {
                         addLocalProblem(invocation, formatExplanation(lhsType.get()));

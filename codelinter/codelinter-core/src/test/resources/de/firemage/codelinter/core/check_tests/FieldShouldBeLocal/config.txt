@@ -1,0 +1,4 @@
+de.firemage.codelinter.core.check.FieldShouldBeLocalCheck
+Field should be local
+Test.java:5
+Test.java:6

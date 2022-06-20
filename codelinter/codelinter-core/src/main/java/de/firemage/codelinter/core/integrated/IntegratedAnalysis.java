@@ -6,7 +6,9 @@ import de.firemage.codelinter.core.dynamic.DockerRunnerException;
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.dynamic.TestRunResult;
 import de.firemage.codelinter.core.file.UploadedFile;
+
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -15,22 +17,27 @@ import java.util.function.Consumer;
 public class IntegratedAnalysis implements AutoCloseable {
     private final UploadedFile file;
     private final Path jar;
+    private final Path tmpPath;
     private final StaticAnalysis staticAnalysis;
     private DynamicAnalysis dynamicAnalysis;
 
-    public IntegratedAnalysis(UploadedFile file, Path jar, Consumer<String> statusConsumer) throws ModelBuildException, IOException {
+    public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpPath, Consumer<String> statusConsumer)
+        throws ModelBuildException, IOException {
         this.file = file;
         this.jar = jar;
+        this.tmpPath = tmpPath;
 
         this.staticAnalysis = new StaticAnalysis(file, jar, statusConsumer);
         this.dynamicAnalysis = new DynamicAnalysis(List.of());
     }
 
-    public void runDynamicAnalysis(Path tests, Consumer<String> statusConsumer) throws IOException, InterruptedException, DockerRunnerException {
+    public void runDynamicAnalysis(Path tests, Consumer<String> statusConsumer)
+        throws IOException, InterruptedException, DockerRunnerException, URISyntaxException {
         DockerConsoleRunner runner = new DockerConsoleRunner(
-                Path.of("codelinter-executor/target/codelinter-executor-1.0-SNAPSHOT.jar"),
-                Path.of("codelinter-agent/target/codelinter-agent-1.0-SNAPSHOT.jar"),
-                tests);
+            Path.of(this.getClass().getResource("/executor.jar").toURI()),
+            Path.of(this.getClass().getResource("/agent.jar").toURI()),
+            tests,
+            this.tmpPath);
         List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar, statusConsumer);
         this.dynamicAnalysis = new DynamicAnalysis(results);
     }

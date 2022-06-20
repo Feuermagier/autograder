@@ -5,7 +5,6 @@ import com.github.dockerjava.api.async.ResultCallback;
 import com.github.dockerjava.api.command.BuildImageResultCallback;
 import com.github.dockerjava.api.command.WaitContainerResultCallback;
 import com.github.dockerjava.api.exception.DockerClientException;
-import com.github.dockerjava.api.exception.InternalServerErrorException;
 import com.github.dockerjava.api.exception.NotFoundException;
 import com.github.dockerjava.api.model.Frame;
 import com.github.dockerjava.api.model.HostConfig;
@@ -22,12 +21,13 @@ import spoon.reflect.declaration.CtClass;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.Base64;
+import java.util.Comparator;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
@@ -38,35 +38,54 @@ public class DockerConsoleRunner implements TestRunner {
     private final Path executor;
     private final Path agent;
     private final Path tests;
+    private final Path tmpPath;
 
-    public DockerConsoleRunner(Path executor, Path agent, Path tests) {
+    public DockerConsoleRunner(Path executor, Path agent, Path tests, Path tmpPath) {
         this.executor = executor;
         this.agent = agent;
         if (!Files.isDirectory(tests)) {
             throw new IllegalArgumentException("tests must point to a folder containing the individual test cases");
         }
         this.tests = tests;
+        this.tmpPath = tmpPath;
     }
 
     public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer)
-        throws IOException, InterruptedException, DockerRunnerException {
+        throws IOException, InterruptedException, DockerRunnerException, URISyntaxException {
         String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
         statusConsumer.accept("Building the docker image");
+
+        // Create the docker client
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
         DockerHttpClient client =
             new ApacheDockerHttpClient.Builder().dockerHost(config.getDockerHost()).sslConfig(config.getSSLConfig())
                 .build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).withDockerHttpClient(client).build();
+
+        // Prepare the build directory
+        Path buildDirectory = Files.createTempDirectory(this.tmpPath, "docker_build");
+        Files.copy(Path.of(this.getClass().getResource("Dockerfile").toURI()), buildDirectory.resolve("Dockerfile"));
+        Files.copy(this.executor, buildDirectory.resolve("executor.jar"));
+        Files.copy(this.agent, buildDirectory.resolve("agent.jar"));
+        Files.copy(jar, buildDirectory.resolve("src.jar"));
+
         String imageId = dockerClient.buildImageCmd()
-            .withBaseDirectory(new File("."))
-            .withDockerfile(new File("Dockerfile"))
+            .withBaseDirectory(buildDirectory.toFile())
+            .withDockerfile(buildDirectory.resolve("Dockerfile").toFile())
             .withPull(true)
-            .withBuildArg("jarfile", Paths.get("").relativize(jar).toString().replace("\\", "/"))
-            .withBuildArg("executor", Paths.get("").relativize(this.executor).toString().replace("\\", "/"))
-            .withBuildArg("agent", Paths.get("").relativize(this.agent).toString().replace("\\", "/"))
+            .withBuildArg("jarfile", "src.jar")
+            .withBuildArg("executor", "executor.jar")
+            .withBuildArg("agent", "agent.jar")
             .exec(new BuildImageResultCallback())
             .awaitImageId();
+
+        // Clean up the build directory
+        try (Stream<Path> walk = Files.walk(buildDirectory)) {
+            walk.sorted(Comparator.reverseOrder())
+                .map(Path::toFile)
+                .forEach(File::delete);
+        }
 
         try {
             List<Path> testCases;
@@ -79,22 +98,11 @@ public class DockerConsoleRunner implements TestRunner {
             for (Path testPath : testCases) {
                 statusConsumer.accept("Running test case " + testPath.getFileName());
                 results.add(executeTestCase(dockerClient, imageId, testPath, mainClass));
-                TestRunResult result = null;
-                int retryCounter = 1;
-                while (result == null) {
-                    try {
-                        result = executeTestCase(dockerClient, imageId, testPath, mainClass);
-                    } catch (InternalServerErrorException ex) {
-                        System.err.println("Docker timed out - retrying...");
-                        Thread.sleep(100);
-                    }
-                    retryCounter++;
-                    if (retryCounter > 5) {
-                        throw new IllegalStateException("Failed to crate the container after 5 attempts");
-                    }
-                }
-                results.add(result);
             }
+
+            System.out.println(
+                results.stream().filter(t -> t.status() == TestRunResult.TestRunStatus.OK).count() + "/" +
+                    results.size() + " tests successful");
 
             return results;
         } finally {
@@ -107,18 +115,19 @@ public class DockerConsoleRunner implements TestRunner {
 
         List<String> interactionLines = Files.readAllLines(testFile);
         String containerId = dockerClient
-                    .createContainerCmd(imageId)
-                    .withHostConfig(
-                        new HostConfig()
-                            .withCapDrop()
-                            .withNetworkMode("none")
-                            .withPidsLimit(2000L)
-                            .withMemory(200 * (1L << 20))
-                    )
-                    .withCmd(mainClass, Base64.getEncoder()
-                        .encodeToString(String.join("\n", interactionLines).getBytes(StandardCharsets.UTF_8)), String.valueOf(false))
-                    .exec()
-                    .getId();
+            .createContainerCmd(imageId)
+            .withHostConfig(
+                new HostConfig()
+                    .withCapDrop()
+                    .withNetworkMode("none")
+                    .withPidsLimit(2000L)
+                    .withMemory(200 * (1L << 20))
+            )
+            .withCmd(mainClass, Base64.getEncoder()
+                    .encodeToString(String.join("\n", interactionLines).getBytes(StandardCharsets.UTF_8)),
+                String.valueOf(false))
+            .exec()
+            .getId();
 
         try {
             dockerClient.startContainerCmd(containerId).exec();

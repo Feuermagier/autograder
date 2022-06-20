@@ -1,0 +1,5 @@
+de.firemage.codelinter.core.check.debug.AssertCheck
+Don't use assertions
+Test.java:3
+Test.java:5
+Test.java:7

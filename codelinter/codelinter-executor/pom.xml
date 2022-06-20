@@ -59,6 +59,7 @@
                             </manifestEntries>
                         </transformer>
                     </transformers>
+                    <outputFile>${project.build.directory}/../../codelinter-core/src/main/resources/executor.jar</outputFile>
                 </configuration>
                 <executions>
                     <execution>

@@ -22,6 +22,10 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtMethod<?>>() {
             @Override
             public void process(CtMethod<?> method) {
+                if (method.isPrivate() || method.getType().isPrimitive()) {
+                    return;
+                }
+
                 boolean returnsNull = dynamicAnalysis.findEventsForMethod(method)
                         .anyMatch(event -> event instanceof ReferenceReturnEvent refRet && refRet.returnedNull());
 
@@ -38,9 +42,7 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
                             .filter(tag -> tag.getType().equals(CtJavaDocTag.TagType.RETURN))
                             .findFirst();
 
-                    if (returnTag.isEmpty()) {
-                        addLocalProblem(javaDoc, "The method may return null but the Javadoc doesn't mention it");
-                    } else if (!returnTag.get().getContent().contains("null")) {
+                    if (returnTag.isPresent() && !returnTag.get().getContent().contains("null")) { // We don't care if the return tag does not exist
                         // We sadly cannot use the returnTag itself as the position because it has a "NoSourcePosition"
                         addLocalProblem(javaDoc, "The method may return null but the @return tag doesn't mention it");
                     }

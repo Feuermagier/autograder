@@ -1,10 +1,14 @@
 package de.firemage.codelinter.core.integrated;
 
+import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.reference.CtTypeReference;
 
+import java.util.List;
 import java.util.Optional;
 
 public final class SpoonUtil {
@@ -37,6 +41,10 @@ public final class SpoonUtil {
     }
 
     public static boolean isStringLiteral(CtExpression<?> expression, String value) {
-        return expression instanceof CtLiteral<?> literal && literal.getValue().equals(value);
+        return expression instanceof CtLiteral<?> literal && literal.getValue() != null && literal.getValue().equals(value);
+    }
+    
+    public static List<CtStatement> getEffectiveStatements(CtBlock<?> block) {
+        return block.getStatements().stream().filter(statement -> !(statement instanceof CtComment)).toList();
     }
 }

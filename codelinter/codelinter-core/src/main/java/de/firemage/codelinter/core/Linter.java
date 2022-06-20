@@ -14,6 +14,7 @@ import de.firemage.codelinter.core.spotbugs.SpotbugsCheck;
 import de.firemage.codelinter.core.spotbugs.SpotbugsLinter;
 import lombok.extern.slf4j.Slf4j;
 import java.io.IOException;
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -23,7 +24,7 @@ import java.util.function.Consumer;
 public class Linter {
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks, Consumer<String> statusConsumer, boolean disableDynamicAnalysis)
-            throws LinterException, InterruptedException, IOException {
+        throws LinterException, InterruptedException, IOException, URISyntaxException {
         statusConsumer.accept("Compiling");
         CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
 
@@ -65,7 +66,7 @@ public class Linter {
 
         if (!integratedChecks.isEmpty()) {
             statusConsumer.accept("Building the code model");
-            try (IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), statusConsumer)) {
+            try (IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), tmpLocation, statusConsumer)) {
                 if (!disableDynamicAnalysis) {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }
