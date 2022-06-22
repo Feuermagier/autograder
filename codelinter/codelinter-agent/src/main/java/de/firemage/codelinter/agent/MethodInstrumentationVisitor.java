@@ -68,7 +68,7 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
     }
     
     private String generifyDescriptor(String descriptor) {
-        if (descriptor.startsWith("L")) {
+        if (descriptor.startsWith("L") || descriptor.startsWith("[")) {
             return "Ljava/lang/Object;";
         } else {
             return descriptor;

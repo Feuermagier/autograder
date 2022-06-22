@@ -1,4 +1,4 @@
-package de.firemage.codelinter.core.check.javadoc;
+package de.firemage.codelinter.core.check.comment;
 
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.integrated.IntegratedCheck;
