@@ -96,7 +96,7 @@ public class Application implements Callable<Integer> {
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
             List<Problem> problems =
-                linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText, false);
+                linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText, true);
             progress.finish("Completed checks");
             printProblems(problems);
             CmdUtil.endSection();
@@ -118,7 +118,9 @@ public class Application implements Callable<Integer> {
 
     private List<Check> getChecks() {
         return List.of(
+            new AssertCheck()
             // General
+            /*
             new ConstantsInInterfaceCheck(false),
             new CopyPasteCheck(100),
             new DoubleBraceInitializationCheck(),
@@ -166,6 +168,7 @@ public class Application implements Callable<Integer> {
             // Unnecessary
             new EmptyNonCatchBlockCheck(),
             new UnusedCodeElementCheck()
+             */
         );
     }
 

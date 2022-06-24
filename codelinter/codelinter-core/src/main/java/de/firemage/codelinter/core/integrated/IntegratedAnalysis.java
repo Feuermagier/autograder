@@ -6,6 +6,7 @@ import de.firemage.codelinter.core.dynamic.DockerRunnerException;
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.dynamic.TestRunResult;
 import de.firemage.codelinter.core.file.UploadedFile;
+import de.firemage.codelinter.core.integrated.graph.GraphBuilder;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -42,10 +43,13 @@ public class IntegratedAnalysis implements AutoCloseable {
         this.dynamicAnalysis = new DynamicAnalysis(results);
     }
 
-    public List<Problem> lint(List<IntegratedCheck> checks) {
+    public List<Problem> lint(List<IntegratedCheck> checks, Consumer<String> statusConsumer) {
         //MethodAnalysis methodAnalysis = new MethodAnalysis(this.model);
         //methodAnalysis.run();
 
+        new GraphBuilder(false).buildGraph(this.staticAnalysis);
+        
+        statusConsumer.accept("Executing integrated checks");
         List<Problem> problems = new ArrayList<>();
         for (IntegratedCheck check : checks) {
             problems.addAll(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getFile()));

@@ -1,17 +1,17 @@
 name: Public test
 comment: Public test
-args:
+args: 
 --
 >add track (1,1) -> (5,1)
 1
 >add track (10,10) -> (10,11)
-Error, track not connected to other track
+!A!!R!^(E|e)rror.*
 >list tracks
 t 1 (1,1) -> (5,1) 4
 >add switch (5,1) -> (8,1),(5,3)
 2
 >add track (5,3) -> (8,1)
-Error, creation not possible wrong position
+!A!!R!^(E|e)rror.*
 >add track (10,1) -> (8,1)
 3
 >add switch (10,-3) -> (10,1),(12,-3)
@@ -38,7 +38,7 @@ none s T3 Emma 1 false true
 none e 103 118 3 true true
 none s T3 Emma 1 false true
 >delete rolling stock 3
-Error, rolling stock with ID 03 not found
+!A!!R!^(E|e)rror.*
 >delete rolling stock 103-118
 OK
 >create coach passenger 1 true true
@@ -87,7 +87,7 @@ train-set 403-145 added to train 2
 >set switch 4 position (10,1)
 OK
 >step 1
-Error, position of switches not set
+!A!!R!^(E|e)rror.*
 >set switch 2 position (8,1)
 OK
 >set switch 9 position (12,-3)

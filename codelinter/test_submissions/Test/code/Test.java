@@ -1,15 +1,17 @@
 import java.util.*;
 
 public class Test {
+	private List<Bar> list;
+	private Bar bar;
 	
-	public static void main(String[] args) {
-		String foo;
-		int x = 0;
-		/*
-			if (x < 0) {
-				System.out.println(x);
-			}
-			
-		 */
+	private void foo() {
+		this.bar.a();
+		this.bar.a();
+	}
+}
+
+class Bar {
+	public void a() {
+		
 	}
 }

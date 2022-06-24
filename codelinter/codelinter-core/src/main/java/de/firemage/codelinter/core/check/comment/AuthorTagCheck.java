@@ -7,16 +7,15 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
 
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class AuthorTagCheck extends IntegratedCheck {
     private final Pattern pattern;
-    
+
     public AuthorTagCheck() {
         this("\\w+");
     }
-    
+
     public AuthorTagCheck(String regex) {
         super("The @author tag is incorrect");
         this.pattern = Pattern.compile(regex);

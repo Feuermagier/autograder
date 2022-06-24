@@ -70,7 +70,7 @@ public class Linter {
                 if (!disableDynamicAnalysis) {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }
-                problems.addAll(analysis.lint(integratedChecks));
+                problems.addAll(analysis.lint(integratedChecks, statusConsumer));
             }
         }
 
