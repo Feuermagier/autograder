@@ -8,9 +8,11 @@ import java.security.ProtectionDomain;
 
 public class ClassTransformer implements ClassFileTransformer {
     @Override
-    public byte[] transform(ClassLoader classLoader, String className, Class<?> clazz, ProtectionDomain domain, byte[] buffer) {
+    public byte[] transform(ClassLoader classLoader, String className, Class<?> clazz, ProtectionDomain domain,
+                            byte[] buffer) {
         // Don't modify JDK classes
-        if (className.startsWith("java/") || className.startsWith("sun/") || className.startsWith("jdk/") || className.startsWith("de/firemage/codelinter/")) {
+        if (className.startsWith("java/") || className.startsWith("sun/") || className.startsWith("jdk/") ||
+            className.startsWith("de/firemage/codelinter/")) {
             return buffer;
         }
         System.out.println("AGENT: Modifying class " + className);

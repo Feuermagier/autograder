@@ -1,0 +1,4 @@
+- Dataflow analysis: Catch redundant checks such as (int) i < 2^31 or redundant null checks
+- Missing underscores in UPPER_SNAKE_CASE names
+- Detect loops that are only ever executed once (e.g. instead of return, method body placed in while(true) and always break used)
+- Detect wrappers used outside of generic datastructures

@@ -33,8 +33,11 @@ public interface Event {
                 String[] parts = line.split(":");
                 return switch(parts[0]) {
                     case "RefRet" -> new ReferenceReturnEvent(parts[1], parts[2], parts[3], parts[4]);
+                    case "PrimRet" -> new PrimitiveReturnEvent(parts[1], parts[2], parts[3], parts[4]);
                     case "GetField" -> new GetFieldEvent(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
                     case "PutField" -> new PutFieldEvent(parts[1], parts[2], parts[3], parts[4], parts[5], parts[6]);
+                    case "Enter" -> new MethodEnterEvent(parts[1], parts[2], parts[3]);
+                    case "Throw" -> new MethodExitThrowEvent(parts[1], parts[2], parts[3], parts[4]);
                     default -> throw new IllegalStateException("Unknown event type '" + parts[0] + "'");
                 };
             }).collect(Collectors.toList());

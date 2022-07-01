@@ -6,7 +6,9 @@ import de.firemage.codelinter.core.dynamic.DockerRunnerException;
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.dynamic.TestRunResult;
 import de.firemage.codelinter.core.file.UploadedFile;
+import de.firemage.codelinter.core.integrated.graph.GraphAnalysis;
 import de.firemage.codelinter.core.integrated.graph.GraphBuilder;
+import de.firemage.codelinter.core.integrated.modelmatching.ModelMatcher;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -20,6 +22,7 @@ public class IntegratedAnalysis implements AutoCloseable {
     private final Path jar;
     private final Path tmpPath;
     private final StaticAnalysis staticAnalysis;
+    private final GraphAnalysis graphAnalysis;
     private DynamicAnalysis dynamicAnalysis;
 
     public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpPath, Consumer<String> statusConsumer)
@@ -29,7 +32,9 @@ public class IntegratedAnalysis implements AutoCloseable {
         this.tmpPath = tmpPath;
 
         this.staticAnalysis = new StaticAnalysis(file, jar, statusConsumer);
+        this.graphAnalysis = new GraphAnalysis(this.staticAnalysis);
         this.dynamicAnalysis = new DynamicAnalysis(List.of());
+        
     }
 
     public void runDynamicAnalysis(Path tests, Consumer<String> statusConsumer)
@@ -47,8 +52,16 @@ public class IntegratedAnalysis implements AutoCloseable {
         //MethodAnalysis methodAnalysis = new MethodAnalysis(this.model);
         //methodAnalysis.run();
 
-        new GraphBuilder(false).buildGraph(this.staticAnalysis);
-        
+        //this.graphAnalysis.partition(this.staticAnalysis.findMain().getDeclaringType().getReference(), this.staticAnalysis.findClassByName("edu.kit.informatik.model.track.Track").getReference());
+
+        /*
+        try {
+            new ModelMatcher().match(this.staticAnalysis, Path.of("C:/Users/flose/Downloads/model.yaml"));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+         */
+
         statusConsumer.accept("Executing integrated checks");
         List<Problem> problems = new ArrayList<>();
         for (IntegratedCheck check : checks) {

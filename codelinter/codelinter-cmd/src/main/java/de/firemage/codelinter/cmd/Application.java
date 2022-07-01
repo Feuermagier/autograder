@@ -20,6 +20,7 @@ import de.firemage.codelinter.core.check.api.StringIsEmptyReimplementationCheck;
 import de.firemage.codelinter.core.check.comment.AuthorTagCheck;
 import de.firemage.codelinter.core.check.comment.CommentLanguageCheck;
 import de.firemage.codelinter.core.check.comment.CommentedOutCodeCheck;
+import de.firemage.codelinter.core.check.comment.JavadocParamCheck;
 import de.firemage.codelinter.core.check.comment.JavadocReturnNullCheck;
 import de.firemage.codelinter.core.check.comment.JavadocStubCheck;
 import de.firemage.codelinter.core.check.complexity.DiamondOperatorCheck;
@@ -96,7 +97,7 @@ public class Application implements Callable<Integer> {
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
             List<Problem> problems =
-                linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText, true);
+                linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText, false);
             progress.finish("Completed checks");
             printProblems(problems);
             CmdUtil.endSection();
@@ -118,9 +119,7 @@ public class Application implements Callable<Integer> {
 
     private List<Check> getChecks() {
         return List.of(
-            new AssertCheck()
             // General
-            /*
             new ConstantsInInterfaceCheck(false),
             new CopyPasteCheck(100),
             new DoubleBraceInitializationCheck(),
@@ -157,6 +156,7 @@ public class Application implements Callable<Integer> {
             new VariablesHaveDescriptiveNamesCheck(),
             new CommentedOutCodeCheck(),
             new AuthorTagCheck("u(\\w){4}"),
+            new JavadocParamCheck(),
             // Naming
             new BooleanMethodNameCheck(),
             new LinguisticNamingCheck(),
@@ -168,7 +168,6 @@ public class Application implements Callable<Integer> {
             // Unnecessary
             new EmptyNonCatchBlockCheck(),
             new UnusedCodeElementCheck()
-             */
         );
     }
 

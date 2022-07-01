@@ -2,6 +2,7 @@ package de.firemage.codelinter.core.check.comment;
 
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.integrated.IntegratedCheck;
+import de.firemage.codelinter.core.integrated.SpoonUtil;
 import de.firemage.codelinter.core.integrated.StaticAnalysis;
 import de.firemage.codelinter.event.ReferenceReturnEvent;
 import spoon.processing.AbstractProcessor;
@@ -30,13 +31,11 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
                         .anyMatch(event -> event instanceof ReferenceReturnEvent refRet && refRet.returnedNull());
 
                 if (returnsNull) {
-                    if (method.getComments().isEmpty() || !(method.getComments().get(0) instanceof CtJavaDoc)) {
-                        // TODO lookup inherited javadoc
+                    Optional<CtJavaDoc> javaDoc = SpoonUtil.getJavadoc(method);
+                    if (javaDoc.isEmpty()) {
                         return;
                     }
-
-                    CtJavaDoc javaDoc = method.getComments().get(0).asJavaDoc();
-                    Optional<CtJavaDocTag> returnTag = javaDoc
+                    Optional<CtJavaDocTag> returnTag = javaDoc.get()
                             .getTags()
                             .stream()
                             .filter(tag -> tag.getType().equals(CtJavaDocTag.TagType.RETURN))
@@ -44,7 +43,7 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
 
                     if (returnTag.isPresent() && !returnTag.get().getContent().contains("null")) { // We don't care if the return tag does not exist
                         // We sadly cannot use the returnTag itself as the position because it has a "NoSourcePosition"
-                        addLocalProblem(javaDoc, "The method may return null but the @return tag doesn't mention it");
+                        addLocalProblem(javaDoc.get(), "The method may return null but the @return tag doesn't mention it");
                     }
                 }
             }

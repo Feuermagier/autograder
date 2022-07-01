@@ -20,6 +20,10 @@ public class ClassInstrumentationVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
-        return new MethodInstrumentationVisitor(visitor, access, name, descriptor, this.name);
+        if ((access & Opcodes.ACC_ABSTRACT) != 0) {
+            return visitor;
+        } else {
+            return new MethodInstrumentationVisitor(visitor, access, name, descriptor, this.name);
+        }
     }
 }

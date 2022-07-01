@@ -33,7 +33,11 @@ public class ConsoleExecutor {
             } else if (line.startsWith("comment:")) {
                 System.out.println("EXEC:  " + line.substring(9));
             } else if (line.startsWith("args:")) {
-                args = List.of(line.substring(6).split(" "));
+                if (line.length() <= 6) {
+                    args = List.of();
+                } else {
+                    args = List.of(line.substring(6).split(" "));
+                }
             }
         }
         throw new IllegalStateException("Invalid test file: end of header missing");

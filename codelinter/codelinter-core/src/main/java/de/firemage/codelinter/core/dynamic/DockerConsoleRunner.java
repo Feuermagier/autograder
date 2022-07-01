@@ -91,7 +91,8 @@ public class DockerConsoleRunner implements TestRunner {
             List<Path> testCases;
             try (Stream<Path> files = Files.walk(this.tests)) {
                 testCases =
-                    files.filter(Files::isRegularFile).filter(f -> f.toString().endsWith(".protocol")).toList();
+                    files.filter(Files::isRegularFile)
+                        .filter(f -> f.toString().endsWith(".txt") || f.toString().endsWith(".protocol")).toList();
             }
 
             List<TestRunResult> results = new ArrayList<>();

@@ -4,6 +4,7 @@ import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtMethod;
@@ -90,5 +91,14 @@ public final class SpoonUtil {
             && method.getParameters().size() == 1
             && method.getParameters().get(0).getType().getQualifiedName()
             .equals(method.getDeclaringType().getQualifiedName());
+    }
+    
+    public static Optional<CtJavaDoc> getJavadoc(CtMethod<?> method) {
+        if (method.getComments().isEmpty() || !(method.getComments().get(0) instanceof CtJavaDoc)) {
+            // TODO lookup inherited javadoc
+            return Optional.empty();
+        } else {
+            return Optional.of(method.getComments().get(0).asJavaDoc());
+        }
     }
 }
