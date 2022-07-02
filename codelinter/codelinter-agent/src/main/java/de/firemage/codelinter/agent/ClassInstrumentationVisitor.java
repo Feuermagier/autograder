@@ -3,10 +3,10 @@ package de.firemage.codelinter.agent;
 import org.objectweb.asm.ClassVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
-import org.objectweb.asm.Type;
 
 public class ClassInstrumentationVisitor extends ClassVisitor {
     private String name;
+
     public ClassInstrumentationVisitor(ClassVisitor visitor) {
         super(Opcodes.ASM9, visitor);
     }
@@ -20,7 +20,7 @@ public class ClassInstrumentationVisitor extends ClassVisitor {
     @Override
     public MethodVisitor visitMethod(int access, String name, String descriptor, String signature, String[] exceptions) {
         MethodVisitor visitor = super.visitMethod(access, name, descriptor, signature, exceptions);
-        if ((access & Opcodes.ACC_ABSTRACT) != 0) {
+        if ((access & Opcodes.ACC_ABSTRACT) != 0 || (access & Opcodes.ACC_SYNTHETIC) != 0) {
             return visitor;
         } else {
             return new MethodInstrumentationVisitor(visitor, access, name, descriptor, this.name);

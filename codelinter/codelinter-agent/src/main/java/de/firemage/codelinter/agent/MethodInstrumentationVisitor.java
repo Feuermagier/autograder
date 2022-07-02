@@ -11,6 +11,9 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
     private static final Type RECORDER = Type.getType("Lde/firemage/codelinter/agent/EventRecorder;");
     private final String className;
     private final Label startFinally;
+    private boolean initialized = false; // Required because the compiler produces a putfield instruction before
+        // calling the super constructor for storing the reference to the outer class in implicit constructors
+        // of anonymous inner classes if they are defined in a non-static method
 
     public MethodInstrumentationVisitor(MethodVisitor visitor, int access, String name, String descriptor,
                                         String className) {
@@ -21,6 +24,7 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
 
     @Override
     protected void onMethodEnter() {
+        this.initialized = true;
         visitLabel(this.startFinally);
         visitLdcInsn(this.className);
         visitLdcInsn(this.getName());
@@ -32,6 +36,10 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
 
     @Override
     protected void onMethodExit(int opcode) {
+        if (!this.initialized) {
+            return;
+        }
+
         if (opcode == Opcodes.ARETURN) {
             dup();
             int returnValue = newLocal(this.getReturnType());
@@ -64,6 +72,10 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
 
     @Override
     public void visitFieldInsn(int opcode, String owner, String name, String descriptor) {
+        if (!this.initialized) {
+            return;
+        }
+
         if (opcode == Opcodes.PUTFIELD) {
             int value = newLocal(Type.getType(descriptor));
             storeLocal(value);
@@ -100,6 +112,10 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
 
     @Override
     public void visitMaxs(int maxStack, int maxLocals) {
+        if (!this.initialized) {
+            return;
+        }
+
         Label endFinally = new Label();
         visitTryCatchBlock(this.startFinally, endFinally, endFinally, "java/lang/Throwable");
         visitLabel(endFinally);

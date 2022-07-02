@@ -5,6 +5,7 @@ import org.objectweb.asm.ClassWriter;
 
 import java.lang.instrument.ClassFileTransformer;
 import java.security.ProtectionDomain;
+import java.util.Arrays;
 
 public class ClassTransformer implements ClassFileTransformer {
     @Override
