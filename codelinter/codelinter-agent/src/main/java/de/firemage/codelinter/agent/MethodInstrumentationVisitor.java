@@ -44,7 +44,11 @@ public class MethodInstrumentationVisitor extends AdviceAdapter {
                 new Method("recordReferenceReturn",
                     "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Ljava/lang/Object;)V"));
         } else if (opcode != Opcodes.ATHROW && opcode != Opcodes.RETURN) {
-            dup();
+            if (opcode == Opcodes.DRETURN || opcode == Opcodes.LRETURN) {
+                dup2();
+            } else {
+                dup();
+            }
             int returnValue = newLocal(this.getReturnType());
             storeLocal(returnValue);
             visitLdcInsn(this.className);
