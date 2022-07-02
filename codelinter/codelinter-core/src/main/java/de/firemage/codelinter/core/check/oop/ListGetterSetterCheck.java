@@ -4,29 +4,30 @@ import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
 import de.firemage.codelinter.core.integrated.IntegratedCheck;
 import de.firemage.codelinter.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtReturn;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.reference.CtVariableReference;
 
 public class ListGetterSetterCheck extends IntegratedCheck {
     public ListGetterSetterCheck() {
         super("Copy mutable collections before returning them to avoid unwanted mutations by other classes");
     }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtReturn<?>>() {
             @Override
             public void process(CtReturn<?> ret) {
-                if (!ret.getParent(CtMethod.class).isPublic()) {
+                if (!ret.getParent(CtMethod.class).isPublic() || ret.getReturnedExpression() == null) {
                     return;
                 }
 
-                if (isMutableCollection(ret.getReturnedExpression().getType())) {
-                    if (ret.getReturnedExpression() instanceof CtVariableReference<?> reference
-                            && reference.getDeclaration() instanceof CtField) {
+                if (isMutableCollection(ret.getReturnedExpression().getType())
+                        && ret.getReturnedExpression() instanceof CtFieldRead<?> read) {
+                    CtField<?> field = read.getVariable().getFieldDeclaration();
+                    if (field.isPrivate()) {
                         addLocalProblem(ret, "Copy this collection before returning it");
                     }
                 }
@@ -35,7 +36,7 @@ public class ListGetterSetterCheck extends IntegratedCheck {
     }
 
     private boolean isMutableCollection(CtTypeReference<?> type) {
-        String name = type.getSimpleName();
+        String name = type.getQualifiedName();
         return name.equals("java.util.List")
                 || name.equals("java.util.ArrayList")
                 || name.equals("java.util.LinkedList")
