@@ -70,8 +70,7 @@ public class GraphBuilder {
                 });
             }
         });
-        exportToFile(graph, "test.dot");
-        var sets = new ConnectivityInspector<>(graph).connectedSets();
+        //var sets = new ConnectivityInspector<>(graph).connectedSets();
         return graph;
     }
 
@@ -131,7 +130,7 @@ public class GraphBuilder {
             && !(!this.includeJDK && type.getQualifiedName().startsWith("java."));
     }
 
-    private static void exportToFile(Graph<CtTypeReference<?>, Usage> graph, String filename) {
+   public void exportToFile(Graph<CtTypeReference<?>, Usage> graph, String filename) {
         try {
             var exporter = new DOTExporter<CtTypeReference<?>, Usage>();
             exporter.setVertexAttributeProvider(
