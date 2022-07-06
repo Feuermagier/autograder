@@ -19,3 +19,5 @@ target/
 logs/
 /upload/
 tmp/
+uni_config.yaml
+*.dot

@@ -1,0 +1,52 @@
+- general:
+    - ConstantsInInterfaceCheck:
+        ignoreIfHasMethods: True
+    - CopyPasteCheck:
+        tokenCount: 100
+    - DoubleBraceInitializationCheck
+    - ForToForEachCheck
+    - MissingOverrideAnnotationCheck
+    - EqualsContractCheck
+    - CompareObjectsNotStringsCheck
+    - ConstantNamingAndQualifierCheck
+    - DontReassignParametersCheck
+    - FieldShouldBeLocalCheck
+- api:
+    - IsEmptyReimplementationCheck
+    - OldCollectionCheck
+    - StringIsEmptyReimplementationCheck
+- complexity:
+    - DiamondOperatorCheck
+    - ExtendsObjectCheck
+    - ForLoopVariableCheck
+    - RedundantModifierCheck
+    - RedundantReturnCheck
+    - UnnecessaryLocalBeforeReturnCheck
+    - UnusedImportCheck
+    - WrapperInstantiationCheck
+    - RedundantConstructorCheck
+- debug:
+    - AssertCheck
+    - PrintStackTraceCheck
+- exceptions:
+    - EmptyCatchCheck
+- comment:
+    - JavadocReturnNullCheck
+    - CommentLanguageCheck
+    - JavadocStubCheck
+    - CommentedOutCodeCheck
+    - AuthorTagCheck:
+        regex: .*
+    - JavadocParamCheck
+- naming:
+    - BooleanMethodNameCheck
+    - LinguisticNamingCheck
+    - VariablesHaveDescriptiveNamesCheck
+- oop:
+    - ConcreteCollectionCheck
+    - MethodShouldBeAbstractCheck
+- structure:
+    - DefaultPackageCheck
+- unnecessary:
+    - EmptyNonCatchBlockCheck
+    - UnusedCodeElementCheck

@@ -29,6 +29,10 @@ import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.List;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -51,7 +55,7 @@ public class DockerConsoleRunner implements TestRunner {
     }
 
     public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer)
-        throws IOException, InterruptedException, DockerRunnerException, URISyntaxException {
+        throws RunnerException, InterruptedException {
         String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
         statusConsumer.accept("Building the docker image");
@@ -63,44 +67,61 @@ public class DockerConsoleRunner implements TestRunner {
                 .build();
         DockerClient dockerClient = DockerClientBuilder.getInstance(config).withDockerHttpClient(client).build();
 
-        // Prepare the build directory
-        Path buildDirectory = Files.createTempDirectory(this.tmpPath, "docker_build");
-        Files.copy(Path.of(this.getClass().getResource("Dockerfile").toURI()), buildDirectory.resolve("Dockerfile"));
-        Files.copy(this.executor, buildDirectory.resolve("executor.jar"));
-        Files.copy(this.agent, buildDirectory.resolve("agent.jar"));
-        Files.copy(jar, buildDirectory.resolve("src.jar"));
-
-        String imageId = dockerClient.buildImageCmd()
-            .withBaseDirectory(buildDirectory.toFile())
-            .withDockerfile(buildDirectory.resolve("Dockerfile").toFile())
-            .withPull(true)
-            .withBuildArg("jarfile", "src.jar")
-            .withBuildArg("executor", "executor.jar")
-            .withBuildArg("agent", "agent.jar")
-            .exec(new BuildImageResultCallback())
-            .awaitImageId();
-
-        // Clean up the build directory
-        try (Stream<Path> walk = Files.walk(buildDirectory)) {
-            walk.sorted(Comparator.reverseOrder())
-                .map(Path::toFile)
-                .forEach(File::delete);
-        }
-
+        String imageId;
+        List<Path> testCases;
         try {
-            List<Path> testCases;
+            // Prepare the build directory
+            Path buildDirectory = Files.createTempDirectory(this.tmpPath, "docker_build");
+            Files.copy(Path.of(this.getClass().getResource("Dockerfile").toURI()), buildDirectory.resolve("Dockerfile"));
+            Files.copy(this.executor, buildDirectory.resolve("executor.jar"));
+            Files.copy(this.agent, buildDirectory.resolve("agent.jar"));
+            Files.copy(jar, buildDirectory.resolve("src.jar"));
+
+            imageId = dockerClient.buildImageCmd()
+                .withBaseDirectory(buildDirectory.toFile())
+                .withDockerfile(buildDirectory.resolve("Dockerfile").toFile())
+                .withPull(true)
+                .withBuildArg("jarfile", "src.jar")
+                .withBuildArg("executor", "executor.jar")
+                .withBuildArg("agent", "agent.jar")
+                .exec(new BuildImageResultCallback())
+                .awaitImageId();
+
+            // Clean up the build directory
+            try (Stream<Path> walk = Files.walk(buildDirectory)) {
+                walk.sorted(Comparator.reverseOrder())
+                    .map(Path::toFile)
+                    .forEach(File::delete);
+            }
+            
             try (Stream<Path> files = Files.walk(this.tests)) {
                 testCases =
                     files.filter(Files::isRegularFile)
                         .filter(f -> f.toString().endsWith(".txt") || f.toString().endsWith(".protocol")).toList();
             }
+        } catch (IOException | URISyntaxException e) {
+            throw new RunnerException(e);
+        }
 
-            List<TestRunResult> results = new ArrayList<>();
+
+        statusConsumer.accept("Running tests");
+        try {
+            ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
+            List<Future<TestRunResult>> futures = new ArrayList<>();
             for (Path testPath : testCases) {
-                statusConsumer.accept("Running test case " + testPath.getFileName());
-                results.add(executeTestCase(dockerClient, imageId, testPath, mainClass));
+                futures.add(service.submit(() -> executeTestCase(dockerClient, imageId, testPath, mainClass)));
             }
+            List<TestRunResult> results = new ArrayList<>();
+            for (var future : futures) {
+                try {
+                    results.add(future.get());
+                } catch (ExecutionException e) {
+                    throw new RunnerException(e.getCause());
+                }
+            }
+            service.shutdown();
 
+            System.out.println(System.lineSeparator());
             System.out.println(
                 results.stream().filter(t -> t.status() == TestRunResult.TestRunStatus.OK).count() + "/" +
                     results.size() + " tests successful");
@@ -151,9 +172,7 @@ public class DockerConsoleRunner implements TestRunner {
             }
 
             String logs = readLogs(dockerClient, containerId);
-            System.out.println(System.lineSeparator());
-            System.out.println(logs);
-
+            
             List<Event> events;
             try {
                 InputStream tar = dockerClient
@@ -161,8 +180,16 @@ public class DockerConsoleRunner implements TestRunner {
                     .exec();
                 events = Event.read(extractSingleFileFromTar(tar));
             } catch (NotFoundException ex) {
-                System.err.println("No codelinter_events.txt found in the container");
                 events = List.of();
+            }
+
+            synchronized (this) {
+                System.out.println(System.lineSeparator());
+                System.out.println(logs);
+                if (events.isEmpty()) {
+                    System.err.println("No events found. Maybe the student's code timed out.");
+                    System.err.flush();
+                }
             }
 
             return new TestRunResult(events, status, logs);

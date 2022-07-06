@@ -24,7 +24,7 @@ import java.util.function.Consumer;
 public class Linter {
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks, Consumer<String> statusConsumer, boolean disableDynamicAnalysis)
-        throws LinterException, InterruptedException, IOException, URISyntaxException {
+        throws LinterException, InterruptedException, IOException {
         statusConsumer.accept("Compiling");
         CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
 

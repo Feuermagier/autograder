@@ -4,6 +4,7 @@ import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.dynamic.DockerConsoleRunner;
 import de.firemage.codelinter.core.dynamic.DockerRunnerException;
 import de.firemage.codelinter.core.dynamic.DynamicAnalysis;
+import de.firemage.codelinter.core.dynamic.RunnerException;
 import de.firemage.codelinter.core.dynamic.TestRunResult;
 import de.firemage.codelinter.core.file.UploadedFile;
 import de.firemage.codelinter.core.integrated.graph.GraphAnalysis;
@@ -38,14 +39,18 @@ public class IntegratedAnalysis implements AutoCloseable {
     }
 
     public void runDynamicAnalysis(Path tests, Consumer<String> statusConsumer)
-        throws IOException, InterruptedException, DockerRunnerException, URISyntaxException {
-        DockerConsoleRunner runner = new DockerConsoleRunner(
-            Path.of(this.getClass().getResource("/executor.jar").toURI()),
-            Path.of(this.getClass().getResource("/agent.jar").toURI()),
-            tests,
-            this.tmpPath);
-        List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar, statusConsumer);
-        this.dynamicAnalysis = new DynamicAnalysis(results);
+        throws RunnerException, InterruptedException {
+        try {
+            DockerConsoleRunner runner = new DockerConsoleRunner(
+                Path.of(this.getClass().getResource("/executor.jar").toURI()),
+                Path.of(this.getClass().getResource("/agent.jar").toURI()),
+                tests,
+                this.tmpPath);
+            List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar, statusConsumer);
+            this.dynamicAnalysis = new DynamicAnalysis(results);
+        } catch (URISyntaxException e) {
+            throw new RunnerException(e);
+        }
     }
 
     public List<Problem> lint(List<IntegratedCheck> checks, Consumer<String> statusConsumer) {

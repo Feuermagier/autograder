@@ -7,45 +7,6 @@ import de.firemage.codelinter.core.Linter;
 import de.firemage.codelinter.core.LinterException;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.check.Check;
-import de.firemage.codelinter.core.check.general.CompareObjectsNotStringsCheck;
-import de.firemage.codelinter.core.check.general.ConstantNamingAndQualifierCheck;
-import de.firemage.codelinter.core.check.general.ConstantsInInterfaceCheck;
-import de.firemage.codelinter.core.check.general.CopyPasteCheck;
-import de.firemage.codelinter.core.check.general.DontReassignParametersCheck;
-import de.firemage.codelinter.core.check.general.DoubleBraceInitializationCheck;
-import de.firemage.codelinter.core.check.general.EqualsContractCheck;
-import de.firemage.codelinter.core.check.general.FieldShouldBeLocalCheck;
-import de.firemage.codelinter.core.check.general.ForToForEachCheck;
-import de.firemage.codelinter.core.check.general.MissingOverrideAnnotationCheck;
-import de.firemage.codelinter.core.check.api.IsEmptyReimplementationCheck;
-import de.firemage.codelinter.core.check.api.OldCollectionCheck;
-import de.firemage.codelinter.core.check.api.StringIsEmptyReimplementationCheck;
-import de.firemage.codelinter.core.check.comment.AuthorTagCheck;
-import de.firemage.codelinter.core.check.comment.CommentLanguageCheck;
-import de.firemage.codelinter.core.check.comment.CommentedOutCodeCheck;
-import de.firemage.codelinter.core.check.comment.JavadocParamCheck;
-import de.firemage.codelinter.core.check.comment.JavadocReturnNullCheck;
-import de.firemage.codelinter.core.check.comment.JavadocStubCheck;
-import de.firemage.codelinter.core.check.complexity.DiamondOperatorCheck;
-import de.firemage.codelinter.core.check.complexity.ExtendsObjectCheck;
-import de.firemage.codelinter.core.check.complexity.ForLoopVariableCheck;
-import de.firemage.codelinter.core.check.complexity.RedundantModifierCheck;
-import de.firemage.codelinter.core.check.complexity.RedundantReturnCheck;
-import de.firemage.codelinter.core.check.complexity.UnnecessaryLocalBeforeReturnCheck;
-import de.firemage.codelinter.core.check.complexity.UnusedImportCheck;
-import de.firemage.codelinter.core.check.complexity.WrapperInstantiationCheck;
-import de.firemage.codelinter.core.check.debug.AssertCheck;
-import de.firemage.codelinter.core.check.debug.PrintStackTraceCheck;
-import de.firemage.codelinter.core.check.exceptions.EmptyCatchCheck;
-import de.firemage.codelinter.core.check.naming.BooleanMethodNameCheck;
-import de.firemage.codelinter.core.check.naming.LinguisticNamingCheck;
-import de.firemage.codelinter.core.check.naming.VariablesHaveDescriptiveNamesCheck;
-import de.firemage.codelinter.core.check.oop.ConcreteCollectionCheck;
-import de.firemage.codelinter.core.check.oop.ListGetterSetterCheck;
-import de.firemage.codelinter.core.check.oop.MethodShouldBeAbstractCheck;
-import de.firemage.codelinter.core.check.structure.DefaultPackageCheck;
-import de.firemage.codelinter.core.check.unnecessary.EmptyNonCatchBlockCheck;
-import de.firemage.codelinter.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.codelinter.core.compiler.CompilationFailureException;
 import de.firemage.codelinter.core.compiler.JavaVersion;
 import de.firemage.codelinter.core.file.UploadedFile;
@@ -56,14 +17,14 @@ import picocli.CommandLine.Option;
 import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
+
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.concurrent.Callable;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
-        description = "Static code analysis for student java code")
+    description = "Static code analysis for student java code")
 public class Application implements Callable<Integer> {
     private static final int IO_EXIT_CODE = 3;
     private static final int COMPILATION_EXIT_CODE = 4;
@@ -71,14 +32,16 @@ public class Application implements Callable<Integer> {
 
     private static final int CAPTION_LENGTH = 20;
 
-    @Parameters(index = "0", description = "The check configuration")
+    @Parameters(index = "0", description = "The check configuration.")
     private Path checkConfig;
-    @Parameters(index = "1", description = "The root folder which contains the files to check")
+    @Parameters(index = "1", description = "The root folder which contains the files to check.")
     private Path file;
-    @Parameters(index = "2", description = "The root folder which contains the tests to run")
+    @Parameters(index = "2", defaultValue = "", description = "The root folder which contains the tests to run. If not provided or empty, no tests will be run.")
     private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version.")
     private String javaVersion;
+    @Option(names = {"-d", "--dynamic"}, defaultValue = "true", description = "Run the dynamic analysis?")
+    private boolean enableDynamic;
     @Spec
     private CommandSpec spec;
 
@@ -93,7 +56,13 @@ public class Application implements Callable<Integer> {
         if (!JavaVersion.isValidJavaVersion(javaVersion)) {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
-        
+
+        boolean dynamic = this.enableDynamic && !this.tests.toString().equals("");
+        if (!dynamic) {
+            CmdUtil.println("Note: Dynamic analysis is disabled.");
+            CmdUtil.println();
+        }
+
         List<Check> checks;
         try {
             CheckConfig config = new ObjectMapper(new YAMLFactory()).readValue(checkConfig.toFile(), CheckConfig.class);
@@ -110,79 +79,23 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, progress::updateText, false);
+            List<Problem> problems =
+                linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, progress::updateText, !dynamic);
             progress.finish("Completed checks");
             printProblems(problems);
             CmdUtil.endSection();
         } catch (CompilationFailureException e) {
             CmdUtil.println(e.getMessage());
             return COMPILATION_EXIT_CODE;
-        } catch (LinterException e) {
+        } catch (LinterException | InterruptedException e) {
             e.printStackTrace();
+            return MISC_EXIT_CODE;
         } catch (IOException e) {
             e.printStackTrace();
-        } catch (InterruptedException e) {
-            e.printStackTrace();
-        } catch (URISyntaxException e) {
-            e.printStackTrace();
+            return IO_EXIT_CODE;
         }
 
         return 0;
-    }
-
-    private List<Check> getChecks() {
-        return List.of(
-                // General
-                new ConstantsInInterfaceCheck(false),
-                new CopyPasteCheck(100),
-                new DoubleBraceInitializationCheck(),
-                new ForToForEachCheck(),
-                new MissingOverrideAnnotationCheck(),
-                new EqualsContractCheck(),
-                new CompareObjectsNotStringsCheck(),
-                new ConstantNamingAndQualifierCheck(),
-                new DontReassignParametersCheck(),
-                new FieldShouldBeLocalCheck(),
-                // API
-                new IsEmptyReimplementationCheck(),
-                new OldCollectionCheck(),
-                new StringIsEmptyReimplementationCheck(),
-                // Complexity
-                new DiamondOperatorCheck(),
-                new ExtendsObjectCheck(),
-                new ForLoopVariableCheck(),
-                //new RedundantConstructorCheck(), // Allow declaring empty constructors for documentation
-                new RedundantModifierCheck(),
-                new RedundantReturnCheck(),
-                new UnnecessaryLocalBeforeReturnCheck(),
-                new UnusedImportCheck(),
-                new WrapperInstantiationCheck(),
-                // Debug
-                new AssertCheck(),
-                new PrintStackTraceCheck(),
-                // Exceptions
-                new EmptyCatchCheck(),
-                // Comments
-                new JavadocReturnNullCheck(),
-                new CommentLanguageCheck(),
-                new JavadocStubCheck(),
-                new VariablesHaveDescriptiveNamesCheck(),
-                new CommentedOutCodeCheck(),
-                new AuthorTagCheck("u(\\w){4}"),
-                new JavadocParamCheck(),
-                // Naming
-                new BooleanMethodNameCheck(),
-                new LinguisticNamingCheck(),
-                // OOP
-                new ConcreteCollectionCheck(),
-                new MethodShouldBeAbstractCheck(),
-                new ListGetterSetterCheck(),
-                // Structure
-                new DefaultPackageCheck(),
-                // Unnecessary
-                new EmptyNonCatchBlockCheck(),
-                new UnusedCodeElementCheck()
-        );
     }
 
     private Path getTmpDirectory() {
@@ -201,8 +114,8 @@ public class Application implements Callable<Integer> {
 
     private String formatProblem(Problem problem) {
         return String.format("%s %s (Source: %s)",
-                problem.getDisplayLocation(),
-                problem.getExplanation(),
-                problem.getCheck().getLinter());
+            problem.getDisplayLocation(),
+            problem.getExplanation(),
+            problem.getCheck().getLinter());
     }
 }
