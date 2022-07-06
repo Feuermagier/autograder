@@ -1,4 +1,4 @@
-## Automatically run a set of static & dynamic analysis on student code to aid grading.
+## Automatically run static & dynamic analysis on student code to aid grading.
 
 Configuration is done using command line flags and a check config file.
 The command line parameters are
@@ -24,3 +24,5 @@ The dynamic analysis modifies the bytecode of the student's code, and bugs typic
 Note: To get accurate results from the dynamic analysis, make sure that the tests cover most or all possible input types.
 This makes sure that all possible code paths are executed.
 
+If you change the events module, make sure to run `mvn install`, as both the agent and the core module depend on it.
+If you change the executor or the agent, run `mvn package` for those modules so that the jar files in [codelinter-core/src/main/resources](codelinter-core/src/main/resources) get updated.
