@@ -1,4 +1,4 @@
-package de.firemage.codelinter.core.check;
+package de.firemage.codelinter.core.check.general;
 
 import de.firemage.codelinter.core.pmd.PMDCheck;
 import net.sourceforge.pmd.lang.java.rule.bestpractices.MissingOverrideRule;

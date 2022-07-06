@@ -1,5 +1,6 @@
-package de.firemage.codelinter.core.check;
+package de.firemage.codelinter.core.check.general;
 
+import de.firemage.codelinter.core.check.Check;
 import lombok.Getter;
 
 public class CopyPasteCheck implements Check {

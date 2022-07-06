@@ -1,19 +1,22 @@
 package de.firemage.codelinter.cmd;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.firemage.codelinter.cmd.config.CheckConfig;
 import de.firemage.codelinter.core.Linter;
 import de.firemage.codelinter.core.LinterException;
 import de.firemage.codelinter.core.Problem;
 import de.firemage.codelinter.core.check.Check;
-import de.firemage.codelinter.core.check.CompareObjectsNotStringsCheck;
-import de.firemage.codelinter.core.check.ConstantNamingAndQualifierCheck;
-import de.firemage.codelinter.core.check.ConstantsInInterfaceCheck;
-import de.firemage.codelinter.core.check.CopyPasteCheck;
-import de.firemage.codelinter.core.check.DontReassignParametersCheck;
-import de.firemage.codelinter.core.check.DoubleBraceInitializationCheck;
-import de.firemage.codelinter.core.check.EqualsContractCheck;
-import de.firemage.codelinter.core.check.FieldShouldBeLocalCheck;
-import de.firemage.codelinter.core.check.ForToForEachCheck;
-import de.firemage.codelinter.core.check.MissingOverrideAnnotationCheck;
+import de.firemage.codelinter.core.check.general.CompareObjectsNotStringsCheck;
+import de.firemage.codelinter.core.check.general.ConstantNamingAndQualifierCheck;
+import de.firemage.codelinter.core.check.general.ConstantsInInterfaceCheck;
+import de.firemage.codelinter.core.check.general.CopyPasteCheck;
+import de.firemage.codelinter.core.check.general.DontReassignParametersCheck;
+import de.firemage.codelinter.core.check.general.DoubleBraceInitializationCheck;
+import de.firemage.codelinter.core.check.general.EqualsContractCheck;
+import de.firemage.codelinter.core.check.general.FieldShouldBeLocalCheck;
+import de.firemage.codelinter.core.check.general.ForToForEachCheck;
+import de.firemage.codelinter.core.check.general.MissingOverrideAnnotationCheck;
 import de.firemage.codelinter.core.check.api.IsEmptyReimplementationCheck;
 import de.firemage.codelinter.core.check.api.OldCollectionCheck;
 import de.firemage.codelinter.core.check.api.StringIsEmptyReimplementationCheck;
@@ -68,9 +71,11 @@ public class Application implements Callable<Integer> {
 
     private static final int CAPTION_LENGTH = 20;
 
-    @Parameters(index = "0", description = "The root folder which contains the files to check")
+    @Parameters(index = "0", description = "The check configuration")
+    private Path checkConfig;
+    @Parameters(index = "1", description = "The root folder which contains the files to check")
     private Path file;
-    @Parameters(index = "1", description = "The root folder which contains the tests to run")
+    @Parameters(index = "2", description = "The root folder which contains the tests to run")
     private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version.")
     private String javaVersion;
@@ -88,6 +93,15 @@ public class Application implements Callable<Integer> {
         if (!JavaVersion.isValidJavaVersion(javaVersion)) {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
+        
+        List<Check> checks;
+        try {
+            CheckConfig config = new ObjectMapper(new YAMLFactory()).readValue(checkConfig.toFile(), CheckConfig.class);
+            checks = config.getChecks().stream().flatMap(c -> c.create().stream()).toList();
+        } catch (IOException e) {
+            e.printStackTrace();
+            return IO_EXIT_CODE;
+        }
 
         Linter linter = new Linter();
         UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));
@@ -96,8 +110,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems =
-                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, getChecks(), progress::updateText, false);
+            List<Problem> problems = linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, progress::updateText, false);
             progress.finish("Completed checks");
             printProblems(problems);
             CmdUtil.endSection();

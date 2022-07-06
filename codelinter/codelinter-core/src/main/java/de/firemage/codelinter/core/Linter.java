@@ -1,7 +1,7 @@
 package de.firemage.codelinter.core;
 
 import de.firemage.codelinter.core.check.Check;
-import de.firemage.codelinter.core.check.CopyPasteCheck;
+import de.firemage.codelinter.core.check.general.CopyPasteCheck;
 import de.firemage.codelinter.core.compiler.CompilationResult;
 import de.firemage.codelinter.core.compiler.Compiler;
 import de.firemage.codelinter.core.cpd.CPDLinter;

@@ -1,7 +1,7 @@
 package de.firemage.codelinter.core.cpd;
 
 import de.firemage.codelinter.core.Problem;
-import de.firemage.codelinter.core.check.CopyPasteCheck;
+import de.firemage.codelinter.core.check.general.CopyPasteCheck;
 import de.firemage.codelinter.core.file.UploadedFile;
 import net.sourceforge.pmd.cpd.CPD;
 import net.sourceforge.pmd.cpd.CPDConfiguration;

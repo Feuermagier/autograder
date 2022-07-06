@@ -1,7 +1,6 @@
 package de.firemage.codelinter.core.spotbugs;
 
 import de.firemage.codelinter.core.Problem;
-import de.firemage.codelinter.core.check.PlaceholderCheck;
 import edu.umd.cs.findbugs.AbstractBugReporter;
 import edu.umd.cs.findbugs.AnalysisError;
 import edu.umd.cs.findbugs.BugCollection;
@@ -12,11 +11,8 @@ import edu.umd.cs.findbugs.SortedBugCollection;
 import edu.umd.cs.findbugs.annotations.Confidence;
 import edu.umd.cs.findbugs.classfile.ClassDescriptor;
 import javax.annotation.CheckForNull;
-import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 public class InCodeBugReporter extends AbstractBugReporter {
     private final BugCollection bugCollection;
