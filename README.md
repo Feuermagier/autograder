@@ -4,9 +4,9 @@ Configuration is done using command line flags and a check config file.
 The command line parameters are
 * Parameter #1: The path to the check config file
 * Parameter #2: The path to the student's code. The directory should contain the root package. Non-java files are ignored.
-* Parameter #3: (Optional) The path to the directory containing the test protocols. Those are used for the dynamic analysis.
+* Parameter #3: (Optional) The path to the directory containing the test protocols. Those are used for the dynamic analysis. If not specified, no tests will be run.
 * `-j <int>` / `--java <int>`: Specify the java version of the student's code. Default: `11`
-* `-d <bool>`: Enable dynamic analysis. This has no effect if no test path is specified. Default: `true`
+* `-s` / `--static`: Disable dynamic analysis.
 
 The code is analyzed using PMD, SpotBugs and the PMD CPD with custom configurations as well as custom static and dynamic checks ("integrated" checks).
 The check config file must be a valid YAML file that configures the tests to run.

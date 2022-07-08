@@ -40,8 +40,8 @@ public class Application implements Callable<Integer> {
     private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version.")
     private String javaVersion;
-    @Option(names = {"-d", "--dynamic"}, defaultValue = "true", description = "Run the dynamic analysis?")
-    private boolean enableDynamic;
+    @Option(names = {"-s", "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
+    private boolean staticOnly;
     @Spec
     private CommandSpec spec;
 
@@ -57,7 +57,7 @@ public class Application implements Callable<Integer> {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
 
-        boolean dynamic = this.enableDynamic && !this.tests.toString().equals("");
+        boolean dynamic = !this.staticOnly && !this.tests.toString().equals("");
         if (!dynamic) {
             CmdUtil.println("Note: Dynamic analysis is disabled.");
             CmdUtil.println();
