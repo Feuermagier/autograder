@@ -19,7 +19,7 @@ public class AssertCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtAssert<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtAssert<?>>() {
             @Override
             public void process(CtAssert<?> element) {
                 addLocalProblem(element, "Assert used");

@@ -25,7 +25,7 @@ public class JavadocStubCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtJavaDoc>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtJavaDoc>() {
             @Override
             public void process(CtJavaDoc javadoc) {
                 if (allowGettersSettersWithEmptyDescription

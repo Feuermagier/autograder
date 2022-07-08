@@ -17,7 +17,7 @@ public class ListGetterSetterCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtReturn<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtReturn<?>>() {
             @Override
             public void process(CtReturn<?> ret) {
                 if (!ret.getParent(CtMethod.class).isPublic() || ret.getReturnedExpression() == null) {

@@ -23,7 +23,7 @@ public class AuthorTagCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtJavaDoc>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtJavaDoc>() {
             @Override
             public void process(CtJavaDoc element) {
                 for (CtJavaDocTag tag : element.getTags()) {

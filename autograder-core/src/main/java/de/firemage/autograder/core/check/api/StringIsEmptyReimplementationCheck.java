@@ -28,7 +28,7 @@ public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtInvocation<?>>() {
             @Override
             public void process(CtInvocation<?> invocation) {
                 if (invocation.getTarget() == null) {

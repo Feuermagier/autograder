@@ -34,7 +34,7 @@ public class CommentLanguageCheck extends IntegratedCheck {
         List<CommentLanguageResult> englishComments = new ArrayList<>();
         List<CommentLanguageResult> germanComments = new ArrayList<>();
 
-        staticAnalysis.processWith(new AbstractProcessor<CtComment>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtComment>() {
             @Override
             public void process(CtComment comment) {
                 var language = CommentLanguageResult.detect(comment, detector);

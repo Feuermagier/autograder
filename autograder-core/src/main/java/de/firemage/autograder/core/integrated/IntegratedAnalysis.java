@@ -43,7 +43,7 @@ public class IntegratedAnalysis implements AutoCloseable {
                 Path.of(this.getClass().getResource("/agent.jar").toURI()),
                 tests,
                 this.tmpPath);
-            List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar, statusConsumer);
+            List<TestRunResult> results = runner.runTests(this.staticAnalysis.getSpoonModel(), this.jar, statusConsumer);
             this.dynamicAnalysis = new DynamicAnalysis(results);
         } catch (URISyntaxException e) {
             throw new RunnerException(e);

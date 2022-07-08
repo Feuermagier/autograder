@@ -15,7 +15,7 @@ public class OldCollectionCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtConstructorCall<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtConstructorCall<?>>() {
             @Override
             public void process(CtConstructorCall call) {
                 String type = call.getType().getQualifiedName();

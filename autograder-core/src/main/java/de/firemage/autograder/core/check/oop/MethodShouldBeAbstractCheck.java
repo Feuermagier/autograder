@@ -27,7 +27,7 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
             public void process(CtClass<?> clazz) {
                 if (!clazz.isAbstract()) {

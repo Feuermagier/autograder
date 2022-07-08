@@ -23,7 +23,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtField<?>>() {
             @Override
             public void process(CtField<?> field) {
                 if (field.isFinal()

@@ -26,7 +26,7 @@ public class CompareObjectsNotStringsCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtInvocation<?>>() {
             @Override
             public void process(CtInvocation<?> invocation) {
                 CtExecutableReference<?> executable = invocation.getExecutable();

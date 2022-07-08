@@ -15,7 +15,7 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtComment>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtComment>() {
             @Override
             public void process(CtComment comment) {
                 var type = comment.getCommentType();

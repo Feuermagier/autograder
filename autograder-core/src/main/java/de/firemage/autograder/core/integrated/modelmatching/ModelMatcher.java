@@ -19,7 +19,7 @@ public class ModelMatcher {
         mapper.findAndRegisterModules();
         ExpectedModel expectedModel = mapper.readValue(modelFile.toFile(), ExpectedModel.class);
         
-        analysis.processWith(new AbstractProcessor<CtType<?>>() {
+        analysis.getSpoonModel().processWith(new AbstractProcessor<CtType<?>>() {
             @Override
             public void process(CtType<?> type) {
                 for (Map.Entry<String, ExpectedType> expectedType : expectedModel.getTypes().entrySet()) {

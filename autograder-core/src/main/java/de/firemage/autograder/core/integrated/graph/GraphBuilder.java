@@ -30,7 +30,7 @@ public class GraphBuilder {
     public Graph<CtTypeReference<?>, Usage> buildGraph(StaticAnalysis analysis) {
         Graph<CtTypeReference<?>, Usage> graph = new DirectedMultigraph<>(Usage.class);
 
-        analysis.processWith(new AbstractProcessor<CtType<?>>() {
+        analysis.getSpoonModel().processWith(new AbstractProcessor<CtType<?>>() {
             @Override
             public void process(CtType<?> type) {
                 createVertex(type.getReference(), graph);

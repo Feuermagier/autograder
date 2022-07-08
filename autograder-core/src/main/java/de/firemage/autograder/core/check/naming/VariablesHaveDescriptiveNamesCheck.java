@@ -22,7 +22,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
             public void process(CtVariable<?> variable) {
                 if (variable instanceof CtCatchVariable || variable.getParent() instanceof CtLambda) {

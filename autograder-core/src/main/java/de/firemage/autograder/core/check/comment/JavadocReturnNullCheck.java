@@ -20,7 +20,7 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtMethod<?>>() {
+        staticAnalysis.getSpoonModel().processWith(new AbstractProcessor<CtMethod<?>>() {
             @Override
             public void process(CtMethod<?> method) {
                 if (method.isPrivate() || method.getType().isPrimitive()) {

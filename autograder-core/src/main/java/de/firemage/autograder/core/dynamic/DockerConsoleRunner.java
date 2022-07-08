@@ -13,6 +13,7 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import de.firemage.autograder.core.integrated.SpoonModel;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.event.Event;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -54,9 +55,9 @@ public class DockerConsoleRunner implements TestRunner {
         this.tmpPath = tmpPath;
     }
 
-    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer)
+    public List<TestRunResult> runTests(SpoonModel spoonModel, Path jar, Consumer<String> statusConsumer)
         throws RunnerException, InterruptedException {
-        String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
+        String mainClass = spoonModel.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
         statusConsumer.accept("Building the docker image");
 
