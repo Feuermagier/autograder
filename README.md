@@ -17,6 +17,8 @@ The dynamic analysis executes the student's code in secured Docker containers.
 We never execute any foreign code on the host!
 However, this means that you need to have Docker installed and running if you want to use the dynamic analysis.
 If you see strange BrokenPipeErrors, restart your Docker daemon.
+Dynamic analysis is currently only available for command line I/O based programs.
+Support for JUnit tests is planned.
 
 If you see a VerifyError in the console, please open an issue or contact me directly.
 The dynamic analysis modifies the bytecode of the student's code, and bugs typically result in invalid bytecode.
