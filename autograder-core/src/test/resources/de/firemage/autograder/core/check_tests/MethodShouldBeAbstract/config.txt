@@ -1,0 +1,9 @@
+MethodShouldBeAbstractCheck
+Method should be abstract instead of providing a dummy implementation
+Test.java:30-32
+Test.java:34-36
+Test.java:42-44
+Test.java:46-48
+Test.java:50-52
+Test.java:54-56
+Test.java:58-60

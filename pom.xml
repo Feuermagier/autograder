@@ -4,8 +4,8 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
-    <groupId>de.firemage.codelinter</groupId>
-    <artifactId>codelinter-parent</artifactId>
+    <groupId>de.firemage.autograder</groupId>
+    <artifactId>autograder-parent</artifactId>
     <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
     <build>
@@ -21,16 +21,14 @@
         </plugins>
     </build>
     <modules>
-        <module>codelinter-core</module>
-        <module>codelinter-web</module>
-        <module>codelinter-cmd</module>
-        <module>codelinter-executor</module>
-        <module>codelinter-event</module>
-        <module>codelinter-agent</module>
+        <module>autograder-core</module>
+        <module>autograder-cmd</module>
+        <module>autograder-executor</module>
+        <module>autograder-event</module>
+        <module>autograder-agent</module>
     </modules>
 
-    <name>codelinter</name>
-    <url>https://codelinter.firemage.de</url>
+    <name>autograder</name>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>

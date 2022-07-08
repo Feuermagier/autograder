@@ -1,0 +1,8 @@
+StringIsEmptyReimplementationCheck
+Use String#isEmpty
+Test.java:15
+Test.java:18
+Test.java:21
+Test.java:23
+Test.java:25
+Test.java:27

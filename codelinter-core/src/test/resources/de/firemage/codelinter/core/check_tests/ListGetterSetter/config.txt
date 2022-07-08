@@ -1,4 +1,0 @@
-de.firemage.codelinter.core.check.oop.ListGetterSetterCheck
-Return mutable collection without copying it
-Test.java:13
-Test.java:17
