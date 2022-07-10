@@ -48,7 +48,7 @@ public final class Compiler {
                 output,
                 fileManager,
                 diagnosticCollector,
-                Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial", "--release=" + javaVersion.getVersionString()),
+                Arrays.asList("-g", "-Xlint:all", "-Xlint:-processing", "-Xlint:-serial", "--release=" + javaVersion.getVersionString()),
                 null,
                 compilationUnits).call();
         output.flush();

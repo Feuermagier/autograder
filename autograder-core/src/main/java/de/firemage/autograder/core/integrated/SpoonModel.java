@@ -15,6 +15,7 @@ import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class SpoonModel implements AutoCloseable {
@@ -59,22 +60,16 @@ public class SpoonModel implements AutoCloseable {
         this.model.processWith(processor);
     }
 
-    public CtClass<?> findClassByName(String name) {
+    public Optional<CtClass<?>> findClassByName(String name) {
         CtClass<?> clazz = this.model.filterChildren(
                 child -> child instanceof CtClass<?> c && c.getQualifiedName().equals(name)).first();
-        if (clazz == null) {
-            throw new IllegalArgumentException("No class with name '" + name + "' found");
-        }
-        return clazz;
+        return Optional.ofNullable(clazz);
     }
 
-    public CtMethod<?> findMethodBySignature(CtClass<?> clazz, String signature) {
+    public Optional<CtMethod<?>> findMethodBySignature(CtClass<?> clazz, String signature) {
         CtMethod<?> result = this.model.filterChildren(
                 child -> child instanceof CtMethod<?> method && method.getSignature().equals(signature)).first();
-        if (result == null) {
-            throw new IllegalArgumentException("No method in class " + clazz.getQualifiedName() + " with signature '" + signature + "' found");
-        }
-        return result;
+        return Optional.ofNullable(result);
     }
 
     public CtMethod<Void> findMain() {

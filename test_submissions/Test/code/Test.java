@@ -1,17 +1,30 @@
 import java.util.*;
 
 public class Test {
-	private List<Bar> list;
-	private Bar bar;
-	
-	private void foo() {
-		this.bar.a();
-		this.bar.a();
-	}
-}
+	private final Object x;
 
-class Bar {
-	public void a() {
-		
+	public Test() {
+		this.x = null;
+	}
+
+	public static void main(String[] args) {
+		new Test().foo();
+	}
+
+	private void foo() {
+		Object a = null;
+		a = bar();
+		Object b;
+		if (a == null) {
+			b = null;
+		} else {
+			b = new Object();
+		}
+		System.out.println(b);
+		System.out.println(this.x);
+	}
+
+	private Object bar() {
+		return new Object();
 	}
 }
