@@ -85,7 +85,7 @@ public class Application implements Callable<Integer> {
             printProblems(problems);
             CmdUtil.endSection();
         } catch (CompilationFailureException e) {
-            CmdUtil.println(e.getMessage());
+            CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
             return COMPILATION_EXIT_CODE;
         } catch (LinterException | InterruptedException e) {
             e.printStackTrace();

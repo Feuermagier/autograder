@@ -14,6 +14,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -23,7 +24,6 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.stream.Collectors;
 
 public final class Compiler {
     public static final Locale COMPILER_LOCALE = Locale.US;
@@ -31,33 +31,51 @@ public final class Compiler {
     private Compiler() {
     }
 
-    public static CompilationResult compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion) throws IOException, CompilationFailureException {
+    public static CompilationResult compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion)
+        throws IOException, CompilationFailureException {
+        try {
+            return compileWithEncoding(input, tmpLocation, javaVersion, StandardCharsets.UTF_8);
+        } catch (CompilationFailureException ex) {
+            // Try again with ANSI encoding
+            try {
+                return compileWithEncoding(input, tmpLocation, javaVersion, StandardCharsets.ISO_8859_1);
+            } catch (CompilationFailureException ex2) {
+                // Didn't work, the code does really not compile
+                throw ex;
+            }
+        }
+    }
+
+    public static CompilationResult compileWithEncoding(UploadedFile input, Path tmpLocation, JavaVersion javaVersion,
+                                                        Charset charset)
+        throws IOException, CompilationFailureException {
 
         List<PhysicalFileObject> compilationUnits = input.streamFiles()
-                .map(PhysicalFileObject::new)
-                .collect(Collectors.toList());
+            .map(file -> new PhysicalFileObject(file, charset))
+            .toList();
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         Path compilerOutput = tmpLocation.resolve(input.getName() + "_compiled");
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
         JavaFileManager fileManager = new SeparateBinaryFileManager(
-                compiler.getStandardFileManager(diagnosticCollector, Locale.US, StandardCharsets.UTF_8),
-                compilerOutput.toFile());
+            compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
+            compilerOutput.toFile(), charset);
         boolean successful = compiler.getTask(
-                output,
-                fileManager,
-                diagnosticCollector,
-                Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial", "--release=" + javaVersion.getVersionString()),
-                null,
-                compilationUnits).call();
+            output,
+            fileManager,
+            diagnosticCollector,
+            Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial",
+                "--release=" + javaVersion.getVersionString()),
+            null,
+            compilationUnits).call();
         output.flush();
         output.close();
 
         if (!successful) {
             throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
-                    .map(d -> new CompilationDiagnostic(d, input.getFile()))
-                    .toList(), input.getFile());
+                .map(d -> new CompilationDiagnostic(d, input.getFile()))
+                .toList(), input.getFile());
         }
 
         Manifest manifest = new Manifest();
@@ -69,8 +87,8 @@ public final class Compiler {
         FileUtils.deleteDirectory(compilerOutput.toFile());
 
         return new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
-                .map(d -> new CompilationDiagnostic(d, input.getFile()))
-                .toList());
+            .map(d -> new CompilationDiagnostic(d, input.getFile()))
+            .toList());
     }
 
 
