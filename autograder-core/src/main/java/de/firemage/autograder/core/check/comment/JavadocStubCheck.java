@@ -32,24 +32,24 @@ public class JavadocStubCheck extends IntegratedCheck {
                     && javadoc.getParent() instanceof CtMethod<?> method
                     && (SpoonUtil.isGetter(method) || SpoonUtil.isSetter(method))) {
                     // Setters and Getters are okay
-                } else if (javadoc.getContent().isBlank()) {
+                } else if (isDefaultValueDescription(javadoc.getContent())) {
                     addLocalProblem(javadoc, "Javadoc has an empty description");
                 }
 
                 for (CtJavaDocTag tag : javadoc.getTags()) {
                     switch(tag.getType()) {
                         case PARAM -> {
-                            if (isDefaultValueDescription(tag)) {
+                            if (isDefaultValueDescription(tag.getContent())) {
                                 addLocalProblem(javadoc, "Stub description for parameter " + tag.getParam());
                             }
                         }
                         case RETURN -> {
-                            if (isDefaultValueDescription(tag)) {
+                            if (isDefaultValueDescription(tag.getContent())) {
                                 addLocalProblem(javadoc, "Stub description for return value");
                             }
                         }
                         case THROWS -> {
-                            if (isDefaultValueDescription(tag)) {
+                            if (isDefaultValueDescription(tag.getContent())) {
                                 addLocalProblem(javadoc, "Stub description for exception " + tag.getParam());
                             }
                         }
@@ -61,14 +61,17 @@ public class JavadocStubCheck extends IntegratedCheck {
         });
     }
 
-    private boolean isDefaultValueDescription(CtJavaDocTag tag) {
-        return tag.getContent().isBlank()
-            || tag.getContent().equals("parameter")
-            || tag.getContent().equals("param")
-            || tag.getContent().equals("return value")
-            || tag.getContent().equals("TODO")
-            || tag.getContent().equals("null")
-            || tag.getContent().trim()
+    private boolean isDefaultValueDescription(String description) {
+        description = description.toLowerCase().replace(".", "").replace(",", "");
+        return description.isBlank()
+            || description.equals("parameter")
+            || description.equals("param")
+            || description.equals("return value")
+            || description.equals("todo")
+            || description.equals("null")
+            || description.equals("description")
+            || description.equals("beschreibung")
+            || description.trim()
             .matches("the (bool|boolean|byte|char|short|int|integer|long|float|double|String|Object|exception|array)( value| array)?");
     }
 }

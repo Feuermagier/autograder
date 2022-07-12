@@ -25,6 +25,7 @@
     - UnusedImportCheck
     - WrapperInstantiationCheck
     - RedundantConstructorCheck
+    - RedundantIfForBooleanCheck
 - debug:
     - AssertCheck
     - PrintStackTraceCheck

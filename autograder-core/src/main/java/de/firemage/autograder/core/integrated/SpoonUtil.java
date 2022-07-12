@@ -48,8 +48,30 @@ public final class SpoonUtil {
             literal.getValue().equals(value);
     }
 
+    public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
+        if (expression instanceof CtLiteral<?> literal
+            && literal.getValue() != null
+            && (literal.getType().getQualifiedName().equals("boolean") ||
+            literal.getType().getQualifiedName().equals("java.lang.Boolean"))) {
+            
+            return Optional.of((Boolean) literal.getValue());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     public static List<CtStatement> getEffectiveStatements(CtBlock<?> block) {
         return block.getStatements().stream().filter(statement -> !(statement instanceof CtComment)).toList();
+    }
+    
+    public static CtStatement unwrapStatement(CtStatement statement) {
+        if (statement instanceof CtBlock<?> block) {
+            List<CtStatement> statements = SpoonUtil.getEffectiveStatements(block);
+            if (statements.size() == 1) {
+                return statements.get(0);
+            }
+        }
+        return statement;
     }
 
     public static boolean isGetter(CtMethod<?> method) {
@@ -92,7 +114,7 @@ public final class SpoonUtil {
             && method.getParameters().get(0).getType().getQualifiedName()
             .equals(method.getDeclaringType().getQualifiedName());
     }
-    
+
     public static Optional<CtJavaDoc> getJavadoc(CtMethod<?> method) {
         if (method.getComments().isEmpty() || !(method.getComments().get(0) instanceof CtJavaDoc)) {
             // TODO lookup inherited javadoc

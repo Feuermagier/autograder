@@ -26,6 +26,7 @@
 * For loop should have exactly one loop variable
 * Empty non-catch block
 * All locals, parameters, private fields & private methods should be used
+* Unnecessary if as the value of the condition should be directly used (e.g. `if (x) { return true; } else { false; }`)
 
 ### Debugging Artifacts
 * Assertions used
