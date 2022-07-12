@@ -1,6 +1,7 @@
 ## Automatically run static & dynamic analysis on student code to aid grading.
 
 Autograder requires at least Java 17.
+Make sure Docker is running if you want to use the dynamic analysis.
 The main class of the command line application is [de.firemage.autograder.cmd.Application](de.firemage.autograder.cmd.Application).
 Configuration is done using command line flags and a check config file.
 The command line parameters are
