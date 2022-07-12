@@ -33,17 +33,7 @@ public final class Compiler {
 
     public static CompilationResult compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion)
         throws IOException, CompilationFailureException {
-        try {
-            return compileWithEncoding(input, tmpLocation, javaVersion, StandardCharsets.UTF_8);
-        } catch (CompilationFailureException ex) {
-            // Try again with ANSI encoding
-            try {
-                return compileWithEncoding(input, tmpLocation, javaVersion, StandardCharsets.ISO_8859_1);
-            } catch (CompilationFailureException ex2) {
-                // Didn't work, the code does really not compile
-                throw ex;
-            }
-        }
+        return compileWithEncoding(input, tmpLocation, javaVersion, input.getCharset());
     }
 
     public static CompilationResult compileWithEncoding(UploadedFile input, Path tmpLocation, JavaVersion javaVersion,

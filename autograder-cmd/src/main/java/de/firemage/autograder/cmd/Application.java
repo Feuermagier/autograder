@@ -73,9 +73,10 @@ public class Application implements Callable<Integer> {
         }
 
         Linter linter = new Linter();
-        UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));
 
         try {
+            UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));
+            
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();

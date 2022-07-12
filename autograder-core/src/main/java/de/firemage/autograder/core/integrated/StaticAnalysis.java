@@ -38,6 +38,7 @@ public class StaticAnalysis implements AutoCloseable {
         launcher.getEnvironment().setCommentEnabled(true);
         launcher.getEnvironment().setComplianceLevel(file.getVersion().getVersionNumber());
         launcher.getEnvironment().setInputClassLoader(classLoader);
+        launcher.getEnvironment().setEncoding(file.getCharset());
 
         try {
             this.model = launcher.buildModel();
