@@ -1,5 +1,9 @@
 ## Automatically run static & dynamic analysis on student code to aid grading.
 
+### All currently implemented checks can be found [here](checks.md)
+
+### Usage
+
 Autograder requires at least Java 17.
 Make sure Docker is running if you want to use the dynamic analysis.
 The main class of the command line application is [de.firemage.autograder.cmd.Application](de.firemage.autograder.cmd.Application).
@@ -13,6 +17,8 @@ The command line parameters are
 
 The check config file must be a valid YAML file that configures the tests to run.
 Autograder can also eb used as a library by just using the module `autograder-core`.
+
+### Additional information
 
 The code is analyzed using PMD, SpotBugs and the PMD CPD with custom configurations as well as custom static and dynamic checks ("integrated" checks).
 You can find an exemplary config file [here](sample_config.yaml).
