@@ -8,7 +8,7 @@ import java.util.Objects;
  * Represents an immutable two-dimensional vector. The origin is on the bottom left edge with the positive x-axis going
  * to the right and the positive y-axis going upwards
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class Vector {

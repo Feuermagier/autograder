@@ -6,7 +6,7 @@ import edu.kit.informatik.model.train.Train;
  * An abstract rolling stock with a length. This class also stores the train this rolling
  * stock belongs to (if there is any)
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public abstract class RollingStock {

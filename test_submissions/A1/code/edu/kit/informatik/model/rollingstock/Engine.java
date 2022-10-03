@@ -5,7 +5,7 @@ import edu.kit.informatik.StringConstants;
 /**
  * Represents a single engine of any type (electrical engine, steam engine or diesel engine)
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class Engine extends PoweredRollingStock {

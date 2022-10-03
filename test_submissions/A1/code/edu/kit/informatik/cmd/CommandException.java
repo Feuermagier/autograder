@@ -3,7 +3,7 @@ package edu.kit.informatik.cmd;
 /**
  * Represents any type of error that occurred during parsing of user input
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class CommandException extends Exception {

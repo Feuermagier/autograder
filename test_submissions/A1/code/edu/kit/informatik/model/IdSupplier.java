@@ -7,7 +7,7 @@ import java.util.Set;
  * Manages id's. Provides id's incrementally beginning at 1 and provides functionality of removing ids and later
  * reassigning them
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public final class IdSupplier {

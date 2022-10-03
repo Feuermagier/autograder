@@ -14,7 +14,7 @@ import java.util.Objects;
  * Also stores up to three other tracks which are connected to the start point or the ending points.
  * Important: This class doesn't check if the following tracks can be connected to this track.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class StandardTrack extends Track {

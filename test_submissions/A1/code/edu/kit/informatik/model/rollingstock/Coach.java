@@ -8,7 +8,7 @@ import java.util.Objects;
 /**
  * Represents a single coach of any type (passenger coach, freight coach or a special coach)
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class Coach extends RollingStock {

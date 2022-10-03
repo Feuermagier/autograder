@@ -5,7 +5,7 @@ import java.util.regex.MatchResult;
 /**
  * Represents a simple command for use in lambda parameters to process command line input
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 @FunctionalInterface

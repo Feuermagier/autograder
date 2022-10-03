@@ -24,7 +24,7 @@ import java.util.stream.Collectors;
  * and to check that all tracks are
  * always connected.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 2.0
  */
 public class TrackRepository {

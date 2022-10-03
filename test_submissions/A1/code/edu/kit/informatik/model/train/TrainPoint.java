@@ -13,7 +13,7 @@ import java.util.stream.Stream;
  * Represents a point of a train containing its position, the direction this part is currently moving in and a track
  * that contains the position.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class TrainPoint {

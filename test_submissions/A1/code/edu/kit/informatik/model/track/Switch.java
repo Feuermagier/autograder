@@ -17,7 +17,7 @@ import java.util.Objects;
  * <p>
  * Also stores up to three other tracks which are connected to the start point or the ending points.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class Switch extends Track {

@@ -5,7 +5,7 @@ import edu.kit.informatik.cmd.CommandException;
 /**
  * Represents any kind of error regarding rolling stock, complete trains or the movement of trains
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class TrainException extends CommandException {

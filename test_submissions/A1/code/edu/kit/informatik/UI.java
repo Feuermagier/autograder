@@ -17,7 +17,7 @@ import java.util.Map;
  * The user interface. Contains the main loop, listens for commands and invokes the appropriate
  * actions on the Simulation object.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 2.0
  */
 public final class UI {

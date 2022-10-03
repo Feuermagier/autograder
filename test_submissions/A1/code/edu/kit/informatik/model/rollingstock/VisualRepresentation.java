@@ -8,7 +8,7 @@ import java.util.List;
 /**
  * The visual representation of a single rolling stock.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class VisualRepresentation {

@@ -8,7 +8,7 @@ import java.util.regex.Pattern;
 /**
  * Main class for parsing of user input. Maintains all registered commands and provides methods to execute commands
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class CommandResolver {

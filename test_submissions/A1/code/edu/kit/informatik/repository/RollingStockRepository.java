@@ -10,7 +10,7 @@ import java.util.stream.Stream;
 /**
  * Manages the rolling stocks that has been created. Provides methods to create, delete and search for rolling stock.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class RollingStockRepository {

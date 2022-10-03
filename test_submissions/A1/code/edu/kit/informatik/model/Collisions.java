@@ -8,7 +8,7 @@ import java.util.function.Consumer;
 /**
  * Represents a set of collisions between trains. Automatically merges collisions in which the same trains are involved.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class Collisions {

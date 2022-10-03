@@ -6,7 +6,7 @@ import java.util.Objects;
  * Represents a powered rolling stock (i.e. rolling stock that can drive by itself). A rolling stock can be
  * identified by it's type series (class) and it's name.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public abstract class PoweredRollingStock extends RollingStock {

@@ -6,7 +6,7 @@ import java.util.stream.Collectors;
 /**
  * Builder class for command RegEx strings. You should not create an instance of this class; all methods are static.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public final class CommandBuilder {

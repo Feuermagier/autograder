@@ -9,7 +9,7 @@ import java.util.List;
  * Represents an abstract track with an unambiguous id. Each track can have any number of end points,
  * but while trains are on the track, there must be exactly two active end point between which a connection is created.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public abstract class Track {

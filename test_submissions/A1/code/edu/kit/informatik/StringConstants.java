@@ -3,7 +3,7 @@ package edu.kit.informatik;
 /**
  * Contains some useful string constants to use anywhere.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public final class StringConstants {

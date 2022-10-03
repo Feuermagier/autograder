@@ -26,7 +26,7 @@ import java.util.Set;
  * The central class that manages the application state and provides all necessary methods to change it according
  * to the assignment. Maintains an instance of TrackRepository and RollingStockRepository along all created trains.
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public final class Simulation {

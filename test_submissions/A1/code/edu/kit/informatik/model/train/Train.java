@@ -15,7 +15,7 @@ import java.util.stream.Collectors;
 /**
  * Represents a train containing one or multiple parts (rolling stocks).
  *
- * @author ukidf
+ * @author uxxxx
  * @version 1.0
  */
 public class Train {
