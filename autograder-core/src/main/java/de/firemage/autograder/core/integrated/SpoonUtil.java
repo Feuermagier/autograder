@@ -7,6 +7,7 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtTypeReference;
 
@@ -122,5 +123,12 @@ public final class SpoonUtil {
         } else {
             return Optional.of(method.getComments().get(0).asJavaDoc());
         }
+    }
+    
+    public static boolean isStaticCallTo(CtInvocation<?> invocation, String typeName, String methodName) {
+        return invocation.getExecutable().isStatic()
+            && invocation.getTarget() instanceof CtTypeAccess<?> access
+            && access.getAccessedType().getQualifiedName().equals(typeName)
+            && invocation.getExecutable().getSimpleName().equals(methodName);
     }
 }
