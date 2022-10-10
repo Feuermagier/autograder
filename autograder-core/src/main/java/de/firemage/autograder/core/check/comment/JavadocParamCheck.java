@@ -47,7 +47,7 @@ public class JavadocParamCheck extends IntegratedCheck {
                 
                 // Non-existent parameters?
                 for (String tag : paramTags) {
-                    if (method.getParameters().stream().noneMatch(param -> param.getSimpleName().equals(tag))) {
+                    if (!hasParameter(tag, method) && !hasTypeParameter(tag, method)) {
                         addLocalProblem(javadoc.get(), String.format(
                             "Javadoc mentions parameter '%s', but there is no such parameter in the method declaration",
                             tag));
@@ -55,5 +55,13 @@ public class JavadocParamCheck extends IntegratedCheck {
                 }
             }
         });
+    }
+    
+    private boolean hasTypeParameter(String name, CtMethod<?> method) {
+        return method.getFormalCtTypeParameters().stream().noneMatch(param -> param.getSimpleName().equals(name));
+    }
+    
+    private boolean hasParameter(String name, CtMethod<?> method) {
+        return method.getParameters().stream().noneMatch(param -> param.getSimpleName().equals(name));
     }
 }
