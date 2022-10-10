@@ -11,6 +11,7 @@
     - ConstantNamingAndQualifierCheck
     - DontReassignParametersCheck
     - FieldShouldBeLocalCheck
+    - WrongLineBreakCheck
 - api:
     - IsEmptyReimplementationCheck
     - OldCollectionCheck
@@ -43,6 +44,7 @@
     - BooleanMethodNameCheck
     - LinguisticNamingCheck
     - VariablesHaveDescriptiveNamesCheck
+    - ConstantsHaveDescriptiveNamesCheck
 - oop:
     - ConcreteCollectionCheck
     - MethodShouldBeAbstractCheck
