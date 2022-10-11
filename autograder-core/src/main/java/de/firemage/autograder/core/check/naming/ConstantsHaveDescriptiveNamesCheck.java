@@ -11,6 +11,7 @@ import java.util.List;
 import java.util.stream.Stream;
 
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
+    private static final List<String> NUMBER_PRE_SUFFIXES = List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg");
 
     public ConstantsHaveDescriptiveNamesCheck() {
         super("Constants should have descriptive names - e.g. AUTHOR_INDEX instead of FIRST_INDEX");
@@ -19,15 +20,14 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static boolean isNonDescriptiveIntegerName(String name, int value) {
         List<String> valueNameOptions = switch (value) {
             case 0 -> List.of("zero", "null", "zeroth", "first");
-            case -1 -> List.of("minusone", "minus_one", "negative_one", "negativone");
+            case -1 -> List.of("minusone", "minus_one", "negative_one", "negativone", "neg_one", "negone");
             case 1 -> List.of("one", "second");
             case 2 -> List.of("two", "third");
             case 3 -> List.of("three", "fourth");
             default -> List.of();
         };
         return valueNameOptions.stream()
-            .flatMap(o -> Stream.of(o, o + "_index", "index_" + o, o + "_element", "element_" + o, o + "_value",
-                "value_" + o))
+            .flatMap(o -> Stream.concat(Stream.of(o), NUMBER_PRE_SUFFIXES.stream().flatMap(s -> Stream.of(s + "_" + o, o + "_" + s))))
             .anyMatch(o -> name.toLowerCase().equals(o));
     }
 

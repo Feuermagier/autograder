@@ -38,7 +38,7 @@ public class Application implements Callable<Integer> {
     private Path file;
     @Parameters(index = "2", defaultValue = "", description = "The root folder which contains the tests to run. If not provided or empty, no tests will be run.")
     private Path tests;
-    @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "11", description = "Set the Java version.")
+    @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
     @Option(names = {"-s", "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
     private boolean staticOnly;

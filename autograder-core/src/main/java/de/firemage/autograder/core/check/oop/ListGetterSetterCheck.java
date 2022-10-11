@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtConstructorCall;
+import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtFieldWrite;
@@ -64,29 +65,17 @@ public class ListGetterSetterCheck extends IntegratedCheck {
     }
     
     private boolean wasMutablyAssigned(StaticAnalysis analysis, CtField<?> field) {
+        if (field.getDefaultExpression() != null && isMutableAssignee(field.getDefaultExpression())) {
+            return true;
+        }
+        
         var processor = new AbstractProcessor<CtAssignment<?, ?>>() {
             boolean mutablyAssigned = false;
 
             @Override
             public void process(CtAssignment<?, ?> write) {
                 if (write.getAssigned() instanceof CtFieldAccess<?> ref && ref.getVariable().getFieldDeclaration().equals(field)) {
-                    if (write.getAssignment() instanceof CtInvocation<?> invocation) {
-                        if (!SpoonUtil.isStaticCallTo(invocation, "java.util.List", "of")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Set", "of")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Map", "of")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableList")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableSet")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableSortedSet")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableMap")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableSortedMap")
-                            && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableCollection")
-                            && !(SpoonStreamUtil.isStreamOperation(invocation) && invocation.getExecutable().getSimpleName().equals("toList"))
-                            // <stream>.collect(Collectors.toList()) can be mutable or immutable
-                        ) {
-                            System.out.println(write);
-                            mutablyAssigned = true;
-                        }
-                    } else if (write.getAssignment() instanceof CtConstructorCall<?>) {
+                    if (isMutableAssignee(write.getAssignment())) {
                         mutablyAssigned = true;
                     }
                 }
@@ -94,5 +83,26 @@ public class ListGetterSetterCheck extends IntegratedCheck {
         };
         analysis.processWith(processor);
         return processor.mutablyAssigned;
+    }
+    
+    private boolean isMutableAssignee(CtExpression<?> expression) {
+        if (expression instanceof CtInvocation<?> invocation) {
+            return !SpoonUtil.isStaticCallTo(invocation, "java.util.List", "of")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Set", "of")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Map", "of")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableList")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableSet")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableSortedSet")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableMap")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableSortedMap")
+                && !SpoonUtil.isStaticCallTo(invocation, "java.util.Collections", "unmodifiableCollection")
+                && !(SpoonStreamUtil.isStreamOperation(invocation) && invocation.getExecutable().getSimpleName().equals("toList"));
+                // <stream>.collect(Collectors.toList()) can be mutable or immutable
+            
+        } else if (expression instanceof CtConstructorCall<?>) {
+            return true;
+        } else {
+            return false;
+        }
     }
 }
