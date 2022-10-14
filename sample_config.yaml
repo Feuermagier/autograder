@@ -27,11 +27,15 @@
     - WrapperInstantiationCheck
     - RedundantConstructorCheck
     - RedundantIfForBooleanCheck
+    - SelfAssignmentCheck
 - debug:
     - AssertCheck
     - PrintStackTraceCheck
 - exceptions:
     - EmptyCatchCheck
+    - RuntimeExceptionCatchCheck
+    - CustomExceptionInheritanceCheck
+    - ExceptionControlFlowCheck
 - comment:
     - JavadocReturnNullCheck
     - CommentLanguageCheck
@@ -48,6 +52,8 @@
 - oop:
     - ConcreteCollectionCheck
     - MethodShouldBeAbstractCheck
+    - ListGetterSetterCheck
+    - UtilityClassCheck
 - structure:
     - DefaultPackageCheck
 - unnecessary:
