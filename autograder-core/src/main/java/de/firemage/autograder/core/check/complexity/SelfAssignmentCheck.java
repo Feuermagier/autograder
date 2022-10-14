@@ -21,6 +21,7 @@ public class SelfAssignmentCheck extends IntegratedCheck {
             public void process(CtAssignment<?, ?> assignment) {
                 if (assignment.getAssignment() instanceof CtVariableRead<?> read 
                     && assignment.getAssigned() instanceof CtVariableWrite<?> write) {
+                    // TODO exclude e.g. this.x = other.x where type(this) == type(other)
                     if (read.getVariable().getDeclaration().equals(write.getVariable().getDeclaration())) {
                         addLocalProblem(assignment,
                             "Useless assignment of '" + assignment.getAssignment() + "' to '" + assignment.getAssigned() +

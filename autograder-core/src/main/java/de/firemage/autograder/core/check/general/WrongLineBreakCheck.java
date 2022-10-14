@@ -5,6 +5,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtTextBlock;
 
 public class WrongLineBreakCheck extends IntegratedCheck {
 
@@ -17,8 +18,8 @@ public class WrongLineBreakCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtLiteral<?>>() {
             @Override
             public void process(CtLiteral<?> literal) {
-                if (literal.getValue() instanceof String value &&
-                    (value.contains("\n") || value.contains("\r") || value.contains("\\n") || value.contains("\\r"))) {
+                if (literal.getValue() instanceof String value && !(literal instanceof CtTextBlock)
+                    && (value.contains("\n") || value.contains("\r") || value.contains("\\n") || value.contains("\\r"))) {
                     addLocalProblem(literal, "System-dependent line break (\\n) used");
                 }
             }
