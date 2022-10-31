@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -20,7 +21,7 @@ public class WrongLineBreakCheck extends IntegratedCheck {
             public void process(CtLiteral<?> literal) {
                 if (literal.getValue() instanceof String value && !(literal instanceof CtTextBlock)
                     && (value.contains("\n") || value.contains("\r") || value.contains("\\n") || value.contains("\\r"))) {
-                    addLocalProblem(literal, "System-dependent line break (\\n) used");
+                    addLocalProblem(literal, "System-dependent line break (\\n) used", ProblemType.SYSTEM_SPECIFIC_LINE_BREAK);
                 }
             }
         });

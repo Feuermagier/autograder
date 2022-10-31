@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -30,7 +31,8 @@ public class CompareObjectsNotStringsCheck extends IntegratedCheck {
             @Override
             public void process(CtInvocation<?> invocation) {
                 CtExecutableReference<?> executable = invocation.getExecutable();
-                if (executable.getSignature().equals("equals(java.lang.Object)") && executable.getParameters().size() == 1) {
+                if (executable.getSignature().equals("equals(java.lang.Object)") &&
+                    executable.getParameters().size() == 1) {
                     Optional<CtTypeReference<?>> lhsType = SpoonUtil.isToStringCall(invocation.getTarget());
                     if (lhsType.isEmpty()) {
                         return;
@@ -42,7 +44,8 @@ public class CompareObjectsNotStringsCheck extends IntegratedCheck {
                     }
 
                     if (lhsType.get().getQualifiedName().equals(rhsType.get().getQualifiedName())) {
-                        addLocalProblem(invocation, formatExplanation(lhsType.get()));
+                        addLocalProblem(invocation, formatExplanation(lhsType.get()),
+                            ProblemType.OBJECTS_COMPARED_VIA_TO_STRING);
                     }
                 }
             }

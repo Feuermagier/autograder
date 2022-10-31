@@ -2,6 +2,7 @@ package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.InCodeProblem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
@@ -12,13 +13,13 @@ import java.nio.file.Path;
 public class IntegratedInCodeProblem extends InCodeProblem {
     private final CtElement element;
 
-    public IntegratedInCodeProblem(Check check, CtElement element, String explanation, Path root) {
-        super(check, mapSourceToCode(element, root), explanation);
+    public IntegratedInCodeProblem(Check check, CtElement element, String explanation, ProblemType problemType, Path root) {
+        super(check, mapSourceToCode(element, root), explanation, problemType);
 
         this.element = element;
     }
 
-    private static CodePosition mapSourceToCode(CtElement element, Path root) {
+    public static CodePosition mapSourceToCode(CtElement element, Path root) {
         SourcePosition position = element.getPosition();
         File file = position.getFile();
         if (file == null) {
@@ -38,24 +39,4 @@ public class IntegratedInCodeProblem extends InCodeProblem {
                 position.getEndColumn()
         );
     }
-
-    /*
-    @Override
-    public String getDisplayLocation() {
-        if (element == null) {
-            return "";
-        } else if (element instanceof CtMethod<?> method) {
-            return method.getParent(CtClass.class).getQualifiedName() + "#" + method.getSimpleName();
-        } else if (element instanceof CtType<?> type) {
-            return type.getQualifiedName();
-        } else {
-            File file = element.getPosition().getFile();
-            if (file != null) {
-                return PathUtil.getSanitizedPath(file, root) + ":" + element.getPosition().getLine();
-            } else {
-                return "<UNKNOWN>";
-            }
-        }
-    }
-    */
 }

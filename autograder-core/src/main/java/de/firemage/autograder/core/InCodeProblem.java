@@ -5,19 +5,19 @@ import lombok.Getter;
 
 public abstract class InCodeProblem implements Problem {
 
-    @Getter
     private final Check check;
 
-    @Getter
     private final CodePosition position;
 
-    @Getter
     private final String explanation;
+    
+    private final ProblemType problemType;
 
-    public InCodeProblem(Check check, CodePosition position, String explanation) {
+    public InCodeProblem(Check check, CodePosition position, String explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;
+        this.problemType = problemType;
     }
 
     @Override
@@ -28,5 +28,21 @@ public abstract class InCodeProblem implements Problem {
         } else {
             return this.position.file() + ":" + this.position.startLine() + "-" + this.position.endLine();
         }
+    }
+
+    public Check getCheck() {
+        return check;
+    }
+
+    public CodePosition getPosition() {
+        return position;
+    }
+
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public ProblemType getProblemType() {
+        return problemType;
     }
 }

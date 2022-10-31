@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -30,7 +31,8 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                     && (field.getType().unbox().isPrimitive() || SpoonUtil.isString(field.getType()))
                     && field.getDefaultExpression() != null) {
                     if (!field.isStatic() || !IdentifierNameUtils.isUpperSnakeCase(field.getSimpleName())) {
-                        addLocalProblem(field, formatExplanation(field));
+                        addLocalProblem(field, formatExplanation(field),
+                            ProblemType.CONSTANT_NOT_STATIC_OR_NOT_UPPER_CAMEL_CASE);
                     }
                 }
             }

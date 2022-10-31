@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -9,6 +10,7 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
 import spoon.reflect.declaration.CtMethod;
+
 import java.util.Optional;
 
 public class JavadocReturnNullCheck extends IntegratedCheck {
@@ -28,7 +30,7 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
                 }
 
                 boolean returnsNull = dynamicAnalysis.findEventsForMethod(method)
-                        .anyMatch(event -> event instanceof ReferenceReturnEvent refRet && refRet.returnedNull());
+                    .anyMatch(event -> event instanceof ReferenceReturnEvent refRet && refRet.returnedNull());
 
                 if (returnsNull) {
                     Optional<CtJavaDoc> javaDoc = SpoonUtil.getJavadoc(method);
@@ -36,14 +38,17 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
                         return;
                     }
                     Optional<CtJavaDocTag> returnTag = javaDoc.get()
-                            .getTags()
-                            .stream()
-                            .filter(tag -> tag.getType().equals(CtJavaDocTag.TagType.RETURN))
-                            .findFirst();
+                        .getTags()
+                        .stream()
+                        .filter(tag -> tag.getType().equals(CtJavaDocTag.TagType.RETURN))
+                        .findFirst();
 
-                    if (returnTag.isPresent() && !returnTag.get().getContent().contains("null")) { // We don't care if the return tag does not exist
+                    if (returnTag.isPresent() && !returnTag.get().getContent()
+                        .contains("null")) { // We don't care if the return tag does not exist
                         // We sadly cannot use the returnTag itself as the position because it has a "NoSourcePosition"
-                        addLocalProblem(javaDoc.get(), "The method may return null but the @return tag doesn't mention it");
+                        addLocalProblem(javaDoc.get(),
+                            "The method may return null but the @return tag doesn't mention it",
+                            ProblemType.JAVADOC_INCOMPLETE_RETURN_TAG);
                     }
                 }
             }

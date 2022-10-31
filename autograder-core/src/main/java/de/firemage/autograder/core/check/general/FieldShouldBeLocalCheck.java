@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -49,7 +50,7 @@ public class FieldShouldBeLocalCheck extends IntegratedCheck {
                     }
                 }
                 if (!readBeforeWriteFound && writeFound) {
-                    addLocalProblem(field, formatExplanation(field));
+                    addLocalProblem(field, formatExplanation(field), ProblemType.INSTANCE_FIELD_CAN_BE_LOCAL);
                 }
             }
         });

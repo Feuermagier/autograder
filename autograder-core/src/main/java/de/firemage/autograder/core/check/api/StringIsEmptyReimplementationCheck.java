@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.api;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -12,7 +13,8 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.reference.CtExecutableReference;
 
 public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
-    private static final String DESCRIPTION = "Use String#isEmpty instead of '.equals(\"\")' or '.length() == 0' (or the negation when checking if the String is not empty)";
+    private static final String DESCRIPTION =
+        "Use String#isEmpty instead of '.equals(\"\")' or '.length() == 0' (or the negation when checking if the String is not empty)";
 
     public StringIsEmptyReimplementationCheck() {
         super(DESCRIPTION);
@@ -37,11 +39,14 @@ public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
 
                 if (SpoonUtil.isString(invocation.getTarget().getType())) {
                     if (equalsWithEmptyString(invocation)) {
-                        addLocalProblem(invocation, formatExplanation(invocation));
+                        addLocalProblem(invocation, formatExplanation(invocation),
+                            ProblemType.STRING_IS_EMPTY_REIMPLEMENTED);
                     } else if (lengthZeroCheck(invocation)) {
-                        addLocalProblem(invocation.getParent(), formatExplanation(invocation.getParent()));
+                        addLocalProblem(invocation.getParent(), formatExplanation(invocation.getParent()),
+                            ProblemType.STRING_IS_EMPTY_REIMPLEMENTED);
                     } else if (lengthGreaterThanZeroCheck(invocation)) {
-                        addLocalProblem(invocation.getParent(), formatNegatedExplanation(invocation.getParent()));
+                        addLocalProblem(invocation.getParent(), formatNegatedExplanation(invocation.getParent()),
+                            ProblemType.STRING_IS_EMPTY_REIMPLEMENTED);
                     }
                 }
             }
@@ -69,8 +74,8 @@ public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
             return false;
         }
         if (invocation.getParent() instanceof CtBinaryOperator<?> operator) {
-            return switch(operator.getKind()) {
-                case EQ -> SpoonUtil.isIntegerLiteral(operator.getLeftHandOperand(), 0) 
+            return switch (operator.getKind()) {
+                case EQ -> SpoonUtil.isIntegerLiteral(operator.getLeftHandOperand(), 0)
                     || SpoonUtil.isIntegerLiteral(operator.getRightHandOperand(), 0);
                 case GT -> SpoonUtil.isIntegerLiteral(operator.getRightHandOperand(), 0);
                 case GE -> SpoonUtil.isIntegerLiteral(operator.getRightHandOperand(), 1);

@@ -1,40 +1,43 @@
 package de.firemage.autograder.core.pmd;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
-import lombok.Getter;
 import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.lang.LanguageRegistry;
 import net.sourceforge.pmd.lang.rule.XPathRule;
 import net.sourceforge.pmd.lang.rule.xpath.XPathVersion;
+
 import java.util.List;
 
 public abstract class PMDCheck implements Check {
 
-    @Getter
     private final String description;
 
-    @Getter
     private final List<Rule> rules;
 
-    @Getter
     private final String explanation;
 
-    protected PMDCheck(String description, String explanation, Rule rule) {
-        this(description, explanation, List.of(rule));
+    private final ProblemType problemType;
+
+    protected PMDCheck(String description, String explanation, Rule rule,
+                       ProblemType problemType) {
+        this(description, explanation, List.of(rule), problemType);
     }
 
-    protected PMDCheck(String description, Rule rule) {
-        this(description, null, List.of(rule));
+    protected PMDCheck(String description, Rule rule, ProblemType problemType) {
+        this(description, null, List.of(rule), problemType);
     }
 
-    protected PMDCheck(String description, List<Rule> rules) {
-        this(description, null, rules);
+    protected PMDCheck(String description, List<Rule> rules, ProblemType problemType) {
+        this(description, null, rules, problemType);
     }
 
-    protected PMDCheck(String description, String explanation, List<Rule> rules) {
+    protected PMDCheck(String description, String explanation, List<Rule> rules,
+                       ProblemType problemType) {
         this.description = description;
         this.explanation = explanation;
         this.rules = rules;
+        this.problemType = problemType;
 
         for (Rule rule : rules) {
             if (rule.getMessage() == null) {
@@ -54,5 +57,22 @@ public abstract class PMDCheck implements Check {
     @Override
     public String getLinter() {
         return "PMD";
+    }
+
+    @Override
+    public String getDescription() {
+        return description;
+    }
+
+    public List<Rule> getRules() {
+        return rules;
+    }
+
+    public String getExplanation() {
+        return explanation;
+    }
+
+    public ProblemType getProblemType() {
+        return problemType;
     }
 }

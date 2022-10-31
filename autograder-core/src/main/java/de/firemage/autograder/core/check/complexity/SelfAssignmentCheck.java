@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -19,13 +20,13 @@ public class SelfAssignmentCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtAssignment<?, ?>>() {
             @Override
             public void process(CtAssignment<?, ?> assignment) {
-                if (assignment.getAssignment() instanceof CtVariableRead<?> read 
+                if (assignment.getAssignment() instanceof CtVariableRead<?> read
                     && assignment.getAssigned() instanceof CtVariableWrite<?> write) {
-                    // TODO exclude e.g. this.x = other.x where type(this) == type(other)
-                    if (read.getVariable().getDeclaration().equals(write.getVariable().getDeclaration())) {
+                    if (read.getVariable().equals(write.getVariable())) {
                         addLocalProblem(assignment,
-                            "Useless assignment of '" + assignment.getAssignment() + "' to '" + assignment.getAssigned() +
-                                "'");
+                            "Useless assignment of '" + assignment.getAssignment() + "' to '" +
+                                assignment.getAssigned() +
+                                "'", ProblemType.REDUNDANT_SELF_ASSIGNMENT);
                     }
                 }
             }

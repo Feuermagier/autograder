@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -23,12 +24,14 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
 
                 if (type == CtComment.CommentType.INLINE) {
                     if (content.endsWith(";") || content.equals("{") || content.equals("}")) {
-                        addLocalProblem(comment, "This commented out code should be removed");
+                        addLocalProblem(comment, "This commented out code should be removed",
+                            ProblemType.COMMENTED_OUT_CODE);
                     }
                 } else if (type == CtComment.CommentType.BLOCK) {
                     if (content.contains(";") || content.contains("=") || content.contains("{") ||
                         content.contains("}")) {
-                        addLocalProblem(comment, "This commented out code should be removed");
+                        addLocalProblem(comment, "This commented out code should be removed",
+                            ProblemType.COMMENTED_OUT_CODE);
                     }
                 }
             }

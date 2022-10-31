@@ -2,6 +2,7 @@ package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.GlobalProblem;
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import lombok.Getter;
@@ -22,12 +23,12 @@ public abstract class IntegratedCheck implements Check {
         this.description = description;
     }
 
-    protected void addGlobalProblem(String explanation) {
-        this.problems.add(new GlobalProblem(this, explanation));
+    protected void addGlobalProblem(String explanation, ProblemType problemType) {
+        this.problems.add(new GlobalProblem(this, explanation, problemType));
     }
 
-    protected void addLocalProblem(CtElement element, String explanation) {
-        this.problems.add(new IntegratedInCodeProblem(this, element, explanation, this.root));
+    protected void addLocalProblem(CtElement element, String explanation, ProblemType problemType) {
+        this.problems.add(new IntegratedInCodeProblem(this, element, explanation, problemType, this.root));
     }
 
     public List<Problem> run(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis, Path root) {
@@ -42,5 +43,9 @@ public abstract class IntegratedCheck implements Check {
     @Override
     public String getLinter() {
         return "Integrated";
+    }
+
+    protected Path getRoot() {
+        return root;
     }
 }

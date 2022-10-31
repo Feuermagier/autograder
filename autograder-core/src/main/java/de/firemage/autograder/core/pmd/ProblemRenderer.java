@@ -28,8 +28,9 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
 
     @Override
     public void renderFileViolations(Iterator<RuleViolation> violations) {
-        violations.forEachRemaining(violation ->
-                problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, root)));
+        violations.forEachRemaining(violation -> {
+            problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, root));
+        });
     }
 
     @Override

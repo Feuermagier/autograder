@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.oop;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -46,18 +47,18 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
 
                     List<CtStatement> statements = SpoonUtil.getEffectiveStatements(method.getBody());
                     if (statements.isEmpty()) {
-                        addLocalProblem(method, formatExplanation(method));
+                        addLocalProblem(method, formatExplanation(method), ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                     } else if (statements.size() == 1) {
                         CtStatement statement = statements.get(0);
                         if (statement instanceof CtReturn<?> ret
                                 && ret.getReturnedExpression() instanceof CtLiteral<?> literal
                                 && literal.getValue() == null) {
-                            addLocalProblem(method, formatExplanation(method));
+                            addLocalProblem(method, formatExplanation(method), ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                         } else if (statement instanceof CtThrow ctThrow
                                 && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call) {
                             String type = call.getType().getQualifiedName();
                             if (type.equals("java.lang.UnsupportedOperationException") || type.equals("java.lang.IllegalStateException")) {
-                                addLocalProblem(method, formatExplanation(method));
+                                addLocalProblem(method, formatExplanation(method), ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                             }
                         }
                     }

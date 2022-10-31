@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -29,7 +30,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     // Catch vars and lambda vars have less strict rules, e.g. it is ok to write "Exception e" or "NullPointerException npe"
                     return;
                 }
-                
+
                 if (variable.getSimpleName().equals("o")
                     && variable.getParent() instanceof CtMethod<?> method
                     && (SpoonUtil.isEqualsMethod(method) || SpoonUtil.isCompareToMethod(method))) {
@@ -40,9 +41,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (variable.getSimpleName().length() == 1
                     && !isAllowedLoopCounter(variable)
                     && !isCoordinate(variable)) {
-                    addLocalProblem(variable, "Single letter names are usually non-descriptive");
+                    addLocalProblem(variable, "Single letter names are usually non-descriptive",
+                        ProblemType.SINGLE_LETTER_LOCAL_NAME);
                 } else if (isTypeAbbreviation(variable)) {
-                    addLocalProblem(variable, "Don't use unnecessary abbreviations");
+                    addLocalProblem(variable, "Don't use unnecessary abbreviations",
+                        ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
                 }
             }
         });
@@ -50,7 +53,6 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
 
     private boolean isCoordinate(CtVariable<?> variable) {
         return (variable.getSimpleName().equals("x") || variable.getSimpleName().equals("y"));
-            //&& SpoonUtil.isPrimitiveNumeric(variable.getType());
     }
 
     private boolean isAllowedLoopCounter(CtVariable<?> variable) {

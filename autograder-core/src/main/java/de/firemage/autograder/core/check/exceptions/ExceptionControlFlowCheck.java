@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.exceptions;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -40,7 +41,8 @@ public class ExceptionControlFlowCheck extends IntegratedCheck {
                         .anyMatch(e -> e.getQualifiedName().equals(caughtException.getQualifiedName()))
                         || thrownExceptions.stream().anyMatch(e -> e.isSubtypeOf(caughtException))) {
                         addLocalProblem(tryBlock,
-                            "Exception '" + caughtException.getSimpleName() + "' used for control flow");
+                            "Exception '" + caughtException.getSimpleName() + "' used for control flow",
+                            ProblemType.EXCEPTION_CAUGHT_IN_SURROUNDING_BLOCK);
                     }
                 }
             }

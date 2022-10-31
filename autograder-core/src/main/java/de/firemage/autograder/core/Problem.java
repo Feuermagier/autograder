@@ -8,4 +8,6 @@ public interface Problem {
     String getExplanation();
 
     String getDisplayLocation();
+    
+    ProblemType getProblemType();
 }

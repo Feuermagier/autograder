@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -67,9 +68,11 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
             Optional<Boolean> elseValue = SpoonUtil.tryGetBooleanLiteral(elseRet.getReturnedExpression());
             if (thenValue.isPresent() && elseValue.isPresent()) {
                 if (thenValue.get() && !elseValue.get()) {
-                    addLocalProblem(condition, formatReturnProblem(condition, false));
+                    addLocalProblem(condition, formatReturnProblem(condition, false),
+                        ProblemType.REDUNDANT_IF_FOR_BOOLEAN);
                 } else if (!thenValue.get() && elseValue.get()) {
-                    addLocalProblem(condition, formatReturnProblem(condition, true));
+                    addLocalProblem(condition, formatReturnProblem(condition, true),
+                        ProblemType.REDUNDANT_IF_FOR_BOOLEAN);
                 }
                 // Otherwise we have if (...) return true else return true ... it's not our task to handle such nonsense
             }
@@ -83,9 +86,11 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
             if (thenValue.isPresent() && elseValue.isPresent() &&
                 thenAssign.getAssigned().equals(elseAssign.getAssigned())) {
                 if (thenValue.get() && !elseValue.get()) {
-                    addLocalProblem(condition, formatAssignProblem(condition, thenAssign.getAssigned(), false));
+                    addLocalProblem(condition, formatAssignProblem(condition, thenAssign.getAssigned(), false),
+                        ProblemType.REDUNDANT_IF_FOR_BOOLEAN);
                 } else if (!thenValue.get() && elseValue.get()) {
-                    addLocalProblem(condition, formatAssignProblem(condition, thenAssign.getAssigned(), true));
+                    addLocalProblem(condition, formatAssignProblem(condition, thenAssign.getAssigned(), true),
+                        ProblemType.REDUNDANT_IF_FOR_BOOLEAN);
                 }
             }
         }

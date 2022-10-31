@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -77,12 +78,12 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                         isNonDescriptiveIntegerName(field.getSimpleName(), value)) {
                         addLocalProblem(field,
                             String.format("The name '%s' is non-descriptive for the value %d", field.getSimpleName(),
-                                value));
+                                value), ProblemType.MEANINGLESS_CONSTANT_NAME);
                     } else if (literal.getValue() instanceof String value &&
                         isNonDescriptiveStringName(field.getSimpleName(), value)) {
                         addLocalProblem(field,
                             String.format("The name '%s' is non-descriptive for the value '%s'", field.getSimpleName(),
-                                value));
+                                value), ProblemType.MEANINGLESS_CONSTANT_NAME);
                     }
                 }
             }

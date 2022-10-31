@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -31,7 +32,7 @@ public class AuthorTagCheck extends IntegratedCheck {
                         String content = tag.getContent().trim();
                         if (!pattern.matcher(content).matches()) {
                             addLocalProblem(element,
-                                "This @author tag is not valid");
+                                "This @author tag is not valid", ProblemType.INVALID_AUTHOR_TAG);
                         }
                     }
                 }

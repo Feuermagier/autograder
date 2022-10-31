@@ -3,8 +3,11 @@ package de.firemage.autograder.core.check.comment;
 import com.github.pemistahl.lingua.api.Language;
 import com.github.pemistahl.lingua.api.LanguageDetector;
 import com.github.pemistahl.lingua.api.LanguageDetectorBuilder;
+import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.IntegratedInCodeProblem;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtComment;
@@ -39,28 +42,40 @@ public class CommentLanguageCheck extends IntegratedCheck {
             public void process(CtComment comment) {
                 var language = CommentLanguageResult.detect(comment, detector);
 
-                switch(language.language) {
+                switch (language.language) {
                     case ENGLISH -> englishComments.add(language);
                     case GERMAN -> germanComments.add(language);
                     case UNKNOWN -> {
                     }
                     default -> addLocalProblem(comment,
                         "The language of this comment is neither English nor German but seems to be " +
-                            language.language.name());
+                            language.language.name(), ProblemType.INVALID_COMMENT_LANGUAGE);
                 }
             }
         });
 
         if (!englishComments.isEmpty() && !germanComments.isEmpty()) {
-            CtComment bestEnglish =
-                englishComments.stream().max(Comparator.comparingDouble(a -> a.confidence)).get().comment;
-            addLocalProblem(bestEnglish,
-                "The code contains comments in German and in English. This comment is in English.");
+            CtComment bestEnglish = englishComments.stream()
+                .max(Comparator.comparingDouble(a -> a.confidence))
+                .get().comment;
+            CodePosition englishPosition = IntegratedInCodeProblem.mapSourceToCode(bestEnglish, this.getRoot());
 
-            CtComment bestGerman =
-                germanComments.stream().max(Comparator.comparingDouble(a -> a.confidence)).get().comment;
+            CtComment bestGerman = germanComments.stream()
+                .max(Comparator.comparingDouble(a -> a.confidence))
+                .get().comment;
+            CodePosition germanPosition = IntegratedInCodeProblem.mapSourceToCode(bestGerman, this.getRoot());
+
+            addLocalProblem(bestEnglish,
+                String.format(
+                    "The code contains comments in German and in English. This comment is in English. A German comment can be found at %s:%d",
+                    germanPosition.file(), germanPosition.startLine()),
+                ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
+
+
             addLocalProblem(bestGerman,
-                "The code contains comments in German and in English. This comment is in German.");
+                String.format("The code contains comments in German and in English. This comment is in German. An English comment can be found at %s:%d",
+                    englishPosition.file(), englishPosition.startLine()),
+                ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
         }
     }
 

@@ -51,17 +51,10 @@
         </dependency>
 
         <!-- Spoon -->
-        <!--
         <dependency>
             <groupId>fr.inria.gforge.spoon</groupId>
             <artifactId>spoon-core</artifactId>
-            <version>9.2.0-beta-3</version>
-        </dependency>
-        -->
-        <dependency>
-            <groupId>com.github.Feuermagier</groupId>
-            <artifactId>spoon</artifactId>
-            <version>be9318a2</version>
+            <version>10.2.0</version>
         </dependency>
 
         <!-- JavaParser -->
@@ -91,13 +84,6 @@
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
             <version>9.3</version>
-        </dependency>
-
-        <!-- Soot -->
-        <dependency>
-            <groupId>org.soot-oss</groupId>
-            <artifactId>soot</artifactId>
-            <version>4.3.0-SNAPSHOT</version>
         </dependency>
 
         <!-- Apache Commons -->
@@ -171,6 +157,13 @@
             <groupId>com.github.albfernandez</groupId>
             <artifactId>juniversalchardet</artifactId>
             <version>2.4.0</version>
+        </dependency>
+        
+        <!-- Translation -->
+        <dependency>
+            <groupId>fr.inria.gforge.spoon</groupId>
+            <artifactId>spoon-core</artifactId>
+            <version>10.2.0</version>
         </dependency>
 
         <!-- Test -->

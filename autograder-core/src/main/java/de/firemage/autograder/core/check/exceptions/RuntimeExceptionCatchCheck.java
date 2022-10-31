@@ -1,13 +1,12 @@
 package de.firemage.autograder.core.check.exceptions;
 
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.ExceptionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatch;
-
-import java.util.List;
 
 public class RuntimeExceptionCatchCheck extends IntegratedCheck {
     public RuntimeExceptionCatchCheck() {
@@ -21,7 +20,8 @@ public class RuntimeExceptionCatchCheck extends IntegratedCheck {
             public void process(CtCatch catchBlock) {
                 var varType = catchBlock.getParameter().getType();
                 if (ExceptionUtil.isRuntimeException(varType) || ExceptionUtil.isError(varType)) {
-                    addLocalProblem(catchBlock, catchBlock.getParameter().getType().getSimpleName() + " caught");
+                    addLocalProblem(catchBlock, catchBlock.getParameter().getType().getSimpleName() + " caught",
+                        ProblemType.RUNTIME_EXCEPTION_OR_ERROR_CAUGHT);
                 }
             }
         });
