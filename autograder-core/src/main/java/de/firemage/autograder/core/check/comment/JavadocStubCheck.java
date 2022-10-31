@@ -14,11 +14,10 @@ import spoon.reflect.declaration.CtMethod;
 import java.util.Map;
 
 public class JavadocStubCheck extends IntegratedCheck {
-    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("javadoc-stub-desc");
     private final boolean allowGettersSettersWithEmptyDescription;
 
     public JavadocStubCheck(boolean allowGettersSettersWithEmptyDescription) {
-        super(DESCRIPTION);
+        super(new LocalizedMessage("javadoc-stub-desc"));
         this.allowGettersSettersWithEmptyDescription = allowGettersSettersWithEmptyDescription;
     }
 
