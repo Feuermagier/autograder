@@ -5,7 +5,7 @@ import de.firemage.autograder.core.check.Check;
 public interface Problem {
     Check getCheck();
 
-    String getExplanation();
+    LocalizedMessage getExplanation();
 
     String getDisplayLocation();
     

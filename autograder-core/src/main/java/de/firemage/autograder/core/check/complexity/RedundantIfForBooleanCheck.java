@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -14,23 +15,26 @@ import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class RedundantIfForBooleanCheck extends IntegratedCheck {
 
     public RedundantIfForBooleanCheck() {
-        super(
-            "It is unnecessary to assign/return boolean literals values in ifs - you can just assign/return the condition directly");
+        super(new LocalizedMessage("redundant-if-for-bool-desc"));
     }
 
-    private String formatReturnProblem(CtExpression<?> expression, boolean negate) {
-        return "Directly return " + String.format(negate ? "'!(%s)'" : "'%s'", expression) +
-            " instead of wrapping it in an if";
+    private LocalizedMessage formatReturnProblem(CtExpression<?> expression, boolean negate) {
+        return new LocalizedMessage("redundant-if-for-bool-exp-return", Map.of(
+            "exp", (negate ? "!" : "") + expression
+        ));
     }
 
-    private String formatAssignProblem(CtExpression<?> expression, CtExpression<?> target, boolean negate) {
-        return "Directly assign " + String.format(negate ? "'!(%s)'" : "'%s'", expression) +
-            "to '" + target + "' instead of wrapping it in an if";
+    private LocalizedMessage formatAssignProblem(CtExpression<?> expression, CtExpression<?> target, boolean negate) {
+        return new LocalizedMessage("redundant-if-for-bool-exp-return", Map.of(
+            "exp", (negate ? "!" : "") + expression,
+            "target", target.toString()
+        ));
     }
 
     @Override

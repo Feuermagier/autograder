@@ -1,33 +1,33 @@
 package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.GlobalProblem;
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
-import lombok.Getter;
 import spoon.reflect.declaration.CtElement;
+
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class IntegratedCheck implements Check {
 
-    @Getter
-    private final String description;
+    private final LocalizedMessage description;
 
     private final List<Problem> problems = new ArrayList<>();
     private Path root;
 
-    protected IntegratedCheck(String description) {
+    protected IntegratedCheck(LocalizedMessage description) {
         this.description = description;
     }
 
-    protected void addGlobalProblem(String explanation, ProblemType problemType) {
+    protected void addGlobalProblem(LocalizedMessage explanation, ProblemType problemType) {
         this.problems.add(new GlobalProblem(this, explanation, problemType));
     }
 
-    protected void addLocalProblem(CtElement element, String explanation, ProblemType problemType) {
+    protected void addLocalProblem(CtElement element, LocalizedMessage explanation, ProblemType problemType) {
         this.problems.add(new IntegratedInCodeProblem(this, element, explanation, problemType, this.root));
     }
 
@@ -41,8 +41,13 @@ public abstract class IntegratedCheck implements Check {
     protected abstract void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis);
 
     @Override
-    public String getLinter() {
-        return "Integrated";
+    public LocalizedMessage getLinter() {
+        return new LocalizedMessage("linter-integrated");
+    }
+
+    @Override
+    public LocalizedMessage getDescription() {
+        return description;
     }
 
     protected Path getRoot() {

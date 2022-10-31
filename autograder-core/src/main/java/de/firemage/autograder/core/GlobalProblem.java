@@ -7,11 +7,11 @@ public class GlobalProblem implements Problem {
 
     private final Check check;
 
-    private final String explanation;
+    private final LocalizedMessage explanation;
     
     private final ProblemType problemType;
 
-    public GlobalProblem(Check check, String explanation, ProblemType problemType) {
+    public GlobalProblem(Check check, LocalizedMessage explanation, ProblemType problemType) {
         this.check = check;
         this.explanation = explanation;
         this.problemType = problemType;
@@ -33,7 +33,7 @@ public class GlobalProblem implements Problem {
     }
 
     @Override
-    public String getExplanation() {
+    public LocalizedMessage getExplanation() {
         return explanation;
     }
 

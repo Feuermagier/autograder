@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.exceptions;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -13,12 +14,12 @@ import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 public class ExceptionControlFlowCheck extends IntegratedCheck {
 
     public ExceptionControlFlowCheck() {
-        super(
-            "Exceptions should not be used for control flow inside of a method (i.e. throwing an exception and catching it in a directly surrounding catch block)");
+        super(new LocalizedMessage("exception-controlflow-desc"));
     }
 
     @Override
@@ -41,7 +42,8 @@ public class ExceptionControlFlowCheck extends IntegratedCheck {
                         .anyMatch(e -> e.getQualifiedName().equals(caughtException.getQualifiedName()))
                         || thrownExceptions.stream().anyMatch(e -> e.isSubtypeOf(caughtException))) {
                         addLocalProblem(tryBlock,
-                            "Exception '" + caughtException.getSimpleName() + "' used for control flow",
+                            new LocalizedMessage("exception-controlflow-exp-caught",
+                                Map.of("exp", caughtException.getSimpleName())),
                             ProblemType.EXCEPTION_CAUGHT_IN_SURROUNDING_BLOCK);
                     }
                 }

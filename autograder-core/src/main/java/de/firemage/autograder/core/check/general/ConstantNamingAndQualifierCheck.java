@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
@@ -9,17 +10,18 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 
-public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
-    private static final String DESCRIPTION =
-        "Constants that are never written to should be 'static final' and have a UPPER_SNAKE_CASE name";
+import java.util.Map;
 
+public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
     public ConstantNamingAndQualifierCheck() {
-        super(DESCRIPTION);
+        super(new LocalizedMessage("constant-naming-qualifier-desc"));
     }
 
-    private static String formatExplanation(CtField<?> field) {
-        return String.format("The constant field '%s' of class %s should be static and have a UPPER_SNAKE_CASE name",
-            field.getSimpleName(), field.getDeclaringType().getQualifiedName());
+    private static LocalizedMessage formatExplanation(CtField<?> field) {
+        return new LocalizedMessage("constant-naming-qualifier-exp", Map.of(
+            "field", field.getSimpleName(),
+            "class", field.getDeclaringType().getQualifiedName()
+        ));
     }
 
     @Override

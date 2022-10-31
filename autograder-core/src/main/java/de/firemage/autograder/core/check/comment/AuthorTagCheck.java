@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -18,7 +19,7 @@ public class AuthorTagCheck extends IntegratedCheck {
     }
 
     public AuthorTagCheck(String regex) {
-        super("The @author tag is incorrect");
+        super(new LocalizedMessage("author-tag-invalid-desc"));
         this.pattern = Pattern.compile(regex);
     }
 
@@ -32,7 +33,7 @@ public class AuthorTagCheck extends IntegratedCheck {
                         String content = tag.getContent().trim();
                         if (!pattern.matcher(content).matches()) {
                             addLocalProblem(element,
-                                "This @author tag is not valid", ProblemType.INVALID_AUTHOR_TAG);
+                                new LocalizedMessage("author-tag-invalid-exp"), ProblemType.INVALID_AUTHOR_TAG);
                         }
                     }
                 }

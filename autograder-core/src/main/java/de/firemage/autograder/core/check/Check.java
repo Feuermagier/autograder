@@ -1,8 +1,10 @@
 package de.firemage.autograder.core.check;
 
 
-public interface Check {
-    String getDescription();
+import de.firemage.autograder.core.LocalizedMessage;
 
-    String getLinter();
+public interface Check {
+    LocalizedMessage getDescription();
+
+    LocalizedMessage getLinter();
 }

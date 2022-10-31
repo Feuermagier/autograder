@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -11,18 +12,18 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 
-public class FieldShouldBeLocalCheck extends IntegratedCheck {
-    private static final String DESCRIPTION =
-        "Fields should be converted to locals if they are always overwritten before being read.";
+import java.util.Map;
 
+public class FieldShouldBeLocalCheck extends IntegratedCheck {
     public FieldShouldBeLocalCheck() {
-        super(DESCRIPTION);
+        super(new LocalizedMessage("field-local-desc"));
     }
 
-    private static String formatExplanation(CtField<?> field) {
-        return String.format(
-            "Field '%s' of class '%s' should be converted to a local variable as every method overwrites it before reading it",
-            field.getSimpleName(), field.getDeclaringType().getQualifiedName());
+    private static LocalizedMessage formatExplanation(CtField<?> field) {
+        return new LocalizedMessage("field-local-exp", Map.of(
+            "field", field.getSimpleName(),
+            "class", field.getDeclaringType().getQualifiedName()
+        ));
     }
 
     @Override

@@ -12,6 +12,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.fail;
@@ -32,7 +33,7 @@ public class CheckTest {
                         .toList());
 
                     var file = new UploadedFile(path.resolve("code"), JavaVersion.JAVA_17);
-                    var linter = new Linter();
+                    var linter = new Linter(Locale.US);
 
                     var problems =
                         linter.checkFile(file, Files.createTempDirectory(null), path.resolve("tests"), List.of(check),

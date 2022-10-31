@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.exceptions;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.ExceptionUtil;
@@ -10,7 +11,7 @@ import spoon.reflect.declaration.CtClass;
 
 public class CustomExceptionInheritanceCheck extends IntegratedCheck {
     public CustomExceptionInheritanceCheck() {
-        super("Custom exceptions should not extend from RuntimeException or Error");
+        super(new LocalizedMessage("custom-exception-inheritance-desc"));
     }
 
     @Override
@@ -21,14 +22,14 @@ public class CustomExceptionInheritanceCheck extends IntegratedCheck {
                 if (clazz.getSuperclass() == null) {
                     return;
                 }
-                
+
                 if (ExceptionUtil.isRuntimeException(clazz.getSuperclass())) {
-                    addLocalProblem(clazz, "Custom exceptions should be checked exceptions",
+                    addLocalProblem(clazz, new LocalizedMessage("custom-exception-inheritance-exp-runtime"),
                         ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION);
                 }
 
                 if (ExceptionUtil.isError(clazz.getSuperclass())) {
-                    addLocalProblem(clazz, "Custom exceptions should not inherit from Error",
+                    addLocalProblem(clazz, new LocalizedMessage("custom-exception-inheritance-exp-error"),
                         ProblemType.CUSTOM_EXCEPTION_INHERITS_ERROR);
                 }
             }

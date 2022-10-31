@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.dynamic.DockerConsoleRunner;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
@@ -23,7 +24,7 @@ public class IntegratedAnalysis implements AutoCloseable {
     private final GraphAnalysis graphAnalysis;
     private DynamicAnalysis dynamicAnalysis;
 
-    public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpPath, Consumer<String> statusConsumer)
+    public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpPath, Consumer<LinterStatus> statusConsumer)
         throws ModelBuildException, IOException {
         this.file = file;
         this.jar = jar;
@@ -32,10 +33,10 @@ public class IntegratedAnalysis implements AutoCloseable {
         this.staticAnalysis = new StaticAnalysis(file, jar, statusConsumer);
         this.graphAnalysis = new GraphAnalysis(this.staticAnalysis);
         this.dynamicAnalysis = new DynamicAnalysis(List.of());
-        
+
     }
 
-    public void runDynamicAnalysis(Path tests, Consumer<String> statusConsumer)
+    public void runDynamicAnalysis(Path tests, Consumer<LinterStatus> statusConsumer)
         throws RunnerException, InterruptedException {
         try {
             DockerConsoleRunner runner = new DockerConsoleRunner(
@@ -50,21 +51,8 @@ public class IntegratedAnalysis implements AutoCloseable {
         }
     }
 
-    public List<Problem> lint(List<IntegratedCheck> checks, Consumer<String> statusConsumer) {
-        //MethodAnalysis methodAnalysis = new MethodAnalysis(this.model);
-        //methodAnalysis.run();
-
-        //this.graphAnalysis.partition(this.staticAnalysis.findMain().getDeclaringType().getReference(), this.staticAnalysis.findClassByName("edu.kit.informatik.model.track.Track").getReference());
-
-        /*
-        try {
-            new ModelMatcher().match(this.staticAnalysis, Path.of("C:/Users/flose/Downloads/model.yaml"));
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-         */
-
-        statusConsumer.accept("Executing integrated checks");
+    public List<Problem> lint(List<IntegratedCheck> checks, Consumer<LinterStatus> statusConsumer) {
+        statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
         List<Problem> problems = new ArrayList<>();
         for (IntegratedCheck check : checks) {
             problems.addAll(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getFile()));

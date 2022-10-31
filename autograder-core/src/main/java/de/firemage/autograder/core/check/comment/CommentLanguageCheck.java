@@ -4,6 +4,7 @@ import com.github.pemistahl.lingua.api.Language;
 import com.github.pemistahl.lingua.api.LanguageDetector;
 import com.github.pemistahl.lingua.api.LanguageDetectorBuilder;
 import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -17,10 +18,10 @@ import spoon.reflect.code.CtJavaDocTag;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 
 public class CommentLanguageCheck extends IntegratedCheck {
-    private static final String DESCRIPTION =
-        "All comments (including Javadoc and inline comments) must be either in English or in German. Mixing languages is not allowed.";
+    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("comment-language-desc");
     private final LanguageDetector detector;
 
     public CommentLanguageCheck() {
@@ -48,8 +49,8 @@ public class CommentLanguageCheck extends IntegratedCheck {
                     case UNKNOWN -> {
                     }
                     default -> addLocalProblem(comment,
-                        "The language of this comment is neither English nor German but seems to be " +
-                            language.language.name(), ProblemType.INVALID_COMMENT_LANGUAGE);
+                        new LocalizedMessage("comment-language-desc", Map.of("lang", language.language.name())),
+                        ProblemType.INVALID_COMMENT_LANGUAGE);
                 }
             }
         });
@@ -66,16 +67,16 @@ public class CommentLanguageCheck extends IntegratedCheck {
             CodePosition germanPosition = IntegratedInCodeProblem.mapSourceToCode(bestGerman, this.getRoot());
 
             addLocalProblem(bestEnglish,
-                String.format(
-                    "The code contains comments in German and in English. This comment is in English. A German comment can be found at %s:%d",
-                    germanPosition.file(), germanPosition.startLine()),
-                ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
-
-
-            addLocalProblem(bestGerman,
-                String.format("The code contains comments in German and in English. This comment is in German. An English comment can be found at %s:%d",
-                    englishPosition.file(), englishPosition.startLine()),
-                ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
+                new LocalizedMessage(
+                    "comment-language-exp-english",
+                    Map.of("file", germanPosition.file().toString(), "line", String.valueOf(germanPosition.startLine()))
+                ), ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
+            addLocalProblem(bestEnglish,
+                new LocalizedMessage(
+                    "comment-language-exp-german",
+                    Map.of("file", englishPosition.file().toString(), "line",
+                        String.valueOf(englishPosition.startLine()))
+                ), ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
         }
     }
 

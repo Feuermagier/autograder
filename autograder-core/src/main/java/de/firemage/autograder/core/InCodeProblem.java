@@ -9,11 +9,11 @@ public abstract class InCodeProblem implements Problem {
 
     private final CodePosition position;
 
-    private final String explanation;
+    private final LocalizedMessage explanation;
     
     private final ProblemType problemType;
 
-    public InCodeProblem(Check check, CodePosition position, String explanation, ProblemType problemType) {
+    public InCodeProblem(Check check, CodePosition position, LocalizedMessage explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;
@@ -38,7 +38,7 @@ public abstract class InCodeProblem implements Problem {
         return position;
     }
 
-    public String getExplanation() {
+    public LocalizedMessage getExplanation() {
         return explanation;
     }
 

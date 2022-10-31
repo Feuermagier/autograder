@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.oop;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -13,17 +14,20 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtThrow;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtMethod;
+
 import java.util.List;
+import java.util.Map;
 
 public class MethodShouldBeAbstractCheck extends IntegratedCheck {
-    private static final String DESCRIPTION = "Empty methods in abstract classes should be abstract";
-
     public MethodShouldBeAbstractCheck() {
-        super(DESCRIPTION);
+        super(new LocalizedMessage("method-abstract-desc"));
     }
 
-    private static String formatExplanation(CtMethod<?> method) {
-        return String.format("%s#%s should be abstract and not provide a default implementation", method.getDeclaringType().getQualifiedName(), method.getSimpleName());
+    private static LocalizedMessage formatExplanation(CtMethod<?> method) {
+        return new LocalizedMessage("method-abstract-exp", Map.of(
+            "type", method.getDeclaringType().getQualifiedName(),
+            "method", method.getSimpleName()
+        ));
     }
 
     @Override
@@ -47,18 +51,22 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
 
                     List<CtStatement> statements = SpoonUtil.getEffectiveStatements(method.getBody());
                     if (statements.isEmpty()) {
-                        addLocalProblem(method, formatExplanation(method), ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
+                        addLocalProblem(method, formatExplanation(method),
+                            ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                     } else if (statements.size() == 1) {
                         CtStatement statement = statements.get(0);
                         if (statement instanceof CtReturn<?> ret
-                                && ret.getReturnedExpression() instanceof CtLiteral<?> literal
-                                && literal.getValue() == null) {
-                            addLocalProblem(method, formatExplanation(method), ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
+                            && ret.getReturnedExpression() instanceof CtLiteral<?> literal
+                            && literal.getValue() == null) {
+                            addLocalProblem(method, formatExplanation(method),
+                                ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                         } else if (statement instanceof CtThrow ctThrow
-                                && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call) {
+                            && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call) {
                             String type = call.getType().getQualifiedName();
-                            if (type.equals("java.lang.UnsupportedOperationException") || type.equals("java.lang.IllegalStateException")) {
-                                addLocalProblem(method, formatExplanation(method), ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
+                            if (type.equals("java.lang.UnsupportedOperationException") ||
+                                type.equals("java.lang.IllegalStateException")) {
+                                addLocalProblem(method, formatExplanation(method),
+                                    ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                             }
                         }
                     }

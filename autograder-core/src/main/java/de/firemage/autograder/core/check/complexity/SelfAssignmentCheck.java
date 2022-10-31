@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -9,10 +10,12 @@ import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
 
+import java.util.Map;
+
 public class SelfAssignmentCheck extends IntegratedCheck {
 
     public SelfAssignmentCheck() {
-        super("Assigning a variable to itself is useless.");
+        super(new LocalizedMessage("self-assignment-desc"));
     }
 
     @Override
@@ -24,9 +27,13 @@ public class SelfAssignmentCheck extends IntegratedCheck {
                     && assignment.getAssigned() instanceof CtVariableWrite<?> write) {
                     if (read.getVariable().equals(write.getVariable())) {
                         addLocalProblem(assignment,
-                            "Useless assignment of '" + assignment.getAssignment() + "' to '" +
-                                assignment.getAssigned() +
-                                "'", ProblemType.REDUNDANT_SELF_ASSIGNMENT);
+                            new LocalizedMessage(
+                                "self-assignment-exp",
+                                Map.of(
+                                    "lhs", assignment.getAssigned(),
+                                    "rhs", assignment.getAssignment()
+                                )
+                            ), ProblemType.REDUNDANT_SELF_ASSIGNMENT);
                     }
                 }
             }

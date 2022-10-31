@@ -13,6 +13,7 @@ import com.github.dockerjava.core.DockerClientBuilder;
 import com.github.dockerjava.core.DockerClientConfig;
 import com.github.dockerjava.httpclient5.ApacheDockerHttpClient;
 import com.github.dockerjava.transport.DockerHttpClient;
+import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.event.Event;
 import org.apache.commons.compress.archivers.tar.TarArchiveInputStream;
@@ -54,11 +55,11 @@ public class DockerConsoleRunner implements TestRunner {
         this.tmpPath = tmpPath;
     }
 
-    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<String> statusConsumer)
+    public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<LinterStatus> statusConsumer)
         throws RunnerException, InterruptedException {
         String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
-        statusConsumer.accept("Building the docker image");
+        statusConsumer.accept(LinterStatus.BUILDING_DOCKER_IMAGE);
 
         // Create the docker client
         DockerClientConfig config = DefaultDockerClientConfig.createDefaultConfigBuilder().build();
@@ -72,7 +73,8 @@ public class DockerConsoleRunner implements TestRunner {
         try {
             // Prepare the build directory
             Path buildDirectory = Files.createTempDirectory(this.tmpPath, "docker_build");
-            Files.copy(Path.of(this.getClass().getResource("Dockerfile").toURI()), buildDirectory.resolve("Dockerfile"));
+            Files.copy(Path.of(this.getClass().getResource("Dockerfile").toURI()),
+                buildDirectory.resolve("Dockerfile"));
             Files.copy(this.executor, buildDirectory.resolve("executor.jar"));
             Files.copy(this.agent, buildDirectory.resolve("agent.jar"));
             Files.copy(jar, buildDirectory.resolve("src.jar"));
@@ -93,7 +95,7 @@ public class DockerConsoleRunner implements TestRunner {
                     .map(Path::toFile)
                     .forEach(File::delete);
             }
-            
+
             try (Stream<Path> files = Files.walk(this.tests)) {
                 testCases =
                     files.filter(Files::isRegularFile)
@@ -104,7 +106,7 @@ public class DockerConsoleRunner implements TestRunner {
         }
 
 
-        statusConsumer.accept("Running tests");
+        statusConsumer.accept(LinterStatus.EXECUTING_TESTS);
         try {
             ExecutorService service = Executors.newFixedThreadPool(Runtime.getRuntime().availableProcessors());
             List<Future<TestRunResult>> futures = new ArrayList<>();
@@ -172,7 +174,7 @@ public class DockerConsoleRunner implements TestRunner {
             }
 
             String logs = readLogs(dockerClient, containerId);
-            
+
             List<Event> events;
             try {
                 InputStream tar = dockerClient

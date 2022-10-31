@@ -7,13 +7,13 @@ import java.util.List;
 public class MultiPositionProblem implements Problem {
     private final Check check;
 
-    private final String explanation;
+    private final LocalizedMessage explanation;
 
     private final List<CodePosition> positions;
     
     private final ProblemType problemType;
 
-    public MultiPositionProblem(Check check, List<CodePosition> positions, String explanation,
+    public MultiPositionProblem(Check check, List<CodePosition> positions, LocalizedMessage explanation,
                                 ProblemType problemType) {
         this.check = check;
         this.explanation = explanation;
@@ -33,7 +33,7 @@ public class MultiPositionProblem implements Problem {
     }
 
     @Override
-    public String getExplanation() {
+    public LocalizedMessage getExplanation() {
         return explanation;
     }
 

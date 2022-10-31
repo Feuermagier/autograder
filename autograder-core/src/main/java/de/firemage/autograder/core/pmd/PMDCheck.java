@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.pmd;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import net.sourceforge.pmd.Rule;
@@ -11,28 +12,28 @@ import java.util.List;
 
 public abstract class PMDCheck implements Check {
 
-    private final String description;
+    private final LocalizedMessage description;
 
     private final List<Rule> rules;
 
-    private final String explanation;
+    private final LocalizedMessage explanation;
 
     private final ProblemType problemType;
 
-    protected PMDCheck(String description, String explanation, Rule rule,
+    protected PMDCheck(LocalizedMessage description, LocalizedMessage explanation, Rule rule,
                        ProblemType problemType) {
         this(description, explanation, List.of(rule), problemType);
     }
 
-    protected PMDCheck(String description, Rule rule, ProblemType problemType) {
+    protected PMDCheck(LocalizedMessage description, Rule rule, ProblemType problemType) {
         this(description, null, List.of(rule), problemType);
     }
 
-    protected PMDCheck(String description, List<Rule> rules, ProblemType problemType) {
+    protected PMDCheck(LocalizedMessage description, List<Rule> rules, ProblemType problemType) {
         this(description, null, rules, problemType);
     }
 
-    protected PMDCheck(String description, String explanation, List<Rule> rules,
+    protected PMDCheck(LocalizedMessage description, LocalizedMessage explanation, List<Rule> rules,
                        ProblemType problemType) {
         this.description = description;
         this.explanation = explanation;
@@ -55,12 +56,12 @@ public abstract class PMDCheck implements Check {
     }
 
     @Override
-    public String getLinter() {
-        return "PMD";
+    public LocalizedMessage getLinter() {
+        return new LocalizedMessage("linter-pmd");
     }
 
     @Override
-    public String getDescription() {
+    public LocalizedMessage getDescription() {
         return description;
     }
 
@@ -68,7 +69,7 @@ public abstract class PMDCheck implements Check {
         return rules;
     }
 
-    public String getExplanation() {
+    public LocalizedMessage getExplanation() {
         return explanation;
     }
 

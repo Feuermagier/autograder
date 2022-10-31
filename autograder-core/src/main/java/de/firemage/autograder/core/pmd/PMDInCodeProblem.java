@@ -2,6 +2,7 @@ package de.firemage.autograder.core.pmd;
 
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.InCodeProblem;
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import net.sourceforge.pmd.RuleViolation;
 
@@ -17,7 +18,7 @@ public class PMDInCodeProblem extends InCodeProblem {
                 violation.getEndLine(),
                 violation.getBeginColumn(),
                 violation.getEndColumn()),
-            check.getExplanation() != null ? check.getExplanation() : violation.getDescription(),
+            check.getExplanation() != null ? check.getExplanation() : new LocalizedMessage(violation.getDescription()),
             check.getProblemType());
     }
 }

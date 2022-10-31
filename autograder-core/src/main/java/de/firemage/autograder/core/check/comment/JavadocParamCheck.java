@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -12,11 +13,12 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 public class JavadocParamCheck extends IntegratedCheck {
     public JavadocParamCheck() {
-        super("Javadoc comments for methods must mention all declared parameters.");
+        super(new LocalizedMessage("javadoc-param-desc"));
     }
 
     @Override
@@ -43,17 +45,20 @@ public class JavadocParamCheck extends IntegratedCheck {
                 for (CtParameter<?> param : method.getParameters()) {
                     if (!paramTags.contains(param.getSimpleName())) {
                         addLocalProblem(javadoc.get(),
-                            String.format("The parameter '%s' is not mentioned in the Javadoc comment",
-                                param.getSimpleName()), ProblemType.JAVADOC_MISSING_PARAMETER_TAG);
+                            new LocalizedMessage(
+                                "javadoc-param-exp-missing",
+                                Map.of("param", param.getSimpleName())
+                            ), ProblemType.JAVADOC_MISSING_PARAMETER_TAG);
                     }
                 }
 
                 // Non-existent parameters?
                 for (String tag : paramTags) {
                     if (!hasParameter(tag, method) && !hasTypeParameter(tag, method)) {
-                        addLocalProblem(javadoc.get(), String.format(
-                            "Javadoc mentions parameter '%s', but there is no such parameter in the method declaration",
-                            tag), ProblemType.JAVADOC_UNKNOWN_PARAMETER_TAG);
+                        addLocalProblem(javadoc.get(), new LocalizedMessage(
+                            "javadoc-param-exp-missing",
+                            Map.of("param", tag)
+                        ), ProblemType.JAVADOC_UNKNOWN_PARAMETER_TAG);
                     }
                 }
             }

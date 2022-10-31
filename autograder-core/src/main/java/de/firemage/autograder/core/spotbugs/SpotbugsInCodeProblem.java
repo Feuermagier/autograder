@@ -12,7 +12,7 @@ public class SpotbugsInCodeProblem extends InCodeProblem {
     public SpotbugsInCodeProblem(SpotbugsCheck check, BugInstance bug) {
         super(check,
             mapLineAnnotation(bug.getPrimarySourceLineAnnotation()),
-            bug.getMessageWithoutPrefix(),
+            check.getExplanation(),
             check.getProblemType()
         );
     }

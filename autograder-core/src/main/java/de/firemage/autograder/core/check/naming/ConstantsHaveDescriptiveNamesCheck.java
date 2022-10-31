@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -9,13 +10,15 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtField;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
-    private static final List<String> NUMBER_PRE_SUFFIXES = List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg");
+    private static final List<String> NUMBER_PRE_SUFFIXES =
+        List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg");
 
     public ConstantsHaveDescriptiveNamesCheck() {
-        super("Constants should have descriptive names - e.g. AUTHOR_INDEX instead of FIRST_INDEX");
+        super(new LocalizedMessage("constants-name-desc"));
     }
 
     private static boolean isNonDescriptiveIntegerName(String name, int value) {
@@ -28,7 +31,8 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             default -> List.of();
         };
         return valueNameOptions.stream()
-            .flatMap(o -> Stream.concat(Stream.of(o), NUMBER_PRE_SUFFIXES.stream().flatMap(s -> Stream.of(s + "_" + o, o + "_" + s))))
+            .flatMap(o -> Stream.concat(Stream.of(o),
+                NUMBER_PRE_SUFFIXES.stream().flatMap(s -> Stream.of(s + "_" + o, o + "_" + s))))
             .anyMatch(o -> name.toLowerCase().equals(o));
     }
 
@@ -45,7 +49,8 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (charOptions == null) {
                     return false;
                 }
-                options = options.flatMap(suffix -> charOptions.stream().flatMap(o -> Stream.of(suffix + o, suffix + "_" + o)));
+                options = options.flatMap(
+                    suffix -> charOptions.stream().flatMap(o -> Stream.of(suffix + o, suffix + "_" + o)));
             }
         }
         return options.anyMatch(option -> option.equals(name.toLowerCase()));
@@ -77,13 +82,19 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                     if (literal.getValue() instanceof Integer value &&
                         isNonDescriptiveIntegerName(field.getSimpleName(), value)) {
                         addLocalProblem(field,
-                            String.format("The name '%s' is non-descriptive for the value %d", field.getSimpleName(),
-                                value), ProblemType.MEANINGLESS_CONSTANT_NAME);
+                            new LocalizedMessage("constants-name-exp-number",
+                                Map.of(
+                                    "name", field.getSimpleName(),
+                                    "value", value
+                                )), ProblemType.MEANINGLESS_CONSTANT_NAME);
                     } else if (literal.getValue() instanceof String value &&
                         isNonDescriptiveStringName(field.getSimpleName(), value)) {
                         addLocalProblem(field,
-                            String.format("The name '%s' is non-descriptive for the value '%s'", field.getSimpleName(),
-                                value), ProblemType.MEANINGLESS_CONSTANT_NAME);
+                            new LocalizedMessage("constants-name-exp-string",
+                                Map.of(
+                                    "name", field.getSimpleName(),
+                                    "value", value
+                                )), ProblemType.MEANINGLESS_CONSTANT_NAME);
                     }
                 }
             }

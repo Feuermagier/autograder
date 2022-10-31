@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -10,9 +11,10 @@ import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
 import spoon.reflect.declaration.CtMethod;
 
+import java.util.Map;
+
 public class JavadocStubCheck extends IntegratedCheck {
-    private static final String DESCRIPTION =
-        "Auto-generated Javadoc comments should be modified for the particular method";
+    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("javadoc-stub-desc");
     private final boolean allowGettersSettersWithEmptyDescription;
 
     public JavadocStubCheck(boolean allowGettersSettersWithEmptyDescription) {
@@ -34,26 +36,29 @@ public class JavadocStubCheck extends IntegratedCheck {
                     && (SpoonUtil.isGetter(method) || SpoonUtil.isSetter(method))) {
                     // Setters and Getters are okay
                 } else if (isDefaultValueDescription(javadoc.getContent())) {
-                    addLocalProblem(javadoc, "Javadoc has an empty description", ProblemType.JAVADOC_STUB_DESCRIPTION);
+                    addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-desc"),
+                        ProblemType.JAVADOC_STUB_DESCRIPTION);
                 }
 
                 for (CtJavaDocTag tag : javadoc.getTags()) {
                     switch (tag.getType()) {
                         case PARAM -> {
                             if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc, "Stub description for parameter " + tag.getParam(),
+                                addLocalProblem(javadoc,
+                                    new LocalizedMessage("javadoc-stub-exp-param", Map.of("param", tag.getParam())),
                                     ProblemType.JAVADOC_STUB_PARAMETER_TAG);
                             }
                         }
                         case RETURN -> {
                             if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc, "Stub description for return value",
+                                addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-param"),
                                     ProblemType.JAVADOC_STUB_RETURN_TAG);
                             }
                         }
                         case THROWS -> {
                             if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc, "Stub description for exception " + tag.getParam(),
+                                addLocalProblem(javadoc,
+                                    new LocalizedMessage("javadoc-stub-exp-param", Map.of("exp", tag.getParam())),
                                     ProblemType.JAVADOC_STUB_THROWS_TAG);
                             }
                         }

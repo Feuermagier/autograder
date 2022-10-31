@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.cpd;
 
 import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.MultiPositionProblem;
 import de.firemage.autograder.core.PathUtil;
 import de.firemage.autograder.core.ProblemType;
@@ -10,6 +11,7 @@ import net.sourceforge.pmd.cpd.Match;
 
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Map;
 
 public class CPDInCodeProblem extends MultiPositionProblem {
 
@@ -27,9 +29,16 @@ public class CPDInCodeProblem extends MultiPositionProblem {
         this.root = root;
     }
 
-    private static String formatMatch(Match match, Path root) {
-        return "Duplicated code (" + match.getLineCount() + " lines): "
-            + formatLocation(match, root);
+    private static LocalizedMessage formatMatch(Match match, Path root) {
+        return new LocalizedMessage("duplicate-code", Map.of(
+            "lines", String.valueOf(match.getLineCount()),
+            "first-path", PathUtil.getSanitizedPath(match.getFirstMark().getFilename(), root),
+            "first-start", String.valueOf(match.getFirstMark().getBeginLine()),
+            "first-end", String.valueOf(match.getFirstMark().getEndLine()),
+            "second-path", PathUtil.getSanitizedPath(match.getSecondMark().getFilename(), root),
+            "second-start", String.valueOf(match.getSecondMark().getBeginLine()),
+            "second-end", String.valueOf(match.getSecondMark().getEndLine())
+        ));
     }
 
     private static String formatLocation(Match match, Path root) {

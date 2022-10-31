@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -8,7 +9,7 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtComment;
 
 public class CommentedOutCodeCheck extends IntegratedCheck {
-    private static final String DESCRIPTION = "Unused code should be removed and not commented out";
+    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("commented-out-code-desc");
 
     public CommentedOutCodeCheck() {
         super(DESCRIPTION);
@@ -24,13 +25,13 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
 
                 if (type == CtComment.CommentType.INLINE) {
                     if (content.endsWith(";") || content.equals("{") || content.equals("}")) {
-                        addLocalProblem(comment, "This commented out code should be removed",
+                        addLocalProblem(comment, new LocalizedMessage("commented-out-code-exp"),
                             ProblemType.COMMENTED_OUT_CODE);
                     }
                 } else if (type == CtComment.CommentType.BLOCK) {
                     if (content.contains(";") || content.contains("=") || content.contains("{") ||
                         content.contains("}")) {
-                        addLocalProblem(comment, "This commented out code should be removed",
+                        addLocalProblem(comment, new LocalizedMessage("commented-out-code-exp"),
                             ProblemType.COMMENTED_OUT_CODE);
                     }
                 }

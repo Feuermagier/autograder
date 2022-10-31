@@ -21,6 +21,7 @@ import picocli.CommandLine.Spec;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Locale;
 import java.util.concurrent.Callable;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
@@ -40,7 +41,8 @@ public class Application implements Callable<Integer> {
     private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
-    @Option(names = {"-s", "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
+    @Option(names = {"-s",
+        "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
     private boolean staticOnly;
     @Spec
     private CommandSpec spec;
@@ -72,18 +74,19 @@ public class Application implements Callable<Integer> {
             return IO_EXIT_CODE;
         }
 
-        Linter linter = new Linter();
+        Linter linter = new Linter(Locale.US);
 
         try {
             UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));
-            
+
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
             List<Problem> problems =
-                linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, progress::updateText, !dynamic);
+                linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks,
+                    status -> progress.updateText(linter.translateMessage(status.getMessage())), !dynamic);
             progress.finish("Completed checks");
-            printProblems(problems);
+            printProblems(problems, linter);
             CmdUtil.endSection();
         } catch (CompilationFailureException e) {
             CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
@@ -104,19 +107,19 @@ public class Application implements Callable<Integer> {
         return Path.of("tmp");
     }
 
-    private void printProblems(List<Problem> problems) {
+    private void printProblems(List<Problem> problems, Linter linter) {
         if (problems.isEmpty()) {
             CmdUtil.println("No problems found - good job!");
         } else {
             CmdUtil.println("Found " + problems.size() + " problem(s):");
-            problems.stream().map(this::formatProblem).sorted().forEach(CmdUtil::println);
+            problems.stream().map(p -> this.formatProblem(p, linter)).sorted().forEach(CmdUtil::println);
         }
     }
 
-    private String formatProblem(Problem problem) {
+    private String formatProblem(Problem problem, Linter linter) {
         return String.format("%s %s (Source: %s)",
             problem.getDisplayLocation(),
-            problem.getExplanation(),
-            problem.getCheck().getLinter());
+            linter.translateMessage(problem.getExplanation()),
+            linter.translateMessage(problem.getCheck().getLinter()));
     }
 }

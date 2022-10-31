@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.check.Check;
 import lombok.Getter;
 
@@ -13,14 +14,12 @@ public class CopyPasteCheck implements Check {
 
 
     @Override
-    public String getDescription() {
-        return """
-                Duplicated code.
-                """;
+    public LocalizedMessage getDescription() {
+        return new LocalizedMessage("description-duplicate-code");
     }
 
     @Override
-    public String getLinter() {
-        return "CPD";
+    public LocalizedMessage getLinter() {
+        return new LocalizedMessage("linter-cpd");
     }
 }

@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -11,10 +12,11 @@ import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
 import spoon.reflect.declaration.CtMethod;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class JavadocReturnNullCheck extends IntegratedCheck {
-    private static final String DESCRIPTION = "Methods must document in the @return-annotation if they may return null";
+    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("javadoc-return-null-desc");
 
     public JavadocReturnNullCheck() {
         super(DESCRIPTION);
@@ -47,7 +49,10 @@ public class JavadocReturnNullCheck extends IntegratedCheck {
                         .contains("null")) { // We don't care if the return tag does not exist
                         // We sadly cannot use the returnTag itself as the position because it has a "NoSourcePosition"
                         addLocalProblem(javaDoc.get(),
-                            "The method may return null but the @return tag doesn't mention it",
+                            new LocalizedMessage(
+                                "javadoc-return-null-exp",
+                                Map.of("method", method.getSignature())
+                            ),
                             ProblemType.JAVADOC_INCOMPLETE_RETURN_TAG);
                     }
                 }

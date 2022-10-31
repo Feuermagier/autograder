@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -10,19 +11,16 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 
+import java.util.Map;
 import java.util.Optional;
 
 public class CompareObjectsNotStringsCheck extends IntegratedCheck {
-    private static final String DESCRIPTION =
-        "Objects should be compared directly with equals and by their String representation";
-
     public CompareObjectsNotStringsCheck() {
-        super(DESCRIPTION);
+        super(new LocalizedMessage("compare-objects-desc"));
     }
 
-    private static String formatExplanation(CtTypeReference<?> type) {
-        return String.format("Implement an equals method for type %s and use it for comparisons",
-            type.getQualifiedName());
+    private static LocalizedMessage formatExplanation(CtTypeReference<?> type) {
+        return new LocalizedMessage("compare-objects-exp", Map.of("type", type.getQualifiedName()));
     }
 
     @Override

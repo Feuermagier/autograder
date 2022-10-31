@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -14,11 +15,8 @@ import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
 
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
-    private static final String DESCRIPTION = "Local variables must have descriptive names";
-
-
     public VariablesHaveDescriptiveNamesCheck() {
-        super(DESCRIPTION);
+        super(new LocalizedMessage("variable-name-desc"));
     }
 
     @Override
@@ -41,10 +39,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (variable.getSimpleName().length() == 1
                     && !isAllowedLoopCounter(variable)
                     && !isCoordinate(variable)) {
-                    addLocalProblem(variable, "Single letter names are usually non-descriptive",
+                    addLocalProblem(variable, new LocalizedMessage("variable-name-exp-single-letter"),
                         ProblemType.SINGLE_LETTER_LOCAL_NAME);
                 } else if (isTypeAbbreviation(variable)) {
-                    addLocalProblem(variable, "Don't use unnecessary abbreviations",
+                    addLocalProblem(variable, new LocalizedMessage("variable-name-exp-type"),
                         ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
                 }
             }

@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.file.UploadedFile;
 import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
@@ -23,8 +24,8 @@ public class StaticAnalysis implements AutoCloseable {
     private final Factory factory;
     private final CtModel model;
 
-    public StaticAnalysis(UploadedFile file, Path jar, Consumer<String> statusConsumer) throws ModelBuildException, IOException {
-        statusConsumer.accept("Building the code model");
+    public StaticAnalysis(UploadedFile file, Path jar, Consumer<LinterStatus> statusConsumer) throws ModelBuildException, IOException {
+        statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
 
         // Use a custom class loader because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
         this.classLoader =

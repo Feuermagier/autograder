@@ -161,9 +161,15 @@
         
         <!-- Translation -->
         <dependency>
-            <groupId>fr.inria.gforge.spoon</groupId>
-            <artifactId>spoon-core</artifactId>
-            <version>10.2.0</version>
+            <groupId>net.xyzsd.fluent</groupId>
+            <artifactId>fluent-base</artifactId>
+            <version>0.70</version>
+            <type>module</type>
+        </dependency>
+        <dependency>
+            <groupId>net.xyzsd.fluent</groupId>
+            <artifactId>fluent-functions-icu</artifactId>
+            <version>0.70</version>
         </dependency>
 
         <!-- Test -->

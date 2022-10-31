@@ -2,18 +2,21 @@ package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.InCodeProblem;
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
+
 import java.io.File;
 import java.nio.file.Path;
 
 public class IntegratedInCodeProblem extends InCodeProblem {
     private final CtElement element;
 
-    public IntegratedInCodeProblem(Check check, CtElement element, String explanation, ProblemType problemType, Path root) {
+    public IntegratedInCodeProblem(Check check, CtElement element, LocalizedMessage explanation,
+                                   ProblemType problemType, Path root) {
         super(check, mapSourceToCode(element, root), explanation, problemType);
 
         this.element = element;
@@ -32,11 +35,11 @@ public class IntegratedInCodeProblem extends InCodeProblem {
             }
         }
         return new CodePosition(
-                root.relativize(file.toPath()),
-                position.getLine(),
-                position.getEndLine(),
-                position.getColumn(),
-                position.getEndColumn()
+            root.relativize(file.toPath()),
+            position.getLine(),
+            position.getEndLine(),
+            position.getColumn(),
+            position.getEndColumn()
         );
     }
 }

@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.oop;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -20,7 +21,7 @@ import spoon.reflect.reference.CtTypeReference;
 
 public class ListGetterSetterCheck extends IntegratedCheck {
     public ListGetterSetterCheck() {
-        super("Copy mutable collections before returning them to avoid unwanted mutations by other classes");
+        super(new LocalizedMessage("list-getter-desc"));
     }
 
     @Override
@@ -38,7 +39,7 @@ public class ListGetterSetterCheck extends IntegratedCheck {
                     && returnedExpression instanceof CtFieldRead<?> read) {
                     CtField<?> field = read.getVariable().getFieldDeclaration();
                     if (field.isPrivate() && wasMutablyAssigned(staticAnalysis, field)) {
-                        addLocalProblem(ret, "Copy this mutable collection before returning it",
+                        addLocalProblem(ret, new LocalizedMessage("list-getter-exp"),
                             ProblemType.LIST_NOT_COPIED_IN_GETTER);
                     }
                 }

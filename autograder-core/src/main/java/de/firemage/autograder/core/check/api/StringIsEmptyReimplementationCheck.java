@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.api;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -12,20 +13,21 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.reference.CtExecutableReference;
 
+import java.util.Map;
+
 public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
-    private static final String DESCRIPTION =
-        "Use String#isEmpty instead of '.equals(\"\")' or '.length() == 0' (or the negation when checking if the String is not empty)";
+    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("string-is-empty-desc");
 
     public StringIsEmptyReimplementationCheck() {
         super(DESCRIPTION);
     }
 
-    private static String formatExplanation(CtElement element) {
-        return String.format("Use 'isEmpty()' instead of '%s' to check for emptiness", element.toString());
+    private static LocalizedMessage formatExplanation(CtElement element) {
+        return new LocalizedMessage("string-is-empty-exp-emptiness", Map.of("exp", element.toString()));
     }
 
-    private static String formatNegatedExplanation(CtElement element) {
-        return String.format("Use '!isEmpty()' instead of '%s' to check for non-emptiness", element.toString());
+    private static LocalizedMessage formatNegatedExplanation(CtElement element) {
+        return new LocalizedMessage("string-is-empty-exp-non-emptiness", Map.of("exp", element.toString()));
     }
 
     @Override

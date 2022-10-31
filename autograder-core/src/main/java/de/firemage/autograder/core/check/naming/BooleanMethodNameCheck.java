@@ -1,11 +1,10 @@
 package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.pmd.PMDCheck;
 
 public class BooleanMethodNameCheck extends PMDCheck {
-    private static final String DESCRIPTION =
-        "Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'.";
     private static final String QUERY = """
         //MethodDeclaration
             [starts-with(@Name, 'get')]
@@ -14,8 +13,8 @@ public class BooleanMethodNameCheck extends PMDCheck {
         """;
 
     public BooleanMethodNameCheck() {
-        super(DESCRIPTION,
-            createXPathRule("boolean method naming", "The method should be called isY() instead of getY()", QUERY),
+        super(new LocalizedMessage("bool-getter-name-desc"),
+            createXPathRule("boolean method naming", "bool-method-name-exp", QUERY),
             ProblemType.BOOLEAN_GETTER_NOT_CALLED_IS);
     }
 }
