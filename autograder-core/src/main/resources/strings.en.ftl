@@ -28,7 +28,7 @@ old-collection-exp-stack = Use Dequeue instead of Stack
 
 string-is-empty-desc = Use String#isEmpty instead of '.equals("")' or '.length() == 0' (or the negation when checking if the String is not empty)
 string-is-empty-exp-emptiness = Use 'isEmpty()' instead of '{$exp}' to check for emptiness
-string-is-empty-exp-non-emptiness = Use 'isEmpty()' instead of '{$exp}' to check for non-emptiness
+string-is-empty-exp-non-emptiness = Use '!<...>isEmpty()' instead of '{$exp}' to check for non-emptiness
 
 # Comment
 author-tag-invalid-desc = The @author-tag is invalid
@@ -186,7 +186,7 @@ default-package-exp = Do not use the default package
 
 empty-block-desc = Empty block (if / else / for / while / switch / try)
 empty-block-exp-if = Empty if/else block
-empty-block-exp-while = Empty while
+empty-block-exp-while = Empty while block
 empty-block-exp-try = Empty try block
 empty-block-exp-finally = Empty finally block
 empty-block-exp-switch = Empty switch block

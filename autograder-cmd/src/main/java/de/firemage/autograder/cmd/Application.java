@@ -74,7 +74,7 @@ public class Application implements Callable<Integer> {
             return IO_EXIT_CODE;
         }
 
-        Linter linter = new Linter(Locale.US);
+        Linter linter = new Linter(Locale.GERMANY);
 
         try {
             UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));

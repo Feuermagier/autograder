@@ -31,9 +31,15 @@ public class Linter {
     private final FluentBundle fluentBundle;
 
     public Linter(Locale locale) {
+        String filename = switch (locale.getLanguage()) {
+            case "de" -> "/strings.de.ftl";
+            case "en" -> "/strings.en.ftl";
+            default -> throw new IllegalArgumentException("No translation available for the locale " + locale);
+        };
         try {
-            FluentResource resource = FTLParser.parse(
-                FTLStream.of(Files.readString(Path.of(this.getClass().getResource("/strings.en.ftl").toURI()))));
+            FluentResource resource = FTLParser.parse(FTLStream.of(
+                Files.readString(Path.of(this.getClass().getResource(filename).toURI()))
+            ));
             this.fluentBundle = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE).addResource(resource).build();
         } catch (IOException | URISyntaxException e) {
             throw new IllegalStateException(e);
