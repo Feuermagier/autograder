@@ -90,6 +90,10 @@ unused-import-exp = Unused import
 wrapper-instantiation-desc = Don't instantiate primitive wrappers
 wrapper-instantiation-exp = Don't instantiate primitive wrappers
 
+repeated-math-operation = Don't repeat simple operations such as addition or multiplication, but use the higher-level operation (n + n + n => 3 * n; n * n * n => Math.pow(n, 3)) instead.
+repeated-math-operation-mul = Use Math.pow instead of multiplying '{$var}' {count} times with itself.
+repeated-math-operation-plus = Use a multiplication with {$count} instead of adding '{$var}' {$count} times to itself.
+
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
@@ -147,7 +151,6 @@ system-dependent-linebreak-desc = Always use system-independent line breaks such
 system-dependent-linebreak-exp = System-dependent line break (\n) used
 
 # Naming
-
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
 
@@ -178,12 +181,10 @@ utility-exp-constructor = Utility classes must have a private no-arg constructor
 utility-exp-field = Utility classes must only have final fields
 
 # Structure
-
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package
 
 # Unnecessary
-
 empty-block-desc = Empty block (if / else / for / while / switch / try)
 empty-block-exp-if = Empty if/else block
 empty-block-exp-while = Empty while block

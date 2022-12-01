@@ -90,6 +90,10 @@ unused-import-exp = Unbenutzter Import
 wrapper-instantiation-desc = Wrapper-Klassen sollten nicht direkt instanziiert werden
 wrapper-instantiation-exp = Wrapper-Klassen sollten nicht direkt instanziiert werden
 
+repeated-math-operation = Einfache mathematische Operationen sollten nicht wiederholt werden, sondern durch die entsprechende Operation "ein Level höher" ersetzt werden (z.B. n + n + n => 3 * n; n * n * n => Math.pow(n, 3)).
+repeated-math-operation-mul = Hier sollte Math.pow verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu multiplizieren.
+repeated-math-operation-plus = Hier sollte eine Multiplikation mit {$count} verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu addieren.
+
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt
@@ -112,7 +116,6 @@ runtime-ex-caught-desc = RuntimeExceptions sollten niemals gefangen werden (abge
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 
 # General
-
 compare-objects-desc = Objekte sollten mit equals verglichen werden, anstatt sie zum Vergleich in Strings umzuwandeln
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
 
@@ -144,7 +147,6 @@ system-dependent-linebreak-desc = Es sollten immer systemunabhängige Zeilenumbr
 system-dependent-linebreak-exp = Systemabhängiger Zeilenumbruch (\n) benutzt
 
 # Naming
-
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
 

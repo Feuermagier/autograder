@@ -28,6 +28,7 @@
     - RedundantConstructorCheck
     - RedundantIfForBooleanCheck
     - SelfAssignmentCheck
+    - RepeatedMathOperationCheck
 - debug:
     - AssertCheck
     - PrintStackTraceCheck
