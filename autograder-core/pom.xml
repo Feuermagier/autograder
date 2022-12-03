@@ -164,7 +164,6 @@
             <groupId>net.xyzsd.fluent</groupId>
             <artifactId>fluent-base</artifactId>
             <version>0.70</version>
-            <type>module</type>
         </dependency>
         <dependency>
             <groupId>net.xyzsd.fluent</groupId>

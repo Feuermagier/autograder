@@ -19,13 +19,14 @@ import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
 import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.Callable;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
-    description = "Static code analysis for student java code")
+        description = "Static code analysis for student java code")
 public class Application implements Callable<Integer> {
     private static final int IO_EXIT_CODE = 3;
     private static final int COMPILATION_EXIT_CODE = 4;
@@ -41,9 +42,10 @@ public class Application implements Callable<Integer> {
     private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
-    @Option(names = {"-s",
-        "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
+    @Option(names = {"-s", "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
     private boolean staticOnly;
+    @Option(names = {"--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
+    private boolean artemisFolders;
     @Spec
     private CommandSpec spec;
 
@@ -58,6 +60,22 @@ public class Application implements Callable<Integer> {
         if (!JavaVersion.isValidJavaVersion(javaVersion)) {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
+
+        if (artemisFolders) {
+            try {
+                file = Files.list(file)
+                        .filter(child -> !child.endsWith(".metadata"))
+                        .findAny()
+                        .get()
+                        .resolve("assignment")
+                        .resolve("src");
+            } catch (IOException e) {
+                e.printStackTrace();
+                return IO_EXIT_CODE;
+            }
+        }
+
+        System.out.println("Student source code directory is " + file);
 
         boolean dynamic = !this.staticOnly && !this.tests.toString().equals("");
         if (!dynamic) {
