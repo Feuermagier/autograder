@@ -66,7 +66,7 @@ public class Application implements Callable<Integer> {
                 file = Files.list(file)
                         .filter(child -> !child.endsWith(".metadata"))
                         .findAny()
-                        .get()
+                        .orElseThrow(() -> new IllegalStateException("No student code found"))
                         .resolve("assignment")
                         .resolve("src");
             } catch (IOException e) {
