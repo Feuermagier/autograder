@@ -17,10 +17,8 @@ import fluent.bundle.FluentResource;
 import fluent.functions.icu.ICUFunctionFactory;
 import fluent.syntax.parser.FTLParser;
 import fluent.syntax.parser.FTLStream;
-import org.apache.commons.io.FileUtils;
-import java.io.File;
+
 import java.io.IOException;
-import java.net.URISyntaxException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -39,17 +37,17 @@ public class Linter {
         };
         try {
             FluentResource resource = FTLParser.parse(FTLStream.of(
-                    FileUtils.readFileToString(new File(this.getClass().getResource(filename).toURI()), StandardCharsets.UTF_8)
+                new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
             ));
             this.fluentBundle = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE).addResource(resource).build();
-        } catch (IOException | URISyntaxException e) {
+        } catch (IOException e) {
             throw new IllegalStateException(e);
         }
     }
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks,
                                    Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)
-            throws LinterException, InterruptedException, IOException {
+        throws LinterException, InterruptedException, IOException {
         statusConsumer.accept(LinterStatus.COMPILING);
         CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
 
@@ -91,7 +89,7 @@ public class Linter {
 
         if (!integratedChecks.isEmpty()) {
             try (
-                    IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), tmpLocation, statusConsumer)) {
+                IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), tmpLocation, statusConsumer)) {
                 if (!disableDynamicAnalysis) {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }

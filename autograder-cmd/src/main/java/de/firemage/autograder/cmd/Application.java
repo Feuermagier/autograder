@@ -1,8 +1,11 @@
 package de.firemage.autograder.cmd;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.firemage.autograder.cmd.config.CheckConfig;
+import de.firemage.autograder.cmd.output.Annotation;
+import de.firemage.autograder.core.InCodeProblem;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.Problem;
@@ -26,7 +29,7 @@ import java.util.Locale;
 import java.util.concurrent.Callable;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
-        description = "Static code analysis for student java code")
+    description = "Static code analysis for student java code")
 public class Application implements Callable<Integer> {
     private static final int IO_EXIT_CODE = 3;
     private static final int COMPILATION_EXIT_CODE = 4;
@@ -42,10 +45,16 @@ public class Application implements Callable<Integer> {
     private Path tests;
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
-    @Option(names = {"-s", "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
+    @Option(names = {"-s",
+        "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
     private boolean staticOnly;
-    @Option(names = {"--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
+    @Option(names = {
+        "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
     private boolean artemisFolders;
+    @Option(names = {
+        "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
+    private boolean outputJson;
+
     @Spec
     private CommandSpec spec;
 
@@ -64,21 +73,23 @@ public class Application implements Callable<Integer> {
         if (artemisFolders) {
             try {
                 file = Files.list(file)
-                        .filter(child -> !child.endsWith(".metadata"))
-                        .findAny()
-                        .orElseThrow(() -> new IllegalStateException("No student code found"))
-                        .resolve("assignment")
-                        .resolve("src");
+                    .filter(child -> !child.endsWith(".metadata"))
+                    .findAny()
+                    .orElseThrow(() -> new IllegalStateException("No student code found"))
+                    .resolve("assignment")
+                    .resolve("src");
             } catch (IOException e) {
                 e.printStackTrace();
                 return IO_EXIT_CODE;
             }
         }
 
-        System.out.println("Student source code directory is " + file);
+        if (!outputJson) {
+            System.out.println("Student source code directory is " + file);
+        }
 
         boolean dynamic = !this.staticOnly && !this.tests.toString().equals("");
-        if (!dynamic) {
+        if (!dynamic && !outputJson) {
             CmdUtil.println("Note: Dynamic analysis is disabled.");
             CmdUtil.println();
         }
@@ -97,15 +108,25 @@ public class Application implements Callable<Integer> {
         try {
             UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));
 
-            CmdUtil.beginSection("Checks");
-            ProgressAnimation progress = new ProgressAnimation("Checking...");
-            progress.start();
-            List<Problem> problems =
-                linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks,
-                    status -> progress.updateText(linter.translateMessage(status.getMessage())), !dynamic);
-            progress.finish("Completed checks");
-            printProblems(problems, linter);
-            CmdUtil.endSection();
+            if (outputJson) {
+                List<Problem> problems =
+                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks,
+                        status -> System.out.println(linter.translateMessage(status.getMessage())), !dynamic);
+                System.out.println(">> Problems <<");
+                printProblemsAsJson(problems, linter);
+            } else {
+                CmdUtil.beginSection("Checks");
+                ProgressAnimation progress = new ProgressAnimation("Checking...");
+                progress.start();
+                List<Problem> problems =
+                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks,
+                        status -> progress.updateText(linter.translateMessage(status.getMessage())), !dynamic);
+                progress.finish("Completed checks");
+
+                printProblems(problems, linter);
+
+                CmdUtil.endSection();
+            }
         } catch (CompilationFailureException e) {
             CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
             return COMPILATION_EXIT_CODE;
@@ -131,6 +152,25 @@ public class Application implements Callable<Integer> {
         } else {
             CmdUtil.println("Found " + problems.size() + " problem(s):");
             problems.stream().map(p -> this.formatProblem(p, linter)).sorted().forEach(CmdUtil::println);
+        }
+    }
+
+    private void printProblemsAsJson(List<Problem> problems, Linter linter) {
+        try {
+            ObjectMapper mapper = new ObjectMapper();
+            String jsonOutput = mapper.writeValueAsString(problems.stream().map(p -> {
+                if (p instanceof InCodeProblem inCodeProblem) {
+                    var position = inCodeProblem.getPosition();
+                    return new Annotation(inCodeProblem.getProblemType(),
+                        linter.translateMessage(inCodeProblem.getExplanation()),
+                        position.file().toString(), position.startLine(), position.endLine());
+                } else {
+                    throw new IllegalStateException();
+                }
+            }).toList());
+            System.out.println(jsonOutput);
+        } catch (JsonProcessingException ex) {
+            ex.printStackTrace();
         }
     }
 

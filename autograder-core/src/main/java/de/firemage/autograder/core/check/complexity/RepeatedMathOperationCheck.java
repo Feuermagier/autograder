@@ -4,6 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -59,8 +60,14 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
         if (expression instanceof CtVariableRead<?> read) {
             return Map.of(read.getVariable(), 1);
         } else if (expression instanceof CtBinaryOperator<?> operator && operator.getKind() == kind) {
-            return mergeOccurrenceMaps(countOccurrences(operator.getLeftHandOperand(), kind),
-                countOccurrences(operator.getRightHandOperand(), kind));
+            // '+' can also be used on Strings, but String operations are not associative
+            if (SpoonUtil.isString(operator.getLeftHandOperand().getType()) ||
+                SpoonUtil.isString(operator.getRightHandOperand().getType())) {
+                return Map.of();
+            } else {
+                return mergeOccurrenceMaps(countOccurrences(operator.getLeftHandOperand(), kind),
+                    countOccurrences(operator.getRightHandOperand(), kind));
+            }
         } else {
             return Map.of();
         }
