@@ -14,7 +14,7 @@ public class BooleanMethodNameCheck extends PMDCheck {
 
     public BooleanMethodNameCheck() {
         super(new LocalizedMessage("bool-getter-name-desc"),
-            createXPathRule("boolean method naming", "bool-method-name-exp", QUERY),
+            createXPathRule("boolean method naming", "bool-getter-name-exp", QUERY),
             ProblemType.BOOLEAN_GETTER_NOT_CALLED_IS);
     }
 }

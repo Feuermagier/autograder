@@ -103,6 +103,11 @@ public class Linter {
     }
 
     public String translateMessage(LocalizedMessage message) {
-        return message.format(this.fluentBundle);
+        String output = message.format(this.fluentBundle);
+        if (output.startsWith("Unknown messageID '")) {
+            return output.substring("Unknown messageID '".length(), output.length() - 1);
+        } else {
+            return output;
+        }
     }
 }

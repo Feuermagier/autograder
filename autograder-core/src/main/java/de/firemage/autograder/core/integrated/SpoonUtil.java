@@ -3,11 +3,13 @@ package de.firemage.autograder.core.integrated;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtTypeReference;
 
@@ -130,5 +132,11 @@ public final class SpoonUtil {
             && invocation.getTarget() instanceof CtTypeAccess<?> access
             && access.getAccessedType().getQualifiedName().equals(typeName)
             && invocation.getExecutable().getSimpleName().equals(methodName);
+    }
+
+    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtField<?> field) {
+        return staticAnalysis.getModel()
+            .filterChildren(e -> e instanceof CtFieldWrite write && write.getVariable().equals(field.getReference()))
+            .first() == null;
     }
 }

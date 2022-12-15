@@ -146,6 +146,9 @@ missing-override-exp = Fehlendes @Override
 system-dependent-linebreak-desc = Es sollten immer systemunabhängige Zeilenumbrüche wie der Wert von System.lineSeparator() oder '%n' in format-Strings verwendet werden
 system-dependent-linebreak-exp = Systemabhängiger Zeilenumbruch (\n) benutzt
 
+field-final-desc = Konstante Attribute sollten final sein
+field-final-exp = Das Attribut '{$name}' sollte final sein
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
@@ -175,6 +178,9 @@ utility-desc = Utility-Klassen müssen final sein und genau einen parameterlosen
 utility-exp-final = Utility-Klasse ist nicht final
 utility-exp-constructor = Utility-Klassen müssen genau einen parameterlosen Konstruktor haben
 utility-exp-field = Utility-Klassen dürfen ausschließlich finale Attribute haben
+
+static-field-desc = Statische Attribute dürfen nicht verändert werden
+static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut sein
 
 # Structure
 

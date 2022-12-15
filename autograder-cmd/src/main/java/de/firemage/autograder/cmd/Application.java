@@ -21,11 +21,17 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.PrintStream;
+import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
@@ -59,6 +65,7 @@ public class Application implements Callable<Integer> {
     private CommandSpec spec;
 
     public static void main(String... args) {
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
         int exitCode = new CommandLine(new Application()).execute(args);
         System.exit(exitCode);
     }
@@ -161,13 +168,13 @@ public class Application implements Callable<Integer> {
             String jsonOutput = mapper.writeValueAsString(problems.stream().map(p -> {
                 if (p instanceof InCodeProblem inCodeProblem) {
                     var position = inCodeProblem.getPosition();
-                    return new Annotation(inCodeProblem.getProblemType(),
+                    return Optional.of(new Annotation(inCodeProblem.getProblemType(),
                         linter.translateMessage(inCodeProblem.getExplanation()),
-                        position.file().toString(), position.startLine(), position.endLine());
+                        position.file().toString(), position.startLine(), position.endLine()));
                 } else {
-                    throw new IllegalStateException();
+                    return Optional.empty();
                 }
-            }).toList());
+            }).filter(Optional::isPresent).map(Optional::get).toList());
             System.out.println(jsonOutput);
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();

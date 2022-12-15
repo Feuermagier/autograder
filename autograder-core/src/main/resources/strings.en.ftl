@@ -150,6 +150,9 @@ missing-override-exp = Missing @Override
 system-dependent-linebreak-desc = Always use system-independent line breaks such as the value obtained from System.lineSeparator() or %n in format strings
 system-dependent-linebreak-exp = System-dependent line break (\n) used
 
+field-final-desc = Constant fields should be final
+field-final-exp = The attribute '{$name}' should be final
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
@@ -179,6 +182,9 @@ utility-desc = Utility classes must be final and must have a single no-args priv
 utility-exp-final = Utility class is not final
 utility-exp-constructor = Utility classes must have a private no-arg constructor
 utility-exp-field = Utility classes must only have final fields
+
+static-field-desc = Static fields must be immutable
+static-field-exp = The static field '{$name}' must not be static
 
 # Structure
 default-package-desc = The default package must not be used

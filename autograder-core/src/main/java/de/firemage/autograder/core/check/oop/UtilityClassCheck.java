@@ -4,6 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
@@ -21,8 +22,9 @@ public class UtilityClassCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
             public void process(CtClass<?> clazz) {
-                if (clazz.isClass() && !clazz.getMethods().isEmpty() &&
-                    clazz.getMethods().stream().allMatch(CtMethod::isStatic)) {
+                if (clazz.isClass() && !clazz.getMethods().isEmpty()
+                    && clazz.getMethods().stream().allMatch(CtMethod::isStatic)
+                    && clazz.getFields().stream().allMatch(f -> SpoonUtil.isEffectivelyFinal(staticAnalysis, f))) {
                     if (!clazz.isFinal()) {
                         addLocalProblem(clazz, new LocalizedMessage("utility-exp-final"),
                             ProblemType.UTILITY_CLASS_NOT_FINAL);
@@ -40,10 +42,10 @@ public class UtilityClassCheck extends IntegratedCheck {
 
                     }
 
-                    clazz.getFields().stream()
-                        .filter(f -> !f.isFinal())
-                        .forEach(f -> addLocalProblem(f, new LocalizedMessage("utility-exp-field"),
-                            ProblemType.UTILITY_CLASS_MUTABLE_FIELD));
+//                    clazz.getFields().stream()
+//                        .filter(f -> !f.isFinal())
+//                        .forEach(f -> addLocalProblem(f, new LocalizedMessage("utility-exp-field"),
+//                            ProblemType.UTILITY_CLASS_MUTABLE_FIELD));
 
                     // TODO add mutable access to fields, e.g. Collection::add
                 }

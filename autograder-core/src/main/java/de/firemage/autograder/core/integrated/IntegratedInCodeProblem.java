@@ -6,8 +6,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import spoon.reflect.cu.SourcePosition;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtType;
 
 import java.io.File;
 import java.nio.file.Path;
@@ -27,19 +27,30 @@ public class IntegratedInCodeProblem extends InCodeProblem {
         File file = position.getFile();
         if (file == null) {
             // Try to find the path in the parent class (if it exists)
-            CtClass<?> parent = element.getParent(CtClass.class);
+            CtType<?> parent = element.getParent(CtType.class);
             if (parent != null) {
                 file = parent.getPosition().getFile();
             } else {
                 throw new IllegalStateException("Cannot resolve the source file");
             }
         }
-        return new CodePosition(
-            root.relativize(file.toPath()),
-            position.getLine(),
-            position.getEndLine(),
-            position.getColumn(),
-            position.getEndColumn()
-        );
+
+        if (element instanceof CtType<?>) {
+            return new CodePosition(
+                root.relativize(file.toPath()),
+                position.getLine(),
+                position.getLine(),
+                position.getColumn(),
+                position.getColumn()
+            );
+        } else {
+            return new CodePosition(
+                root.relativize(file.toPath()),
+                position.getLine(),
+                position.getEndLine(),
+                position.getColumn(),
+                position.getEndColumn()
+            );
+        }
     }
 }
