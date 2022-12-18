@@ -144,10 +144,13 @@ missing-override-desc = Fehlendes @Override
 missing-override-exp = Fehlendes @Override
 
 system-dependent-linebreak-desc = Es sollten immer systemunabhängige Zeilenumbrüche wie der Wert von System.lineSeparator() oder '%n' in format-Strings verwendet werden
-system-dependent-linebreak-exp = Systemabhängiger Zeilenumbruch (\n) benutzt
+system-dependent-linebreak-exp = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
 
 field-final-desc = Konstante Attribute sollten final sein
 field-final-exp = Das Attribut '{$name}' sollte final sein
+
+string-cmp-desc = Strings müssen immer mit der equals-Methode verglichen werden
+string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Methode verglichen werden: '{$lhs}.equals({$rhs})' statt '{$lhs} == {$rhs}'
 
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben

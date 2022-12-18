@@ -153,6 +153,9 @@ system-dependent-linebreak-exp = System-dependent line break (\n) used
 field-final-desc = Constant fields should be final
 field-final-exp = The attribute '{$name}' should be final
 
+string-cmp-desc = Strings must always be compares using the 'equals' method
+string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lhs} == {$rhs}'
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()

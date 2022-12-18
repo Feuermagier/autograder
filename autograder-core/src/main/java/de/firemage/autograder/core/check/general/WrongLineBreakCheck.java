@@ -27,6 +27,9 @@ public class WrongLineBreakCheck extends IntegratedCheck {
                     || value.contains("\\r"))) {
                     addLocalProblem(literal, new LocalizedMessage("system-dependent-linebreak-exp"),
                         ProblemType.SYSTEM_SPECIFIC_LINE_BREAK);
+                } else if (literal.getValue() instanceof Character value && (value == '\n' || value == '\r')) {
+                    addLocalProblem(literal, new LocalizedMessage("system-dependent-linebreak-exp"),
+                        ProblemType.SYSTEM_SPECIFIC_LINE_BREAK);
                 }
             }
         });

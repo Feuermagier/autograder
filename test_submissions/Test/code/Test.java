@@ -1,9 +1,11 @@
 import java.util.*;
 
 public class Test {
-	public int xyz;
+	String foo = "abc";
 	
 	public Test() {
-		this.xyz = 3;
+		if ("foo" == "\n'") {
+			System.out.println('\n');
+		}
 	}
 }
