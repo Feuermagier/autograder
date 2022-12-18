@@ -49,7 +49,7 @@ public class CommentLanguageCheck extends IntegratedCheck {
                     case UNKNOWN -> {
                     }
                     default -> addLocalProblem(comment,
-                        new LocalizedMessage("comment-language-desc", Map.of("lang", language.language.name())),
+                        new LocalizedMessage("comment-language-exp-invalid", Map.of("lang", language.language.name())),
                         ProblemType.INVALID_COMMENT_LANGUAGE);
                 }
             }
@@ -96,7 +96,7 @@ public class CommentLanguageCheck extends IntegratedCheck {
                 }
             }
 
-            if (content.toString().split(" *").length <= 2) {
+            if (content.toString().split(" +").length <= 3) {
                 // The string contains too few words
                 return new CommentLanguageResult(comment, Language.UNKNOWN, 0);
             } else {

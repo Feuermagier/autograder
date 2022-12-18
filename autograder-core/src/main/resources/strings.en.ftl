@@ -124,7 +124,7 @@ compare-objects-desc = Objects should be compared directly with equals and by th
 compare-objects-exp = Implement an equals method for type {$type} and use it for comparisons
 
 constant-naming-qualifier-desc = Constants that are never written to should be 'static final' and have a UPPER_SNAKE_CASE name
-constant-naming-qualifier-exp = The constant field '{$field}' of class {$class} should be static and have a UPPER_SNAKE_CASE name
+constant-naming-qualifier-exp = The constant field '{$field}' should be static and have a UPPER_SNAKE_CASE name
 
 constants-interfaces-desc = Shared constants should be placed in enums or final classes and not in interfaces
 constants-interfaces-exp = Interfaces must not have fields
@@ -168,8 +168,8 @@ linguistic-desc = The code element has a confusing name. See https://pmd.github.
 linguistic-exp = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 
 variable-names-desc = Local variables must have descriptive names
-variable-name-exp-single-letter = Single letter names are usually non-descriptive
-variable-name-exp-type = Don't use unnecessary abbreviations
+variable-name-exp-single-letter = Single letter names such as '{$name}' are usually non-descriptive
+variable-name-exp-type = Don't use unnecessary abbreviations such as '{$name}'
 
 # OOP
 concrete-collection-desc = Use the parent interface instead of a concrete collection class (e.g. List instead of ArrayList)
@@ -183,7 +183,7 @@ method-abstract-exp = {$type}::{$method} should be abstract and not provide a de
 
 utility-desc = Utility classes must be final and must have a single no-args private constructor.
 utility-exp-final = Utility class is not final
-utility-exp-constructor = Utility classes must have a private no-arg constructor
+utility-exp-constructor = Utility classes must have a single private no-arg constructor
 utility-exp-field = Utility classes must only have final fields
 
 static-field-desc = Static fields must be immutable

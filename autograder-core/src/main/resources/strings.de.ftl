@@ -120,7 +120,7 @@ compare-objects-desc = Objekte sollten mit equals verglichen werden, anstatt sie
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
 
 constant-naming-qualifier-desc = Konstanten sollten 'static final' sein und einen UPPER_SNAKE_CASE-Namen haben
-constant-naming-qualifier-exp = Die Konstante '{$field}' der Klasse {$class} sollte statisch sein und einen UPPER_SNAKE_CASE-Namen haben
+constant-naming-qualifier-exp = Die Konstante '{$field}'  sollte statisch sein und einen UPPER_SNAKE_CASE-Namen haben
 
 constants-interfaces-desc = Geteilte Konstanten sollten in Enums oder Utility-Klassen und nicht in Interfaces gespeichert werden
 constants-interfaces-exp = Interfaces sollten keine Attribute haben
@@ -164,8 +164,8 @@ linguistic-desc = Das Code-Element hat einen verwirrenden Namen. Siehe https://p
 linguistic-exp = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 
 variable-names-desc = Lokale Variablen sollten aussagekräftige Werte haben
-variable-name-exp-single-letter = Der Bezeichner ist nicht aussagekräftig
-variable-name-exp-type = Unnötige Abkürzung
+variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
+variable-name-exp-type = Unnötige Abkürzung '{$name}'
 
 # OOP
 concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List stat ArrayList)
@@ -179,7 +179,7 @@ method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Plat
 
 utility-desc = Utility-Klassen müssen final sein und genau einen parameterlosen Konstruktor haben
 utility-exp-final = Utility-Klasse ist nicht final
-utility-exp-constructor = Utility-Klassen müssen genau einen parameterlosen Konstruktor haben
+utility-exp-constructor = Utility-Klassen müssen genau einen privaten und parameterlosen Konstruktor haben
 utility-exp-field = Utility-Klassen dürfen ausschließlich finale Attribute haben
 
 static-field-desc = Statische Attribute dürfen nicht verändert werden

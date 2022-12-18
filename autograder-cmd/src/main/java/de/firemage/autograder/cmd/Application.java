@@ -170,7 +170,7 @@ public class Application implements Callable<Integer> {
                     var position = inCodeProblem.getPosition();
                     return Optional.of(new Annotation(inCodeProblem.getProblemType(),
                         linter.translateMessage(inCodeProblem.getExplanation()),
-                        position.file().toString(), position.startLine(), position.endLine()));
+                        position.file().toString().replace("\\", "/"), position.startLine(), position.endLine()));
                 } else {
                     return Optional.empty();
                 }

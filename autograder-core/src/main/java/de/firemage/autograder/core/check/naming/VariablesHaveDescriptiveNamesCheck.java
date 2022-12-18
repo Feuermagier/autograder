@@ -11,10 +11,17 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatchVariable;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
+    private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
+    
     public VariablesHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("variable-name-desc"));
     }
@@ -24,7 +31,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
             public void process(CtVariable<?> variable) {
-                if (variable instanceof CtCatchVariable || variable.getParent() instanceof CtLambda) {
+                if (variable instanceof CtCatchVariable || isLambdaParameter(variable)) {
                     // Catch vars and lambda vars have less strict rules, e.g. it is ok to write "Exception e" or "NullPointerException npe"
                     return;
                 }
@@ -39,14 +46,20 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (variable.getSimpleName().length() == 1
                     && !isAllowedLoopCounter(variable)
                     && !isCoordinate(variable)) {
-                    addLocalProblem(variable, new LocalizedMessage("variable-name-exp-single-letter"),
+                    addLocalProblem(variable, new LocalizedMessage("variable-name-exp-single-letter",
+                            Map.of("name", variable.getSimpleName())),
                         ProblemType.SINGLE_LETTER_LOCAL_NAME);
                 } else if (isTypeAbbreviation(variable)) {
-                    addLocalProblem(variable, new LocalizedMessage("variable-name-exp-type"),
+                    addLocalProblem(variable,
+                        new LocalizedMessage("variable-name-exp-type", Map.of("name", variable.getSimpleName())),
                         ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
                 }
             }
         });
+    }
+    
+    private boolean isLambdaParameter(CtVariable<?> variable) {
+        return variable instanceof CtParameter<?> && variable.getParent() instanceof CtLambda<?>;
     }
 
     private boolean isCoordinate(CtVariable<?> variable) {
@@ -54,11 +67,16 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private boolean isAllowedLoopCounter(CtVariable<?> variable) {
-        return variable.getRoleInParent() == CtRole.FOR_INIT && SpoonUtil.isPrimitiveNumeric(variable.getType());
+        return (variable.getRoleInParent() == CtRole.FOR_INIT || variable.getRoleInParent() == CtRole.FOREACH_VARIABLE) 
+            && SpoonUtil.isPrimitiveNumeric(variable.getType());
     }
 
     private boolean isTypeAbbreviation(CtVariable<?> variable) {
         if (variable.getType().isPrimitive()) {
+            return false;
+        }
+        
+        if (ALLOWED_ABBREVIATIONS.contains(variable.getSimpleName().toLowerCase())) {
             return false;
         }
 
