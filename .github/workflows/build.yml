@@ -1,0 +1,17 @@
+name: Build
+on: push
+jobs:
+  build:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Set up Git repository
+        uses: actions/checkout@v3
+      - name: Build docker images
+        run: docker build -t local .
+      - name: Build Plugin
+        run: docker run -v $PWD:/opt/mount local "cp autograder-cmd/target/autograder-cmd-*.jar /opt/mount/autograder-cmd.jar"
+      - uses: actions/upload-artifact@v3
+        with:
+          name: autograder-cmd
+          path: autograder-cmd.jar
+          if-no-files-found: error
