@@ -102,7 +102,6 @@ public class Linter {
             }
         }
 
-
         compilationResult.get().jar().toFile().delete();
         return problems;
     }

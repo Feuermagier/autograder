@@ -69,12 +69,12 @@ public class CommentLanguageCheck extends IntegratedCheck {
             addLocalProblem(bestEnglish,
                 new LocalizedMessage(
                     "comment-language-exp-english",
-                    Map.of("file", germanPosition.file().toString(), "line", String.valueOf(germanPosition.startLine()))
+                    Map.of("path", germanPosition.file().toString(), "line", String.valueOf(germanPosition.startLine()))
                 ), ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
-            addLocalProblem(bestEnglish,
+            addLocalProblem(bestGerman,
                 new LocalizedMessage(
                     "comment-language-exp-german",
-                    Map.of("file", englishPosition.file().toString(), "line",
+                    Map.of("path", englishPosition.file().toString(), "line",
                         String.valueOf(englishPosition.startLine()))
                 ), ProblemType.INCONSISTENT_COMMENT_LANGUAGE);
         }
