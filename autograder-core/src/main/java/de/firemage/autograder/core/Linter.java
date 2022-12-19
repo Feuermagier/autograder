@@ -24,6 +24,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.function.Consumer;
 
 public class Linter {
@@ -48,8 +49,12 @@ public class Linter {
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks,
                                    Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)
         throws LinterException, InterruptedException, IOException {
+        
         statusConsumer.accept(LinterStatus.COMPILING);
-        CompilationResult result = Compiler.compileToJar(file, tmpLocation, file.getVersion());
+        Optional<CompilationResult> compilationResult = Compiler.compileToJar(file, tmpLocation, file.getVersion());
+        if (compilationResult.isEmpty()) {
+            return List.of();
+        }
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
@@ -84,12 +89,12 @@ public class Linter {
 
         if (!spotbugsChecks.isEmpty()) {
             statusConsumer.accept(LinterStatus.RUNNING_SPOTBUGS);
-            problems.addAll(new SpotbugsLinter().lint(result.jar(), spotbugsChecks));
+            problems.addAll(new SpotbugsLinter().lint(compilationResult.get().jar(), spotbugsChecks));
         }
 
         if (!integratedChecks.isEmpty()) {
             try (
-                IntegratedAnalysis analysis = new IntegratedAnalysis(file, result.jar(), tmpLocation, statusConsumer)) {
+                IntegratedAnalysis analysis = new IntegratedAnalysis(file, compilationResult.get().jar(), tmpLocation, statusConsumer)) {
                 if (!disableDynamicAnalysis) {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }
@@ -98,7 +103,7 @@ public class Linter {
         }
 
 
-        result.jar().toFile().delete();
+        compilationResult.get().jar().toFile().delete();
         return problems;
     }
 

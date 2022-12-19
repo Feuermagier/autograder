@@ -15,11 +15,11 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
 import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
@@ -31,18 +31,22 @@ public final class Compiler {
     private Compiler() {
     }
 
-    public static CompilationResult compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion)
+    public static Optional<CompilationResult> compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion)
         throws IOException, CompilationFailureException {
         return compileWithEncoding(input, tmpLocation, javaVersion, input.getCharset());
     }
 
-    public static CompilationResult compileWithEncoding(UploadedFile input, Path tmpLocation, JavaVersion javaVersion,
-                                                        Charset charset)
+    public static Optional<CompilationResult> compileWithEncoding(UploadedFile input, Path tmpLocation, JavaVersion javaVersion,
+                                                                  Charset charset)
         throws IOException, CompilationFailureException {
 
         List<PhysicalFileObject> compilationUnits = input.streamFiles()
             .map(file -> new PhysicalFileObject(file, charset))
             .toList();
+        
+        if (compilationUnits.isEmpty()) {
+            return Optional.empty();
+        }
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         Path compilerOutput = tmpLocation.resolve(input.getName() + "_compiled");
@@ -76,9 +80,9 @@ public final class Compiler {
         }
         FileUtils.deleteDirectory(compilerOutput.toFile());
 
-        return new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
+        return Optional.of(new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
             .map(d -> new CompilationDiagnostic(d, input.getFile()))
-            .toList());
+            .toList()));
     }
 
 
