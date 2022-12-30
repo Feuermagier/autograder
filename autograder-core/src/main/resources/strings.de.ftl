@@ -94,6 +94,9 @@ repeated-math-operation = Einfache mathematische Operationen sollten nicht wiede
 repeated-math-operation-mul = Hier sollte Math.pow verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu multiplizieren.
 repeated-math-operation-plus = Hier sollte eine Multiplikation mit {$count} verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu addieren.
 
+redundant-neg-desc = '!(a == b)' kann durch 'a != b' ersetzt werden
+redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
+
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt

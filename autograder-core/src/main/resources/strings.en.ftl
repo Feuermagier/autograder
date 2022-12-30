@@ -94,6 +94,9 @@ repeated-math-operation = Don't repeat simple operations such as addition or mul
 repeated-math-operation-mul = Use Math.pow instead of multiplying '{$var}' {count} times with itself.
 repeated-math-operation-plus = Use a multiplication with {$count} instead of adding '{$var}' {$count} times to itself.
 
+redundant-neg-desc = '!(a == b)' should be replaced by 'a != b'
+redundant-neg-exp = '{$original}' should be written as '{$fixed}'
+
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
