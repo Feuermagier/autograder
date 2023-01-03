@@ -42,9 +42,14 @@ comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf E
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}
 comment-language-exp-german = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Deutsch. Ein englischer Kommentar befindet sich bei {$path}:{$line}
 
-javadoc-param-desc = Javadoc-Kommentare müssen alle deklarierten Parameter beschreiben
-javadoc-param-exp-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
-javadoc-param-exp-unknown = Der Javadoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
+javadoc-method-desc = Methoden müssen valide JavaDoc-Kommentare haben
+javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
+javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
+javadoc-method-exp-unexpected-tag = JavaDoc-Kommentare von Methoden sollten keinen '@{$tag}'-Tag haben
+
+javadoc-type-desc = Typen (Klassen, Schnittstellen, ...) müssen valide JavaDoc-Kommentare haben
+javadoc-type-exp-unexpected-tag = JavaDoc-Kommentare von Typen sollten keinen '@{$tag}'-Tag haben
+javadoc-type-exp-invalid-author = Im @author-Tag darf *ausschließlich* dein u-Kürzel stehen
 
 javadoc-return-null-desc = Methoden müssen in dem @return-Tag angeben, wenn sie null zurückgeben können
 javadoc-return-null-exp = Die Methode {$method} kann null zurückgeben, der @return-Tag erwähnt das aber nicht

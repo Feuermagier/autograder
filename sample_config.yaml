@@ -45,9 +45,8 @@
     - CommentLanguageCheck
     - JavadocStubCheck
     - CommentedOutCodeCheck
-    - AuthorTagCheck:
-        regex: .*
-    - JavadocParamCheck
+    - MethodJavadocCheck
+    - TypeJavadocCheck
 - naming:
     - BooleanMethodNameCheck
     - LinguisticNamingCheck

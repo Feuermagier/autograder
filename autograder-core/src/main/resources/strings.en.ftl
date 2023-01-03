@@ -31,9 +31,6 @@ string-is-empty-exp-emptiness = Use 'isEmpty()' instead of '{$exp}' to check for
 string-is-empty-exp-non-emptiness = Use '!<...>isEmpty()' instead of '{$exp}' to check for non-emptiness
 
 # Comment
-author-tag-invalid-desc = The @author-tag is invalid
-author-tag-invalid-exp = The @author-tag is invalid
-
 commented-out-code-desc = Unused code should be removed and not commented out
 commented-out-code-exp = This commented out code should be removed
 
@@ -42,9 +39,14 @@ comment-language-exp-invalid = The language of this comment is neither English n
 comment-language-exp-english = The code contains comments in German and in English. This comment is in English. A German comment can be found at {$path}:{$line}
 comment-language-exp-german = The code contains comments in German and in English. This comment is in German. An English comment can be found at {$path}:{$line}
 
-javadoc-param-desc = Javadoc comments for methods must mention all declared parameters
-javadoc-param-exp-missing = The parameter '{$param}' is not mentioned in the Javadoc comment
-javadoc-param-exp-unknown = Javadoc mentions parameter '{$param}', but there is no such parameter in the method declaration
+javadoc-method-desc = Methoden must have valid JavaDoc comments
+javadoc-method-exp-param-missing = The parameter '{$param}' is not mentioned in the JavaDoc comment
+javadoc-method-exp-param-unknown = The JavaDoc comment mentions the parameter '{$param}', but the parameter doesn't exist
+javadoc-method-exp-unexpected-tag = JavaDoc comments of methods must not have '@{$tag}' tags
+
+javadoc-type-desc = Types (classes, interfaces, ...) must have valid JavaDoc comments
+javadoc-type-exp-unexpected-tag = JavaDoc comments of types must not have '@{$tag}' tags
+javadoc-type-exp-invalid-author = The @author tag must contain *only* your u-shorthand
 
 javadoc-return-null-desc = Methods must document in the @return-annotation if they may return null
 javadoc-return-null-exp = The method {$method} may return null but the @return tag doesn't mention it

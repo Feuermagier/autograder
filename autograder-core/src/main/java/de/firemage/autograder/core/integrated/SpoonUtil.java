@@ -9,6 +9,7 @@ import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtTypeReference;
@@ -118,12 +119,12 @@ public final class SpoonUtil {
             .equals(method.getDeclaringType().getQualifiedName());
     }
 
-    public static Optional<CtJavaDoc> getJavadoc(CtMethod<?> method) {
-        if (method.getComments().isEmpty() || !(method.getComments().get(0) instanceof CtJavaDoc)) {
+    public static Optional<CtJavaDoc> getJavadoc(CtElement element) {
+        if (element.getComments().isEmpty() || !(element.getComments().get(0) instanceof CtJavaDoc)) {
             // TODO lookup inherited javadoc
             return Optional.empty();
         } else {
-            return Optional.of(method.getComments().get(0).asJavaDoc());
+            return Optional.of(element.getComments().get(0).asJavaDoc());
         }
     }
     

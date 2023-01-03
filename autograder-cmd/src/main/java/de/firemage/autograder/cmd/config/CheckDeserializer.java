@@ -6,7 +6,6 @@ import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.deser.std.StdDeserializer;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.check.comment.AuthorTagCheck;
 import de.firemage.autograder.core.check.general.ConstantsInInterfaceCheck;
 import de.firemage.autograder.core.check.general.CopyPasteCheck;
 
@@ -35,8 +34,6 @@ public class CheckDeserializer extends StdDeserializer<CheckFactory> {
             node -> new ConstantsInInterfaceCheck(node.get("ignoreIfHasMethods").asBoolean()));
         this.customFactories.put("CopyPasteCheck",
             node -> new CopyPasteCheck(node.get("tokenCount").asInt()));
-        this.customFactories.put("AuthorTagCheck",
-            node -> new AuthorTagCheck(node.get("regex").asText()));
     }
 
     @Override
