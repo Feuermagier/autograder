@@ -47,6 +47,7 @@
     - CommentedOutCodeCheck
     - MethodJavadocCheck
     - TypeJavadocCheck
+    - FieldJavadocCheck
 - naming:
     - BooleanMethodNameCheck
     - LinguisticNamingCheck

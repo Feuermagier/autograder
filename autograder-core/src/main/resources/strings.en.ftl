@@ -48,6 +48,9 @@ javadoc-type-desc = Types (classes, interfaces, ...) must have valid JavaDoc com
 javadoc-type-exp-unexpected-tag = JavaDoc comments of types must not have '@{$tag}' tags
 javadoc-type-exp-invalid-author = The @author tag must contain *only* your u-shorthand
 
+javadoc-field-desc = Fields must have valid JavaDoc comments
+javadoc-field-exp-unexpected-tag = JavaDoc comments of fields must not have '@{$tag}' tags
+
 javadoc-return-null-desc = Methods must document in the @return-annotation if they may return null
 javadoc-return-null-exp = The method {$method} may return null but the @return tag doesn't mention it
 

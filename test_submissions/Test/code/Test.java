@@ -6,5 +6,8 @@ import java.util.*;
  */
 public class Test {
 
-	
+    /**
+     * @version 1.0
+     */
+	public int foo;
 }

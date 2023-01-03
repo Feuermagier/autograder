@@ -51,6 +51,9 @@ javadoc-type-desc = Typen (Klassen, Schnittstellen, ...) müssen valide JavaDoc-
 javadoc-type-exp-unexpected-tag = JavaDoc-Kommentare von Typen sollten keinen '@{$tag}'-Tag haben
 javadoc-type-exp-invalid-author = Im @author-Tag darf *ausschließlich* dein u-Kürzel stehen
 
+javadoc-field-desc = Attribute müssen valide JavaDoc-Kommentare haben
+javadoc-field-exp-unexpected-tag = JavaDoc-Kommentare von Attributen sollten keinen '@{$tag}'-Tag haben
+
 javadoc-return-null-desc = Methoden müssen in dem @return-Tag angeben, wenn sie null zurückgeben können
 javadoc-return-null-exp = Die Methode {$method} kann null zurückgeben, der @return-Tag erwähnt das aber nicht
 
