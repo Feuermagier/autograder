@@ -6,6 +6,7 @@ import com.github.pemistahl.lingua.api.LanguageDetectorBuilder;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.IntegratedInCodeProblem;
@@ -20,6 +21,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.INVALID_COMMENT_LANGUAGE, ProblemType.INCONSISTENT_COMMENT_LANGUAGE})
 public class CommentLanguageCheck extends IntegratedCheck {
     private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("comment-language-desc");
     private final LanguageDetector detector;

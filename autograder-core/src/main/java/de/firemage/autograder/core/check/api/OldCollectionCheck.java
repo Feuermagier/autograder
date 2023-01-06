@@ -2,12 +2,14 @@ package de.firemage.autograder.core.check.api;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtConstructorCall;
 
+@ExecutableCheck(reportedProblems = {ProblemType.DEPRECATED_COLLECTION_USED})
 public class OldCollectionCheck extends IntegratedCheck {
     public static final LocalizedMessage DESCRIPTION = new LocalizedMessage("old-collection-desc");
 

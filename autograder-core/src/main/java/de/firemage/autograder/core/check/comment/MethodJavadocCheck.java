@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -16,8 +17,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_MISSING_PARAMETER_TAG,
+    ProblemType.JAVADOC_UNKNOWN_PARAMETER_TAG, ProblemType.JAVADOC_UNEXPECTED_TAG})
 public class MethodJavadocCheck extends IntegratedCheck {
-    private static List<CtJavaDocTag.TagType> VALID_TAGS = List.of(
+    private static final List<CtJavaDocTag.TagType> VALID_TAGS = List.of(
         CtJavaDocTag.TagType.PARAM,
         CtJavaDocTag.TagType.RETURN,
         CtJavaDocTag.TagType.THROWS,

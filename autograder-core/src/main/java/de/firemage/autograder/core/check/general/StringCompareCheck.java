@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -12,6 +13,7 @@ import spoon.reflect.code.CtBinaryOperator;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.STRING_COMPARE_BY_REFERENCE})
 public class StringCompareCheck extends IntegratedCheck {
     public StringCompareCheck() {
         super(new LocalizedMessage("string-cmp-desc"));

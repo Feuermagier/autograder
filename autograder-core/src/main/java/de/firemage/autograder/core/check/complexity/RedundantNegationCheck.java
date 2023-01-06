@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -13,6 +14,7 @@ import spoon.reflect.code.UnaryOperatorKind;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_NEGATION})
 public class RedundantNegationCheck extends IntegratedCheck {
     public RedundantNegationCheck() {
         super(new LocalizedMessage("redundant-neg-desc"));

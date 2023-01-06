@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonStreamUtil;
@@ -19,6 +20,7 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtTypeReference;
 
+@ExecutableCheck(reportedProblems = {ProblemType.LIST_NOT_COPIED_IN_GETTER})
 public class ListGetterSetterCheck extends IntegratedCheck {
     public ListGetterSetterCheck() {
         super(new LocalizedMessage("list-getter-desc"));

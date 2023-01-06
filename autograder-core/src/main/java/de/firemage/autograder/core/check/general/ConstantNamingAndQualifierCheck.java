@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -12,6 +13,7 @@ import spoon.reflect.declaration.CtField;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.CONSTANT_NOT_STATIC_OR_NOT_UPPER_CAMEL_CASE})
 public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
     public ConstantNamingAndQualifierCheck() {
         super(new LocalizedMessage("constant-naming-qualifier-desc"));

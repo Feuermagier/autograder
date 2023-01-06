@@ -2,8 +2,10 @@ package de.firemage.autograder.core.check.naming;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.pmd.PMDCheck;
 
+@ExecutableCheck(reportedProblems = {ProblemType.BOOLEAN_GETTER_NOT_CALLED_IS})
 public class BooleanMethodNameCheck extends PMDCheck {
     private static final String QUERY = """
         //MethodDeclaration

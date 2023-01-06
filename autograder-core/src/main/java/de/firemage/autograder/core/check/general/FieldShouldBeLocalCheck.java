@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -14,6 +15,7 @@ import spoon.reflect.declaration.CtMethod;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.INSTANCE_FIELD_CAN_BE_LOCAL})
 public class FieldShouldBeLocalCheck extends IntegratedCheck {
     public FieldShouldBeLocalCheck() {
         super(new LocalizedMessage("field-local-desc"));

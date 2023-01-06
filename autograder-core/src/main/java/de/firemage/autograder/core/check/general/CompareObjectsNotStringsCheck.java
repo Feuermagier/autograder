@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -14,6 +15,7 @@ import spoon.reflect.reference.CtTypeReference;
 import java.util.Map;
 import java.util.Optional;
 
+@ExecutableCheck(reportedProblems = {ProblemType.OBJECTS_COMPARED_VIA_TO_STRING})
 public class CompareObjectsNotStringsCheck extends IntegratedCheck {
     public CompareObjectsNotStringsCheck() {
         super(new LocalizedMessage("compare-objects-desc"));

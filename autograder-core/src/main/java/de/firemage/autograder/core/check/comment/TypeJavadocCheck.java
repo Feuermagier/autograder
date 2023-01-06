@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -16,8 +17,9 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.regex.Pattern;
 
+@ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_UNEXPECTED_TAG, ProblemType.INVALID_AUTHOR_TAG})
 public class TypeJavadocCheck extends IntegratedCheck {
-    private static List<CtJavaDocTag.TagType> VALID_TAGS = List.of(
+    private static final List<CtJavaDocTag.TagType> VALID_TAGS = List.of(
         CtJavaDocTag.TagType.SEE,
         CtJavaDocTag.TagType.UNKNOWN,
         CtJavaDocTag.TagType.DEPRECATED,
@@ -67,7 +69,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
         Optional<CtJavaDocTag> authorTag = javadoc.getTags().stream()
             .filter(tag -> tag.getType() == CtJavaDocTag.TagType.AUTHOR)
             .findAny();
-        
+
         if (authorTag.isPresent() && !this.pattern.matcher(authorTag.get().getContent().trim()).matches()) {
             addLocalProblem(javadoc, new LocalizedMessage("javadoc-type-exp-invalid-author",
                 Map.of("author", authorTag.get().getContent().trim())), ProblemType.INVALID_AUTHOR_TAG);

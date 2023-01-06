@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -18,6 +19,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+@ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_IF_FOR_BOOLEAN})
 public class RedundantIfForBooleanCheck extends IntegratedCheck {
 
     public RedundantIfForBooleanCheck() {

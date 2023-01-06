@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -11,6 +12,7 @@ import spoon.reflect.declaration.CtField;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE})
 public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
     public StaticFieldShouldBeInstanceCheck() {
         super(new LocalizedMessage("static-field-desc"));

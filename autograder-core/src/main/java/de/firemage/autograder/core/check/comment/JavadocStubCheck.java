@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -13,6 +14,8 @@ import spoon.reflect.declaration.CtMethod;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_STUB_DESCRIPTION, ProblemType.JAVADOC_STUB_RETURN_TAG,
+    ProblemType.JAVADOC_STUB_THROWS_TAG, ProblemType.JAVADOC_STUB_PARAMETER_TAG})
 public class JavadocStubCheck extends IntegratedCheck {
     private final boolean allowGettersSettersWithEmptyDescription;
 
