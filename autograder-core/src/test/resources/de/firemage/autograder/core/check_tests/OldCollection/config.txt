@@ -1,5 +1,5 @@
-OldCollectionCheck
+api.OldCollectionCheck
 Don't use old collections
-Test.java:14
 Test.java:16
-Test.java:19
+Test.java:18
+Test.java:21

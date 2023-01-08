@@ -1,5 +1,5 @@
-AssertCheck
+debug.AssertCheck
 Don't use assertions
-Test.java:3
 Test.java:5
 Test.java:7
+Test.java:9

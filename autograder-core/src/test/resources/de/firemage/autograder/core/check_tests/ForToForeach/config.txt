@@ -1,4 +1,4 @@
-de.firemage.codelinter.core.check.ForToForEachCheck
+general.ForToForEachCheck
 For loop should be for-each loop
-Test.java:7-9
-Test.java:11-14
+Test.java:9
+Test.java:13
