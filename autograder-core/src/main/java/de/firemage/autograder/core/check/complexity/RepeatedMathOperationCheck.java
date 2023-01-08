@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -18,6 +19,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+@ExecutableCheck(reportedProblems = {ProblemType.REPEATED_MATH_OPERATION})
 public class RepeatedMathOperationCheck extends IntegratedCheck {
     private static final Map<BinaryOperatorKind, Integer> OCCURRENCE_THRESHOLDS =
         Map.of(BinaryOperatorKind.PLUS, 2, BinaryOperatorKind.MUL, 3);

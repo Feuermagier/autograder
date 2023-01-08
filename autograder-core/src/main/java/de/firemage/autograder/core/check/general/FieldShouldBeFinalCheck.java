@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -15,6 +16,7 @@ import spoon.reflect.declaration.CtField;
 import java.util.Map;
 import java.util.Set;
 
+@ExecutableCheck(reportedProblems = {ProblemType.FIELD_SHOULD_BE_FINAL})
 public class FieldShouldBeFinalCheck extends IntegratedCheck {
     public FieldShouldBeFinalCheck() {
         super(new LocalizedMessage("field-final-desc"));

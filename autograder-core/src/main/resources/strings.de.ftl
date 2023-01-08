@@ -42,9 +42,17 @@ comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf E
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}
 comment-language-exp-german = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Deutsch. Ein englischer Kommentar befindet sich bei {$path}:{$line}
 
-javadoc-param-desc = Javadoc-Kommentare müssen alle deklarierten Parameter beschreiben
-javadoc-param-exp-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
-javadoc-param-exp-unknown = Der Javadoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
+javadoc-method-desc = Methoden müssen valide JavaDoc-Kommentare haben
+javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
+javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
+javadoc-method-exp-unexpected-tag = JavaDoc-Kommentare von Methoden sollten keinen '@{$tag}'-Tag haben
+
+javadoc-type-desc = Typen (Klassen, Schnittstellen, ...) müssen valide JavaDoc-Kommentare haben
+javadoc-type-exp-unexpected-tag = JavaDoc-Kommentare von Typen sollten keinen '@{$tag}'-Tag haben
+javadoc-type-exp-invalid-author = Im @author-Tag darf *ausschließlich* dein u-Kürzel stehen
+
+javadoc-field-desc = Attribute müssen valide JavaDoc-Kommentare haben
+javadoc-field-exp-unexpected-tag = JavaDoc-Kommentare von Attributen sollten keinen '@{$tag}'-Tag haben
 
 javadoc-return-null-desc = Methoden müssen in dem @return-Tag angeben, wenn sie null zurückgeben können
 javadoc-return-null-exp = Die Methode {$method} kann null zurückgeben, der @return-Tag erwähnt das aber nicht
@@ -93,6 +101,9 @@ wrapper-instantiation-exp = Wrapper-Klassen sollten nicht direkt instanziiert we
 repeated-math-operation = Einfache mathematische Operationen sollten nicht wiederholt werden, sondern durch die entsprechende Operation "ein Level höher" ersetzt werden (z.B. n + n + n => 3 * n; n * n * n => Math.pow(n, 3)).
 repeated-math-operation-mul = Hier sollte Math.pow verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu multiplizieren.
 repeated-math-operation-plus = Hier sollte eine Multiplikation mit {$count} verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu addieren.
+
+redundant-neg-desc = '!(a == b)' kann durch 'a != b' ersetzt werden
+redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
 
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung

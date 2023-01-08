@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.api;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -15,6 +16,7 @@ import spoon.reflect.reference.CtExecutableReference;
 
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.STRING_IS_EMPTY_REIMPLEMENTED})
 public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
     private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("string-is-empty-desc");
 

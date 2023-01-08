@@ -4,6 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.check.Check;
 import lombok.Getter;
 
+// TODO add executable check annotation and problem type
 public class CopyPasteCheck implements Check {
     @Getter
     private final int tokenCount;

@@ -2,10 +2,12 @@ package de.firemage.autograder.core.check.unnecessary;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.pmd.PMDCheck;
 
 import java.util.List;
 
+@ExecutableCheck(reportedProblems = {ProblemType.EMPTY_BLOCK})
 public class EmptyNonCatchBlockCheck extends PMDCheck {
     public EmptyNonCatchBlockCheck() {
         super(new LocalizedMessage("empty-block-desc"), List.of(

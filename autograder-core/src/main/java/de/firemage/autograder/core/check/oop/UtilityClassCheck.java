@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -11,6 +12,8 @@ import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtMethod;
 
+@ExecutableCheck(reportedProblems = {ProblemType.UTILITY_CLASS_NOT_FINAL,
+    ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR})
 public class UtilityClassCheck extends IntegratedCheck {
 
     public UtilityClassCheck() {

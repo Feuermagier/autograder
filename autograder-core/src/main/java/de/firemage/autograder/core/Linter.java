@@ -1,6 +1,7 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.general.CopyPasteCheck;
 import de.firemage.autograder.core.compiler.CompilationResult;
 import de.firemage.autograder.core.compiler.Compiler;
@@ -17,6 +18,7 @@ import fluent.bundle.FluentResource;
 import fluent.functions.icu.ICUFunctionFactory;
 import fluent.syntax.parser.FTLParser;
 import fluent.syntax.parser.FTLStream;
+import org.reflections.Reflections;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -46,10 +48,18 @@ public class Linter {
         }
     }
 
-    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<Check> checks,
+    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<ProblemType> problemsToReport,
                                    Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)
+        throws LinterException, IOException, InterruptedException {
+        return this.checkFile(file, tmpLocation, tests, problemsToReport, findChecksForProblemTypes(problemsToReport),
+            statusConsumer, disableDynamicAnalysis);
+    }
+
+    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<ProblemType> problemsToReport,
+                                   List<Check> checks, Consumer<LinterStatus> statusConsumer,
+                                   boolean disableDynamicAnalysis)
         throws LinterException, InterruptedException, IOException {
-        
+
         statusConsumer.accept(LinterStatus.COMPILING);
         Optional<CompilationResult> compilationResult = Compiler.compileToJar(file, tmpLocation, file.getVersion());
         if (compilationResult.isEmpty()) {
@@ -94,7 +104,8 @@ public class Linter {
 
         if (!integratedChecks.isEmpty()) {
             try (
-                IntegratedAnalysis analysis = new IntegratedAnalysis(file, compilationResult.get().jar(), tmpLocation, statusConsumer)) {
+                IntegratedAnalysis analysis = new IntegratedAnalysis(file, compilationResult.get().jar(), tmpLocation,
+                    statusConsumer)) {
                 if (!disableDynamicAnalysis) {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }
@@ -103,7 +114,11 @@ public class Linter {
         }
 
         compilationResult.get().jar().toFile().delete();
-        return problems;
+        if (problemsToReport.isEmpty()) {
+            return problems;
+        } else {
+            return problems.stream().filter(p -> problemsToReport.contains(p.getProblemType())).toList();
+        }
     }
 
     public String translateMessage(LocalizedMessage message) {
@@ -113,5 +128,25 @@ public class Linter {
         } else {
             return output;
         }
+    }
+
+    private List<Check> findChecksForProblemTypes(List<ProblemType> problems) {
+        Reflections reflections = new Reflections("de.firemage.autograder.core.check");
+        return reflections.getTypesAnnotatedWith(ExecutableCheck.class).stream()
+            .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
+            .map(c -> {
+                try {
+                    return (Check) c.getConstructor().newInstance();
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException("Failed to instantiate check " + c.getName(), e);
+                } catch (ClassCastException e) {
+                    throw new IllegalStateException(c.getName() + " does not inherit from Check");
+                }
+            })
+            .toList();
+    }
+
+    private boolean isRequiredCheck(ExecutableCheck check, List<ProblemType> problems) {
+        return problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));
     }
 }

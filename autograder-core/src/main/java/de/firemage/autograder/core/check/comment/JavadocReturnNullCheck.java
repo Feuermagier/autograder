@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -15,6 +16,7 @@ import spoon.reflect.declaration.CtMethod;
 import java.util.Map;
 import java.util.Optional;
 
+@ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_INCOMPLETE_RETURN_TAG})
 public class JavadocReturnNullCheck extends IntegratedCheck {
     private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("javadoc-return-null-desc");
 

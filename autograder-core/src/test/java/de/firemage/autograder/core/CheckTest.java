@@ -1,8 +1,8 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
 
@@ -42,7 +42,12 @@ public class CheckTest {
                     var linter = new Linter(Locale.US);
 
                     var problems =
-                        linter.checkFile(file, Files.createTempDirectory(null), path.resolve("tests"), List.of(check),
+                        linter.checkFile(
+                            file,
+                            Files.createTempDirectory(null),
+                            path.resolve("tests"),
+                            List.of(),
+                            List.of(check),
                             status -> {
                             }, !ENABLE_DYNAMIC || !Files.exists(path.resolve("tests")));
 

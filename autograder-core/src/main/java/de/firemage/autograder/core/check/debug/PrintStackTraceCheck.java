@@ -2,8 +2,10 @@ package de.firemage.autograder.core.check.debug;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.pmd.PMDCheck;
 
+@ExecutableCheck(reportedProblems = {ProblemType.EXCEPTION_PRINT_STACK_TRACE})
 public class PrintStackTraceCheck extends PMDCheck {
     private static final String QUERY = """
         //PrimaryExpression[

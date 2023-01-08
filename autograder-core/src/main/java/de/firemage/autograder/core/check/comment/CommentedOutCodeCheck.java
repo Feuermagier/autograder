@@ -2,12 +2,14 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtComment;
 
+@ExecutableCheck(reportedProblems = {ProblemType.COMMENTED_OUT_CODE})
 public class CommentedOutCodeCheck extends IntegratedCheck {
     private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("commented-out-code-desc");
 

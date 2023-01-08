@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.naming;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -13,6 +14,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
+@ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
         List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg");

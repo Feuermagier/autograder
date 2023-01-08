@@ -2,8 +2,10 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.pmd.PMDCheck;
 
+@ExecutableCheck(reportedProblems = {ProblemType.UNUSED_DIAMOND_OPERATOR})
 public class DiamondOperatorCheck extends PMDCheck {
     private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("diamond-desc");
     

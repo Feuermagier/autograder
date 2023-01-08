@@ -1,7 +1,13 @@
 import java.util.*;
 
+/**
+ * @author flose
+ * @param foo
+ */
 public class Test {
-	// this is the row
-	String foo = "abc";
-	// und das ist die spalte
+
+    /**
+     * @version 1.0
+     */
+	public int foo;
 }

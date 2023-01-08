@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.exceptions;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -16,6 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.EXCEPTION_CAUGHT_IN_SURROUNDING_BLOCK})
 public class ExceptionControlFlowCheck extends IntegratedCheck {
 
     public ExceptionControlFlowCheck() {

@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -9,6 +10,7 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTextBlock;
 
+@ExecutableCheck(reportedProblems = {ProblemType.SYSTEM_SPECIFIC_LINE_BREAK})
 public class WrongLineBreakCheck extends IntegratedCheck {
 
     public WrongLineBreakCheck() {

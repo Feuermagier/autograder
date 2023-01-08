@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -18,6 +19,7 @@ import spoon.reflect.declaration.CtMethod;
 import java.util.List;
 import java.util.Map;
 
+@ExecutableCheck(reportedProblems = {ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION})
 public class MethodShouldBeAbstractCheck extends IntegratedCheck {
     public MethodShouldBeAbstractCheck() {
         super(new LocalizedMessage("method-abstract-desc"));

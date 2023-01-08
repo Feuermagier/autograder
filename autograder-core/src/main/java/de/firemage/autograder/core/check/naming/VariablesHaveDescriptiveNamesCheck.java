@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.naming;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -15,13 +16,13 @@ import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
 
-import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+@ExecutableCheck(reportedProblems = {ProblemType.SINGLE_LETTER_LOCAL_NAME, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE})
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
-    
+
     public VariablesHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("variable-name-desc"));
     }
@@ -57,7 +58,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
             }
         });
     }
-    
+
     private boolean isLambdaParameter(CtVariable<?> variable) {
         return variable instanceof CtParameter<?> && variable.getParent() instanceof CtLambda<?>;
     }
@@ -67,7 +68,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private boolean isAllowedLoopCounter(CtVariable<?> variable) {
-        return (variable.getRoleInParent() == CtRole.FOR_INIT || variable.getRoleInParent() == CtRole.FOREACH_VARIABLE) 
+        return (variable.getRoleInParent() == CtRole.FOR_INIT || variable.getRoleInParent() == CtRole.FOREACH_VARIABLE)
             && SpoonUtil.isPrimitiveNumeric(variable.getType());
     }
 
@@ -75,7 +76,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         if (variable.getType().isPrimitive()) {
             return false;
         }
-        
+
         if (ALLOWED_ABBREVIATIONS.contains(variable.getSimpleName().toLowerCase())) {
             return false;
         }

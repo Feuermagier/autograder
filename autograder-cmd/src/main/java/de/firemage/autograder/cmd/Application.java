@@ -3,13 +3,12 @@ package de.firemage.autograder.cmd;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
-import de.firemage.autograder.cmd.config.CheckConfig;
 import de.firemage.autograder.cmd.output.Annotation;
 import de.firemage.autograder.core.InCodeProblem;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.check.Check;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.UploadedFile;
@@ -25,7 +24,6 @@ import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
-import java.io.UnsupportedEncodingException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -101,10 +99,10 @@ public class Application implements Callable<Integer> {
             CmdUtil.println();
         }
 
-        List<Check> checks;
+        List<ProblemType> checks;
+
         try {
-            CheckConfig config = new ObjectMapper(new YAMLFactory()).readValue(checkConfig.toFile(), CheckConfig.class);
-            checks = config.getChecks().stream().flatMap(c -> c.create().stream()).toList();
+            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig.toFile(), ProblemType[].class));
         } catch (IOException e) {
             e.printStackTrace();
             return IO_EXIT_CODE;
