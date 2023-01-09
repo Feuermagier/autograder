@@ -47,7 +47,7 @@ class Scope {
      * Registers the variable in the current scope having the specified value.
      *
      * @param variable the variable to register
-     * @param value the value it has
+     * @param value    the value it has
      */
     void register(CtVariableReference<?> variable, CtExpression<?> value) {
         this.variables.get(this.variables.size() - 1).put(variable, value);
@@ -66,6 +66,7 @@ class Scope {
      * Returns the value of the variable or null.
      *
      * @param variable the variable of which one should get the value
+     *
      * @return the value or null if it is unknown.
      */
     CtExpression<?> get(CtVariableReference<?> variable) {
@@ -137,7 +138,10 @@ public class RedundantArrayInit extends IntegratedCheck {
     }
 
     // equals impl of CtLiteral seems to be broken
-    private static boolean areLiteralsEqual(CtLiteral<?> left, CtLiteral<?> right) {
+    private static boolean areLiteralsEqual(
+        CtLiteral<?> left,
+        CtLiteral<?> right
+    ) {
         if (left == null && right == null) {
             return true;
         } else if (left == null || right == null) {
@@ -150,29 +154,25 @@ public class RedundantArrayInit extends IntegratedCheck {
             return false;
         }
 
-        // short, char and byte can be implicitly casted
-        // so the literal in the code might be of type int, while the default value
-        // has the correct type short, char or byte
-        //
-        // To solve this, try to cast.
-
-        Object leftValue = left.getValue();
-        Object rightValue = right.getValue();
-        Integer leftIntValue = integerValue(leftValue);
-        Integer rightIntValue = integerValue(rightValue);
-
-        if (leftIntValue != null && rightIntValue != null) {
-            return leftIntValue.equals(rightIntValue);
+        if (left.getValue() instanceof Character l && right.getValue() instanceof Character r) {
+            return l.equals(r);
+        } else if (left.getValue() instanceof Number l && right.getValue() instanceof Character r) {
+            return l.intValue() == (int) r;
+        } else if (left.getValue() instanceof Character l && right.getValue() instanceof Number r) {
+            return (int) l == r.intValue();
         }
 
-        boolean result = true;
-
-        // ensure that it will return true, when one base is not specified
-        if (left.getBase() != null && right.getBase() != null) {
-            result = left.getBase() == right.getBase();
+        if (!(left.getValue() instanceof Number valLeft)
+            || !(right.getValue() instanceof Number valRight)) {
+            return left.getValue() == right.getValue() || left.getValue().equals(right.getValue());
         }
 
-        return result && leftValue.equals(rightValue);
+        if (valLeft instanceof Float || valLeft instanceof Double || valRight instanceof Float
+            || valRight instanceof Double) {
+            return valLeft.doubleValue() == valRight.doubleValue();
+        }
+
+        return valLeft.longValue() == valRight.longValue();
     }
 
     private static CtVariableAccess<?> getVariableFromArray(CtArrayAccess<?, ?> ctArrayAccess) {
