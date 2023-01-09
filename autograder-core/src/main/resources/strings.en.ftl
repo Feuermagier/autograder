@@ -102,6 +102,9 @@ repeated-math-operation-plus = Use a multiplication with {$count} instead of add
 redundant-neg-desc = '!(a == b)' should be replaced by 'a != b'
 redundant-neg-exp = '{$original}' should be written as '{$fixed}'
 
+use-operator-assignment-desc = Assignments that look like 'a = a + b' should be written as 'a += b'
+use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
+
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
