@@ -22,11 +22,51 @@
         <fluent.version>0.70</fluent.version>
     </properties>
 
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy todir="${basedir}/target/classes">
+                                    <fileset dir="${basedir}/../autograder-executor/target/"
+                                        includes="executor.jar" />
+                                    <fileset dir="${basedir}/../autograder-agent/target/"
+                                        includes="agent.jar" />
+                                </copy>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
+
     <dependencies>
         <!-- Internal -->
         <dependency>
             <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-event</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-agent</artifactId>
+            <!-- This dependency is needed to copy jars to resources -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-executor</artifactId>
+            <!-- This dependency is needed to copy jars to resources -->
+            <scope>test</scope>
         </dependency>
 
         <!-- Spoon -->
