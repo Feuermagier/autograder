@@ -1,83 +1,39 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>autograder-parent</artifactId>
         <groupId>de.firemage.autograder</groupId>
-        <version>0.1</version>
+        <version>${revision}</version>
     </parent>
-    <version>0.1</version>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>autograder-core</artifactId>
     <name>autograder-core</name>
-    <build>
-        <plugins>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-compiler-plugin</artifactId>
-                <configuration>
-                    <source>17</source>
-                    <target>17</target>
-                </configuration>
-            </plugin>
-            <plugin>
-                <groupId>org.apache.maven.plugins</groupId>
-                <artifactId>maven-shade-plugin</artifactId>
-                <version>3.2.4</version>
-                <configuration>
-                    <!-- Exclude signature files -->
-                    <filters>
-                        <filter>
-                            <artifact>*:*</artifact>
-                            <excludes>
-                                <exclude>META-INF/*.SF</exclude>
-                                <exclude>META-INF/*.DSA</exclude>
-                                <exclude>META-INF/*.RSA</exclude>
-                            </excludes>
-                        </filter>
-                    </filters>
-                </configuration>
-                <executions>
-                    <execution>
-                        <phase>package</phase>
-                        <goals>
-                            <goal>shade</goal>
-                        </goals>
-                    </execution>
-                </executions>
-            </plugin>
-        </plugins>
-    </build>
 
     <properties>
-        <java.version>17</java.version>
-    </properties>
+        <spoon.version>10.2.0</spoon.version>
+        <pmd.version>6.45.0</pmd.version>
+        <spotbugs.version>6.45.0</spotbugs.version>
 
-    <repositories>
-        <repository>
-            <id>sonatype-snapshots</id>
-            <url>https://oss.sonatype.org/content/repositories/snapshots</url>
-            <releases>
-                <enabled>false</enabled>
-            </releases>
-        </repository>
-    </repositories>
+        <docker.version>3.2.14</docker.version>
+        <jgraph.version>1.5.1</jgraph.version>
+        <fluent.version>0.70</fluent.version>
+    </properties>
 
     <dependencies>
         <!-- Internal -->
         <dependency>
             <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-event</artifactId>
-            <version>0.1</version>
         </dependency>
 
         <!-- Spoon -->
         <dependency>
             <groupId>fr.inria.gforge.spoon</groupId>
             <artifactId>spoon-core</artifactId>
-            <version>10.2.0</version>
+            <version>${spoon.version}</version>
         </dependency>
 
 
@@ -99,7 +55,7 @@
         <dependency>
             <groupId>org.ow2.asm</groupId>
             <artifactId>asm</artifactId>
-            <version>9.3</version>
+            <version>${asm.version}</version>
         </dependency>
 
         <!-- Apache Commons -->
@@ -114,25 +70,25 @@
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
             <artifactId>jackson-dataformat-yaml</artifactId>
-            <version>2.13.0</version>
+            <version>${jackson.version}</version>
         </dependency>
         <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
-            <version>2.13.0</version>
+            <version>${jackson.version}</version>
         </dependency>
 
         <!-- Docker -->
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java</artifactId>
-            <version>3.2.14</version>
+            <version>${docker.version}</version>
         </dependency>
 
         <dependency>
             <groupId>com.github.docker-java</groupId>
             <artifactId>docker-java-transport-httpclient5</artifactId>
-            <version>3.2.14</version>
+            <version>${docker.version}</version>
         </dependency>
 
         <!-- Compression - to unpack tar files extracted from docker containers -->
@@ -141,31 +97,31 @@
             <artifactId>commons-compress</artifactId>
             <version>1.21</version>
         </dependency>
-        
+
         <!-- Language detection -->
         <dependency>
             <groupId>com.github.pemistahl</groupId>
             <artifactId>lingua</artifactId>
             <version>1.2.1</version>
         </dependency>
-        
+
         <!-- Commons -->
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-lang3</artifactId>
             <version>3.12.0</version>
         </dependency>
-        
+
         <!-- Graphs -->
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-core</artifactId>
-            <version>1.5.1</version>
+            <version>${jgraph.version}</version>
         </dependency>
         <dependency>
             <groupId>org.jgrapht</groupId>
             <artifactId>jgrapht-io</artifactId>
-            <version>1.5.1</version>
+            <version>${jgraph.version}</version>
         </dependency>
 
         <!-- Charsets -->
@@ -174,32 +130,24 @@
             <artifactId>juniversalchardet</artifactId>
             <version>2.4.0</version>
         </dependency>
-        
+
         <!-- Translation -->
         <dependency>
             <groupId>net.xyzsd.fluent</groupId>
             <artifactId>fluent-base</artifactId>
-            <version>0.70</version>
+            <version>${fluent.version}</version>
         </dependency>
         <dependency>
             <groupId>net.xyzsd.fluent</groupId>
             <artifactId>fluent-functions-icu</artifactId>
-            <version>0.70</version>
+            <version>${fluent.version}</version>
         </dependency>
-        
+
         <!-- Reflection -->
         <dependency>
             <groupId>org.reflections</groupId>
             <artifactId>reflections</artifactId>
             <version>0.10.2</version>
-        </dependency>
-
-        <!-- Test -->
-        <dependency>
-            <groupId>org.junit.jupiter</groupId>
-            <artifactId>junit-jupiter</artifactId>
-            <version>5.8.2</version>
-            <scope>test</scope>
         </dependency>
     </dependencies>
 </project>

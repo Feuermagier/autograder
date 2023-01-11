@@ -15,6 +15,7 @@
 log/
 target/
 dependency-reduced-pom.xml
+.flattened-pom.xml
 
 # App
 logs/
