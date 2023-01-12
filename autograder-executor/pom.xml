@@ -42,9 +42,9 @@
                 <artifactId>maven-assembly-plugin</artifactId>
                 <configuration>
                     <archive>
-                        <manifestEntries>
-                            <Premain-Class>de.firemage.autograder.executor.Main</Premain-Class>
-                        </manifestEntries>
+                        <manifest>
+                            <mainClass>de.firemage.autograder.executor.Main</mainClass>
+                        </manifest>
                     </archive>
                     <descriptorRefs>
                         <descriptorRef>jar-with-dependencies</descriptorRef>
@@ -58,7 +58,7 @@
                         <goals>
                             <goal>single</goal>
                         </goals>
-                        <phase>package</phase>
+                        <phase>compile</phase>
                     </execution>
                 </executions>
             </plugin>
