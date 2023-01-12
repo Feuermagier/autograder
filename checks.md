@@ -30,6 +30,8 @@
 * All locals, parameters, private fields & private methods should be used
 * Unnecessary if as the value of the condition should be directly used (e.g. `if (x) { return true; } else { false; }`)
 * Variable is reassigned to itself
+* Overwriting default values in arrays with default values
+* Not using operator assignments (e.g. `x = x + 1` instead of `x += 1`)
 
 ### Debugging Artifacts
 * Assertions used

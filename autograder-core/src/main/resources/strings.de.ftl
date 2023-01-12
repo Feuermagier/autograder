@@ -105,6 +105,9 @@ repeated-math-operation-plus = Hier sollte eine Multiplikation mit {$count} verw
 redundant-neg-desc = '!(a == b)' kann durch 'a != b' ersetzt werden
 redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
 
+use-operator-assignment-desc = Zuweisungen der Form 'a = a + b' sollte man als 'a += b' schreiben
+use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
+
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt
