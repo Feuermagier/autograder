@@ -84,6 +84,6 @@ public class JavadocStubCheck extends IntegratedCheck {
             || description.equals("beschreibung")
             || description.trim()
             .matches(
-                "the (bool|boolean|byte|char|short|int|integer|long|float|double|String|Object|exception|array)( value| array)?");
+                "the (bool|boolean|byte|char|short|int|integer|long|float|double|string|object|exception|array)( value| array)?");
     }
 }

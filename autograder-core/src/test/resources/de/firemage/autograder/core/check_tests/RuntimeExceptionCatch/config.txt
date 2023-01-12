@@ -1,0 +1,5 @@
+exceptions.RuntimeExceptionCatchCheck
+Runtime exception caught (except NumberFormatException)
+Test.java:5-7
+Test.java:13-15
+Test.java:19-21

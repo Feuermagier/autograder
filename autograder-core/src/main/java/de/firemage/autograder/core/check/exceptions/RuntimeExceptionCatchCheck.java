@@ -10,10 +10,13 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatch;
 
+import java.util.List;
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.RUNTIME_EXCEPTION_OR_ERROR_CAUGHT})
 public class RuntimeExceptionCatchCheck extends IntegratedCheck {
+    private static final List<String> ALLOWED_EXCEPTIONS = List.of("java.lang.NumberFormatException");
+
     public RuntimeExceptionCatchCheck() {
         super(new LocalizedMessage("runtime-ex-caught-desc"));
     }
@@ -24,7 +27,8 @@ public class RuntimeExceptionCatchCheck extends IntegratedCheck {
             @Override
             public void process(CtCatch catchBlock) {
                 var varType = catchBlock.getParameter().getType();
-                if (ExceptionUtil.isRuntimeException(varType) || ExceptionUtil.isError(varType)) {
+                if ((ExceptionUtil.isRuntimeException(varType) || ExceptionUtil.isError(varType)) &&
+                    !ALLOWED_EXCEPTIONS.contains(varType.getQualifiedName())) {
                     addLocalProblem(catchBlock, new LocalizedMessage("runtime-ex-caught-exp",
                             Map.of("exp", catchBlock.getParameter().getType().getSimpleName())),
                         ProblemType.RUNTIME_EXCEPTION_OR_ERROR_CAUGHT);
