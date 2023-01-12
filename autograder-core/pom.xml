@@ -37,10 +37,12 @@
                             <target>
                                 <copy todir="${basedir}/target/classes">
                                     <fileset dir="${basedir}/../autograder-executor/target/"
-                                        includes="executor.jar" />
+                                        includes="executor-jar-with-dependencies.jar" />
                                     <fileset dir="${basedir}/../autograder-agent/target/"
-                                        includes="agent.jar" />
+                                        includes="agent-jar-with-dependencies.jar" />
                                 </copy>
+                                <move file="${basedir}/target/classes/agent-jar-with-dependencies.jar" tofile="${basedir}/target/classes/agent.jar"/>
+                                <move file="${basedir}/target/classes/executor-jar-with-dependencies.jar" tofile="${basedir}/target/classes/executor.jar"/>
                             </target>
                         </configuration>
                     </execution>
