@@ -11,10 +11,15 @@ public class ClassTransformer implements ClassFileTransformer {
     public byte[] transform(ClassLoader classLoader, String className, Class<?> clazz, ProtectionDomain domain,
                             byte[] buffer) {
         // Don't modify JDK classes
-        if (className.startsWith("java/") || className.startsWith("sun/") || className.startsWith("jdk/") ||
-            className.startsWith("de/firemage/codelinter/")) {
+        if (className.startsWith("java/") || className.startsWith("sun/") || className.startsWith("jdk/")) {
             return buffer;
         }
+
+        // Don't modify classes of the Autograder Framework (excluding tests in check_tests)
+        if (className.startsWith("de/firemage/autograder") && !className.contains("check_tests")) {
+            return buffer;
+        }
+
         System.out.println("AGENT: Modifying class " + className);
 
         ClassReader reader = new ClassReader(buffer);
