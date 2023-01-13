@@ -8,7 +8,7 @@ import org.objectweb.asm.commons.AdviceAdapter;
 import org.objectweb.asm.commons.Method;
 
 public class MethodInstrumentationVisitor extends AdviceAdapter {
-    private static final Type RECORDER = Type.getType("Lde/firemage/codelinter/agent/EventRecorder;");
+    private static final Type RECORDER = Type.getType("Lde/firemage/autograder/agent/EventRecorder;");
     private final String className;
     private final Label startFinally;
     private boolean initialized = false; // Required because the compiler produces a putfield instruction before

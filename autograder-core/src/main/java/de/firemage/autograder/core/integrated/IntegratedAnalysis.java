@@ -9,17 +9,30 @@ import de.firemage.autograder.core.dynamic.TestRunResult;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.graph.GraphAnalysis;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
 import java.io.IOException;
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
+import java.nio.file.FileSystem;
+import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public class IntegratedAnalysis implements AutoCloseable {
+    private static final Logger logger = LoggerFactory.getLogger(IntegratedAnalysis.class);
+
     private final UploadedFile file;
     private final Path jar;
     private final Path tmpPath;
+    private final Map<String, FileSystem> openFileSystems = new HashMap<>();
     private final StaticAnalysis staticAnalysis;
     private final GraphAnalysis graphAnalysis;
     private DynamicAnalysis dynamicAnalysis;
@@ -39,16 +52,50 @@ public class IntegratedAnalysis implements AutoCloseable {
     public void runDynamicAnalysis(Path tests, Consumer<LinterStatus> statusConsumer)
         throws RunnerException, InterruptedException {
         try {
-            DockerConsoleRunner runner = new DockerConsoleRunner(
-                Path.of(this.getClass().getResource("/executor.jar").toURI()),
-                Path.of(this.getClass().getResource("/agent.jar").toURI()),
-                tests,
-                this.tmpPath);
+            DockerConsoleRunner runner = new DockerConsoleRunner(toPath(this.getClass().getResource("/executor.jar")), toPath(this.getClass().getResource("/agent.jar")), tests, this.tmpPath);
             List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar, statusConsumer);
             this.dynamicAnalysis = new DynamicAnalysis(results);
-        } catch (URISyntaxException e) {
+        } catch (URISyntaxException | IOException e) {
             throw new RunnerException(e);
+        } finally {
+            closeOpenFileSystems();
         }
+    }
+
+    private Path toPath(URL resource) throws URISyntaxException, IOException {
+        if (resource == null) {
+            throw new IllegalArgumentException("URL is null");
+        }
+        URI uri = resource.toURI();
+        if (!uri.toString().contains("!")) {
+            return Path.of(uri);
+        }
+        // See https://stackoverflow.com/questions/22605666/java-access-files-in-jar-causes-java-nio-file-filesystemnotfoundexception
+        String[] path = uri.toString().split("!", 2);
+        @SuppressWarnings("resource") FileSystem fs = createFileSystem(path[0]);
+        return fs.getPath(path[1]);
+    }
+
+    private FileSystem createFileSystem(String path) throws IOException {
+        FileSystem existingFileSystem = openFileSystems.get(path);
+        if (existingFileSystem != null) {
+            return existingFileSystem;
+        }
+
+        FileSystem newFileSystem = FileSystems.newFileSystem(URI.create(path), new HashMap<>());
+        openFileSystems.put(path, newFileSystem);
+        return newFileSystem;
+    }
+
+    private void closeOpenFileSystems() {
+        for (FileSystem openFileSystem : openFileSystems.values()) {
+            try {
+                openFileSystem.close();
+            } catch (IOException e) {
+                logger.error(e.getMessage(), e);
+            }
+        }
+        openFileSystems.clear();
     }
 
     public List<Problem> lint(List<IntegratedCheck> checks, Consumer<LinterStatus> statusConsumer) {
