@@ -38,7 +38,7 @@ commented-out-code-desc = Unbenutzter Code sollte entfernt werden
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
 
 comment-language-desc = Alle Kommentare (einschließlich Javadoc and inline comments) müssen entweder auf Deutsch oder auf Englisch sein
-comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf Englisch, sonder scheint {$lang} zu sein
+comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf Englisch, sondern scheint {$lang} zu sein
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}
 comment-language-exp-german = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Deutsch. Ein englischer Kommentar befindet sich bei {$path}:{$line}
 
