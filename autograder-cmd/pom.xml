@@ -12,7 +12,7 @@
     <artifactId>autograder-cmd</artifactId>
 
     <properties>
-        <picocli.version>4.6.1</picocli.version>
+        <picocli.version>4.7.0</picocli.version>
     </properties>
 
     <dependencies>
