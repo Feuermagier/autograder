@@ -49,8 +49,7 @@ When reasonably possible, those should be used to keep the code clean.
 All checks except the PMD-based checks must inherit from PMD-based tests must inherit from [IntegratedCheck](autograder-core/src/main/java/de/firemage/autograder/core/integrated/IntegratedCheck.java).
 PMD-based checks must inherit from [PMDCheck](autograder-core/src/main/java/de/firemage/autograder/core/pmd/PMDCheck.java).
 
-If you change the events module, make sure to run `mvn install`, as both the agent and the core module depend on it.
-If you change the executor or the agent, run `mvn package` for those modules so that the jar files in [autograder-core/src/main/resources](autograder-core/src/main/resources) get updated.
+If you change the executor or the agent, run `mvn compile` for all so that the jar files in [autograder-core resources](autograder-core) get updated.
 
 The directory [test_submissions](test_submissions) contains two projects you can test your checks on:
 * [Bank](test_submissions/Bank) is an implementation of a task I used in my tutorial.
