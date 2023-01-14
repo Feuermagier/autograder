@@ -1,0 +1,12 @@
+general.DoNotUseRawTypes
+Do not use raw types
+Test.java:9
+Test.java:11
+Test.java:13
+Test.java:14
+Test.java:15
+Test.java:16
+Test.java:17
+Test.java:17
+Test.java:23
+Test.java:23

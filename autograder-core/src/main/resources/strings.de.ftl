@@ -172,6 +172,9 @@ field-final-exp = Das Attribut '{$name}' sollte final sein
 string-cmp-desc = Strings müssen immer mit der equals-Methode verglichen werden
 string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Methode verglichen werden: '{$lhs}.equals({$rhs})' statt '{$lhs} == {$rhs}'
 
+do-not-use-raw-types-desc = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
+do-not-use-raw-types-exp = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen

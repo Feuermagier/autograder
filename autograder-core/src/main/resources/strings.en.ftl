@@ -173,6 +173,9 @@ field-final-exp = The attribute '{$name}' should be final
 string-cmp-desc = Strings must always be compares using the 'equals' method
 string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lhs} == {$rhs}'
 
+do-not-use-raw-types-desc = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
+do-not-use-raw-types-exp = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
