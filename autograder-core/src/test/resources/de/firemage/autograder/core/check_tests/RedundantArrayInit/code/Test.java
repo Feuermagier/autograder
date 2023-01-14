@@ -75,4 +75,12 @@ public class Test {
         arr[0][0] = false; // Not Ok
         arr[0] = null; // Ok
     }
+
+    private void sanityTest() {
+        int a = 0;
+        a = 1; // Ok
+        a = 2; // Ok
+        String hello = "hello";
+        hello = "world"; // Ok
+    }
 }

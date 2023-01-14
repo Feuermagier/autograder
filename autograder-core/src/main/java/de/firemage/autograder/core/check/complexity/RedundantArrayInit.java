@@ -5,28 +5,25 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtArrayWrite;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtLoop;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtRHSReceiver;
-import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtTypeInformation;
-import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.CtScanner;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
@@ -34,6 +31,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.BiConsumer;
 
 class Scope {
     private final List<Map<CtVariableReference<?>, CtExpression<?>>> variables;
@@ -100,6 +98,69 @@ class Scope {
     }
 }
 
+class Visitor extends CtScanner {
+    private final Scope scope;
+
+    private final BiConsumer<? super Scope, ? super CtAssignment<?, ?>> visit;
+
+    Visitor(BiConsumer<? super Scope, ? super CtAssignment<?, ?>> visit) {
+        this.visit = visit;
+        this.scope = new Scope();
+    }
+
+    @Override
+    public <T, A extends T> void visitCtAssignment(CtAssignment<T, A> assignment) {
+        this.visit.accept(this.scope, assignment);
+        super.visitCtAssignment(assignment);
+    }
+
+    @Override
+    public <R> void visitCtBlock(CtBlock<R> block) {
+        this.scope.push();
+        super.visitCtBlock(block);
+        this.scope.pop();
+    }
+
+    @Override
+    public <R> void visitCtField(CtField<R> field) {
+        this.scope.register(field.getReference(), field.getDefaultExpression());
+        this.updateValueAssignment(field.getReference(), field.getAssignment());
+
+        super.visitCtField(field);
+    }
+
+    @Override
+    public <T> void visitCtLocalVariable(CtLocalVariable<T> localVariable) {
+        this.scope.register(localVariable.getReference(), localVariable.getDefaultExpression());
+        this.updateValueAssignment(localVariable.getReference(), localVariable.getAssignment());
+
+        super.visitCtLocalVariable(localVariable);
+    }
+
+    private <T> void updateValueAssignment(CtVariableReference<T> variable, CtExpression<?> value) {
+        if (value instanceof CtNewArray<?> newArray) {
+            CtLiteral<?> defaultValue = RedundantArrayInit.getDefaultArrayValueOrNull(variable.getType(), newArray);
+            if (defaultValue != null) {
+                this.scope.register(variable, defaultValue);
+            }
+        } else if (value instanceof CtLiteral<?> literal) {
+            this.scope.register(variable, literal);
+        } else {
+            // an unknown kind of value has been assigned, therefore the variable is no longer tracked
+            this.scope.remove(variable);
+        }
+    }
+
+    @Override
+    public <R> void visitCtVariableWrite(CtVariableWrite<R> variableWrite) {
+        // if the variable has been assigned a new value, update it:
+        if (variableWrite instanceof CtRHSReceiver<?> rhs) {
+            this.updateValueAssignment(variableWrite.getVariable(), rhs.getAssignment());
+        }
+        super.visitCtVariableWrite(variableWrite);
+    }
+}
+
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_ARRAY_INIT })
 public class RedundantArrayInit extends IntegratedCheck {
     private static final Map<String, CtLiteral<?>> DEFAULT_VALUES = Map.ofEntries(
@@ -119,22 +180,38 @@ public class RedundantArrayInit extends IntegratedCheck {
         return literal;
     }
 
-    public RedundantArrayInit() {
-        super(new LocalizedMessage("redundant-array-init-desc"));
-    }
-
-    private static <T> Integer integerValue(T value) {
-        if (value instanceof Byte res) {
-            return res.intValue();
-        } else if (value instanceof Short res) {
-            return res.intValue();
-        } else if (value instanceof Character res) {
-            return (int) res;
-        } else if (value instanceof Integer res) {
-            return res;
-        } else {
+    static <R> CtLiteral<?> getDefaultArrayValueOrNull(CtTypeInformation type, R rhs) {
+        // skip all non-array assignments:
+        if (!type.isArray()) {
             return null;
         }
+
+        CtArrayTypeReference<?> arrayType = (CtArrayTypeReference<?>) type;
+
+        // skip all non-default array assignments:
+        if (!(rhs instanceof CtNewArray<?> newArray)) {
+            return null;
+        }
+
+        if (!newArray.getElements().isEmpty()) {
+            return null;
+        }
+
+        CtTypeReference<?> realType = arrayType.getArrayType();
+        if (realType.isPrimitive() && !DEFAULT_VALUES.containsKey(realType.getSimpleName())) {
+            // skip all types for which we don't have a default value
+            return null;
+        }
+
+        if (realType.isPrimitive()) {
+            return DEFAULT_VALUES.get(realType.getSimpleName());
+        } else {
+            return makeLiteral(null);
+        }
+    }
+
+    public RedundantArrayInit() {
+        super(new LocalizedMessage("redundant-array-init-desc"));
     }
 
     // equals impl of CtLiteral seems to be broken
@@ -211,6 +288,10 @@ public class RedundantArrayInit extends IntegratedCheck {
             }
             CtVariableReference<?> variableName = read.getVariable();
 
+            if (scope.get(variableName) == null) {
+                return;
+            }
+
             CtLiteral<?> defaultValue = (CtLiteral<?>) scope.get(variableName);
             if (defaultValue == null) {
                 // could not find the default value
@@ -236,92 +317,10 @@ public class RedundantArrayInit extends IntegratedCheck {
         }
     }
 
-    private void processStatement(CtElement statement, Scope scope) {
-        if (statement instanceof CtAssignment<?, ?> assignment) {
-            this.checkAssignment(assignment.getAssigned(), assignment.getAssignment(), statement, scope);
-        }
-
-        // check declaration:
-        if (statement instanceof CtVariable<?> variable && statement instanceof CtRHSReceiver<?> rhs) {
-            // check if a new array is assigned to the variable and then put it into the scope
-            CtLiteral<?> defaultValue = getDefaultArrayValueOrNull(variable.getType(), rhs.getAssignment());
-            if (defaultValue != null) {
-                scope.register(variable.getReference(), defaultValue);
-            }
-        }
-
-        if (statement instanceof CtBlock<?> innerBlock) {
-            scope.push();
-
-            processBlock(innerBlock, scope);
-
-            scope.pop();
-        }
-
-        if (statement instanceof CtLoop loop) {
-            scope.push();
-
-            processStatement(loop.getBody(), scope);
-
-            scope.pop();
-        }
-
-        if (statement instanceof CtIf conditional) {
-            scope.push();
-
-            processStatement(conditional.getThenStatement(), scope);
-            processStatement(conditional.getElseStatement(), scope);
-
-            scope.pop();
-        }
-    }
-
-    private void processBlock(CtBlock<?> block, Scope scope) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(block);
-
-        for (CtStatement statement : statements) {
-            processStatement(statement, scope);
-        }
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtBlock<?>>() {
-            @Override
-            public void process(CtBlock<?> block) {
-                Scope scope = new Scope();
-                processBlock(block, scope);
-            }
-        });
-    }
-
-    private static <R> CtLiteral<?> getDefaultArrayValueOrNull(CtTypeInformation type, R rhs) {
-        // skip all non-array assignments:
-        if (!type.isArray()) {
-            return null;
-        }
-
-        CtArrayTypeReference<?> arrayType = (CtArrayTypeReference<?>) type;
-
-        // skip all non-default array assignments:
-        if (!(rhs instanceof CtNewArray<?> newArray)) {
-            return null;
-        }
-
-        if (!newArray.getElements().isEmpty()) {
-            return null;
-        }
-
-        CtTypeReference<?> realType = arrayType.getArrayType();
-        if (realType.isPrimitive() && !DEFAULT_VALUES.containsKey(realType.getSimpleName())) {
-            // skip all types for which we don't have a default value
-            return null;
-        }
-
-        if (realType.isPrimitive()) {
-            return DEFAULT_VALUES.get(realType.getSimpleName());
-        } else {
-            return makeLiteral(null);
-        }
+        staticAnalysis.getModel().getRootPackage().accept(new Visitor((scope, element) -> {
+            this.checkAssignment(element.getAssigned(), element.getAssignment(), element, scope);
+        }));
     }
 }
