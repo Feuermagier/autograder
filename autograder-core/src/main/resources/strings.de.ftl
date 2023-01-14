@@ -64,8 +64,8 @@ javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
 javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
 
 # Complexity
-diamond-desc = Verwende den 'diamond operator' statt den generischen Typ zu wiederholen: new Foo<>()
-diamond-exp = Verwende den 'diamond operator'
+diamond-desc = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
+diamond-exp = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
 extends-object-desc = Explizit von Object zu erben ist unnötig
 extends-object-exp = Unnötiges 'extends Object'

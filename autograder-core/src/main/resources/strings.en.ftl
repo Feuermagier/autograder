@@ -61,8 +61,8 @@ javadoc-stub-exp-return = Stub description for return value
 javadoc-stub-exp-throws = Stub description for exception {$exp}
 
 # Complexity
-diamond-desc = Use the 'diamond operator' instead of repeating the generic type: new Foo<>()
-diamond-exp = Use the 'diamond operator'
+diamond-desc = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
+diamond-exp = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
 extends-object-desc = Explicitly extending Object is unnecessary
 extends-object-exp = Unnecessary 'extends Object'
