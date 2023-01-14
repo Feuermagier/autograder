@@ -53,4 +53,11 @@ public class IntegratedInCodeProblem extends InCodeProblem {
             );
         }
     }
+
+    @Override
+    public String toString() {
+        return String.format(
+            "IntegratedInCodeProblem { element: '%s', position: '%s' }", element, getPosition()
+        );
+    }
 }
