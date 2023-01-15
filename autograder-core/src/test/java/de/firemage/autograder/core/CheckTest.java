@@ -54,7 +54,7 @@ public class CheckTest {
                     for (var problem : problems) {
                         if (!expectedProblems.remove(problem.getDisplayLocation())) {
                             fail("The check reported a problem '" + problem.getDisplayLocation() +
-                                "' but we don't expect a problem to be there");
+                                "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType().toString());
                         }
                     }
                     if (!expectedProblems.isEmpty()) {

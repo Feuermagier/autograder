@@ -208,6 +208,10 @@ utility-exp-field = Utility-Klassen dürfen ausschließlich finale Attribute hab
 static-field-desc = Statische Attribute dürfen nicht verändert werden
 static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut sein
 
+constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
+interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
+interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
+
 # Structure
 
 default-package-desc = Das default-Paket sollte nicht verwendet werden

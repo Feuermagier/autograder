@@ -1,0 +1,8 @@
+oop.InterfaceBadPractices
+Bad practices for interfaces
+Test.java:6
+Test.java:9
+Test.java:15
+Test.java:16
+Test.java:28
+Test.java:34
