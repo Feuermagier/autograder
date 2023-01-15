@@ -1,0 +1,9 @@
+general.StringCompareCheck
+Do not compare strings with == or !=
+Test.java:10
+Test.java:11
+Test.java:12
+Test.java:13
+Test.java:18
+Test.java:19
+Test.java:20
