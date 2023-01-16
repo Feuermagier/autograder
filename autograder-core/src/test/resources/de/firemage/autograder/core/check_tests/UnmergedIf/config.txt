@@ -1,0 +1,4 @@
+complexity.ChainedIfCheck
+Avoid else { if () { } }
+Test.java:57
+Test.java:67

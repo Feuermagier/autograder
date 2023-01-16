@@ -40,7 +40,7 @@ public class PMDLinter {
         ProblemRenderer renderer = new ProblemRenderer(idMap, file.getFile());
 
         try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
-            pmd.addRuleSet(RuleSet.create("Codelinter Configuration (Generated)", "", null, List.of(), List.of(), rules));
+            pmd.addRuleSet(RuleSet.create("Autograder Configuration (Generated)", "", null, List.of(), List.of(), rules));
             pmd.addRenderer(renderer);
             pmd.files().addDirectory(file.getFile());
             pmd.performAnalysis();

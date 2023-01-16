@@ -108,6 +108,9 @@ redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
 use-operator-assignment-desc = Zuweisungen der Form 'a = a + b' sollte man als 'a += b' schreiben
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
 
+merge-if-desc = Besteht ein else-Block nur aus einem if, kann auch else-if verwendet werden
+merge-if-exp = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
+
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt
@@ -124,7 +127,7 @@ empty-catch-desc = Alle Exceptions sollten angemessen behandelt werden
 empty-catch-exp = Leerer catch-Block
 
 exception-controlflow-desc = Exceptions sollten innerhalb von Methoden nicht für Kontrollfluss benutzt werden (z.B. durch Werfen und Fangen in derselben Methode)
-exception-controlfow-exp-caught = {$exp} wird geworfen und im umgebenden Block sofort wieder gefangen
+exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block sofort wieder gefangen
 
 runtime-ex-caught-desc = RuntimeExceptions sollten niemals gefangen werden (abgesehen von NumberFormatException)
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen

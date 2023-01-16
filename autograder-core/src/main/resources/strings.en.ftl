@@ -105,6 +105,9 @@ redundant-neg-exp = '{$original}' should be written as '{$fixed}'
 use-operator-assignment-desc = Assignments that look like 'a = a + b' should be written as 'a += b'
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
 
+merge-if-desc = If an else-block consists solely of an if, you can replace it with an else-if
+merge-if-exp = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
+
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
