@@ -53,14 +53,14 @@ public class JavadocStubCheck extends IntegratedCheck {
                         }
                         case RETURN -> {
                             if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-param"),
+                                addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-return"),
                                     ProblemType.JAVADOC_STUB_RETURN_TAG);
                             }
                         }
                         case THROWS -> {
                             if (isDefaultValueDescription(tag.getContent())) {
                                 addLocalProblem(javadoc,
-                                    new LocalizedMessage("javadoc-stub-exp-param", Map.of("exp", tag.getParam())),
+                                    new LocalizedMessage("javadoc-stub-exp-throws", Map.of("exp", tag.getParam())),
                                     ProblemType.JAVADOC_STUB_THROWS_TAG);
                             }
                         }
