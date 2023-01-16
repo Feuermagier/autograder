@@ -132,6 +132,9 @@ exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block 
 runtime-ex-caught-desc = RuntimeExceptions sollten niemals gefangen werden (abgesehen von NumberFormatException)
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 
+exception-message-desc = Geworfene Exceptions sollten immer eine Nachricht haben
+exception-message-exp = Nachricht ('message') fehlt oder ist leer
+
 # General
 compare-objects-desc = Objekte sollten mit equals verglichen werden, anstatt sie zum Vergleich in Strings umzuwandeln
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen

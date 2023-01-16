@@ -132,6 +132,9 @@ exception-controlfow-exp-caught = {$exp} thrown and immediately caught in a surr
 runtime-ex-caught-desc = Never catch runtime exceptions (aside from NumberFormatException)
 runtime-ex-caught-exp = Runtime exception of type {$exp} caught
 
+exception-message-desc = Thrown exception always need a message
+exception-message-exp = Message is missing or empty
+
 # General
 
 compare-objects-desc = Objects should be compared directly with equals and by their String representation
