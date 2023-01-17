@@ -31,7 +31,8 @@ public class ListGetterSetterCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtReturn<?>>() {
             @Override
             public void process(CtReturn<?> ret) {
-                if (!ret.getParent(CtMethod.class).isPublic() || ret.getReturnedExpression() == null) {
+                CtMethod<?> parentMethod = ret.getParent(CtMethod.class);
+                if (parentMethod == null || !parentMethod.isPublic() || ret.getReturnedExpression() == null) {
                     return;
                 }
 
