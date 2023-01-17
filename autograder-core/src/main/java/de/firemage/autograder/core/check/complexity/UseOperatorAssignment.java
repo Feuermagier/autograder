@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.PrintUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -16,7 +17,7 @@ import spoon.reflect.code.CtOperatorAssignment;
 import java.util.List;
 import java.util.Map;
 
-@ExecutableCheck(reportedProblems = { ProblemType.USE_OPERATOR_ASSIGNMENT })
+@ExecutableCheck(reportedProblems = {ProblemType.USE_OPERATOR_ASSIGNMENT})
 
 public class UseOperatorAssignment extends IntegratedCheck {
     public UseOperatorAssignment() {
@@ -74,12 +75,12 @@ public class UseOperatorAssignment extends IntegratedCheck {
                 String simplifiedExpr = null;
                 if (left.toString().equals(lhs.toString())) {
                     // left hand side is the same, so we can use an operator assignment
-                    simplifiedExpr = String.format("%s %s= %s", lhs, operator, right);
+                    simplifiedExpr = String.format("%s %s= %s", lhs, PrintUtil.printOperator(operator), right);
                 } else if (isCommutative(operator) && right.toString().equals(lhs.toString())) {
                     // operator is commutative so <lhs> = <left> <op> <right> is equivalent to
                     // <lhs> = <right> <op> <left>
 
-                    simplifiedExpr = String.format("%s %s= %s", lhs, operator, left);
+                    simplifiedExpr = String.format("%s %s= %s", lhs, PrintUtil.printOperator(operator), left);
                 }
 
                 if (simplifiedExpr != null) {
