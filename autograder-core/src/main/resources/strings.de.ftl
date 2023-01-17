@@ -188,8 +188,8 @@ variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekrä
 variable-name-exp-type = Unnötige Abkürzung '{$name}'
 
 # OOP
-concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List stat ArrayList)
-concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List stat ArrayList)
+concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
+concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 
 list-getter-desc = Veränderbare Collections müssen in Gettern kopiert werden
 list-getter-exp = Die Collection is veränderbar, wird aber nicht kopiert
