@@ -19,7 +19,8 @@ public final class ExceptionUtil {
         "java.lang.ArrayStoreException",
         "java.lang.EnumConstantNotPresentException",
         "java.lang.IllegalStateException",
-        "java.lang.UnsupportedOperationException"
+        "java.lang.UnsupportedOperationException",
+        "java.lang.IndexOutOfBoundsException"
         
     );
     
