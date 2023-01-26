@@ -1,7 +1,9 @@
 package de.firemage.autograder.core.integrated.scope;
 
+import akka.util.Index;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.scope.value.ArrayValue;
+import de.firemage.autograder.core.integrated.scope.value.IndexValue;
 import de.firemage.autograder.core.integrated.scope.value.UnknownValue;
 import de.firemage.autograder.core.integrated.scope.value.Value;
 import de.firemage.autograder.core.integrated.scope.value.VariableValue;
@@ -18,6 +20,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 public final class Scope {
     private final List<Map<CtVariableReference<?>, Value>> variables;
@@ -29,7 +32,7 @@ public final class Scope {
 
     private Value resolveArrayRead(CtArrayRead<?> ctArrayRead) {
         // first resolve the index into the array
-        Value index = this.resolve(ctArrayRead.getIndexExpression());
+        IndexValue index = (IndexValue) this.resolve(ctArrayRead.getIndexExpression());
         CtVariableReference<?> variable = SpoonUtil.getVariableFromArray(ctArrayRead).getVariable();
 
         Value storedValue = this.get(variable);
@@ -44,6 +47,18 @@ public final class Scope {
         }
 
         return arrayValue.get(index, this);
+    }
+
+    public Optional<CtLiteral<?>> tryResolveLiteral(CtExpression<?> expression) {
+        if (expression instanceof CtLiteral<?> literal) {
+            return Optional.of(literal);
+        }
+
+        return this.resolve(expression).toLiteral();
+    }
+
+    public Optional<CtLiteral<?>> tryResolveLiteral(Value value) {
+        return value.toExpression().map(this::resolve).flatMap(Value::toLiteral);
     }
 
     public Value resolve(CtExpression<?> value) {
@@ -97,18 +112,20 @@ public final class Scope {
         // then check if the array is already registered:
         Value storedValue = this.get(variableReference);
 
-        Value index = VariableValue.fromExpression(ctArrayWrite.getIndexExpression());
-        ArrayValue arrayValue = (ArrayValue) storedValue;
+        IndexValue index = VariableValue.fromExpression(ctArrayWrite.getIndexExpression());
 
         if (storedValue != null) {
+            ArrayValue arrayValue = (ArrayValue) storedValue;
             // if the value is known, check that the index is known as well:
             if (!index.isConstant()) {
                 // try to resolve the index:
-                index = index.toExpression().map(this::resolve).orElse(index);
-                if (!index.isConstant()) {
+                Value resolvedIndex = index.toExpression().map(this::resolve).orElse(index);
+                if (!resolvedIndex.isConstant() || !(resolvedIndex instanceof IndexValue)) {
                     // if the index is not known, it can be anything, so we need to invalidate the whole array:
                     arrayValue.invalidate();
                 }
+
+                index = (IndexValue) resolvedIndex;
             }
 
             // if it is, then update the value at the specified index:

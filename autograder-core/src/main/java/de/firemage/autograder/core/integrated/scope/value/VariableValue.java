@@ -7,28 +7,38 @@ import spoon.reflect.code.CtLiteral;
 import java.util.Objects;
 import java.util.Optional;
 
-public class VariableValue implements Value {
+public final class VariableValue implements Value, IndexValue {
     private final CtExpression<?> value;
 
     private VariableValue(CtExpression<?> value) {
         this.value = Objects.requireNonNull(value);
     }
 
-    public static <T> Value fromExpression(CtExpression<T> expression) {
+    public static <T> IndexValue fromExpression(CtExpression<T> expression) {
         return new VariableValue(Objects.requireNonNull(expression));
     }
 
-    public static <T> Value fromLiteral(CtLiteral<T> literal) {
+    public static <T> IndexValue fromLiteral(CtLiteral<T> literal) {
         return VariableValue.fromExpression(literal);
     }
 
-    public static Value fromInteger(int value) {
+    public static IndexValue fromInteger(int value) {
         return new VariableValue(SpoonUtil.makeLiteral(value));
     }
 
     @Override
     public Optional<CtExpression<?>> toExpression() {
         return Optional.of(this.value);
+    }
+
+    @Override
+    public boolean isEqual(IndexValue other) {
+        return this.equals(other);
+    }
+
+    @Override
+    public int hashValue() {
+        return this.hashCode();
     }
 
     @Override

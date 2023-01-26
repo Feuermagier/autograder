@@ -5,7 +5,7 @@ import spoon.reflect.code.CtExpression;
 
 import java.util.Optional;
 
-public class UnknownValue implements Value {
+public class UnknownValue implements Value, IndexValue {
     /**
      * Creates a new UnknownValue.
      */
@@ -18,6 +18,16 @@ public class UnknownValue implements Value {
         return Optional.empty();
     }
 
+
+    @Override
+    public boolean isEqual(IndexValue other) {
+        return this.equals(other);
+    }
+
+    @Override
+    public int hashValue() {
+        return this.hashCode();
+    }
 
     // NOTE: default equals and hashCode are ideal for this class
 }

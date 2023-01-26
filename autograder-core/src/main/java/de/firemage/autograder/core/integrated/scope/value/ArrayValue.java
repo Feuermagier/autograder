@@ -14,9 +14,9 @@ import java.util.Optional;
 
 public final class ArrayValue implements Value {
     private Value defaultValue;
-    private final Map<? super Value, Value> values;
+    private final Map<IndexValueWrapper, Value> values;
 
-    private ArrayValue(Value defaultValue, Map<? super Value, Value> values) {
+    private ArrayValue(Value defaultValue, Map<IndexValueWrapper, Value> values) {
         this.defaultValue = defaultValue;
         this.values = values;
     }
@@ -37,20 +37,18 @@ public final class ArrayValue implements Value {
 
         CtLiteral<?> defaultValue = SpoonUtil.getDefaultValue(arrayType.getArrayType());
 
-        Map<Value, Value> values = new HashMap<>();
+        Map<IndexValueWrapper, Value> values = new HashMap<>();
         int i = 0;
         for (CtExpression<?> expression : ctNewArray.getElements()) {
-            Value index = VariableValue.fromInteger(i);
-            Value value = VariableValue.fromExpression(expression);
-            values.put(index, value);
+            values.put(new IndexValueWrapper(VariableValue.fromInteger(i)), VariableValue.fromExpression(expression));
             i += 1;
         }
 
         return new ArrayValue(VariableValue.fromLiteral(defaultValue), values);
     }
 
-    public void set(Value index, Value value) {
-        this.values.put(index, value);
+    public void set(IndexValue index, Value value) {
+        this.values.put(new IndexValueWrapper(index), value);
     }
 
     private Value defaultValue() {
@@ -62,9 +60,9 @@ public final class ArrayValue implements Value {
         this.values.clear();
     }
 
-    public Value get(Value index, Scope scope) {
+    public Value get(IndexValue index, Scope scope) {
         // first try to get the value from the map
-        Value potentialValue = this.values.get(index);
+        Value potentialValue = this.values.get(new IndexValueWrapper(index));
         // if it is present, return it
         if (potentialValue != null) {
             return potentialValue;
@@ -74,7 +72,8 @@ public final class ArrayValue implements Value {
         return index.toExpression()
                     .map(scope::resolve)
                     // after it has been resolved, try to get the value again:
-                    .flatMap(resolved -> Optional.ofNullable(this.values.get(resolved)))
+                    .flatMap(
+                        resolved -> Optional.ofNullable(this.values.get(new IndexValueWrapper((IndexValue) resolved))))
                     // .map(value -> new VariableValue(value))
                     // if that is not possible either, return the default value:
                     .orElseGet(this::defaultValue);
