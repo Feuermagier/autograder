@@ -32,6 +32,8 @@ public class ListGetterSetterCheck extends IntegratedCheck {
             @Override
             public void process(CtReturn<?> ret) {
                 CtMethod<?> parentMethod = ret.getParent(CtMethod.class);
+                // parent will be null, if the return is in a constructor.
+                // constructors are not considered methods.
                 if (parentMethod == null || !parentMethod.isPublic() || ret.getReturnedExpression() == null) {
                     return;
                 }
