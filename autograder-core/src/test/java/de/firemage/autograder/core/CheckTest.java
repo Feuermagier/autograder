@@ -36,6 +36,8 @@ public class CheckTest {
                     var expectedProblems = new ArrayList<>(config.stream()
                         .skip(2)
                         .filter(line -> !line.isBlank())
+                        // skip comments
+                        .filter(line -> !line.startsWith("#"))
                         .toList());
 
                     var file = new UploadedFile(path.resolve("code"), JavaVersion.JAVA_17);
