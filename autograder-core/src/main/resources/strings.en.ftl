@@ -61,8 +61,8 @@ javadoc-stub-exp-return = Stub description for return value
 javadoc-stub-exp-throws = Stub description for exception {$exp}
 
 # Complexity
-diamond-desc = Use the 'diamond operator' instead of repeating the generic type: new Foo<>()
-diamond-exp = Use the 'diamond operator'
+diamond-desc = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
+diamond-exp = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
 extends-object-desc = Explicitly extending Object is unnecessary
 extends-object-exp = Unnecessary 'extends Object'
@@ -173,6 +173,9 @@ field-final-exp = The attribute '{$name}' should be final
 string-cmp-desc = Strings must always be compares using the 'equals' method
 string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lhs} == {$rhs}'
 
+do-not-use-raw-types-desc = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
+do-not-use-raw-types-exp = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
@@ -205,6 +208,12 @@ utility-exp-field = Utility classes must only have final fields
 
 static-field-desc = Static fields must be immutable
 static-field-exp = The static field '{$name}' must not be static
+
+constants-class-exp = Constants should be saved in the class they are used in and not in a separate class. See https://stackoverflow.com/a/15056462/7766117
+interface-static-method-exp = Interfaces should not have static methods, because they can not be overwritten.
+interface-static-exp = Interfaces must not be static. The keyword 'static' is redundant and should be removed.
+
+interface-bad-practices-desc = Interfaces are very useful, but not every feature of an interface should be used.
 
 # Structure
 default-package-desc = The default package must not be used

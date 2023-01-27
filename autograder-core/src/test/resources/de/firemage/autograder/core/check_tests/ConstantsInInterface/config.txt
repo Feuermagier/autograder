@@ -1,3 +1,0 @@
-general.ConstantsInInterfaceCheck
-Fields in interfaces are not allowed
-Test.java:6

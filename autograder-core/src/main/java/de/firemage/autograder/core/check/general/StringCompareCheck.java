@@ -10,27 +10,40 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
+import spoon.reflect.code.CtExpression;
 
 import java.util.Map;
 
-@ExecutableCheck(reportedProblems = {ProblemType.STRING_COMPARE_BY_REFERENCE})
+@ExecutableCheck(reportedProblems = { ProblemType.STRING_COMPARE_BY_REFERENCE })
 public class StringCompareCheck extends IntegratedCheck {
     public StringCompareCheck() {
         super(new LocalizedMessage("string-cmp-desc"));
     }
-    
+
+    private static boolean isStringComparison(CtExpression<?> lhs, CtExpression<?> rhs) {
+        return SpoonUtil.isString(lhs.getType()) && !SpoonUtil.isNullLiteral(rhs)
+               || SpoonUtil.isString(rhs.getType()) && !SpoonUtil.isNullLiteral(lhs);
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtBinaryOperator<?>>() {
             @Override
             public void process(CtBinaryOperator<?> operator) {
-                if (operator.getKind() != BinaryOperatorKind.EQ) {
+                if (operator.getKind() != BinaryOperatorKind.EQ && operator.getKind() != BinaryOperatorKind.NE) {
                     return;
                 }
 
-                if (SpoonUtil.isString(operator.getLeftHandOperand().getType())) {
-                    addLocalProblem(operator, new LocalizedMessage("string-cmp-exp", Map.of("lhs", operator.getLeftHandOperand(), "rhs", operator.getRightHandOperand())),
-                        ProblemType.STRING_COMPARE_BY_REFERENCE);
+                CtExpression<?> lhs = operator.getLeftHandOperand();
+                CtExpression<?> rhs = operator.getRightHandOperand();
+
+                if (isStringComparison(lhs, rhs)) {
+                    addLocalProblem(operator, new LocalizedMessage(
+                            "string-cmp-exp",
+                            Map.of("lhs", lhs, "rhs", rhs)
+                        ),
+                        ProblemType.STRING_COMPARE_BY_REFERENCE
+                    );
                 }
             }
         });

@@ -64,8 +64,8 @@ javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
 javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
 
 # Complexity
-diamond-desc = Verwende den 'diamond operator' statt den generischen Typ zu wiederholen: new Foo<>()
-diamond-exp = Verwende den 'diamond operator'
+diamond-desc = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
+diamond-exp = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
 extends-object-desc = Explizit von Object zu erben ist unnötig
 extends-object-exp = Unnötiges 'extends Object'
@@ -172,6 +172,9 @@ field-final-exp = Das Attribut '{$name}' sollte final sein
 string-cmp-desc = Strings müssen immer mit der equals-Methode verglichen werden
 string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Methode verglichen werden: '{$lhs}.equals({$rhs})' statt '{$lhs} == {$rhs}'
 
+do-not-use-raw-types-desc = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
+do-not-use-raw-types-exp = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
@@ -204,6 +207,10 @@ utility-exp-field = Utility-Klassen dürfen ausschließlich finale Attribute hab
 
 static-field-desc = Statische Attribute dürfen nicht verändert werden
 static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut sein
+
+constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
+interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
+interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
 
 # Structure
 
