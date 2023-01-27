@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.integrated.scope;
 
-import akka.util.Index;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.scope.value.ArrayValue;
 import de.firemage.autograder.core.integrated.scope.value.IndexValue;
