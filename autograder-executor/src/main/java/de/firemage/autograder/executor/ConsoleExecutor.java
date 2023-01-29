@@ -73,7 +73,7 @@ public class ConsoleExecutor {
                 if (output == null) {
                     pollAllOutput(containerOut);
                     System.err.println("EXEC:  The child JVM exited unexpectedly");
-                    System.exit(1);
+                    return false;
                 }
                 if (!matchOutput(output, line)) {
                     failed = true;
@@ -130,7 +130,7 @@ public class ConsoleExecutor {
             }
             if (System.currentTimeMillis() - beforeTime > 5000) {
                 System.err.println("EXEC:  Did not receive any output after 5s");
-                System.exit(1);
+                return null;
             }
             if (!process.isAlive()) {
                 return null;

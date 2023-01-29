@@ -64,8 +64,7 @@ public class Application implements Callable<Integer> {
 
     public static void main(String... args) {
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
-        int exitCode = new CommandLine(new Application()).execute(args);
-        System.exit(exitCode);
+        new CommandLine(new Application()).execute(args);
     }
 
     @Override
