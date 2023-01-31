@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.path.CtRole;
 import spoon.reflect.reference.CtTypeReference;
 
 @ExecutableCheck(reportedProblems = { ProblemType.DO_NOT_USE_RAW_TYPES })
@@ -21,6 +22,11 @@ public class DoNotUseRawTypes extends IntegratedCheck {
 
         if (declaration == null) {
             // reference points to a type not in the class-path
+            return false;
+        }
+        
+        if (ctTypeReference.getRoleInParent() == CtRole.DECLARING_TYPE) {
+            // Prevent 'Map' in 'Map.Entry<A, B>' from being reported
             return false;
         }
 

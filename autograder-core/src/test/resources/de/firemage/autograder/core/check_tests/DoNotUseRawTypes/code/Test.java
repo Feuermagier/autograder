@@ -24,5 +24,6 @@ public class Test {
         String s = "Hello World!";
         aList.add(s);
         String c = (String)aList.get(0);
+        for (Map.Entry<String, String> entry : l4.entrySet()) {} // Ok
     }
 }
