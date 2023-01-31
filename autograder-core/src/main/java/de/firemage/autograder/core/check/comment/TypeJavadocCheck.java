@@ -10,6 +10,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
+import spoon.reflect.declaration.CtRecord;
 import spoon.reflect.declaration.CtType;
 
 import java.util.List;
@@ -49,15 +50,19 @@ public class TypeJavadocCheck extends IntegratedCheck {
                     return;
                 }
 
-                checkValidTags(javadoc.get());
+                checkValidTags(javadoc.get(), type);
                 checkValidAuthor(javadoc.get());
             }
         });
     }
 
-    private void checkValidTags(CtJavaDoc javadoc) {
+    private void checkValidTags(CtJavaDoc javadoc, CtType<?> type) {
         for (CtJavaDocTag tag : javadoc.getTags()) {
             if (!VALID_TAGS.contains(tag.getType())) {
+                if (tag.getType() == CtJavaDocTag.TagType.PARAM && type instanceof CtRecord) {
+                    continue;
+                }
+                
                 addLocalProblem(javadoc,
                     new LocalizedMessage("javadoc-type-exp-unexpected-tag", Map.of("tag", tag.getType().getName())),
                     ProblemType.JAVADOC_UNEXPECTED_TAG);

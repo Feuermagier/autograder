@@ -195,7 +195,7 @@ concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine 
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 
 list-getter-desc = Veränderbare Collections müssen in Gettern kopiert werden
-list-getter-exp = Die Collection is veränderbar, wird aber nicht kopiert
+list-getter-exp = Die Collection ist veränderbar, wird aber nicht kopiert
 
 method-abstract-desc = Leere Methoden in abstrakten Klassen sollten abstrakt sein
 method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben

@@ -20,8 +20,8 @@ public final class ExceptionUtil {
         "java.lang.EnumConstantNotPresentException",
         "java.lang.IllegalStateException",
         "java.lang.UnsupportedOperationException",
-        "java.lang.IndexOutOfBoundsException"
-        
+        "java.lang.IndexOutOfBoundsException",
+        "java.lang.StringIndexOutOfBoundsException"
     );
     
     private static final Set<String> ERRORS = Set.of(
