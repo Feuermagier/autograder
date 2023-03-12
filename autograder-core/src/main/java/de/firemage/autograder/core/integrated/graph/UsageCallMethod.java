@@ -21,11 +21,11 @@ public final class UsageCallMethod extends Usage {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         UsageCallMethod that = (UsageCallMethod) o;
-        return method.equals(that.method);
+        return this.getStart().equals(that.getStart()) && this.getEnd().equals(that.getEnd());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), method);
+        return Objects.hash(super.hashCode(), this.getStart(), this.getEnd());
     }
 }

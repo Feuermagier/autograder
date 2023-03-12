@@ -21,11 +21,11 @@ public final class UsageCreateInstance extends Usage {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         UsageCreateInstance that = (UsageCreateInstance) o;
-        return constructor.equals(that.constructor);
+        return this.getStart().equals(that.getStart()) && this.getEnd().equals(that.getEnd());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), constructor);
+        return Objects.hash(super.hashCode(), this.getStart(), this.getEnd());
     }
 }

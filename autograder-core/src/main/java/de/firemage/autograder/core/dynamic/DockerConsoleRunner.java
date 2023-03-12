@@ -57,7 +57,7 @@ public class DockerConsoleRunner implements TestRunner {
 
     public List<TestRunResult> runTests(StaticAnalysis analysis, Path jar, Consumer<LinterStatus> statusConsumer)
         throws RunnerException, InterruptedException {
-        String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
+        String mainClass = analysis.getCodeModel().findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
         statusConsumer.accept(LinterStatus.BUILDING_DOCKER_IMAGE);
 

@@ -3,8 +3,6 @@ package de.firemage.autograder.core;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.general.CopyPasteCheck;
-import de.firemage.autograder.core.compiler.CompilationResult;
-import de.firemage.autograder.core.compiler.Compiler;
 import de.firemage.autograder.core.cpd.CPDLinter;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.IntegratedAnalysis;
@@ -26,7 +24,6 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.function.Consumer;
 
 public class Linter {
@@ -48,23 +45,20 @@ public class Linter {
         }
     }
 
-    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<ProblemType> problemsToReport,
+    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
+                                   List<ProblemType> problemsToReport,
                                    Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)
         throws LinterException, IOException, InterruptedException {
-        return this.checkFile(file, tmpLocation, tests, problemsToReport, findChecksForProblemTypes(problemsToReport),
+        return this.checkFile(file, tmpLocation, tests, problemsToReport,
+            findChecksForProblemTypes(problemsToReport),
             statusConsumer, disableDynamicAnalysis);
     }
 
-    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests, List<ProblemType> problemsToReport,
+    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
+                                   List<ProblemType> problemsToReport,
                                    List<Check> checks, Consumer<LinterStatus> statusConsumer,
                                    boolean disableDynamicAnalysis)
         throws LinterException, InterruptedException, IOException {
-
-        statusConsumer.accept(LinterStatus.COMPILING);
-        Optional<CompilationResult> compilationResult = Compiler.compileToJar(file, tmpLocation, file.getVersion());
-        if (compilationResult.isEmpty()) {
-            return List.of();
-        }
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
@@ -99,21 +93,17 @@ public class Linter {
 
         if (!spotbugsChecks.isEmpty()) {
             statusConsumer.accept(LinterStatus.RUNNING_SPOTBUGS);
-            problems.addAll(new SpotbugsLinter().lint(compilationResult.get().jar(), spotbugsChecks));
+            problems.addAll(new SpotbugsLinter().lint(file.getCompilationResult().jar(), spotbugsChecks));
         }
 
         if (!integratedChecks.isEmpty()) {
-            try (
-                IntegratedAnalysis analysis = new IntegratedAnalysis(file, compilationResult.get().jar(), tmpLocation,
-                    statusConsumer)) {
-                if (!disableDynamicAnalysis) {
-                    analysis.runDynamicAnalysis(tests, statusConsumer);
-                }
-                problems.addAll(analysis.lint(integratedChecks, statusConsumer));
+            IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
+            if (!disableDynamicAnalysis) {
+                analysis.runDynamicAnalysis(tests, statusConsumer);
             }
+            problems.addAll(analysis.lint(integratedChecks, statusConsumer));
         }
 
-        compilationResult.get().jar().toFile().delete();
         if (problemsToReport.isEmpty()) {
             return problems;
         } else {

@@ -25,11 +25,11 @@ public final class UsageField extends Usage {
         if (o == null || getClass() != o.getClass()) return false;
         if (!super.equals(o)) return false;
         UsageField that = (UsageField) o;
-        return field.equals(that.field);
+        return this.getStart().equals(that.getStart()) && this.getEnd().equals(that.getEnd());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), field);
+        return Objects.hash(super.hashCode(), this.getStart(), this.getEnd());
     }
 }

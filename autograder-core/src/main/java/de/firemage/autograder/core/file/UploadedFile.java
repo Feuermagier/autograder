@@ -1,92 +1,67 @@
 package de.firemage.autograder.core.file;
 
+import de.firemage.autograder.core.CodeModel;
+import de.firemage.autograder.core.LinterStatus;
+import de.firemage.autograder.core.SourceInfo;
+import de.firemage.autograder.core.compiler.CompilationFailureException;
+import de.firemage.autograder.core.compiler.CompilationResult;
+import de.firemage.autograder.core.compiler.Compiler;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import lombok.Getter;
-import lombok.extern.slf4j.Slf4j;
-import net.sourceforge.pmd.util.datasource.FileDataSource;
-import org.apache.commons.io.FileUtils;
-import org.mozilla.universalchardet.UniversalDetector;
-import spoon.support.compiler.FileSystemFolder;
+import de.firemage.autograder.core.integrated.ModelBuildException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.charset.Charset;
-import java.nio.charset.StandardCharsets;
-import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Stream;
+import java.util.function.Consumer;
 
-@Slf4j
-public class UploadedFile {
+public class UploadedFile implements AutoCloseable {
+    private static final Logger LOG = LoggerFactory.getLogger(UploadedFile.class);
 
-    private final Path file;
+    private final CodeModel model;
+    private final SourceInfo source;
+    private final CompilationResult compilationResult;
 
-    @Getter
-    private final JavaVersion version;
-    
-    @Getter
-    private final Charset charset;
+    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult) {
+        this.model = model;
+        this.source = source;
+        this.compilationResult = compilationResult;
+    }
 
-    public UploadedFile(Path file, JavaVersion version) throws IOException {
-        if (!file.toFile().isDirectory()) {
-            throw new IllegalArgumentException("The file must be a directory");
+    public static UploadedFile build(Path file, JavaVersion version, Path tmpLocation,
+                                     Consumer<LinterStatus> statusConsumer)
+        throws IOException,
+        ModelBuildException, CompilationFailureException {
+        var source = new SourceInfo(file, version);
+
+        statusConsumer.accept(LinterStatus.COMPILING);
+        Optional<CompilationResult> compilationResult = Compiler.compileToJar(source, tmpLocation, source.getVersion());
+        if (compilationResult.isEmpty()) {
+            return null;
         }
 
-        this.file = file;
-        this.version = version;
-        
-        Charset detectedCharset = null;
-        for (File javaFile : this.getJavaFiles()) {
-            String fileCharsetName = UniversalDetector.detectCharset(javaFile);
-            if (fileCharsetName == null) {
-                continue;
-            }
-            Charset fileCharset = Charset.forName(fileCharsetName);
-            if (!fileCharset.equals(StandardCharsets.US_ASCII)) {
-                if (detectedCharset != null && !fileCharset.equals(detectedCharset)) {
-                    throw new IOException("Java files with incompatible encodings found - some are " + detectedCharset + ", but others are " + fileCharset);
-                } else {
-                    detectedCharset = fileCharset;
-                }
-            }
-        }
-        this.charset = Objects.requireNonNullElse(detectedCharset, StandardCharsets.UTF_8);
+        statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
+        var model = CodeModel.buildFor(source, compilationResult.get().jar());
+
+        return new UploadedFile(model, source, compilationResult.get());
     }
 
-    public Path getFile() {
-        return file.toAbsolutePath();
+    public SourceInfo getSource() {
+        return this.source;
     }
 
-    public List<File> getJavaFiles() throws IOException {
-        return streamFiles().toList();
+    public CompilationResult getCompilationResult() {
+        return compilationResult;
     }
 
-    public Stream<File> streamFiles() throws IOException {
-        return Files.walk(this.file)
-                .filter(p -> p.toString().endsWith(".java"))
-                .filter(p -> !p.toString().endsWith("package-info.java"))
-                .map(Path::toFile);
+    public CodeModel getModel() {
+        return model;
     }
 
-    public FileSystemFolder getSpoonFile() {
-        return new FileSystemFolder(this.file.toFile());
-    }
-
-    public List<FileDataSource> getPMDFiles() throws IOException {
-        return Files.walk(this.file)
-                .filter(p -> p.toString().endsWith(".java"))
-                .map(p -> new FileDataSource(p.toFile()))
-                .toList();
-    }
-
-    public String getName() {
-        return this.file.getFileName().toString();
-    }
-
-    public void delete() throws IOException {
-        FileUtils.deleteDirectory(this.file.toFile());
+    @Override
+    public void close() throws Exception {
+        this.model.close();
+        this.compilationResult.jar().toFile().delete();
     }
 }

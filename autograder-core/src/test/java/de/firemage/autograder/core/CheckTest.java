@@ -40,13 +40,15 @@ public class CheckTest {
                         .filter(line -> !line.startsWith("#"))
                         .toList());
 
-                    var file = new UploadedFile(path.resolve("code"), JavaVersion.JAVA_17);
+                    var tmpDirectory = Files.createTempDirectory(null);
+                    
+                    var file = UploadedFile.build(path.resolve("code"), JavaVersion.JAVA_17, tmpDirectory, status -> {});
                     var linter = new Linter(Locale.US);
 
                     var problems =
                         linter.checkFile(
                             file,
-                            Files.createTempDirectory(null),
+                            tmpDirectory,
                             path.resolve("tests"),
                             List.of(),
                             List.of(check),

@@ -7,11 +7,14 @@ import de.firemage.autograder.cmd.output.Annotation;
 import de.firemage.autograder.core.InCodeProblem;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.UploadedFile;
+import de.firemage.autograder.core.visualize.dot.DotGraph;
+import de.firemage.autograder.core.visualize.structure.StructureVisualizer;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -27,10 +30,12 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Callable;
+import java.util.function.Consumer;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
     description = "Static code analysis for student java code")
@@ -70,7 +75,6 @@ public class Application implements Callable<Integer> {
 
     @Override
     public Integer call() {
-
         if (!JavaVersion.isValidJavaVersion(javaVersion)) {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
@@ -109,14 +113,16 @@ public class Application implements Callable<Integer> {
         }
 
         Linter linter = new Linter(Locale.GERMANY);
+        Consumer<LinterStatus> statusConsumer = status ->
+            System.out.println(linter.translateMessage(status.getMessage()));
 
         try {
-            UploadedFile uploadedFile = new UploadedFile(file, JavaVersion.fromString(this.javaVersion));
-
+            UploadedFile uploadedFile = UploadedFile.build(file,
+                JavaVersion.fromString(this.javaVersion), getTmpDirectory(), statusConsumer);
+            
             if (outputJson) {
                 List<Problem> problems =
-                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks,
-                        status -> System.out.println(linter.translateMessage(status.getMessage())), !dynamic);
+                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
                 System.out.println(">> Problems <<");
                 printProblemsAsJson(problems, linter);
             } else {
@@ -124,8 +130,7 @@ public class Application implements Callable<Integer> {
                 ProgressAnimation progress = new ProgressAnimation("Checking...");
                 progress.start();
                 List<Problem> problems =
-                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks,
-                        status -> progress.updateText(linter.translateMessage(status.getMessage())), !dynamic);
+                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
                 progress.finish("Completed checks");
 
                 printProblems(problems, linter);

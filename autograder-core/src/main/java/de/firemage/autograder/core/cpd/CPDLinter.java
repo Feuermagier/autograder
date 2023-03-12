@@ -20,9 +20,9 @@ public class CPDLinter {
             cpdConfig.setLanguage(new JavaLanguage());
             cpdConfig.setMinimumTileSize(check.getTokenCount());
             CPD cpd = new CPD(cpdConfig);
-            cpd.add(file.getJavaFiles());
+            cpd.add(file.getSource().getJavaFiles());
             cpd.go();
-            cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getFile())));
+            cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getSource().getFile())));
         }
         return problems;
     }

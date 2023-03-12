@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated.graph;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import org.jgrapht.Graph;
 import org.jgrapht.graph.DirectedMultigraph;
@@ -14,6 +15,7 @@ import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.path.CtRole;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.io.FileWriter;
@@ -27,48 +29,50 @@ public class GraphBuilder {
         this.includeJDK = includeJDK;
     }
 
-    public Graph<CtTypeReference<?>, Usage> buildGraph(StaticAnalysis analysis) {
+    public Graph<CtTypeReference<?>, Usage> buildGraph(CodeModel model) {
         Graph<CtTypeReference<?>, Usage> graph = new DirectedMultigraph<>(Usage.class);
-
-        analysis.processWith(new AbstractProcessor<CtType<?>>() {
-            @Override
-            public void process(CtType<?> type) {
-                createVertex(type.getReference(), graph);
-
-                for (CtField<?> field : type.getFields()) {
-                    addField(type.getReference(), field, graph);
-                }
-
-                type.filterChildren(CtInvocation.class::isInstance).forEach((CtInvocation<?> i) -> {
-                    var executable = i.getExecutable().getExecutableDeclaration();
-                    if (executable instanceof CtMethod<?> method) {
-                        addMethodCall(type.getReference(), method, graph);
-                    } else if (executable instanceof CtConstructor<?> constructor) {
-                        addInstanceCreation(type.getReference(), constructor, graph);
-                    } else {
-                        throw new IllegalStateException(executable.getClass().getSimpleName());
-                    }
-                });
-
-                type.filterChildren(CtConstructorCall.class::isInstance).forEach((CtConstructorCall<?> c) -> {
-                    var executable = c.getExecutable().getExecutableDeclaration();
-                    if (executable instanceof CtConstructor<?> constructor) {
-                        addInstanceCreation(type.getReference(), constructor, graph);
-                    } else {
-                        throw new IllegalStateException(executable.getClass().getSimpleName());
-                    }
-                });
-
-                type.filterChildren(CtFieldAccess.class::isInstance).forEach((CtFieldAccess<?> a) -> {
-                    var field = a.getVariable().getFieldDeclaration();
-                    if (field == null) {
-                        // e.g. for array.length
-                        return;
-                    }
-                    addFieldAccess(type.getReference(), field, graph);
-                });
+        
+        model.getModel().getAllTypes().forEach(type -> {
+            if (type.getRoleInParent() == CtRole.TYPE_PARAMETER) {
+                return;
             }
+
+            createVertex(type.getReference(), graph);
+
+            for (CtField<?> field : type.getFields()) {
+                addField(type.getReference(), field, graph);
+            }
+
+            type.filterChildren(CtInvocation.class::isInstance).forEach((CtInvocation<?> i) -> {
+                var executable = i.getExecutable().getExecutableDeclaration();
+                if (executable instanceof CtMethod<?> method) {
+                    addMethodCall(type.getReference(), method, graph);
+                } else if (executable instanceof CtConstructor<?> constructor) {
+                    addInstanceCreation(type.getReference(), constructor, graph);
+                } else {
+                    throw new IllegalStateException(executable.getClass().getSimpleName());
+                }
+            });
+
+            type.filterChildren(CtConstructorCall.class::isInstance).forEach((CtConstructorCall<?> c) -> {
+                var executable = c.getExecutable().getExecutableDeclaration();
+                if (executable instanceof CtConstructor<?> constructor) {
+                    addInstanceCreation(type.getReference(), constructor, graph);
+                } else {
+                    throw new IllegalStateException(executable.getClass().getSimpleName());
+                }
+            });
+
+            type.filterChildren(CtFieldAccess.class::isInstance).forEach((CtFieldAccess<?> a) -> {
+                var field = a.getVariable().getFieldDeclaration();
+                if (field == null) {
+                    // e.g. for array.length
+                    return;
+                }
+                addFieldAccess(type.getReference(), field, graph);
+            });
         });
+        
         //var sets = new ConnectivityInspector<>(graph).connectedSets();
         return graph;
     }
@@ -84,7 +88,7 @@ public class GraphBuilder {
         CtTypeReference<?> target = method.getDeclaringType().getReference();
         if (includeType(start) && includeType(target) && !start.equals(target)) {
             createVertex(target, graph);
-            graph.addEdge(start, target, new UsageCallMethod(start, target, method));
+            addEdge(start, target, new UsageCallMethod(start, target, method), graph);
         }
     }
 
@@ -97,7 +101,7 @@ public class GraphBuilder {
                                              Graph<CtTypeReference<?>, Usage> graph) {
         if (includeType(start) && includeType(type) && !start.equals(type)) {
             createVertex(type, graph);
-            graph.addEdge(start, type, new UsageField(start, type, field, index));
+            addEdge(start, type, new UsageField(start, type, field, index), graph);
         }
         for (CtTypeReference<?> parameter : type.getActualTypeArguments()) {
             addReferenceViaField(start, field, parameter, index + 1, graph);
@@ -109,7 +113,7 @@ public class GraphBuilder {
         CtTypeReference<?> target = constructor.getDeclaringType().getReference();
         if (includeType(start) && includeType(target) && !start.equals(target)) {
             createVertex(target, graph);
-            graph.addEdge(start, target, new UsageCreateInstance(start, target, constructor));
+            addEdge(start, target, new UsageCreateInstance(start, target, constructor), graph);
         }
     }
 
@@ -118,7 +122,14 @@ public class GraphBuilder {
         CtTypeReference<?> target = field.getDeclaringType().getReference();
         if (includeType(start) && includeType(target) && !start.equals(target)) {
             createVertex(target, graph);
-            graph.addEdge(start, target, new UsageAccessField(start, target, field));
+            addEdge(start, target, new UsageAccessField(start, target, field), graph);
+        }
+    }
+    
+    private void addEdge(CtTypeReference<?> start, CtTypeReference<?> end, Usage usage,
+                         Graph<CtTypeReference<?>, Usage> graph) {
+        if (!graph.containsEdge(usage)) {
+            graph.addEdge(start, end, usage);
         }
     }
 

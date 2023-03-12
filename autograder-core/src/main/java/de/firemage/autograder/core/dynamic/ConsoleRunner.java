@@ -35,7 +35,7 @@ public class ConsoleRunner implements TestRunner {
         try (Stream<Path> files = Files.list(this.tests)) {
             testCases = files.filter(Files::isRegularFile).toList();
         }
-        String mainClass = analysis.findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
+        String mainClass = analysis.getCodeModel().findMain().getParent(CtClass.class).getQualifiedName().replace(".", "/");
 
         List<List<Event>> events = new ArrayList<>();
         for (Path testPath : testCases) {

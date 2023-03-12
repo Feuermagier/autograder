@@ -8,11 +8,9 @@ import de.firemage.autograder.core.dynamic.RunnerException;
 import de.firemage.autograder.core.dynamic.TestRunResult;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.graph.GraphAnalysis;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.io.File;
 import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
@@ -26,25 +24,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class IntegratedAnalysis implements AutoCloseable {
+public class IntegratedAnalysis {
     private static final Logger logger = LoggerFactory.getLogger(IntegratedAnalysis.class);
 
     private final UploadedFile file;
-    private final Path jar;
     private final Path tmpPath;
     private final Map<String, FileSystem> openFileSystems = new HashMap<>();
     private final StaticAnalysis staticAnalysis;
     private final GraphAnalysis graphAnalysis;
     private DynamicAnalysis dynamicAnalysis;
 
-    public IntegratedAnalysis(UploadedFile file, Path jar, Path tmpPath, Consumer<LinterStatus> statusConsumer)
-        throws ModelBuildException, IOException {
+    public IntegratedAnalysis(UploadedFile file, Path tmpPath) {
         this.file = file;
-        this.jar = jar;
         this.tmpPath = tmpPath;
 
-        this.staticAnalysis = new StaticAnalysis(file, jar, statusConsumer);
-        this.graphAnalysis = new GraphAnalysis(this.staticAnalysis);
+        this.staticAnalysis = new StaticAnalysis(file.getModel());
+        this.graphAnalysis = new GraphAnalysis(this.staticAnalysis.getCodeModel());
         this.dynamicAnalysis = new DynamicAnalysis(List.of());
 
     }
@@ -52,8 +47,10 @@ public class IntegratedAnalysis implements AutoCloseable {
     public void runDynamicAnalysis(Path tests, Consumer<LinterStatus> statusConsumer)
         throws RunnerException, InterruptedException {
         try {
-            DockerConsoleRunner runner = new DockerConsoleRunner(toPath(this.getClass().getResource("/executor.jar")), toPath(this.getClass().getResource("/agent.jar")), tests, this.tmpPath);
-            List<TestRunResult> results = runner.runTests(this.staticAnalysis, this.jar, statusConsumer);
+            DockerConsoleRunner runner = new DockerConsoleRunner(toPath(this.getClass().getResource("/executor.jar")),
+                toPath(this.getClass().getResource("/agent.jar")), tests, this.tmpPath);
+            List<TestRunResult> results =
+                runner.runTests(this.staticAnalysis, this.file.getCompilationResult().jar(), statusConsumer);
             this.dynamicAnalysis = new DynamicAnalysis(results);
         } catch (URISyntaxException | IOException e) {
             throw new RunnerException(e);
@@ -102,7 +99,7 @@ public class IntegratedAnalysis implements AutoCloseable {
         statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
         List<Problem> problems = new ArrayList<>();
         for (IntegratedCheck check : checks) {
-            problems.addAll(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getFile()));
+            problems.addAll(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getSource().getFile()));
         }
 
         return problems;
@@ -114,10 +111,5 @@ public class IntegratedAnalysis implements AutoCloseable {
 
     public DynamicAnalysis getDynamicAnalysis() {
         return dynamicAnalysis;
-    }
-
-    @Override
-    public void close() throws IOException {
-        this.staticAnalysis.close();
     }
 }

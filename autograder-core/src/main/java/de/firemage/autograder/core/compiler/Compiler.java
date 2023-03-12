@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.compiler;
 
+import de.firemage.autograder.core.SourceInfo;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.apache.commons.io.FileUtils;
 
@@ -31,12 +32,12 @@ public final class Compiler {
     private Compiler() {
     }
 
-    public static Optional<CompilationResult> compileToJar(UploadedFile input, Path tmpLocation, JavaVersion javaVersion)
+    public static Optional<CompilationResult> compileToJar(SourceInfo input, Path tmpLocation, JavaVersion javaVersion)
         throws IOException, CompilationFailureException {
         return compileWithEncoding(input, tmpLocation, javaVersion, input.getCharset());
     }
 
-    public static Optional<CompilationResult> compileWithEncoding(UploadedFile input, Path tmpLocation, JavaVersion javaVersion,
+    public static Optional<CompilationResult> compileWithEncoding(SourceInfo input, Path tmpLocation, JavaVersion javaVersion,
                                                                   Charset charset)
         throws IOException, CompilationFailureException {
 

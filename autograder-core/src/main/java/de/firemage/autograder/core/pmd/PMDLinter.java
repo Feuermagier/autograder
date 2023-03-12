@@ -22,7 +22,7 @@ public class PMDLinter {
         config.setMinimumPriority(RulePriority.LOW);
         config.setIgnoreIncrementalAnalysis(true);
         config.setReportShortNames(true);
-        config.setDefaultLanguageVersion(LanguageRegistry.findLanguageByTerseName("java").getVersion(file.getVersion().getVersionString()));
+        config.setDefaultLanguageVersion(LanguageRegistry.findLanguageByTerseName("java").getVersion(file.getSource().getVersion().getVersionString()));
 
         Map<String, PMDCheck> idMap = new HashMap<>();
         List<Rule> rules = new ArrayList<>();
@@ -37,12 +37,12 @@ public class PMDLinter {
             }
         }
 
-        ProblemRenderer renderer = new ProblemRenderer(idMap, file.getFile());
+        ProblemRenderer renderer = new ProblemRenderer(idMap, file.getSource().getFile());
 
         try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
             pmd.addRuleSet(RuleSet.create("Autograder Configuration (Generated)", "", null, List.of(), List.of(), rules));
             pmd.addRenderer(renderer);
-            pmd.files().addDirectory(file.getFile());
+            pmd.files().addDirectory(file.getSource().getFile());
             pmd.performAnalysis();
         }
 

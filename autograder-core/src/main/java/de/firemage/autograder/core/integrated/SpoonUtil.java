@@ -240,4 +240,13 @@ public final class SpoonUtil {
                                                   write.getVariable().equals(field.getReference()))
                              .first() == null;
     }
+
+    public static boolean isMainMethod(CtMethod<?> method) {
+        return method.getSimpleName().equals("main")
+            && method.getType().getQualifiedName().equals("void")
+            && method.isStatic()
+            && method.isPublic()
+            && method.getParameters().size() == 1
+            && method.getParameters().get(0).getType().getQualifiedName().equals("java.lang.String[]");
+    }
 }
