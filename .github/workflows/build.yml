@@ -49,3 +49,10 @@ jobs:
           name: autograder-cmd
           path: autograder-cmd/target/autograder-cmd.jar
           if-no-files-found: error
+
+      # Release only when pushing to a tag
+      - uses: actions/checkout@v3
+        if: startsWith(github.ref, 'refs/tags/')
+        with:
+          body: 'Minor Release (mostly for the automatic download of the jar file)'
+          files: autograder-cmd/target/autograder-cmd.jar
