@@ -37,7 +37,7 @@ public class Linter {
         };
         try {
             FluentResource resource = FTLParser.parse(FTLStream.of(
-                new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
+                    new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
             ));
             this.fluentBundle = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE).addResource(resource).build();
         } catch (IOException e) {
@@ -48,17 +48,17 @@ public class Linter {
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
                                    List<ProblemType> problemsToReport,
                                    Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)
-        throws LinterException, IOException, InterruptedException {
+            throws LinterException, IOException, InterruptedException {
         return this.checkFile(file, tmpLocation, tests, problemsToReport,
-            findChecksForProblemTypes(problemsToReport),
-            statusConsumer, disableDynamicAnalysis);
+                findChecksForProblemTypes(problemsToReport),
+                statusConsumer, disableDynamicAnalysis);
     }
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
                                    List<ProblemType> problemsToReport,
                                    List<Check> checks, Consumer<LinterStatus> statusConsumer,
                                    boolean disableDynamicAnalysis)
-        throws LinterException, InterruptedException, IOException {
+            throws LinterException, InterruptedException, IOException {
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
@@ -123,17 +123,17 @@ public class Linter {
     private List<Check> findChecksForProblemTypes(List<ProblemType> problems) {
         Reflections reflections = new Reflections("de.firemage.autograder.core.check");
         return reflections.getTypesAnnotatedWith(ExecutableCheck.class).stream()
-            .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
-            .map(c -> {
-                try {
-                    return (Check) c.getConstructor().newInstance();
-                } catch (ReflectiveOperationException e) {
-                    throw new IllegalStateException("Failed to instantiate check " + c.getName(), e);
-                } catch (ClassCastException e) {
-                    throw new IllegalStateException(c.getName() + " does not inherit from Check");
-                }
-            })
-            .toList();
+                .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
+                .map(c -> {
+                    try {
+                        return (Check) c.getConstructor().newInstance();
+                    } catch (ReflectiveOperationException e) {
+                        throw new IllegalStateException("Failed to instantiate check " + c.getName(), e);
+                    } catch (ClassCastException e) {
+                        throw new IllegalStateException(c.getName() + " does not inherit from Check");
+                    }
+                })
+                .toList();
     }
 
     private boolean isRequiredCheck(ExecutableCheck check, List<ProblemType> problems) {
