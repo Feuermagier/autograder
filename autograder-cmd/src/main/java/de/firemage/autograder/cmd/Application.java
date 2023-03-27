@@ -38,7 +38,7 @@ import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
-    description = "Static code analysis for student java code")
+        description = "Static code analysis for student java code")
 public class Application implements Callable<Integer> {
     private static final int IO_EXIT_CODE = 3;
     private static final int COMPILATION_EXIT_CODE = 4;
@@ -55,13 +55,13 @@ public class Application implements Callable<Integer> {
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
     @Option(names = {"-s",
-        "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
+            "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
     private boolean staticOnly;
     @Option(names = {
-        "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
+            "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
     private boolean artemisFolders;
     @Option(names = {
-        "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
+            "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
     private boolean outputJson;
 
     @Spec
@@ -82,11 +82,11 @@ public class Application implements Callable<Integer> {
         if (artemisFolders) {
             try {
                 file = Files.list(file)
-                    .filter(child -> !child.endsWith(".metadata"))
-                    .findAny()
-                    .orElseThrow(() -> new IllegalStateException("No student code found"))
-                    .resolve("assignment")
-                    .resolve("src");
+                        .filter(child -> !child.endsWith(".metadata"))
+                        .findAny()
+                        .orElseThrow(() -> new IllegalStateException("No student code found"))
+                        .resolve("assignment")
+                        .resolve("src");
             } catch (IOException e) {
                 e.printStackTrace();
                 return IO_EXIT_CODE;
@@ -114,15 +114,15 @@ public class Application implements Callable<Integer> {
 
         Linter linter = new Linter(Locale.GERMANY);
         Consumer<LinterStatus> statusConsumer = status ->
-            System.out.println(linter.translateMessage(status.getMessage()));
+                System.out.println(linter.translateMessage(status.getMessage()));
 
         try {
             UploadedFile uploadedFile = UploadedFile.build(file,
-                JavaVersion.fromString(this.javaVersion), getTmpDirectory(), statusConsumer);
-            
+                    JavaVersion.fromString(this.javaVersion), getTmpDirectory(), statusConsumer);
+
             if (outputJson) {
                 List<Problem> problems =
-                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
+                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
                 System.out.println(">> Problems <<");
                 printProblemsAsJson(problems, linter);
             } else {
@@ -130,7 +130,7 @@ public class Application implements Callable<Integer> {
                 ProgressAnimation progress = new ProgressAnimation("Checking...");
                 progress.start();
                 List<Problem> problems =
-                    linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
+                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
                 progress.finish("Completed checks");
 
                 printProblems(problems, linter);
@@ -172,8 +172,8 @@ public class Application implements Callable<Integer> {
                 if (p instanceof InCodeProblem inCodeProblem) {
                     var position = inCodeProblem.getPosition();
                     return Optional.of(new Annotation(inCodeProblem.getProblemType(),
-                        linter.translateMessage(inCodeProblem.getExplanation()),
-                        position.file().toString().replace("\\", "/"), position.startLine(), position.endLine()));
+                            linter.translateMessage(inCodeProblem.getExplanation()),
+                            position.file().toString().replace("\\", "/"), position.startLine(), position.endLine()));
                 } else {
                     return Optional.empty();
                 }
@@ -186,8 +186,8 @@ public class Application implements Callable<Integer> {
 
     private String formatProblem(Problem problem, Linter linter) {
         return String.format("%s %s (Source: %s)",
-            problem.getDisplayLocation(),
-            linter.translateMessage(problem.getExplanation()),
-            linter.translateMessage(problem.getCheck().getLinter()));
+                problem.getDisplayLocation(),
+                linter.translateMessage(problem.getExplanation()),
+                linter.translateMessage(problem.getCheck().getLinter()));
     }
 }
