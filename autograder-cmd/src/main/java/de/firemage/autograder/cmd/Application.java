@@ -23,10 +23,7 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
-import java.io.FileDescriptor;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.PrintStream;
+import java.io.*;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -47,22 +44,32 @@ public class Application implements Callable<Integer> {
     private static final int CAPTION_LENGTH = 20;
 
     @Parameters(index = "0", description = "The check configuration.")
-    private Path checkConfig;
+    private String checkConfig;
+
     @Parameters(index = "1", description = "The root folder which contains the files to check.")
     private Path file;
+
     @Parameters(index = "2", defaultValue = "", description = "The root folder which contains the tests to run. If not provided or empty, no tests will be run.")
     private Path tests;
+
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
+
     @Option(names = {"-s",
             "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
     private boolean staticOnly;
+
     @Option(names = {
             "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
     private boolean artemisFolders;
+
     @Option(names = {
             "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
     private boolean outputJson;
+
+    @Option(names = {
+            "--pass-config"}, description = "Interpret the first parameter not as the path to a config file, but as the contents of the config file")
+    private boolean passConfig;
 
     @Spec
     private CommandSpec spec;
@@ -104,9 +111,12 @@ public class Application implements Callable<Integer> {
         }
 
         List<ProblemType> checks;
-
         try {
-            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig.toFile(), ProblemType[].class));
+            if (passConfig) {
+                checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig, ProblemType[].class));
+            } else {
+                checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(new File(checkConfig), ProblemType[].class));
+            }
         } catch (IOException e) {
             e.printStackTrace();
             return IO_EXIT_CODE;
