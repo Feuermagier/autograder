@@ -63,7 +63,8 @@ public class ListGetterSetterCheck extends IntegratedCheck {
             || name.equals("java.util.Set")
             || name.equals("java.util.HashSet")
             || name.equals("java.util.LinkedHashSet")
-            || name.equals("java.util.TreeSet");
+            || name.equals("java.util.TreeSet")
+            || name.equals("java.util.NavigableMap");
         // TODO add more collections / implement an inheritance solver
     }
 

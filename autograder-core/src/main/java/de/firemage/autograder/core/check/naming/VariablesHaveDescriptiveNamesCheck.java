@@ -23,6 +23,8 @@ import java.util.Set;
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
 
+    private static final Set<String> ALLOWED_OBJ_NAMES_IN_EQUALS = Set.of("o", "obj", "other", "object");
+
     public VariablesHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("variable-name-desc"));
     }
@@ -37,10 +39,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (variable.getSimpleName().equals("o")
+                if (ALLOWED_OBJ_NAMES_IN_EQUALS.contains(variable.getSimpleName())
                     && variable.getParent() instanceof CtMethod<?> method
                     && (SpoonUtil.isEqualsMethod(method) || SpoonUtil.isCompareToMethod(method))) {
-                    // The parameter of the equals and compareTo methods may be named "o"
+                    // The parameter of the equals and compareTo methods may be named "o", "obj", ...
                     return;
                 }
 
