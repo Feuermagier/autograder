@@ -28,7 +28,7 @@ interface MyInterfaceWithStaticMethod {
     static void doesSomething2() {} // Not Ok
 }
 
-interface Bar {
+interface Bar { // Not Ok
 }
 
 interface Foo {

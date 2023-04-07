@@ -12,9 +12,13 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 
 import java.util.Map;
+import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {ProblemType.CONSTANT_NOT_STATIC_OR_NOT_UPPER_CAMEL_CASE})
 public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
+    private static final Set<String> IGNORE_FIELDS = Set.of("serialVersionUID");
+
+
     public ConstantNamingAndQualifierCheck() {
         super(new LocalizedMessage("constant-naming-qualifier-desc"));
     }
@@ -33,7 +37,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
             public void process(CtField<?> field) {
                 if (field.isFinal()
                     && (field.getType().unbox().isPrimitive() || SpoonUtil.isString(field.getType()))
-                    && field.getDefaultExpression() != null) {
+                    && field.getDefaultExpression() != null && !IGNORE_FIELDS.contains(field.getSimpleName())) {
                     if (!field.isStatic() || !IdentifierNameUtils.isUpperSnakeCase(field.getSimpleName())) {
                         addLocalProblem(field, formatExplanation(field),
                             ProblemType.CONSTANT_NOT_STATIC_OR_NOT_UPPER_CAMEL_CASE);

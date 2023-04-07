@@ -211,6 +211,7 @@ static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut s
 constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
 interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
 interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
+empty-interface-exp = Interfaces sollten nicht leer sein.
 
 # Structure
 

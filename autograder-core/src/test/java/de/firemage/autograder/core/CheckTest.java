@@ -41,7 +41,7 @@ public class CheckTest {
                         .toList());
 
                     var tmpDirectory = Files.createTempDirectory(null);
-                    
+
                     var file = UploadedFile.build(path.resolve("code"), JavaVersion.JAVA_17, tmpDirectory, status -> {});
                     var linter = new Linter(Locale.US);
 
@@ -58,7 +58,7 @@ public class CheckTest {
                     for (var problem : problems) {
                         if (!expectedProblems.remove(problem.getDisplayLocation())) {
                             fail("The check reported a problem '" + problem.getDisplayLocation() +
-                                "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType().toString());
+                                "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType().toString() + problem.getExplanation());
                         }
                     }
                     if (!expectedProblems.isEmpty()) {
