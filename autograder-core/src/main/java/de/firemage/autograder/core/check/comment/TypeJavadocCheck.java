@@ -26,7 +26,9 @@ public class TypeJavadocCheck extends IntegratedCheck {
         CtJavaDocTag.TagType.DEPRECATED,
         CtJavaDocTag.TagType.VERSION,
         CtJavaDocTag.TagType.AUTHOR,
-        CtJavaDocTag.TagType.SINCE
+        CtJavaDocTag.TagType.SINCE,
+        // used for documenting generic types @param <T> description of T
+        CtJavaDocTag.TagType.PARAM
     );
 
     private final Pattern pattern;
@@ -62,7 +64,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
                 if (tag.getType() == CtJavaDocTag.TagType.PARAM && type instanceof CtRecord) {
                     continue;
                 }
-                
+
                 addLocalProblem(javadoc,
                     new LocalizedMessage("javadoc-type-exp-unexpected-tag", Map.of("tag", tag.getType().getName())),
                     ProblemType.JAVADOC_UNEXPECTED_TAG);
