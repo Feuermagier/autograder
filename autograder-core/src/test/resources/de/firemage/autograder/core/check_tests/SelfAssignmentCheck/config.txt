@@ -1,0 +1,3 @@
+complexity.SelfAssignmentCheck
+Don't assign a variable to itself.
+Test.java:9
