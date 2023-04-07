@@ -15,7 +15,8 @@ import java.util.List;
 import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONSTANT_IN_INTERFACE, ProblemType.DO_NOT_HAVE_CONSTANTS_CLASS,
-                                      ProblemType.STATIC_INTERFACE, ProblemType.STATIC_METHOD_IN_INTERFACE })
+                                      ProblemType.STATIC_INTERFACE, ProblemType.STATIC_METHOD_IN_INTERFACE,
+                                      ProblemType.EMPTY_INTERFACE })
 public class InterfaceBadPractices extends IntegratedCheck {
     public InterfaceBadPractices() {
         super(new LocalizedMessage("interface-bad-practices-desc"));
@@ -29,8 +30,19 @@ public class InterfaceBadPractices extends IntegratedCheck {
                 List<CtField<?>> fields = ctInterface.getFields();
                 Set<CtMethod<?>> methods = ctInterface.getMethods();
 
+                // check if the interface is empty
+                if (methods.isEmpty() && fields.isEmpty()) {
+                    addLocalProblem(
+                        ctInterface,
+                        new LocalizedMessage("empty-interface-exp"),
+                        ProblemType.EMPTY_INTERFACE
+                    );
+
+                    return;
+                }
+
                 // check for interfaces with only fields, which are constants "classes"
-                if (methods.isEmpty() && !fields.isEmpty()) {
+                if (methods.isEmpty()) {
                     // interface is only used for constants
                     addLocalProblem(
                         ctInterface,

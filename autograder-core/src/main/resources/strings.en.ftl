@@ -212,8 +212,8 @@ static-field-exp = The static field '{$name}' must not be static
 constants-class-exp = Constants should be saved in the class they are used in and not in a separate class. See https://stackoverflow.com/a/15056462/7766117
 interface-static-method-exp = Interfaces should not have static methods, because they can not be overwritten.
 interface-static-exp = Interfaces must not be static. The keyword 'static' is redundant and should be removed.
-
 interface-bad-practices-desc = Interfaces are very useful, but not every feature of an interface should be used.
+empty-interface-exp = Interfaces should not be empty.
 
 # Structure
 default-package-desc = The default package must not be used
