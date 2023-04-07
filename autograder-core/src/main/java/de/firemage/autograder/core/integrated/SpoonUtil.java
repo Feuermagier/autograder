@@ -11,9 +11,11 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
@@ -248,5 +250,15 @@ public final class SpoonUtil {
             && method.isPublic()
             && method.getParameters().size() == 1
             && method.getParameters().get(0).getType().getQualifiedName().equals("java.lang.String[]");
+    }
+
+    /**
+     * Checks if the given type is an inner class.
+     *
+     * @param type the type to check, not null
+     * @return true if the given type is an inner class, false otherwise
+     */
+    public static boolean isInnerClass(CtClass<?> type) {
+        return type.getDeclaringType() != null;
     }
 }

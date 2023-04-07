@@ -1,0 +1,6 @@
+oop.UtilityClassCheck
+Check that utility classes have a private constructor.
+Test.java:16
+Test.java:20
+Test.java:26
+Test.java:27
