@@ -1,4 +1,6 @@
 oop.ListGetterSetterCheck
 Return mutable collection without copying it
-Test.java:20
-Test.java:24
+Test.java:22
+Test.java:26
+Test.java:38
+Test.java:42
