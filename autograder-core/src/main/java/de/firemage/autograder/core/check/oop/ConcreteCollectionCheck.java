@@ -36,8 +36,6 @@ import spoon.reflect.visitor.CtScanner;
 import java.util.List;
 import java.util.stream.Stream;
 
-// TODO: see https://github.com/pmd/pmd/blob/master/pmd-java/src/main/java/net/sourceforge/pmd/lang/java/rule/bestpractices/LooseCouplingRule.java
-
 @ExecutableCheck(reportedProblems = { ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE })
 public class ConcreteCollectionCheck extends IntegratedCheck {
     private static final List<Class<?>> ALLOWED_TYPES = List.of(java.util.Properties.class);
@@ -45,9 +43,6 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
     public ConcreteCollectionCheck() {
         super(new LocalizedMessage("concrete-collection-desc"));
     }
-
-
-    // TODO: update concrete-collection-exp/desc in locale.fst
 
     private <T extends CtTypeInformation & FactoryAccessor> boolean isConcreteCollectionType(T ctType) {
         return Stream.of(java.util.Collection.class, java.util.Map.class)
@@ -137,9 +132,6 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             return true;
         }
 
-
-        // TODO: what is provides <interface> with <implementation>?
-
         return false;
     }
 
@@ -153,27 +145,18 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         return !ctMethod.getTopDefinitions().isEmpty();
     }
 
-    // TODO: this is wrong
-    private boolean isTypeParameter(CtTypeReference<?> ctTypeReference) {
-        return false;
-    }
-
     private boolean checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
         if (this.isConcreteCollectionType(ctTypeReference)
             && !this.isInOverriddenMethodSignature(ctTypeReference)
             && !this.isInAllowedContext(ctTypeReference)
-            && !this.isTypeParameter(ctTypeReference)
             && !this.isAllowedType(ctTypeReference)
         ) {
-            // TODO: record is visited multiple times for each implicit element
             // A record has both a getter and an attribute -> visited twice and both are implicit...
             CtElement element = ctTypeReference;
-            if (!ctTypeReference.getPosition().isValidPosition()) {
-                if (ctTypeReference.getParent(CtArrayTypeReference.class) == null) {
-                    throw new IllegalStateException("Invalid position for " + ctTypeReference);
-                } else {
+            if (!ctTypeReference.getPosition().isValidPosition()
+                && (ctTypeReference.getParent(CtArrayTypeReference.class) != null)) {
                     element = ctTypeReference.getParent(CtArrayTypeReference.class);
-                }
+
             }
 
             this.addLocalProblem(
@@ -194,15 +177,6 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtTypeReference(CtTypeReference<T> ctTypeReference) {
-                /*CtElement parent = ctTypeReference;
-                while (parent != null) {
-                    // do not visit type references in implicit elements
-                    if (parent.isImplicit()) {
-                        return;
-                    }
-                    parent = parent.getParent();
-                }*/
-
                 boolean hasError = checkCtTypeReference(ctTypeReference);
 
                 if (!hasError) {
