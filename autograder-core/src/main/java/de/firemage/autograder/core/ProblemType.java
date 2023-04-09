@@ -1,6 +1,8 @@
 package de.firemage.autograder.core;
 
 public enum ProblemType {
+    UI_INPUT_SEPARATION,
+    UI_OUTPUT_SEPARATION,
     DEPRECATED_COLLECTION_USED,
     COLLECTION_IS_EMPTY_REIMPLEMENTED,
     STRING_IS_EMPTY_REIMPLEMENTED,

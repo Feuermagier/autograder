@@ -215,6 +215,9 @@ interface-static-exp = Interfaces must not be static. The keyword 'static' is re
 interface-bad-practices-desc = Interfaces are very useful, but not every feature of an interface should be used.
 empty-interface-exp = Interfaces should not be empty.
 
+ui-input-separation = Input should not be spread over multiple classes. First use in {$first}.
+ui-output-separation = Output should not be spread over multiple classes. First use in {$first}.
+
 # Structure
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package

@@ -63,6 +63,7 @@
 * Mutable lists in fields should be copied before returning them
 * Utility classes should have only final fields and a single private no-arg constructor
 * Interfaces should not have fields, constants or be empty
+* Input/Output should be separated from the program logic
 
 ### Code Structure
 * The default package should not be used

@@ -213,6 +213,10 @@ interface-static-method-exp = Interfaces sollte keine statischen Methoden haben,
 interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
 empty-interface-exp = Interfaces sollten nicht leer sein.
 
+ui-input-separation = Eingaben sollten zentral in einer Klasse eingelesen werden. Wurde auch verwendet in {$first}.
+ui-output-separation = Ausgaben sollten zentral in einer Klasse gemacht werden. Wurde auch verwendet in {$first}.
+
+
 # Structure
 
 default-package-desc = Das default-Paket sollte nicht verwendet werden
