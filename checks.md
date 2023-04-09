@@ -64,6 +64,7 @@
 * Utility classes should have only final fields and a single private no-arg constructor
 * Interfaces should not have fields, constants or be empty
 * Input/Output should be separated from the program logic
+* `System.exit()` should never be used
 
 ### Code Structure
 * The default package should not be used

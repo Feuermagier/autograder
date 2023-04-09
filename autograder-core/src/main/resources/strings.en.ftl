@@ -218,6 +218,8 @@ empty-interface-exp = Interfaces should not be empty.
 ui-input-separation = Input should not be spread over multiple classes. First use in {$first}.
 ui-output-separation = Output should not be spread over multiple classes. First use in {$first}.
 
+do-not-use-system-exit = System.exit() must not be used. Structure your code in so that it exits naturally.
+
 # Structure
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package

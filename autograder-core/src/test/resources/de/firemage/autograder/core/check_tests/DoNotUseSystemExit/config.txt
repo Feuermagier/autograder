@@ -1,0 +1,5 @@
+oop.DoNotUseSystemExit
+Don't use System.exit()
+Test.java:5
+Test.java:6
+Test.java:9
