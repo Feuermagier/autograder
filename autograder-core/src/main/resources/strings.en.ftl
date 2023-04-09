@@ -30,6 +30,8 @@ string-is-empty-desc = Use String#isEmpty instead of '.equals("")' or '.length()
 string-is-empty-exp-emptiness = Use 'isEmpty()' instead of '{$exp}' to check for emptiness
 string-is-empty-exp-non-emptiness = Use '!<...>isEmpty()' instead of '{$exp}' to check for non-emptiness
 
+use-string-formatted = `{$formatted}` is easier to read.
+
 # Comment
 commented-out-code-desc = Unused code should be removed and not commented out
 commented-out-code-exp = This commented out code should be removed

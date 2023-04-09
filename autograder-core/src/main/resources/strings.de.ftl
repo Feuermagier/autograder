@@ -30,6 +30,8 @@ string-is-empty-desc = Verwende String#isEmpty statt '.equals("")' oder '.length
 string-is-empty-exp-emptiness = Benutze 'isEmpty()' statt '{$exp}' um auf Leerheit zu prüfen
 string-is-empty-exp-non-emptiness = Benutze '!<...>isEmpty()' statt '{$exp}' um auf mindestens ein Element zu prüfen
 
+use-string-formatted = `{$formatted}` ist schöner zu lesen.
+
 # Comment
 author-tag-invalid-desc = Der @author-Tag ist nicht valide
 author-tag-invalid-exp = Der @author-tag ist nicht valide

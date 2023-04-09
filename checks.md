@@ -15,6 +15,7 @@
 ### Java API
 * isEmpty should be used on Strings/Collections instead of comparing the length/size against 0
 * Old/Deprecated collections such as Stack shouldn't be used
+* use `String.formatted` over `String.format`
 
 ### Unnecessary Complexity
 * Class explicitly extends Object
