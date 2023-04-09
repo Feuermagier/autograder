@@ -3,6 +3,7 @@ package de.firemage.autograder.core;
 public enum ProblemType {
     UI_INPUT_SEPARATION,
     UI_OUTPUT_SEPARATION,
+    AVOID_INNER_CLASSES,
     DO_NOT_USE_SYSTEM_EXIT,
     DEPRECATED_COLLECTION_USED,
     COLLECTION_IS_EMPTY_REIMPLEMENTED,

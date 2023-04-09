@@ -1,0 +1,8 @@
+oop.AvoidInnerClasses
+Avoid having inner classes
+Test.java:5
+Test.java:9
+Test.java:11
+Test.java:21
+Test.java:24
+Test.java:27

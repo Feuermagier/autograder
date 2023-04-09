@@ -258,7 +258,7 @@ public final class SpoonUtil {
      * @param type the type to check, not null
      * @return true if the given type is an inner class, false otherwise
      */
-    public static boolean isInnerClass(CtClass<?> type) {
+    public static boolean isInnerClass(CtType<?> type) {
         return type.getDeclaringType() != null;
     }
 }

@@ -220,6 +220,8 @@ ui-output-separation = Output should not be spread over multiple classes. First 
 
 do-not-use-system-exit = System.exit() must not be used. Structure your code in so that it exits naturally.
 
+avoid-inner-classes = Every class should be in its own file. Inner-Classes should be avoided.
+
 # Structure
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package

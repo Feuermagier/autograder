@@ -65,6 +65,7 @@
 * Interfaces should not have fields, constants or be empty
 * Input/Output should be separated from the program logic
 * `System.exit()` should never be used
+* Innere Klassen sollten in einer eigenen Datei liegen
 
 ### Code Structure
 * The default package should not be used
