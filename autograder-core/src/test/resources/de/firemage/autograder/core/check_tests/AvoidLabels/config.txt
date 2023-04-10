@@ -1,0 +1,5 @@
+general.AvoidLabels
+Avoid Labels
+Test.java:5-7
+Test.java:8-9
+Test.java:11-13

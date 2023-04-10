@@ -11,10 +11,14 @@
 * Method parameters shouldn't be reassigned
 * Attribute should be a local variable
 * System-dependent linebreak used in string literal
+* Labels should be avoided
 
 ### Java API
 * isEmpty should be used on Strings/Collections instead of comparing the length/size against 0
 * Old/Deprecated collections such as Stack shouldn't be used
+* use `String.formatted` over `String.format`
+* Tri-state optionals should be avoided
+* `Optional` as arguments
 
 ### Unnecessary Complexity
 * Class explicitly extends Object
@@ -63,6 +67,9 @@
 * Mutable lists in fields should be copied before returning them
 * Utility classes should have only final fields and a single private no-arg constructor
 * Interfaces should not have fields, constants or be empty
+* Input/Output should be separated from the program logic
+* `System.exit()` should never be used
+* Innere Klassen sollten in einer eigenen Datei liegen
 
 ### Code Structure
 * The default package should not be used

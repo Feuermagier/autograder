@@ -30,6 +30,12 @@ string-is-empty-desc = Use String#isEmpty instead of '.equals("")' or '.length()
 string-is-empty-exp-emptiness = Use 'isEmpty()' instead of '{$exp}' to check for emptiness
 string-is-empty-exp-non-emptiness = Use '!<...>isEmpty()' instead of '{$exp}' to check for non-emptiness
 
+use-string-formatted = `{$formatted}` is easier to read.
+
+optional-argument = Optional should not be used as an argument, because it has 3 states: null, Optional.empty() and Optional.of(..). See https://stackoverflow.com/a/31924845/7766117
+optional-tri-state = Instead of an Optional boolean, one should use an enum.
+
+
 # Comment
 commented-out-code-desc = Unused code should be removed and not commented out
 commented-out-code-exp = This commented out code should be removed
@@ -176,6 +182,8 @@ string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lh
 do-not-use-raw-types-desc = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
 do-not-use-raw-types-exp = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
 
+avoid-labels = Labels should be avoided. See https://stackoverflow.com/a/33689582/7766117.
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
@@ -214,6 +222,13 @@ interface-static-method-exp = Interfaces should not have static methods, because
 interface-static-exp = Interfaces must not be static. The keyword 'static' is redundant and should be removed.
 interface-bad-practices-desc = Interfaces are very useful, but not every feature of an interface should be used.
 empty-interface-exp = Interfaces should not be empty.
+
+ui-input-separation = Input should not be spread over multiple classes. First use in {$first}.
+ui-output-separation = Output should not be spread over multiple classes. First use in {$first}.
+
+do-not-use-system-exit = System.exit() must not be used. Structure your code in so that it exits naturally.
+
+avoid-inner-classes = Every class should be in its own file. Inner-Classes should be avoided.
 
 # Structure
 default-package-desc = The default package must not be used

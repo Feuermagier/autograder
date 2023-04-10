@@ -15,9 +15,11 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.reference.CtTypeReference;
 
 @ExecutableCheck(reportedProblems = {ProblemType.LIST_NOT_COPIED_IN_GETTER})
@@ -52,7 +54,9 @@ public class ListGetterSetterCheck extends IntegratedCheck {
         });
     }
 
-    private boolean isMutableCollection(CtTypeReference<?> type) {
+    private boolean isMutableCollection(CtTypeInformation type) {
+        if (type.isArray()) return true;
+
         String name = type.getQualifiedName();
         return name.equals("java.util.List")
             || name.equals("java.util.ArrayList")
@@ -91,6 +95,10 @@ public class ListGetterSetterCheck extends IntegratedCheck {
     }
 
     private boolean isMutableAssignee(CtExpression<?> expression) {
+        if (expression instanceof CtNewArray<?>) {
+            return true;
+        }
+
         if (expression instanceof CtInvocation<?> invocation) {
             return !SpoonUtil.isStaticCallTo(invocation, "java.util.List", "of")
                 && !SpoonUtil.isStaticCallTo(invocation, "java.util.Set", "of")

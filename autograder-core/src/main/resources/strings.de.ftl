@@ -30,6 +30,11 @@ string-is-empty-desc = Verwende String#isEmpty statt '.equals("")' oder '.length
 string-is-empty-exp-emptiness = Benutze 'isEmpty()' statt '{$exp}' um auf Leerheit zu prüfen
 string-is-empty-exp-non-emptiness = Benutze '!<...>isEmpty()' statt '{$exp}' um auf mindestens ein Element zu prüfen
 
+use-string-formatted = `{$formatted}` ist schöner zu lesen.
+
+optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
+optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
+
 # Comment
 author-tag-invalid-desc = Der @author-Tag ist nicht valide
 author-tag-invalid-exp = Der @author-tag ist nicht valide
@@ -190,6 +195,8 @@ variable-names-desc = Lokale Variablen sollten aussagekräftige Werte haben
 variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-name-exp-type = Unnötige Abkürzung '{$name}'
 
+avoid-labels = Labels sollten vermieden werden. Siehe https://stackoverflow.com/a/33689582/7766117.
+
 # OOP
 concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
@@ -212,6 +219,13 @@ constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der
 interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
 interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
 empty-interface-exp = Interfaces sollten nicht leer sein.
+
+ui-input-separation = Eingaben sollten zentral in einer Klasse eingelesen werden. Wurde auch verwendet in {$first}.
+ui-output-separation = Ausgaben sollten zentral in einer Klasse gemacht werden. Wurde auch verwendet in {$first}.
+
+do-not-use-system-exit = System.exit() darf nicht verwendet werden. Strukturiere deinen Code so, dass er sich natürlich beendet.
+
+avoid-inner-classes = Jede Klasse sollte in einer eigenen Datei sein. Innere-Klassen sollten vermieden werden.
 
 # Structure
 

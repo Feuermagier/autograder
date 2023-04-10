@@ -1,0 +1,4 @@
+api.UseStringFormatted
+Use String#formatted
+Test.java:5
+Test.java:6
