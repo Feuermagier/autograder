@@ -182,6 +182,8 @@ string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lh
 do-not-use-raw-types-desc = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
 do-not-use-raw-types-exp = Generic Types should always have generics and never be used as raw types, see https://stackoverflow.com/a/2770692/7766117
 
+avoid-labels = Labels should be avoided. See https://stackoverflow.com/a/33689582/7766117.
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()

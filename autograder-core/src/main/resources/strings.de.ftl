@@ -195,6 +195,8 @@ variable-names-desc = Lokale Variablen sollten aussagekräftige Werte haben
 variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-name-exp-type = Unnötige Abkürzung '{$name}'
 
+avoid-labels = Labels sollten vermieden werden. Siehe https://stackoverflow.com/a/33689582/7766117.
+
 # OOP
 concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)

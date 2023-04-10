@@ -11,6 +11,7 @@
 * Method parameters shouldn't be reassigned
 * Attribute should be a local variable
 * System-dependent linebreak used in string literal
+* Labels should be avoided
 
 ### Java API
 * isEmpty should be used on Strings/Collections instead of comparing the length/size against 0
