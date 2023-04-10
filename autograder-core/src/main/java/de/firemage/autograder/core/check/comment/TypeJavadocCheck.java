@@ -73,13 +73,15 @@ public class TypeJavadocCheck extends IntegratedCheck {
     }
 
     private void checkValidAuthor(CtJavaDoc javadoc) {
-        Optional<CtJavaDocTag> authorTag = javadoc.getTags().stream()
+        List<CtJavaDocTag> authorTags = javadoc.getTags().stream()
             .filter(tag -> tag.getType() == CtJavaDocTag.TagType.AUTHOR)
-            .findAny();
+            .toList();
 
-        if (authorTag.isPresent() && !this.pattern.matcher(authorTag.get().getContent().trim()).matches()) {
-            addLocalProblem(javadoc, new LocalizedMessage("javadoc-type-exp-invalid-author",
-                Map.of("author", authorTag.get().getContent().trim())), ProblemType.INVALID_AUTHOR_TAG);
+        for (CtJavaDocTag authorTag : authorTags) {
+            if (!this.pattern.matcher(authorTag.getContent().trim()).matches()) {
+                addLocalProblem(javadoc, new LocalizedMessage("javadoc-type-exp-invalid-author",
+                        Map.of("author", authorTag.getContent().trim())), ProblemType.INVALID_AUTHOR_TAG);
+            }
         }
     }
 }
