@@ -12,6 +12,7 @@
 * Attribute should be a local variable
 * System-dependent linebreak used in string literal
 * Labels should be avoided
+* Fields should not be hidden by variables
 
 ### Java API
 * isEmpty should be used on Strings/Collections instead of comparing the length/size against 0

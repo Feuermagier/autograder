@@ -1,0 +1,12 @@
+general.AvoidShadowing
+Don't hide fields with variables.
+Test.java:9
+Test.java:10
+Test.java:11
+Test.java:31
+Test.java:34
+Test.java:35
+Test.java:36
+Test.java:42
+Test.java:43
+Test.java:44
