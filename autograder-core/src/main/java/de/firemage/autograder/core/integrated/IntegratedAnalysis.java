@@ -39,7 +39,8 @@ public class IntegratedAnalysis {
         this.tmpPath = tmpPath;
 
         this.staticAnalysis = new StaticAnalysis(file.getModel());
-        this.graphAnalysis = new GraphAnalysis(this.staticAnalysis.getCodeModel());
+        //this.graphAnalysis = new GraphAnalysis(this.staticAnalysis.getCodeModel());
+        this.graphAnalysis = null; //TODO
         this.dynamicAnalysis = new DynamicAnalysis(List.of());
 
     }
