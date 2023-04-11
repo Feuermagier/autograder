@@ -156,7 +156,6 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             if (!ctTypeReference.getPosition().isValidPosition()
                 && (ctTypeReference.getParent(CtArrayTypeReference.class) != null)) {
                     element = ctTypeReference.getParent(CtArrayTypeReference.class);
-
             }
 
             this.addLocalProblem(
@@ -177,6 +176,12 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtTypeReference(CtTypeReference<T> ctTypeReference) {
+                if (!ctTypeReference.getPosition().isValidPosition()
+                    // arrays are special, they will be handled by the code
+                    && (ctTypeReference.getParent(CtArrayTypeReference.class) == null)) {
+                    return;
+                }
+
                 boolean hasError = checkCtTypeReference(ctTypeReference);
 
                 if (!hasError) {
