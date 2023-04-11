@@ -261,4 +261,14 @@ public final class SpoonUtil {
     public static boolean isInnerClass(CtType<?> type) {
         return type.getDeclaringType() != null;
     }
+
+    public static boolean isInOverriddenMethodSignature(CtElement ctElement) {
+        CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
+        if (ctMethod == null) {
+            return false;
+        }
+
+        // if the method is defined for the first time, this should return an empty collection
+        return !ctMethod.getTopDefinitions().isEmpty();
+    }
 }

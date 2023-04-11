@@ -53,3 +53,13 @@ class SomeException extends IllegalArgumentException {
         super(message);
     }
 }
+
+class Parent {
+    void parent(int x) {}
+}
+
+class Child extends Parent {
+    private int x;
+
+    void parent(int x) {} // Ok
+}

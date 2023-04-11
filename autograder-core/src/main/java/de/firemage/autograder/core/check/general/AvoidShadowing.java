@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtConstructor;
@@ -54,6 +55,11 @@ public class AvoidShadowing extends IntegratedCheck {
             public void process(CtVariable<?> ctVariable) {
                 // skip fields inside constructors
                 if (ctVariable.getParent(CtConstructor.class) != null) {
+                    return;
+                }
+
+                // skip fields inside overridden methods
+                if (SpoonUtil.isInOverriddenMethodSignature(ctVariable)) {
                     return;
                 }
 
