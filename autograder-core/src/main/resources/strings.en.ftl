@@ -184,6 +184,9 @@ do-not-use-raw-types-exp = Generic Types should always have generics and never b
 
 avoid-labels = Labels should be avoided. See https://stackoverflow.com/a/33689582/7766117.
 
+avoid-shadowing = The variable '{$name}' hides an attribute with the same name. Except for in the constructor, this should be avoided.
+
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()

@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -135,19 +136,9 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         return false;
     }
 
-    private boolean isInOverriddenMethodSignature(CtTypeReference<?> ctTypeReference) {
-        CtMethod<?> ctMethod = ctTypeReference.getParent(CtMethod.class);
-        if (ctMethod == null) {
-            return false;
-        }
-
-        // if the method is defined for the first time, this should return an empty collection
-        return !ctMethod.getTopDefinitions().isEmpty();
-    }
-
     private boolean checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
         if (this.isConcreteCollectionType(ctTypeReference)
-            && !this.isInOverriddenMethodSignature(ctTypeReference)
+            && !SpoonUtil.isInOverriddenMethodSignature(ctTypeReference)
             && !this.isInAllowedContext(ctTypeReference)
             && !this.isAllowedType(ctTypeReference)
         ) {
@@ -156,7 +147,6 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             if (!ctTypeReference.getPosition().isValidPosition()
                 && (ctTypeReference.getParent(CtArrayTypeReference.class) != null)) {
                     element = ctTypeReference.getParent(CtArrayTypeReference.class);
-
             }
 
             this.addLocalProblem(
@@ -177,6 +167,12 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtTypeReference(CtTypeReference<T> ctTypeReference) {
+                if (!ctTypeReference.getPosition().isValidPosition()
+                    // arrays are special, they will be handled by the code
+                    && (ctTypeReference.getParent(CtArrayTypeReference.class) == null)) {
+                    return;
+                }
+
                 boolean hasError = checkCtTypeReference(ctTypeReference);
 
                 if (!hasError) {

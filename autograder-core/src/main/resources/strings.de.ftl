@@ -180,6 +180,10 @@ string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Met
 do-not-use-raw-types-desc = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
 do-not-use-raw-types-exp = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
 
+avoid-labels = Labels sollten vermieden werden. Siehe https://stackoverflow.com/a/33689582/7766117.
+
+avoid-shadowing = Die Variable '{$name}' verdeckt ein Attribut mit dem selben Namen. Abgesehen vom Konstruktor, sollte man das vermeiden.
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
@@ -194,8 +198,6 @@ linguistic-exp = Das Code-Element hat einen verwirrenden Namen. Siehe https://pm
 variable-names-desc = Lokale Variablen sollten aussagekräftige Werte haben
 variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-name-exp-type = Unnötige Abkürzung '{$name}'
-
-avoid-labels = Labels sollten vermieden werden. Siehe https://stackoverflow.com/a/33689582/7766117.
 
 # OOP
 concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)

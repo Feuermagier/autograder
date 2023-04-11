@@ -154,3 +154,11 @@ final class Foo3<A, B extends Collection<A>> { // Ok
 
     private Vector vec = new Vector("a", "b", 1); // Ok
 }
+
+class Street {
+    private final TreeMap<Integer, String> carsOnStreet; // Not Ok
+
+    public Street() {
+        this.carsOnStreet = null; // Ok
+    }
+}
