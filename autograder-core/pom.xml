@@ -17,7 +17,7 @@
         <pmd.version>6.45.0</pmd.version>
         <spotbugs.version>6.45.0</spotbugs.version>
 
-        <docker.version>3.2.14</docker.version>
+        <docker.version>3.3.0</docker.version>
         <jgraph.version>1.5.1</jgraph.version>
         <fluent.version>0.70</fluent.version>
     </properties>
@@ -89,7 +89,7 @@
         <dependency>
             <groupId>net.sourceforge.pmd</groupId>
             <artifactId>pmd-java</artifactId>
-            <version>6.54.0</version>
+            <version>6.55.0</version>
         </dependency>
 
         <!-- Spotbugs -->
