@@ -44,3 +44,12 @@ class C extends A {
     static int y; // Not Ok
     private int z; // Ok
 }
+
+class SomeException extends IllegalArgumentException {
+    @java.io.Serial
+    private static final long serialVersionUID = -4491591333105161142L; // Ok
+
+    public SomeException(String message) {
+        super(message);
+    }
+}

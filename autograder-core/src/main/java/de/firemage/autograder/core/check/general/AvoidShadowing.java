@@ -16,11 +16,13 @@ import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 
 
 @ExecutableCheck(reportedProblems = { ProblemType.AVOID_SHADOWING })
 public class AvoidShadowing extends IntegratedCheck {
+    private static final List<String> ALLOWED_FIELDS = List.of("serialVersionUID");
     public AvoidShadowing() {
         super(new LocalizedMessage("avoid-shadowing"));
     }
@@ -64,8 +66,12 @@ public class AvoidShadowing extends IntegratedCheck {
                 Collection<CtFieldReference<?>> visibleFields = getAllVisibleFields(parent);
 
                 for (CtFieldReference<?> ctFieldReference : visibleFields) {
+                    if (ALLOWED_FIELDS.contains(ctFieldReference.getSimpleName()) || ctVariable.getReference() == null) {
+                        continue;
+                    }
+
                     if (ctFieldReference.getSimpleName().equals(ctVariable.getSimpleName())
-                        && !ctFieldReference.getDeclaration().equals(ctVariable)) {
+                        && !ctFieldReference.equals(ctVariable.getReference())) {
                         addLocalProblem(
                             ctVariable,
                             new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),
