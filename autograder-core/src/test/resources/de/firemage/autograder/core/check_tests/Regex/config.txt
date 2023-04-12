@@ -1,0 +1,5 @@
+complexity.RegexCheck
+Complex regex
+Test.java:3
+Test.java:4
+Test.java:5
