@@ -186,6 +186,8 @@ avoid-labels = Labels should be avoided. See https://stackoverflow.com/a/3368958
 
 avoid-shadowing = The variable '{$name}' hides an attribute with the same name. Except for in the constructor, this should be avoided.
 
+suppress-warnings = @SuppressWarnings suppresses warnings from the compiler or Checkstyle, without fixing the underlying problem of the code.
+
 
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'

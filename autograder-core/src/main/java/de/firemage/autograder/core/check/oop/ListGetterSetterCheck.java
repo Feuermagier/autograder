@@ -20,7 +20,9 @@ import spoon.reflect.code.CtReturn;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeInformation;
-import spoon.reflect.reference.CtTypeReference;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @ExecutableCheck(reportedProblems = {ProblemType.LIST_NOT_COPIED_IN_GETTER})
 public class ListGetterSetterCheck extends IntegratedCheck {
@@ -39,6 +41,8 @@ public class ListGetterSetterCheck extends IntegratedCheck {
                 if (parentMethod == null || !parentMethod.isPublic() || ret.getReturnedExpression() == null) {
                     return;
                 }
+                @SuppressWarnings("unchecked")
+                List<String> list = new ArrayList();
 
                 var returnedExpression = ret.getReturnedExpression();
 

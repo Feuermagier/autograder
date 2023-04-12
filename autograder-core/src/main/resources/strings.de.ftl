@@ -184,6 +184,8 @@ avoid-labels = Labels sollten vermieden werden. Siehe https://stackoverflow.com/
 
 avoid-shadowing = Die Variable '{$name}' verdeckt ein Attribut mit dem selben Namen. Abgesehen vom Konstruktor, sollte man das vermeiden.
 
+suppress-warnings = @SuppressWarnings unterdrückt Warnungen des Compilers oder von Checkstyle, anstatt das unterliegende Problem zu beheben.
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen

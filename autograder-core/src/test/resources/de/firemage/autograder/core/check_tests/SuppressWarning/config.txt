@@ -1,0 +1,6 @@
+general.SuppressWarningsCheck
+@SuppressWarnings used
+Test.java:4
+Test.java:6
+Test.java:9
+Test.java:11
