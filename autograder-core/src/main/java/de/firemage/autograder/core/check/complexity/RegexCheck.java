@@ -25,12 +25,13 @@ public class RegexCheck extends IntegratedCheck {
         REGEX_HINTS.put(")?", 1);
         REGEX_HINTS.put(")+", 1);
         REGEX_HINTS.put("*", 1);
+        REGEX_HINTS.put("$", 1);
+        REGEX_HINTS.put("^", 1);
         REGEX_HINTS.put("\\d", 1);
         REGEX_HINTS.put("\\w", 1);
         REGEX_HINTS.put("]?", 2);
         REGEX_HINTS.put("]+", 2);
         REGEX_HINTS.put("]*", 2);
-        REGEX_HINTS.put("[^", 2);
         REGEX_HINTS.put("?=", 3); // Lookahead
         REGEX_HINTS.put("?<=", 3); // Lookbehind
         REGEX_HINTS.put("?!", 3); // Negative lookahead
