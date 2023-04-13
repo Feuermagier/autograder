@@ -8,17 +8,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
-import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtBinaryOperator;
-import spoon.reflect.code.CtConstructorCall;
-import spoon.reflect.code.CtExecutableReferenceExpression;
-import spoon.reflect.code.CtFieldRead;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtNewArray;
-import spoon.reflect.code.CtSuperAccess;
-import spoon.reflect.code.CtThisAccess;
-import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -167,6 +157,12 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtTypeReference(CtTypeReference<T> ctTypeReference) {
+                // check for var
+                CtLocalVariable<?> ctLocalVariable = ctTypeReference.getParent(CtLocalVariable.class);
+                if (ctLocalVariable != null && ctLocalVariable.isInferred()) {
+                    return;
+                }
+
                 if (!ctTypeReference.getPosition().isValidPosition()
                     // arrays are special, they will be handled by the code
                     && (ctTypeReference.getParent(CtArrayTypeReference.class) == null)) {

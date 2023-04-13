@@ -1,6 +1,6 @@
-name: Bug Report (False Negative)
-description: Create a bug report about missing warnings from a lint
-labels: ["bug", "false-negative"]
+name: Bug Report (Crash)
+description: Create a bug report about the autograder crashing
+labels: ["bug", "crash"]
 body:
   - type: markdown
     attributes:
@@ -31,3 +31,21 @@ body:
         ```java
         <code>
         ```
+  - type: textarea
+    id: error
+    attributes:
+      label: Error output
+      description: >
+        Include a backtrace in the code block. You can find the backtrace in the eclipse workspace under `.metadata/.log`.
+        Or Window > Show View > Other then select General > Error Log. This will open the Error Log view, where you
+        can find the backtrace as well.
+      value: |
+        <details><summary>Backtrace</summary>
+          <p>
+
+          ```
+          <backtrace>
+          ```
+
+          </p>
+        </details>

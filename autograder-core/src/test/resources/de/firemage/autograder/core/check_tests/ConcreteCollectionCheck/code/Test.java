@@ -32,7 +32,7 @@ public class Test {
         List[] array = new ArrayList[10]; // Ok
         ArrayList<String>[] array2; // Not Ok
         array[0] = new ArrayList<>(); // Ok
-
+        var someList = new ArrayList<>(); // Ok
         AbstractMap.SimpleEntry<String, String> entry = null; // Ok
     }
 }

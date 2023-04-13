@@ -1,0 +1,45 @@
+name: Diagnostics
+description: Create an issue about an error message that could be improved, is lacking context or otherwise dissatisfactory.
+labels: ["message"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for making an issue!
+
+        Please ensure that **no personal information** is in any code.
+  - type: textarea
+    id: problem
+    attributes:
+      label: Summary
+      description: >
+        Please provide a short summary of the issue, along with any information
+        you feel relevant to replicate it.
+    validations:
+      required: true
+  - type: textarea
+    id: current
+    attributes:
+      label: Current Message
+      description: The current message that needs to be improved.
+    validations:
+      required: true
+  - type: textarea
+    id: improved
+    attributes:
+      label: Improved Message
+      description: A suggestion for an improved message.
+  - type: input
+    id: lint-name
+    attributes:
+      label: Lint Name
+      description: Please provide the lint name.
+  - type: textarea
+    id: reproducer
+    attributes:
+      label: Reproducer
+      description: Please provide the code (without personal information) that triggers the issue
+      value: |
+        ```java
+        <code>
+        ```
