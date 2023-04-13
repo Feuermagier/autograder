@@ -19,6 +19,8 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
         List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
+    private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol");
+    
     public ConstantsHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("constants-name-desc"));
     }
@@ -42,6 +44,11 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         if (value.length() > 4) {
             return false;
         }
+
+        if (NON_DESCRIPTIVE_NAMES.contains(name.toLowerCase())) {
+            return true;
+        }
+
         Stream<String> options = Stream.of("");
         if (value.isEmpty()) {
             options = Stream.of("empty", "blank");
@@ -67,6 +74,8 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             case ':' -> List.of("colon");
             case ';' -> List.of("semi_colon", "semicolon");
             case '_' -> List.of("underscore", "dash", "line");
+            case '/' -> List.of("slash", "backslash");
+            case '\\' -> List.of("slash", "backslash");
             default -> Character.isAlphabetic(c) ? List.of(Character.toLowerCase(c) + "") : null;
         };
     }
