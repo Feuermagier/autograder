@@ -1,0 +1,4 @@
+oop.DoNotMakeConstantsClasses
+Do not make constants classes
+Test.java:3
+Test.java:23
