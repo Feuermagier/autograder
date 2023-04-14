@@ -10,6 +10,8 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.ModifierKind;
+import spoon.support.reflect.CtExtendedModifier;
 
 import java.util.List;
 import java.util.Set;
@@ -73,12 +75,14 @@ public class InterfaceBadPractices extends IntegratedCheck {
 
                 // static modifier can be added to interfaces inside classes,
                 // but is redundant and should be avoided
-                if (ctInterface.isStatic()) {
-                    addLocalProblem(
-                        ctInterface,
-                        new LocalizedMessage("interface-static-exp"),
-                        ProblemType.STATIC_INTERFACE
-                    );
+                for (CtExtendedModifier ctExtendedModifier : ctInterface.getExtendedModifiers()) {
+                    if (!ctExtendedModifier.isImplicit() && ctExtendedModifier.getKind() == ModifierKind.STATIC) {
+                        addLocalProblem(
+                            ctInterface,
+                            new LocalizedMessage("interface-static-exp"),
+                            ProblemType.STATIC_INTERFACE
+                        );
+                    }
                 }
             }
         });
