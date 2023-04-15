@@ -1,0 +1,5 @@
+api.EqualsHashCodeComparableContract
+Equals and hashCode must be overridden together
+Test.java:8
+Test.java:15
+Test.java:22
