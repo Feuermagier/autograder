@@ -190,6 +190,7 @@ avoid-shadowing = The variable '{$name}' hides an attribute with the same name. 
 
 suppress-warnings = @SuppressWarnings suppresses warnings from the compiler or Checkstyle, without fixing the underlying problem of the code.
 
+scanner-closed = Scanner should be closed
 
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'

@@ -188,6 +188,8 @@ avoid-shadowing = Die Variable '{$name}' verdeckt ein Attribut mit dem selben Na
 
 suppress-warnings = @SuppressWarnings unterdrückt Warnungen des Compilers oder von Checkstyle, anstatt das unterliegende Problem zu beheben.
 
+scanner-closed = Scanner sollte geschlossen werden
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
