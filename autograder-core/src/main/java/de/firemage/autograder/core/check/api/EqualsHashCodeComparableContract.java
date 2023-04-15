@@ -13,8 +13,6 @@ import spoon.reflect.declaration.CtType;
 
 @ExecutableCheck(reportedProblems = { ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT })
 public class EqualsHashCodeComparableContract extends IntegratedCheck {
-    public static final LocalizedMessage DESCRIPTION = new LocalizedMessage("is-empty-reimplemented-desc");
-
     public EqualsHashCodeComparableContract() {
         super(new LocalizedMessage("equals-hashcode-comparable-contract"));
     }
