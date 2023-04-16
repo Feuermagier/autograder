@@ -1,7 +1,6 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
-import lombok.Getter;
 
 public abstract class InCodeProblem implements Problem {
 
@@ -10,10 +9,10 @@ public abstract class InCodeProblem implements Problem {
     private final CodePosition position;
 
     private final LocalizedMessage explanation;
-    
+
     private final ProblemType problemType;
 
-    public InCodeProblem(Check check, CodePosition position, LocalizedMessage explanation, ProblemType problemType) {
+    protected InCodeProblem(Check check, CodePosition position, LocalizedMessage explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;

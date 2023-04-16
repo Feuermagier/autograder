@@ -194,6 +194,8 @@ suppress-warnings = @SuppressWarnings suppresses warnings from the compiler or C
 
 scanner-closed = Scanner should be closed
 
+unchecked-type-cast = It has to be ensured that the type of the object is the same as that of the cast. Otherwise, the code might crash.
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()

@@ -14,6 +14,7 @@
 * Labels should be avoided
 * Fields should not be hidden by variables
 * Scanners should be closed
+* Unchecked type casts should be avoided
 
 ### Java API
 * isEmpty should be used on Strings/Collections instead of comparing the length/size against 0

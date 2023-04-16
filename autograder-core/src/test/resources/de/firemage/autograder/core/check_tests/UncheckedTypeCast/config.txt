@@ -1,0 +1,5 @@
+general.UncheckedTypeCast
+Don't unconditionally cast to a type.
+Test.java:17
+Test.java:25
+Test.java:34
