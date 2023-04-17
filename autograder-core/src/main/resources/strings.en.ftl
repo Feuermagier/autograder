@@ -242,6 +242,8 @@ do-not-use-system-exit = System.exit() must not be used. Structure your code in 
 
 avoid-inner-classes = Every class should be in its own file. Inner-Classes should be avoided.
 
+mutable-enum = Enums should be immutable. See https://stackoverflow.com/a/41199773/7766117
+
 # Structure
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package

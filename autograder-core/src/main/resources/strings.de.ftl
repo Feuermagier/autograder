@@ -239,6 +239,8 @@ do-not-use-system-exit = System.exit() darf nicht verwendet werden. Strukturiere
 
 avoid-inner-classes = Jede Klasse sollte in einer eigenen Datei sein. Innere-Klassen sollten vermieden werden.
 
+mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflow.com/a/41199773/7766117
+
 # Structure
 
 default-package-desc = Das default-Paket sollte nicht verwendet werden

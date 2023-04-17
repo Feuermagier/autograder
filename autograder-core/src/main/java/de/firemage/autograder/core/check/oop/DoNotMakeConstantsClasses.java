@@ -32,7 +32,7 @@ public class DoNotMakeConstantsClasses extends IntegratedCheck {
             && !ctType.getFields().isEmpty()
             // all fields should be static and effectively final (no assignments)
             && ctType.getFields().stream().allMatch(
-                ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField)
+                ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())
             )
             // the class should not be abstract
             && !ctType.isAbstract()

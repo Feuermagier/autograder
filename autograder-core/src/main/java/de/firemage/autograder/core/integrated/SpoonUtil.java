@@ -16,6 +16,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
@@ -236,11 +237,11 @@ public final class SpoonUtil {
                && invocation.getExecutable().getSimpleName().equals(methodName);
     }
 
-    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtField<?> field) {
-        return staticAnalysis.getModel()
-                             .filterChildren(e -> e instanceof CtFieldWrite write &&
-                                                  write.getVariable().equals(field.getReference()))
-                             .first() == null;
+    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtFieldReference<?> ctFieldReference) {
+        return ctFieldReference.isFinal() || staticAnalysis.getModel()
+                .filterChildren(e -> e instanceof CtFieldWrite write &&
+                        write.getVariable().equals(ctFieldReference))
+                .first() == null;
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
