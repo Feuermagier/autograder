@@ -70,6 +70,8 @@ javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}
 javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
 javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
 
+javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im Javadoc-Kommentar erwähnt.
+
 # Complexity
 diamond-desc = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 diamond-exp = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117

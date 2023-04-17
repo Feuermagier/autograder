@@ -1,0 +1,4 @@
+comment.ThrowsJavadocCheck
+Thrown exceptions should be documented.
+Test.java:17
+Test.java:36

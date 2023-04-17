@@ -5,6 +5,8 @@ import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
+import org.junit.jupiter.api.parallel.Execution;
+import org.junit.jupiter.api.parallel.ExecutionMode;
 
 import java.io.IOException;
 import java.net.URISyntaxException;
@@ -22,6 +24,7 @@ public class CheckTest {
     private static final boolean ENABLE_DYNAMIC = false;
 
     @TestFactory
+    @Execution(ExecutionMode.CONCURRENT)
     public Stream<DynamicTest> createCheckTest() throws URISyntaxException, IOException {
         var testPath = Path.of(this.getClass().getResource("check_tests/").toURI()).toAbsolutePath();
         return Files.list(testPath).map(path -> {
