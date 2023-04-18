@@ -22,7 +22,7 @@ public class UtilityClassCheck extends IntegratedCheck {
         super(new LocalizedMessage("utility-desc"));
     }
 
-    private static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
+    public static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
         return
             // it must obviously be a class
             ctClass.isClass()
