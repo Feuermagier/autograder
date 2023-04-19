@@ -44,7 +44,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <asm.version>9.5</asm.version>
-        <slf4j.version>2.0.6</slf4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
         <jackson.version>2.14.2</jackson.version>
 
         <revision>0.3</revision>
