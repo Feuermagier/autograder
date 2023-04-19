@@ -114,7 +114,7 @@ use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
 merge-if-desc = If an else-block consists solely of an if, you can replace it with an else-if
 merge-if-exp = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
-complex-regex = Nontrivial regex bneed an explanation
+complex-regex = Nontrivial regex need an explanation (score is {$score}, max allowed score is {$max})
 
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.

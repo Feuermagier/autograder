@@ -116,7 +116,7 @@ use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werd
 merge-if-desc = Besteht ein else-Block nur aus einem if, kann auch else-if verwendet werden
 merge-if-exp = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
-complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar
+complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
 
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
