@@ -117,21 +117,7 @@ public class UseFormatString extends IntegratedCheck {
             return SpoonUtil.makeLiteral("\n");
         }
 
-        // inline constants:
-        if (ctExpression instanceof CtVariableRead<?> ctVariableRead) {
-            CtVariableReference<?> ctVariableReference = ctVariableRead.getVariable();
-
-            Optional<CtExpression<?>> ctExpressionOptional = SpoonUtil.getEffectivelyFinalExpression(
-                    staticAnalysis,
-                    ctVariableReference
-            );
-            // only inline literals:
-            if (ctExpressionOptional.isPresent() && ctExpressionOptional.get() instanceof CtLiteral<?> ctLiteral) {
-                return ctLiteral;
-            }
-        }
-
-        return ctExpression;
+        return SpoonUtil.resolveCtExpression(staticAnalysis, ctExpression);
     }
 
     private void checkArgs(StaticAnalysis staticAnalysis, CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs) {

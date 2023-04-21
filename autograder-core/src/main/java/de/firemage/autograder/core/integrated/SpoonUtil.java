@@ -8,8 +8,10 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -19,9 +21,11 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class SpoonUtil {
     private SpoonUtil() {
@@ -165,8 +169,37 @@ public final class SpoonUtil {
         }
     }
 
-    public static List<CtStatement> getEffectiveStatements(CtBlock<?> block) {
-        return block.getStatements().stream().filter(statement -> !(statement instanceof CtComment)).toList();
+    private static List<CtStatement> getEffectiveStatements(Collection<? extends CtStatement> statements) {
+        return statements.stream().flatMap(ctStatement -> {
+            // flatten blocks
+            if (ctStatement instanceof CtStatementList ctStatementList) {
+                return getEffectiveStatements(ctStatementList).stream();
+            } else {
+                return Stream.of(ctStatement);
+            }
+        }).filter(statement -> !(statement instanceof CtComment)).toList();
+    }
+
+    public static List<CtStatement> getEffectiveStatements(CtStatementList ctStatements) {
+        return getEffectiveStatements(ctStatements.getStatements());
+    }
+
+    public static CtExpression<?> resolveCtExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {
+        if (ctExpression instanceof CtVariableRead<?> ctVariableRead) {
+            CtVariableReference<?> ctVariableReference = ctVariableRead.getVariable();
+
+            Optional<CtExpression<?>> ctExpressionOptional = SpoonUtil.getEffectivelyFinalExpression(
+                    staticAnalysis,
+                    ctVariableReference
+            );
+
+            // only inline literals:
+            if (ctExpressionOptional.isPresent() && ctExpressionOptional.get() instanceof CtLiteral<?> ctLiteral) {
+                return ctLiteral;
+            }
+        }
+
+        return ctExpression;
     }
 
     public static CtStatement unwrapStatement(CtStatement statement) {

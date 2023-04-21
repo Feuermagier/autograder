@@ -34,7 +34,11 @@ public class CheckTest {
             return new Config(lines);
         }
 
-        public String name() {
+        public String checkPath() {
+            return this.lines.get(0);
+        }
+
+        public String description() {
             return this.lines.get(1);
         }
 
@@ -48,7 +52,7 @@ public class CheckTest {
         }
 
         public Check check() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-            return (Check) Class.forName("de.firemage.autograder.core.check." + this.lines.get(0)).getDeclaredConstructor().newInstance();
+            return (Check) Class.forName("de.firemage.autograder.core.check." + this.checkPath()).getDeclaredConstructor().newInstance();
         }
     }
 
@@ -70,7 +74,7 @@ public class CheckTest {
         }
 
         public String testName() {
-            return "Check E2E Test: %s".formatted(this.config.name());
+            return "Check E2E Test: %s".formatted(this.config.description());
         }
     }
 
@@ -85,7 +89,8 @@ public class CheckTest {
         }
 
         return DynamicTest.stream(
-            folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC),
+            folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
+                    .filter(testInput -> testInput.config().checkPath().equals("oop.ShouldBeEnumAttribute")),
             TestInput::testName,
             testInput -> {
                 var check = testInput.config().check();

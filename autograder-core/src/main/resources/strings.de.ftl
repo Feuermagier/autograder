@@ -247,6 +247,8 @@ avoid-inner-classes = Jede Klasse sollte in einer eigenen Datei sein. Innere-Kla
 
 mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflow.com/a/41199773/7766117
 
+should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein. Alternativ sollte man eine Map verwenden.
+
 # Structure
 
 default-package-desc = Das default-Paket sollte nicht verwendet werden
