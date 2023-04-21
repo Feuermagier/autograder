@@ -1,0 +1,10 @@
+api.UseFormatString
+Use format string rather than string concatenation
+Test.java:6
+Test.java:7
+Test.java:19
+Test.java:20
+Test.java:32
+Test.java:33
+Test.java:35
+Test.java:36

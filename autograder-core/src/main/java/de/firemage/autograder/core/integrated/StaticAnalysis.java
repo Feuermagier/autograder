@@ -7,8 +7,6 @@ import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 
-import java.io.IOException;
-
 public class StaticAnalysis {
     private final CodeModel model;
     private final CompilationResult compilationResult;

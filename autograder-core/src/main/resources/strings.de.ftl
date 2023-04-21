@@ -37,6 +37,8 @@ optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden
 
 equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.
 
+use-format-string = `{$formatted}` ist schöner zu lesen.
+
 # Comment
 author-tag-invalid-desc = Der @author-Tag ist nicht valide
 author-tag-invalid-exp = Der @author-tag ist nicht valide

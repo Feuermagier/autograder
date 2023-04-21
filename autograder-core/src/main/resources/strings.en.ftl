@@ -37,6 +37,7 @@ optional-tri-state = Instead of an Optional boolean, one should use an enum.
 
 equals-hashcode-comparable-contract = Equals and hashCode must always be overridden together. Similarly for Comparable, both equals and hashCode must be overwritten.
 
+use-format-string = `{$formatted}` is easier to read.
 
 # Comment
 commented-out-code-desc = Unused code should be removed and not commented out

@@ -4,20 +4,19 @@ import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.declaration.CtClass;
+import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.reference.CtFieldReference;
+import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtVariableReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.List;
@@ -237,11 +236,22 @@ public final class SpoonUtil {
                && invocation.getExecutable().getSimpleName().equals(methodName);
     }
 
-    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtFieldReference<?> ctFieldReference) {
-        return ctFieldReference.isFinal() || staticAnalysis.getModel()
-                .filterChildren(e -> e instanceof CtFieldWrite write &&
-                        write.getVariable().equals(ctFieldReference))
+    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtVariableReference<?> ctVariableReference) {
+        return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || staticAnalysis.getModel()
+                .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
+                        write.getVariable().equals(ctVariableReference))
                 .first() == null;
+    }
+
+    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
+            StaticAnalysis staticAnalysis,
+            CtVariableReference<?> ctVariableReference
+    ) {
+        if (!isEffectivelyFinal(staticAnalysis, ctVariableReference)) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
