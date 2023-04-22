@@ -39,6 +39,8 @@ equals-hashcode-comparable-contract = Equals and hashCode must always be overrid
 
 use-format-string = `{$formatted}` is easier to read.
 
+math-floor-division = Integer division is always floored, therefore the `Math.floor` is redundant.
+
 # Comment
 commented-out-code-desc = Unused code should be removed and not commented out
 commented-out-code-exp = This commented out code should be removed
