@@ -126,8 +126,6 @@ merge-if-exp = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (..
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar
 
-unreachable-code-private-constructor = Der private Konstruktor wird nie aufgerufen. Daher ist der Code im Konstruktor unnötig und sollte zur besseren lesbarkeit gelöscht werden.
-
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt

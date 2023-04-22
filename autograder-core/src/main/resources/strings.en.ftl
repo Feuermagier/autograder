@@ -123,8 +123,6 @@ merge-if-exp = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (..
 
 complex-regex = Nontrivial regex bneed an explanation
 
-unreachable-code-private-constructor = The private constructor is never called, so the code inside it is unreachable.
-
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
