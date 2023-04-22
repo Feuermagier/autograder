@@ -22,6 +22,11 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public class CheckTest {
     private static final boolean ENABLE_DYNAMIC = false;
+    // an empty list means that all tests should be executed
+    // this is useful for debugging/executing only relevant tests
+    //
+    // example: List.of("oop.ShouldBeEnumAttribute")
+    private static final List<String> ONLY_TEST = List.of();
 
     private record Config(List<String> lines) {
         public static Config fromPath(Path path) throws IOException {
@@ -90,7 +95,7 @@ public class CheckTest {
 
         return DynamicTest.stream(
             folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
-                    .filter(testInput -> testInput.config().checkPath().equals("oop.ShouldBeEnumAttribute")),
+                    .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
             TestInput::testName,
             testInput -> {
                 var check = testInput.config().check();
