@@ -21,9 +21,6 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeInformation;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @ExecutableCheck(reportedProblems = {ProblemType.LIST_NOT_COPIED_IN_GETTER})
 public class ListGetterSetterCheck extends IntegratedCheck {
     public ListGetterSetterCheck() {
@@ -41,8 +38,6 @@ public class ListGetterSetterCheck extends IntegratedCheck {
                 if (parentMethod == null || !parentMethod.isPublic() || ret.getReturnedExpression() == null) {
                     return;
                 }
-                @SuppressWarnings("unchecked")
-                List<String> list = new ArrayList();
 
                 var returnedExpression = ret.getReturnedExpression();
 
@@ -77,6 +72,9 @@ public class ListGetterSetterCheck extends IntegratedCheck {
     }
 
     private boolean wasMutablyAssigned(StaticAnalysis analysis, CtField<?> field) {
+        // arrays are always mutable
+        if (field.getType().isArray()) return true;
+
         if (field.getDefaultExpression() != null && isMutableAssignee(field.getDefaultExpression())) {
             return true;
         }
