@@ -60,7 +60,6 @@ public class InstanceOf extends IntegratedCheck {
 
                 CtExecutableReference<?> ctExecutableReference = ctInvocation.getExecutable();
 
-                // TODO: this might break with generics
                 if (ctExecutableReference.getType().getQualifiedName().equals("java.lang.Class")
                         && ctExecutableReference.getSimpleName().equals("getClass")) {
                     addLocalProblem(
