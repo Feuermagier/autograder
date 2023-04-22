@@ -251,6 +251,9 @@ mutable-enum = Enums should be immutable. See https://stackoverflow.com/a/411997
 
 should-be-enum-attribute = The values of the switch should be associated attributes of the enum. Alternatively, one should use a Map.
 
+closed-set-of-values-switch = A switch has only finitely many cases. This is a closed set, which should be modeled as an enum.
+closed-set-of-values-list = A list of finitely many values should be modeled as an enum.
+
 # Structure
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package

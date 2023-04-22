@@ -249,6 +249,9 @@ mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflo
 
 should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein. Alternativ sollte man eine Map verwenden.
 
+closed-set-of-values-switch = Ein switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte.
+closed-set-of-values-list = Eine Auflistung von endlich vielen Werten sollte als enum modelliert werden.
+
 # Structure
 
 default-package-desc = Das default-Paket sollte nicht verwendet werden
