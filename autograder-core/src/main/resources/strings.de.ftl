@@ -41,6 +41,8 @@ use-format-string = `{$formatted}` ist schöner zu lesen.
 
 math-floor-division = Bei integer division wird immer abgerundet, daher ist das `Math.floor` unnötig.
 
+use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
+
 # Comment
 author-tag-invalid-desc = Der @author-Tag ist nicht valide
 author-tag-invalid-exp = Der @author-tag ist nicht valide

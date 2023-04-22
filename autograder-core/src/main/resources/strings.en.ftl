@@ -41,6 +41,8 @@ use-format-string = `{$formatted}` is easier to read.
 
 math-floor-division = Integer division is always floored, therefore the `Math.floor` is redundant.
 
+use-enum-collection = For maps where an enum is used as a key and for sets as a value, one should use EnumMap/EnumSet.
+
 # Comment
 commented-out-code-desc = Unused code should be removed and not commented out
 commented-out-code-exp = This commented out code should be removed
