@@ -152,6 +152,9 @@ runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 exception-message-desc = Geworfene Exceptions sollten immer eine Nachricht haben
 exception-message-exp = Nachricht ('message') fehlt oder ist leer
 
+type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder Suffixe
+type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben
+
 # General
 compare-objects-desc = Objekte sollten mit equals verglichen werden, anstatt sie zum Vergleich in Strings umzuwandeln
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen

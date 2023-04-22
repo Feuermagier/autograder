@@ -1,0 +1,6 @@
+naming.TypesHaveDescriptiveNamesCheck
+Schlechte Bezeichnung für Typen
+Test.java:7
+Test.java:9
+Test.java:13
+Test.java:15
