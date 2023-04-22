@@ -261,6 +261,9 @@ should-be-enum-attribute = The values of the switch should be associated attribu
 closed-set-of-values-switch = A switch has only finitely many cases. This is a closed set, which should be modeled as an enum.
 closed-set-of-values-list = A list of finitely many values should be modeled as an enum.
 
+do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.
+do-not-use-instanceof-emulation = instanceof should not be used and also not be emulated through getClass or ClassCastException. See Ilias Wiki.
+
 # Structure
 default-package-desc = The default package must not be used
 default-package-exp = Do not use the default package
