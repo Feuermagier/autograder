@@ -44,3 +44,25 @@ class TestFiniteListing {
     private static final List<Character> NOT_ENOUGH_DISTINCT_VALUES_LIST = List.of('a', 'b', 'b', 'a'); // Ok (2 distinct values)
     private static final Set<String> NOT_ENOUGH_DISTINCT_VALUES_SET = Set.of("monday", "monday", "monday", "monday"); // Ok (1 distinct value)
 }
+
+enum Color {
+    RED,
+    GREEN,
+    BLUE,
+    YELLOW;
+
+    public static Color fromString(String value) {
+        switch (value) { // Ok
+            case "red":
+                return RED;
+            case "green":
+                return GREEN;
+            case "blue":
+                return BLUE;
+            case "yellow":
+                return YELLOW;
+            default:
+                throw new IllegalArgumentException("Unknown color: " + value);
+        }
+    }
+}

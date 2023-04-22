@@ -39,31 +39,10 @@ public class ShouldBeEnumAttribute extends IntegratedCheck {
                     return;
                 }
 
-                List<Effect> effects = new ArrayList<>();
-                for (CtCase<?> ctCase : ctSwitch.getCases()) {
-                    List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctCase);
-
-                    if (statements.size() != 1 && (statements.size() != 2 || !(statements.get(1) instanceof CtBreak))) {
-                        return;
-                    }
-
-                    Optional<Effect> effect = SpoonUtil.tryMakeEffect(statements.get(0));
-                    if (effect.isEmpty()) {
-                        return;
-                    }
-
-                    Effect resolvedEffect = effect.get();
-
-
-                    // check for default case, which is allowed to be a terminal effect, even if the other cases are not:
-                    if (ctCase.getCaseExpressions().isEmpty() && resolvedEffect instanceof TerminalEffect) {
-                        continue;
-                    }
-
-                    effects.add(resolvedEffect);
+                List<Effect> effects = SpoonUtil.getCasesEffects(ctSwitch.getCases());
+                if (effects.isEmpty()) {
+                    return;
                 }
-
-                if (effects.isEmpty()) return;
 
                 Effect firstEffect = effects.get(0);
                 for (Effect effect : effects) {

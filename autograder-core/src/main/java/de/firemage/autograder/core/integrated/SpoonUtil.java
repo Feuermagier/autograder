@@ -2,9 +2,12 @@ package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
+import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalStatement;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtBreak;
+import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
@@ -24,6 +27,7 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -325,5 +329,39 @@ public final class SpoonUtil {
 
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
         return TerminalStatement.of(ctStatement).or(() -> AssignmentStatement.of(ctStatement));
+    }
+
+    public static Optional<Effect> getSingleEffect(Collection<? extends CtStatement> ctStatements) {
+        List<CtStatement> statements = getEffectiveStatements(ctStatements);
+
+        if (statements.size() != 1 && (statements.size() != 2 || !(statements.get(1) instanceof CtBreak))) {
+            return Optional.empty();
+        }
+
+        return tryMakeEffect(statements.get(0));
+    }
+
+    public static List<Effect> getCasesEffects(Iterable<? extends CtCase<?>> ctCases) {
+        List<Effect> effects = new ArrayList<>();
+        for (CtCase<?> ctCase : ctCases) {
+            Optional<Effect> effect = SpoonUtil.getSingleEffect(ctCase.getStatements());
+            if (effect.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            Effect resolvedEffect = effect.get();
+
+
+            // check for default case, which is allowed to be a terminal effect, even if the other cases are not:
+            if (ctCase.getCaseExpressions().isEmpty() && resolvedEffect instanceof TerminalEffect) {
+                continue;
+            }
+
+            effects.add(resolvedEffect);
+        }
+
+        if (effects.isEmpty()) return new ArrayList<>();
+
+        return effects;
     }
 }

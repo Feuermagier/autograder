@@ -7,12 +7,15 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.effects.Effect;
+import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtNewArray;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtSwitch;
 import spoon.reflect.code.CtSwitchExpression;
 import spoon.reflect.code.CtTypeAccess;
@@ -25,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -74,6 +78,31 @@ public class ClosedSetOfValues extends IntegratedCheck {
         return result;
     }
 
+    private boolean isEnumMapping(CtAbstractSwitch<?> ctSwitch) {
+        List<Effect> effects = SpoonUtil.getCasesEffects(ctSwitch.getCases());
+        if (effects.isEmpty()) {
+            return false;
+        }
+
+        Effect firstEffect = effects.get(0);
+        for (Effect effect : effects) {
+            if (!firstEffect.isSameEffect(effect)) {
+                return false;
+            }
+
+            Optional<CtExpression<?>> ctExpression = effect.value();
+            if (ctExpression.isEmpty()) {
+                return false;
+            }
+
+            if (!(ctExpression.get().getType().isEnum())) {
+                return false;
+            }
+        }
+
+        return true;
+    }
+
     private void checkSwitch(StaticAnalysis staticAnalysis, CtAbstractSwitch<?> ctSwitch) {
         CtTypeReference<?> ctTypeReference = ctSwitch.getSelector().getType();
 
@@ -92,7 +121,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
                 .map(e -> SpoonUtil.resolveCtExpression(staticAnalysis, e))
                 .allMatch(e -> e instanceof CtLiteral<?>);
 
-        if (areKnown) {
+        if (areKnown && !this.isEnumMapping(ctSwitch)) {
             addLocalProblem(
                 ctSwitch,
                 new LocalizedMessage("closed-set-of-values-switch"),
