@@ -1,5 +1,8 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
+import de.firemage.autograder.core.integrated.effects.Effect;
+import de.firemage.autograder.core.integrated.effects.TerminalStatement;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtComment;
@@ -318,5 +321,9 @@ public final class SpoonUtil {
         }
 
         return isOverriddenMethod(ctMethod);
+    }
+
+    public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
+        return TerminalStatement.of(ctStatement).or(() -> AssignmentStatement.of(ctStatement));
     }
 }
