@@ -203,6 +203,8 @@ scanner-closed = Scanner sollte geschlossen werden
 
 unchecked-type-cast = Es muss sicher gestellt werden, dass der Typ des Objekts mit dem Typ des Casts übereinstimmt. Ansonsten kann der Code abstürzen.
 
+local-variable-should-be-constant = Die Variable sollte ein private static final Attribut sein.
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
