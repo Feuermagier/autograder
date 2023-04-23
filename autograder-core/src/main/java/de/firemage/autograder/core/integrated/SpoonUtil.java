@@ -180,15 +180,19 @@ public final class SpoonUtil {
         return statements.stream().flatMap(ctStatement -> {
             // flatten blocks
             if (ctStatement instanceof CtStatementList ctStatementList) {
-                return getEffectiveStatements(ctStatementList).stream();
+                return getEffectiveStatements(ctStatementList.getStatements()).stream();
             } else {
                 return Stream.of(ctStatement);
             }
         }).filter(statement -> !(statement instanceof CtComment)).toList();
     }
 
-    public static List<CtStatement> getEffectiveStatements(CtStatementList ctStatements) {
-        return getEffectiveStatements(ctStatements.getStatements());
+    public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {
+        if (ctStatement instanceof CtStatementList ctStatementList) {
+            return getEffectiveStatements(ctStatementList.getStatements());
+        }
+
+        return getEffectiveStatements(List.of(ctStatement));
     }
 
     public static CtExpression<?> resolveCtExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {

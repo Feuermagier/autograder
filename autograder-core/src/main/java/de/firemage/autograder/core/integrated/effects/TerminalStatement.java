@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated.effects;
 
+import spoon.reflect.code.CtContinue;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
@@ -33,7 +34,8 @@ public class TerminalStatement implements TerminalEffect {
     private static boolean isTerminalStatement(CtStatement ctStatement) {
         return ctStatement instanceof CtYieldStatement
                 || ctStatement instanceof CtReturn<?>
-                || ctStatement instanceof CtThrow;
+                || ctStatement instanceof CtThrow
+                || ctStatement instanceof CtContinue;
     }
 
     public static Optional<Effect> of(CtStatement ctStatement) {
@@ -59,7 +61,8 @@ public class TerminalStatement implements TerminalEffect {
         if (other instanceof TerminalEffect) {
             return this.ctStatement instanceof CtYieldStatement && other.ctStatement() instanceof CtYieldStatement
                     || this.ctStatement instanceof CtReturn<?> && other.ctStatement() instanceof CtReturn<?>
-                    || this.ctStatement instanceof CtThrow && other.ctStatement() instanceof CtThrow;
+                    || this.ctStatement instanceof CtThrow && other.ctStatement() instanceof CtThrow
+                    || this.ctStatement instanceof CtContinue && other.ctStatement() instanceof CtContinue;
         }
 
         return false;

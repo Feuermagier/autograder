@@ -211,6 +211,8 @@ local-variable-should-be-constant = Die Variable sollte ein private static final
 
 compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglichen werden, nicht als int-Werte.
 
+use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispiel ein return ab. if-else-Blöcke mit solchen Abbrüchen kann man mithilfe von sogenannten guard-clauses schöner schreiben. Das hat unter anderem den Vorteil, dass man doppelten Code leichter erkennt. Siehe für eine detaillierte Erklärung https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a oder https://deviq.com/design-patterns/guard-clause
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen

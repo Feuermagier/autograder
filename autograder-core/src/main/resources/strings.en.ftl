@@ -209,6 +209,8 @@ local-variable-should-be-constant = The variable should be a private static fina
 
 compare-char-value = char values in the ASCII range should be compared as char values, not as int values.
 
+use-guard-clauses = The code cancels the normal control-flow through for example a return. if-else-blocks with those conditions can be written more beautifully using so called guard-clauses. This has the advantage that you can better recognize duplicate code. See for a detailed explanation https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a or https://deviq.com/design-patterns/guard-clause
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
