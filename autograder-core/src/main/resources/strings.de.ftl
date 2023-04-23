@@ -35,6 +35,14 @@ use-string-formatted = `{$formatted}` ist schöner zu lesen.
 optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
 
+equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.
+
+use-format-string = `{$formatted}` ist schöner zu lesen.
+
+math-floor-division = Bei integer division wird immer abgerundet, daher ist das `Math.floor` unnötig.
+
+use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
+
 # Comment
 author-tag-invalid-desc = Der @author-Tag ist nicht valide
 author-tag-invalid-exp = Der @author-tag ist nicht valide
@@ -54,7 +62,7 @@ javadoc-method-exp-unexpected-tag = JavaDoc-Kommentare von Methoden sollten kein
 
 javadoc-type-desc = Typen (Klassen, Schnittstellen, ...) müssen valide JavaDoc-Kommentare haben
 javadoc-type-exp-unexpected-tag = JavaDoc-Kommentare von Typen sollten keinen '@{$tag}'-Tag haben
-javadoc-type-exp-invalid-author = Im @author-Tag darf *ausschließlich* dein u-Kürzel stehen
+javadoc-type-exp-invalid-author = Im @author-Tag sollte dein u-Kürzel stehen: {$authors}
 
 javadoc-field-desc = Attribute müssen valide JavaDoc-Kommentare haben
 javadoc-field-exp-unexpected-tag = JavaDoc-Kommentare von Attributen sollten keinen '@{$tag}'-Tag haben
@@ -67,6 +75,8 @@ javadoc-stub-exp-desc = Die Beschreibung des Javadoc-Kommentars ist leer
 javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}'
 javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
 javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
+
+javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im Javadoc-Kommentar erwähnt.
 
 # Complexity
 diamond-desc = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
@@ -118,6 +128,8 @@ merge-if-exp = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (..
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
 
+redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
+
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt
@@ -140,7 +152,10 @@ runtime-ex-caught-desc = RuntimeExceptions sollten niemals gefangen werden (abge
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 
 exception-message-desc = Geworfene Exceptions sollten immer eine Nachricht haben
-exception-message-exp = Nachricht ('message') fehlt oder ist leer
+exception-message-exp = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
+
+type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder Suffixe
+type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben
 
 # General
 compare-objects-desc = Objekte sollten mit equals verglichen werden, anstatt sie zum Vergleich in Strings umzuwandeln
@@ -188,13 +203,23 @@ avoid-shadowing = Die Variable '{$name}' verdeckt ein Attribut mit dem selben Na
 
 suppress-warnings = @SuppressWarnings unterdrückt Warnungen des Compilers oder von Checkstyle, anstatt das unterliegende Problem zu beheben.
 
+scanner-closed = Scanner sollte geschlossen werden
+
+unchecked-type-cast = Es muss sicher gestellt werden, dass der Typ des Objekts mit dem Typ des Casts übereinstimmt. Ansonsten kann der Code abstürzen.
+
+local-variable-should-be-constant = Die Variable sollte ein private static final Attribut sein.
+
+compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglichen werden, nicht als int-Werte.
+
+use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispiel ein return ab. if-else-Blöcke mit solchen Abbrüchen kann man mithilfe von sogenannten guard-clauses schöner schreiben. Das hat unter anderem den Vorteil, dass man doppelten Code leichter erkennt. Siehe für eine detaillierte Erklärung https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a oder https://deviq.com/design-patterns/guard-clause
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
 
 constants-name-desc = Konstanten sollte aussagekräftige Namen haben - z.B. AUTHOR_INDEX statt FIRST_INDEX
-constants-name-exp-string = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
-constants-name-exp-number = The name '{$name}' ist nicht aussagekräftig gegeben den Wert {$value}
+constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
+constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
 
 linguistic-desc = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 linguistic-exp = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
@@ -202,6 +227,7 @@ linguistic-exp = Das Code-Element hat einen verwirrenden Namen. Siehe https://pm
 variable-names-desc = Lokale Variablen sollten aussagekräftige Werte haben
 variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-name-exp-type = Unnötige Abkürzung '{$name}'
+variable-name-exp-type-in-name = Der Bezeichner '{$name}' sollte nicht den Typ im Namen haben
 
 # OOP
 concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
@@ -232,6 +258,16 @@ ui-output-separation = Ausgaben sollten zentral in einer Klasse gemacht werden. 
 do-not-use-system-exit = System.exit() darf nicht verwendet werden. Strukturiere deinen Code so, dass er sich natürlich beendet.
 
 avoid-inner-classes = Jede Klasse sollte in einer eigenen Datei sein. Innere-Klassen sollten vermieden werden.
+
+mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflow.com/a/41199773/7766117
+
+should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein. Alternativ sollte man eine Map verwenden.
+
+closed-set-of-values-switch = Ein switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte.
+closed-set-of-values-list = Eine Auflistung von endlich vielen Werten sollte als enum modelliert werden.
+
+do-not-use-instanceof = instanceof sollte nicht verwendet werden. Siehe Ilias Wiki.
+do-not-use-instanceof-emulation = instanceof sollte nicht verwendet werden und auch nicht durch getClass oder ClassCastException emuliert werden. Siehe Ilias Wiki.
 
 # Structure
 

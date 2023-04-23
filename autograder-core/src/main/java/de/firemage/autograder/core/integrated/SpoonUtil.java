@@ -1,27 +1,38 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
+import de.firemage.autograder.core.integrated.effects.Effect;
+import de.firemage.autograder.core.integrated.effects.TerminalEffect;
+import de.firemage.autograder.core.integrated.effects.TerminalStatement;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtBreak;
+import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.declaration.CtClass;
+import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtVariableReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 public final class SpoonUtil {
     private SpoonUtil() {
@@ -165,8 +176,41 @@ public final class SpoonUtil {
         }
     }
 
-    public static List<CtStatement> getEffectiveStatements(CtBlock<?> block) {
-        return block.getStatements().stream().filter(statement -> !(statement instanceof CtComment)).toList();
+    private static List<CtStatement> getEffectiveStatements(Collection<? extends CtStatement> statements) {
+        return statements.stream().flatMap(ctStatement -> {
+            // flatten blocks
+            if (ctStatement instanceof CtStatementList ctStatementList) {
+                return getEffectiveStatements(ctStatementList.getStatements()).stream();
+            } else {
+                return Stream.of(ctStatement);
+            }
+        }).filter(statement -> !(statement instanceof CtComment)).toList();
+    }
+
+    public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {
+        if (ctStatement instanceof CtStatementList ctStatementList) {
+            return getEffectiveStatements(ctStatementList.getStatements());
+        }
+
+        return getEffectiveStatements(List.of(ctStatement));
+    }
+
+    public static CtExpression<?> resolveCtExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {
+        if (ctExpression instanceof CtVariableRead<?> ctVariableRead) {
+            CtVariableReference<?> ctVariableReference = ctVariableRead.getVariable();
+
+            Optional<CtExpression<?>> ctExpressionOptional = SpoonUtil.getEffectivelyFinalExpression(
+                    staticAnalysis,
+                    ctVariableReference
+            );
+
+            // only inline literals:
+            if (ctExpressionOptional.isPresent() && ctExpressionOptional.get() instanceof CtLiteral<?> ctLiteral) {
+                return ctLiteral;
+            }
+        }
+
+        return ctExpression;
     }
 
     public static CtStatement unwrapStatement(CtStatement statement) {
@@ -236,11 +280,22 @@ public final class SpoonUtil {
                && invocation.getExecutable().getSimpleName().equals(methodName);
     }
 
-    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtField<?> field) {
-        return staticAnalysis.getModel()
-                             .filterChildren(e -> e instanceof CtFieldWrite write &&
-                                                  write.getVariable().equals(field.getReference()))
-                             .first() == null;
+    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtVariableReference<?> ctVariableReference) {
+        return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || staticAnalysis.getModel()
+                .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
+                        write.getVariable().equals(ctVariableReference))
+                .first() == null;
+    }
+
+    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
+            StaticAnalysis staticAnalysis,
+            CtVariableReference<?> ctVariableReference
+    ) {
+        if (!isEffectivelyFinal(staticAnalysis, ctVariableReference)) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
@@ -262,13 +317,55 @@ public final class SpoonUtil {
         return type.getDeclaringType() != null;
     }
 
+    public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
+        // if the method is defined for the first time, this should return an empty collection
+        return !ctMethod.getTopDefinitions().isEmpty();
+    }
+
     public static boolean isInOverriddenMethodSignature(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
             return false;
         }
 
-        // if the method is defined for the first time, this should return an empty collection
-        return !ctMethod.getTopDefinitions().isEmpty();
+        return isOverriddenMethod(ctMethod);
+    }
+
+    public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
+        return TerminalStatement.of(ctStatement).or(() -> AssignmentStatement.of(ctStatement));
+    }
+
+    public static Optional<Effect> getSingleEffect(Collection<? extends CtStatement> ctStatements) {
+        List<CtStatement> statements = getEffectiveStatements(ctStatements);
+
+        if (statements.size() != 1 && (statements.size() != 2 || !(statements.get(1) instanceof CtBreak))) {
+            return Optional.empty();
+        }
+
+        return tryMakeEffect(statements.get(0));
+    }
+
+    public static List<Effect> getCasesEffects(Iterable<? extends CtCase<?>> ctCases) {
+        List<Effect> effects = new ArrayList<>();
+        for (CtCase<?> ctCase : ctCases) {
+            Optional<Effect> effect = SpoonUtil.getSingleEffect(ctCase.getStatements());
+            if (effect.isEmpty()) {
+                return new ArrayList<>();
+            }
+
+            Effect resolvedEffect = effect.get();
+
+
+            // check for default case, which is allowed to be a terminal effect, even if the other cases are not:
+            if (ctCase.getCaseExpressions().isEmpty() && resolvedEffect instanceof TerminalEffect) {
+                continue;
+            }
+
+            effects.add(resolvedEffect);
+        }
+
+        if (effects.isEmpty()) return new ArrayList<>();
+
+        return effects;
     }
 }

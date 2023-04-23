@@ -32,5 +32,11 @@ interface Bar { // Not Ok
 }
 
 interface Foo {
-    public static final int FOO = 1; // Not ok
+    public static final int FOO = 1; // Not Ok
+}
+
+class OuterClass {
+    interface InnerInterface { // Ok
+        void doSomething();
+    }
 }

@@ -26,6 +26,12 @@ public class SourceInfo {
     private final JavaVersion version;
     private final Charset charset;
 
+    private SourceInfo(Path file, JavaVersion version, Charset charset) {
+        this.file = file;
+        this.version = version;
+        this.charset = charset;
+    }
+
     public SourceInfo(Path file, JavaVersion version) throws IOException {
         if (!file.toFile().isDirectory()) {
             throw new IllegalArgumentException("The file must be a directory");
@@ -66,6 +72,12 @@ public class SourceInfo {
             .filter(p -> p.toString().endsWith(".java"))
             .filter(p -> !p.toString().endsWith("package-info.java"))
             .map(Path::toFile);
+    }
+
+    public SourceInfo copyTo(Path target) throws IOException {
+        FileUtils.copyDirectory(this.file.toFile(), target.toFile());
+
+        return new SourceInfo(target, this.version, this.charset);
     }
 
     public FileSystemFolder getSpoonFile() {

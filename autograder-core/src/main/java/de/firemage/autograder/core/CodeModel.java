@@ -1,9 +1,7 @@
 package de.firemage.autograder.core;
 
-import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import de.firemage.autograder.core.integrated.SpoonUtil;
-import org.apache.commons.lang3.StringUtils;
 import spoon.Launcher;
 import spoon.compiler.ModelBuildingException;
 import spoon.processing.AbstractProcessor;
@@ -51,7 +49,7 @@ public class CodeModel implements AutoCloseable {
             throw new ModelBuildException("Failed to parse the code", e);
         }
         this.factory = launcher.getFactory();
-        
+
         // Find the base package
         this.model.processWith(new AbstractProcessor<CtType<?>>() {
             @Override
@@ -59,12 +57,12 @@ public class CodeModel implements AutoCloseable {
                 if (type.getPackage() == null || type.getPackage().getQualifiedName().startsWith("java.")) {
                     return;
                 }
-                
+
                 if (basePackage == null) {
                     basePackage = type.getPackage();
                     return;
                 }
-                
+
                 var typePackage = type.getPackage().getQualifiedName();
                 while (!typePackage.startsWith(basePackage.getQualifiedName())) {
                     basePackage = basePackage.getDeclaringPackage();

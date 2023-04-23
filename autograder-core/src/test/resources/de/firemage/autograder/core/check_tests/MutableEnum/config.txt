@@ -1,0 +1,3 @@
+oop.MutableEnum
+Enums should be immutable.
+Test.java:10

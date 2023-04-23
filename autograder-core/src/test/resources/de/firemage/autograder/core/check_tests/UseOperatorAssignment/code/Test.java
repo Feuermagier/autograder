@@ -29,5 +29,9 @@ public class Test {
         a = b + c * a; // Ok
         a = b - a + c; // Ok
         a = a - b + c - d; // Ok
+
+        String s = "a";
+        s = s + " "; // Not Ok
+        s = " " + s; // Ok
     }
 }

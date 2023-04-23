@@ -37,7 +37,7 @@ public class DoNotUseSystemExit extends IntegratedCheck {
         }
     }
 
-        @Override
+    @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {
             @Override

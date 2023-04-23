@@ -1,0 +1,3 @@
+general.LocalVariableShouldBeConstant
+Check for local variables that could be private static final attributes.
+Test.java:5

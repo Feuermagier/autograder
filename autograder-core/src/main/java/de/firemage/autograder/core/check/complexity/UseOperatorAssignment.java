@@ -13,6 +13,7 @@ import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtOperatorAssignment;
+import spoon.reflect.declaration.CtTypedElement;
 
 import java.util.List;
 import java.util.Map;
@@ -20,28 +21,39 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = {ProblemType.USE_OPERATOR_ASSIGNMENT})
 
 public class UseOperatorAssignment extends IntegratedCheck {
+    private static final List<Class<?>> NON_COMMUTATIVE_TYPES = List.of(
+        java.lang.String.class
+    );
+
     public UseOperatorAssignment() {
         super(new LocalizedMessage("use-operator-assignment-desc"));
     }
 
-    private boolean isCommutative(BinaryOperatorKind kind) {
+    private boolean isCommutativeType(CtTypedElement<?> ctTypedElement) {
+        return ctTypedElement.getType() == null
+               || NON_COMMUTATIVE_TYPES.stream()
+                                       .map(ty -> ctTypedElement.getFactory().Type().createReference(ty))
+                                       .noneMatch(ty -> ty.equals(ctTypedElement.getType()));
+    }
+
+    private boolean isCommutative(BinaryOperatorKind binaryOperatorKind) {
         return List.of(
             BinaryOperatorKind.AND,
             BinaryOperatorKind.OR,
             BinaryOperatorKind.BITXOR,
             BinaryOperatorKind.MUL,
             BinaryOperatorKind.PLUS
-        ).contains(kind);
+        ).contains(binaryOperatorKind);
     }
 
-    private boolean isAssignable(BinaryOperatorKind kind) {
-        return this.isCommutative(kind) || List.of(
+    private boolean isAssignable(BinaryOperatorKind binaryOperatorKind) {
+        return this.isCommutative(binaryOperatorKind) || List.of(
             BinaryOperatorKind.MOD,
             BinaryOperatorKind.MINUS,
             BinaryOperatorKind.DIV,
             BinaryOperatorKind.SL,
             BinaryOperatorKind.SR
-        ).contains(kind);
+        ).contains(binaryOperatorKind);
     }
 
     @Override
@@ -75,12 +87,12 @@ public class UseOperatorAssignment extends IntegratedCheck {
                 String simplifiedExpr = null;
                 if (left.toString().equals(lhs.toString())) {
                     // left hand side is the same, so we can use an operator assignment
-                    simplifiedExpr = String.format("%s %s= %s", lhs, PrintUtil.printOperator(operator), right);
-                } else if (isCommutative(operator) && right.toString().equals(lhs.toString())) {
+                    simplifiedExpr = "%s %s= %s".formatted(lhs, PrintUtil.printOperator(operator), right);
+                } else if (isCommutative(operator) && isCommutativeType(ctBinaryOperator) && right.toString().equals(lhs.toString())) {
                     // operator is commutative so <lhs> = <left> <op> <right> is equivalent to
                     // <lhs> = <right> <op> <left>
 
-                    simplifiedExpr = String.format("%s %s= %s", lhs, PrintUtil.printOperator(operator), left);
+                    simplifiedExpr = "%s %s= %s".formatted(lhs, PrintUtil.printOperator(operator), left);
                 }
 
                 if (simplifiedExpr != null) {

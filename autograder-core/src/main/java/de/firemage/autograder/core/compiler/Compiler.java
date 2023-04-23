@@ -15,6 +15,7 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.StringWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -25,26 +26,85 @@ import java.util.jar.Attributes;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
+import java.util.regex.Pattern;
 
 public final class Compiler {
-    public static final Locale COMPILER_LOCALE = Locale.US;
+    static final Locale COMPILER_LOCALE = Locale.US;
 
     private Compiler() {
     }
 
     public static Optional<CompilationResult> compileToJar(SourceInfo input, Path tmpLocation, JavaVersion javaVersion)
-        throws IOException, CompilationFailureException {
-        return compileWithEncoding(input, tmpLocation, javaVersion, input.getCharset());
+    throws IOException, CompilationFailureException {
+        return compileAndIgnoreSuppressWarnings(input, tmpLocation, javaVersion, input.getCharset());
     }
 
-    public static Optional<CompilationResult> compileWithEncoding(SourceInfo input, Path tmpLocation, JavaVersion javaVersion,
-                                                                  Charset charset)
-        throws IOException, CompilationFailureException {
+    // @SuppressWarnings will result in warnings being ignored (obviously). This is suboptimal, when
+    // one wants to lint things that the compiler emits like unchecked casts.
+    //
+    // This piece of code, tries to patch the @SuppressWarnings annotation to not ignore any warnings.
+    private static Optional<CompilationResult> compileAndIgnoreSuppressWarnings(
+        SourceInfo input, Path tmpLocation, JavaVersion javaVersion, Charset charset
+    ) throws IOException, CompilationFailureException {
+        Path modifiedOutput = tmpLocation.resolve(input.getName() + "_modified");
+        SourceInfo copiedVersion = input.copyTo(modifiedOutput);
+
+        List<PhysicalFileObject> compilationUnits = copiedVersion.streamFiles()
+                                                         .map(file -> new PhysicalFileObject(file, charset))
+                                                         .toList();
+        // patch the files:
+        for (PhysicalFileObject file : compilationUnits) {
+            String content = file.getCharContent(true).toString();
+            Pattern pattern = Pattern.compile("@SuppressWarnings\\((.+?)\\)", Pattern.DOTALL);
+            String patched = pattern.matcher(content).replaceAll(matchResult -> {
+                String group = matchResult.group(1);
+                String result = "";
+                int i = 0;
+                int length = group.length();
+                for (char c : group.toCharArray()) {
+                    if (i == 0) {
+                        result += '{';
+                    } else if (i == length - 1) {
+                        result += '}';
+                    } else if (c == '\r' || c == '\n') {
+                        result += c;
+                    } else {
+                        result += ' ';
+                    }
+
+                    i++;
+                }
+
+                return "@SuppressWarnings(%s)".formatted(result);
+            });
+
+            try (Writer writer = file.openWriter()) {
+                writer.write(patched);
+            }
+        }
+
+        Optional<CompilationResult> result = compileWithEncoding(copiedVersion, tmpLocation, javaVersion, charset);
+
+        copiedVersion.delete();
+
+        Optional<List<CompilationDiagnostic>> diagnostics = result.map(CompilationResult::diagnostics);
+
+        // now compile the code again, but this time without the patched version (to prevent problems if the patching
+        // is broken with the source position)
+        return compileWithEncoding(input, tmpLocation, javaVersion, charset)
+                   .map(res -> new CompilationResult(res.jar(), diagnostics.orElse(List.of())));
+    }
+
+    private static Optional<CompilationResult> compileWithEncoding(
+        SourceInfo input, Path tmpLocation, JavaVersion javaVersion,
+        Charset charset
+    )
+    throws IOException, CompilationFailureException {
 
         List<PhysicalFileObject> compilationUnits = input.streamFiles()
-            .map(file -> new PhysicalFileObject(file, charset))
-            .toList();
-        
+                                                         .map(file -> new PhysicalFileObject(file, charset))
+                                                         .toList();
+
         if (compilationUnits.isEmpty()) {
             return Optional.empty();
         }
@@ -55,22 +115,27 @@ public final class Compiler {
         StringWriter output = new StringWriter();
         JavaFileManager fileManager = new SeparateBinaryFileManager(
             compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
-            compilerOutput.toFile(), charset);
+            compilerOutput.toFile(), charset
+        );
         boolean successful = compiler.getTask(
             output,
             fileManager,
             diagnosticCollector,
             Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial",
-                "--release=" + javaVersion.getVersionString()),
+                "--release=" + javaVersion.getVersionString()
+            ),
             null,
-            compilationUnits).call();
+            compilationUnits
+        ).call();
         output.flush();
         output.close();
 
         if (!successful) {
             throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
-                .map(d -> new CompilationDiagnostic(d, input.getFile()))
-                .toList(), input.getFile());
+                                                                     .map(d -> new CompilationDiagnostic(d,
+                                                                         input.getFile()
+                                                                     ))
+                                                                     .toList(), input.getFile());
         }
 
         Manifest manifest = new Manifest();
@@ -82,8 +147,10 @@ public final class Compiler {
         FileUtils.deleteDirectory(compilerOutput.toFile());
 
         return Optional.of(new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
-            .map(d -> new CompilationDiagnostic(d, input.getFile()))
-            .toList()));
+                                                                         .map(d -> new CompilationDiagnostic(d,
+                                                                             input.getFile()
+                                                                         ))
+                                                                         .toList()));
     }
 
 
@@ -94,8 +161,9 @@ public final class Compiler {
         try {
             if (source.isDirectory()) {
                 if (!relativePath.isEmpty()) {
-                    if (!relativePath.endsWith("/"))
+                    if (!relativePath.endsWith("/")) {
                         relativePath += "/";
+                    }
                     JarEntry entry = new JarEntry(relativePath);
                     entry.setTime(source.lastModified());
                     target.putNextEntry(entry);
@@ -113,8 +181,9 @@ public final class Compiler {
                 byte[] buffer = new byte[1024];
                 while (true) {
                     int count = in.read(buffer);
-                    if (count == -1)
+                    if (count == -1) {
                         break;
+                    }
                     target.write(buffer, 0, count);
                 }
                 target.closeEntry();

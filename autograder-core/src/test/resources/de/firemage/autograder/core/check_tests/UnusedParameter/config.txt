@@ -1,0 +1,4 @@
+unnecessary.UnusedParameter
+Checks for unused parameters in methods and constructors.
+Test.java:8
+Test.java:12

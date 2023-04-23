@@ -22,7 +22,7 @@ public class UtilityClassCheck extends IntegratedCheck {
         super(new LocalizedMessage("utility-desc"));
     }
 
-    private static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
+    public static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
         return
             // it must obviously be a class
             ctClass.isClass()
@@ -34,7 +34,7 @@ public class UtilityClassCheck extends IntegratedCheck {
                 && ctClass.getMethods().stream().allMatch(CtMethod::isStatic)
                 // all fields should be static and effectively final (no assignments)
                 && ctClass.getFields().stream().allMatch(
-                    ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField)
+                    ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())
                 )
                 // the class should not be abstract
                 && !ctClass.isAbstract()

@@ -1,0 +1,3 @@
+api.MathFloorDivision
+Math.floor is not needed for integer division
+Test.java:7

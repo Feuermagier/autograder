@@ -1,0 +1,4 @@
+api.UseEnumCollection
+Use EnumMap/EnumSet instead of HashMap/HashSet when the key or value is an enum.
+Test.java:11
+Test.java:12

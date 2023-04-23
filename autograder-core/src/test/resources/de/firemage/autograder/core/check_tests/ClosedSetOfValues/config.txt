@@ -1,0 +1,7 @@
+oop.ClosedSetOfValues
+A finite set of values should be modelled as an enum.
+Test.java:9-21
+Test.java:23-35
+Test.java:40
+Test.java:41
+Test.java:42

@@ -42,3 +42,21 @@ public class Test {
         return this.array2d;  // Not Ok
     }
 }
+
+enum Vegetable {
+    CARROT, SALAD;
+}
+
+enum FieldKind {
+    FIELD(new Vegetable[] {Vegetable.CARROT, Vegetable.SALAD});
+
+    private final Vegetable[] possibleVegetables;
+
+    FieldKind(Vegetable[] possibleVegetables) {
+        this.possibleVegetables = possibleVegetables;
+    }
+
+    public Vegetable[] getPossibleVegetables() {
+        return this.possibleVegetables; // Not Ok
+    }
+}

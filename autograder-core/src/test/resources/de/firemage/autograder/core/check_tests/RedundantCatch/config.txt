@@ -1,0 +1,3 @@
+complexity.RedundantCatch
+Exception caught unnecessarily
+Test.java:15

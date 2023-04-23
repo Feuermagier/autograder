@@ -35,6 +35,13 @@ use-string-formatted = `{$formatted}` is easier to read.
 optional-argument = Optional should not be used as an argument, because it has 3 states: null, Optional.empty() and Optional.of(..). See https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Instead of an Optional boolean, one should use an enum.
 
+equals-hashcode-comparable-contract = Equals and hashCode must always be overridden together. Similarly for Comparable, both equals and hashCode must be overwritten.
+
+use-format-string = `{$formatted}` is easier to read.
+
+math-floor-division = Integer division is always floored, therefore the `Math.floor` is redundant.
+
+use-enum-collection = For maps where an enum is used as a key and for sets as a value, one should use EnumMap/EnumSet.
 
 # Comment
 commented-out-code-desc = Unused code should be removed and not commented out
@@ -52,7 +59,7 @@ javadoc-method-exp-unexpected-tag = JavaDoc comments of methods must not have '@
 
 javadoc-type-desc = Types (classes, interfaces, ...) must have valid JavaDoc comments
 javadoc-type-exp-unexpected-tag = JavaDoc comments of types must not have '@{$tag}' tags
-javadoc-type-exp-invalid-author = The @author tag must contain *only* your u-shorthand
+javadoc-type-exp-invalid-author = The @author tag should contain your u-shorthand: {$authors}
 
 javadoc-field-desc = Fields must have valid JavaDoc comments
 javadoc-field-exp-unexpected-tag = JavaDoc comments of fields must not have '@{$tag}' tags
@@ -65,6 +72,8 @@ javadoc-stub-exp-desc = Javadoc has an empty description
 javadoc-stub-exp-param = Stub description for parameter {$param}
 javadoc-stub-exp-return = Stub description for return value
 javadoc-stub-exp-throws = Stub description for exception {$exp}
+
+javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned in the javadoc comment.
 
 # Complexity
 diamond-desc = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
@@ -116,6 +125,8 @@ merge-if-exp = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (..
 
 complex-regex = Nontrivial regex need an explanation (score is {$score}, max allowed score is {$max})
 
+redundant-catch = An exception should not be caught and then rethrown immediately.
+
 # Debug
 assert-used-desc = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
@@ -141,7 +152,7 @@ runtime-ex-caught-desc = Never catch runtime exceptions (aside from NumberFormat
 runtime-ex-caught-exp = Runtime exception of type {$exp} caught
 
 exception-message-desc = Thrown exception always need a message
-exception-message-exp = Message is missing or empty
+exception-message-exp = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
 # General
 
@@ -190,14 +201,23 @@ avoid-shadowing = The variable '{$name}' hides an attribute with the same name. 
 
 suppress-warnings = @SuppressWarnings suppresses warnings from the compiler or Checkstyle, without fixing the underlying problem of the code.
 
+scanner-closed = Scanner should be closed
+
+unchecked-type-cast = It has to be ensured that the type of the object is the same as that of the cast. Otherwise, the code might crash.
+
+local-variable-should-be-constant = The variable should be a private static final attribute.
+
+compare-char-value = char values in the ASCII range should be compared as char values, not as int values.
+
+use-guard-clauses = The code cancels the normal control-flow through for example a return. if-else-blocks with those conditions can be written more beautifully using so called guard-clauses. This has the advantage that you can better recognize duplicate code. See for a detailed explanation https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a or https://deviq.com/design-patterns/guard-clause
 
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
 
 constants-name-desc = Constants should have descriptive names - e.g. AUTHOR_INDEX instead of FIRST_INDEX
-constants-name-exp-string = The name '{$name}' is non-descriptive for the value '{$value}'
-constants-name-exp-number = The name '{$name}' is non-descriptive for the value {$value}
+constants-name-exp = The name '{$name}' is non-descriptive for the value '{$value}'
+constants-name-exp-value = The value '{$value}' of the constant '{$name}' should not be in the name
 
 linguistic-desc = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 linguistic-exp = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
@@ -205,6 +225,10 @@ linguistic-exp = The code element has a confusing name. See https://pmd.github.i
 variable-names-desc = Local variables must have descriptive names
 variable-name-exp-single-letter = Single letter names such as '{$name}' are usually non-descriptive
 variable-name-exp-type = Don't use unnecessary abbreviations such as '{$name}'
+variable-name-exp-type-in-name = The identifier '{$name}' should not contain its type in the name.
+
+type-has-descriptive-name-pre-suffix = The name contains redundant prefixes or suffixes
+type-has-descriptive-name-exception = A class that inherits from Exception should have 'Exception' at the end of its name
 
 # OOP
 concrete-collection-desc = Use the parent interface instead of a concrete collection class (e.g. List instead of ArrayList)
@@ -236,6 +260,16 @@ ui-output-separation = Output should not be spread over multiple classes. First 
 do-not-use-system-exit = System.exit() must not be used. Structure your code in so that it exits naturally.
 
 avoid-inner-classes = Every class should be in its own file. Inner-Classes should be avoided.
+
+mutable-enum = Enums should be immutable. See https://stackoverflow.com/a/41199773/7766117
+
+should-be-enum-attribute = The values of the switch should be associated attributes of the enum. Alternatively, one should use a Map.
+
+closed-set-of-values-switch = A switch has only finitely many cases. This is a closed set, which should be modeled as an enum.
+closed-set-of-values-list = A list of finitely many values should be modeled as an enum.
+
+do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.
+do-not-use-instanceof-emulation = instanceof should not be used and also not be emulated through getClass or ClassCastException. See Ilias Wiki.
 
 # Structure
 default-package-desc = The default package must not be used

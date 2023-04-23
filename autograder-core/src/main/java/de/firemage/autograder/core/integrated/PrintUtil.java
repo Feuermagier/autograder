@@ -4,7 +4,6 @@ import spoon.reflect.code.BinaryOperatorKind;
 
 public final class PrintUtil {
     private PrintUtil() {
-        
     }
 
     public static String printOperator(BinaryOperatorKind op) {

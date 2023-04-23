@@ -1,0 +1,4 @@
+general.FieldShouldBeFinalCheck
+Field should be final
+Test.java:8
+Test.java:9

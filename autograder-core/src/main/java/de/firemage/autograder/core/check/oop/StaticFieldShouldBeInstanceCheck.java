@@ -27,7 +27,7 @@ public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (!SpoonUtil.isEffectivelyFinal(staticAnalysis, field)) {
+                if (!SpoonUtil.isEffectivelyFinal(staticAnalysis, field.getReference())) {
                     addLocalProblem(field,
                         new LocalizedMessage("static-field-exp", Map.of("name", field.getSimpleName())),
                         ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE);
