@@ -9,7 +9,7 @@ public class Test {
 
     private static final int VALUE_A = 1; // Ok
 
-    private static final Object d = null; // Not Ok
+    private static final Object d = null; // Ok (covered by descriptive variable check)
     private static final boolean TRUE = true; // Not Ok
     private static final boolean FALSE = false; // Not Ok
     private static final String UP = "up"; // Not Ok

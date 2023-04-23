@@ -75,8 +75,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             case ':' -> List.of("colon");
             case ';' -> List.of("semi_colon", "semicolon");
             case '_' -> List.of("underscore", "dash", "line");
-            case '/' -> List.of("slash", "backslash");
-            case '\\' -> List.of("slash", "backslash");
+            case '/', '\\' -> List.of("slash", "backslash");
             default -> Character.isAlphabetic(c) ? List.of(Character.toLowerCase(c) + "") : null;
         };
     }
@@ -136,8 +135,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
 
                 String fieldName = field.getSimpleName();
 
-                if (fieldName.length() == 1
-                    || literal.getValue() instanceof Integer v1 && isNonDescriptiveIntegerName(fieldName, v1)
+                if (literal.getValue() instanceof Integer v1 && isNonDescriptiveIntegerName(fieldName, v1)
                     || literal.getValue() instanceof String v2 && isNonDescriptiveStringName(fieldName, v2)) {
                     reportProblem("constants-name-exp", field);
                 } else if (containsValueInName(fieldName, literal)) {
