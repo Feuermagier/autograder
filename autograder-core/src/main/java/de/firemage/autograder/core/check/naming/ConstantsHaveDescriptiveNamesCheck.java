@@ -21,6 +21,10 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
     private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol");
+    private static final Map<String, List<String>> SPECIAL_VALUE_MAPPING = Map.ofEntries(
+            Map.entry("->", List.of("arrow")),
+            Map.entry("-->", List.of("arrow"))
+    );
 
     public ConstantsHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("constants-name-desc"));
@@ -90,6 +94,12 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             List<String> charOptions = listCharOptions(valueString.charAt(0));
             if (charOptions != null) {
                 return charOptions.stream().anyMatch(lowerCaseName::contains);
+            }
+        }
+
+        for (var entry : SPECIAL_VALUE_MAPPING.entrySet()) {
+            if (valueString.contains(entry.getKey())) {
+                return entry.getValue().stream().anyMatch(lowerCaseName::contains);
             }
         }
 

@@ -17,4 +17,8 @@ public class Test {
     private static final String DEBUG_PATH = "debug-path"; // Not Ok
     private static final String LEFT = "left"; // Not Ok
     private static final String RIGHT = "right"; // Not Ok
+
+    private static final String SPLIT_COLON = ":"; // Not Ok
+    private static final String SPLIT_COMMA = ","; // Not Ok
+    private static final String SPLIT_ARROW = "-->"; // Not OK
 }
