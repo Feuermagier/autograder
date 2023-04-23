@@ -216,8 +216,8 @@ bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' hab
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
 
 constants-name-desc = Konstanten sollte aussagekräftige Namen haben - z.B. AUTHOR_INDEX statt FIRST_INDEX
-constants-name-exp-string = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
-constants-name-exp-number = The name '{$name}' ist nicht aussagekräftig gegeben den Wert {$value}
+constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
+constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
 
 linguistic-desc = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 linguistic-exp = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming

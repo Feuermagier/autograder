@@ -214,8 +214,8 @@ bool-getter-name-desc = Methods without parameters that return booleans should n
 bool-getter-name-exp = The method should be called isY() instead of getY()
 
 constants-name-desc = Constants should have descriptive names - e.g. AUTHOR_INDEX instead of FIRST_INDEX
-constants-name-exp-string = The name '{$name}' is non-descriptive for the value '{$value}'
-constants-name-exp-number = The name '{$name}' is non-descriptive for the value {$value}
+constants-name-exp = The name '{$name}' is non-descriptive for the value '{$value}'
+constants-name-exp-value = The value '{$value}' of the constant '{$name}' should not be in the name
 
 linguistic-desc = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 linguistic-exp = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming

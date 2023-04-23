@@ -9,6 +9,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -17,10 +18,10 @@ import java.util.stream.Stream;
 @ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
-        List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
+            List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
     private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol");
-    
+
     public ConstantsHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("constants-name-desc"));
     }
@@ -35,16 +36,12 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             default -> List.of();
         };
         return valueNameOptions.stream()
-            .flatMap(o -> Stream.concat(Stream.of(o),
-                NUMBER_PRE_SUFFIXES.stream().flatMap(s -> Stream.of(s + "_" + o, o + "_" + s))))
-            .anyMatch(o -> name.toLowerCase().equals(o));
+                .flatMap(o -> Stream.concat(Stream.of(o),
+                        NUMBER_PRE_SUFFIXES.stream().flatMap(s -> Stream.of(s + "_" + o, o + "_" + s))))
+                .anyMatch(o -> name.toLowerCase().equals(o));
     }
 
     private static boolean isNonDescriptiveStringName(String name, String value) {
-        if (value.length() > 4) {
-            return false;
-        }
-
         if (NON_DESCRIPTIVE_NAMES.contains(name.toLowerCase())) {
             return true;
         }
@@ -59,7 +56,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return false;
                 }
                 options = options.flatMap(
-                    suffix -> charOptions.stream().flatMap(o -> Stream.of(suffix + o, suffix + "_" + o)));
+                        suffix -> charOptions.stream().flatMap(o -> Stream.of(suffix + o, suffix + "_" + o)));
             }
         }
         return options.anyMatch(option -> option.equals(name.toLowerCase()));
@@ -80,33 +77,61 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         };
     }
 
+    private static boolean containsValueInName(String name, CtLiteral<?> value) {
+        String lowerCaseName = name.toLowerCase();
+
+        String valueString = "null";
+        if (value.getValue() != null) {
+            valueString = value.getValue().toString().toLowerCase();
+        }
+
+        // convert special characters like : to their names (colon)
+        if (valueString.length() == 1 && !Character.isAlphabetic(valueString.charAt(0))) {
+            List<String> charOptions = listCharOptions(valueString.charAt(0));
+            if (charOptions != null) {
+                return charOptions.stream().anyMatch(lowerCaseName::contains);
+            }
+        }
+
+        // to detect private static String MY_CONSTANT = "my-constant"
+        valueString = valueString.replace('-', '_');
+
+        return lowerCaseName.contains(valueString);
+    }
+
+    private void reportProblem(String key, CtVariable<?> ctVariable) {
+        this.addLocalProblem(
+            ctVariable,
+            new LocalizedMessage(
+                key,
+                Map.of(
+                    "name", ctVariable.getSimpleName(),
+                    "value", ctVariable.getDefaultExpression().prettyprint()
+                )
+            ),
+            ProblemType.MEANINGLESS_CONSTANT_NAME
+        );
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
             public void process(CtField<?> field) {
-                if (!field.isFinal() || field.getDefaultExpression() == null) {
+                if (!field.isFinal()
+                    || field.getDefaultExpression() == null
+                    || !(field.getDefaultExpression() instanceof CtLiteral<?> literal)) {
                     return;
                 }
 
-                if (field.getDefaultExpression() instanceof CtLiteral<?> literal) {
-                    if (literal.getValue() instanceof Integer value &&
-                        isNonDescriptiveIntegerName(field.getSimpleName(), value)) {
-                        addLocalProblem(field,
-                            new LocalizedMessage("constants-name-exp-number",
-                                Map.of(
-                                    "name", field.getSimpleName(),
-                                    "value", value
-                                )), ProblemType.MEANINGLESS_CONSTANT_NAME);
-                    } else if (literal.getValue() instanceof String value &&
-                        isNonDescriptiveStringName(field.getSimpleName(), value)) {
-                        addLocalProblem(field,
-                            new LocalizedMessage("constants-name-exp-string",
-                                Map.of(
-                                    "name", field.getSimpleName(),
-                                    "value", value
-                                )), ProblemType.MEANINGLESS_CONSTANT_NAME);
-                    }
+                String fieldName = field.getSimpleName();
+
+                if (fieldName.length() == 1
+                    || literal.getValue() instanceof Integer v1 && isNonDescriptiveIntegerName(fieldName, v1)
+                    || literal.getValue() instanceof String v2 && isNonDescriptiveStringName(fieldName, v2)) {
+                    reportProblem("constants-name-exp", field);
+                } else if (containsValueInName(fieldName, literal)) {
+                    reportProblem("constants-name-exp-value", field);
                 }
             }
         });
