@@ -123,7 +123,7 @@ use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
 merge-if-desc = If an else-block consists solely of an if, you can replace it with an else-if
 merge-if-exp = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
-complex-regex = Nontrivial regex needs an explanation
+complex-regex = Nontrivial regex need an explanation (score is {$score}, max allowed score is {$max})
 
 redundant-catch = An exception should not be caught and then rethrown immediately.
 

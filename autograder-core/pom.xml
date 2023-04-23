@@ -57,6 +57,10 @@
             <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-event</artifactId>
         </dependency>
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-treeg</artifactId>
+        </dependency>
 
         <dependency>
             <groupId>de.firemage.autograder</groupId>
@@ -166,7 +170,7 @@
         <dependency>
             <groupId>org.apache.commons</groupId>
             <artifactId>commons-compress</artifactId>
-            <version>1.22</version>
+            <version>1.23.0</version>
         </dependency>
 
         <!-- Language detection -->

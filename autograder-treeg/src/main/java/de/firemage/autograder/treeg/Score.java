@@ -1,15 +1,5 @@
-package de.firemage.autograder.core.check.complexity;
+package de.firemage.autograder.treeg;
 
-import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
-import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
-import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.treeg.InvalidRegExSyntaxException;
-import de.firemage.autograder.treeg.RegExParser;
-import de.firemage.autograder.treeg.RegularExpression;
 import de.firemage.autograder.treeg.ast.Alternative;
 import de.firemage.autograder.treeg.ast.BoundaryMatcher;
 import de.firemage.autograder.treeg.ast.CaptureGroupReference;
@@ -23,57 +13,8 @@ import de.firemage.autograder.treeg.ast.PredefinedCharacterClass;
 import de.firemage.autograder.treeg.ast.Quantifier;
 import de.firemage.autograder.treeg.ast.RegExCharacter;
 import de.firemage.autograder.treeg.ast.RegExNode;
-import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtLiteral;
 
-import java.util.Map;
-
-@ExecutableCheck(reportedProblems = {ProblemType.COMPLEX_REGEX})
-public class RegexCheck extends IntegratedCheck {
-    private static final double MAX_ALLOWED_SCORE = 10.0;
-
-    public RegexCheck() {
-        super(new LocalizedMessage("complex-regex"));
-    }
-
-    @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtLiteral<String>>() {
-            @Override
-            public void process(CtLiteral<String> literal) {
-                if (!SpoonUtil.isString(literal.getType())) {
-                    return;
-                }
-
-                String value = literal.getValue();
-
-                if (value.length() <= 4) {
-                    // Ignore short strings for performance reasons (how complex can those regex be?!)
-                    return;
-                }
-
-                try {
-                    RegularExpression regex = RegExParser.parse(value);
-
-                    if (regex.root() instanceof Chain chain && chain.children().stream().allMatch(c -> c instanceof RegExCharacter)) {
-                        // Normal string
-                        return;
-                    }
-
-                    double score = scoreRegEx(regex);
-                    if (score > MAX_ALLOWED_SCORE) {
-                        addLocalProblem(
-                                literal,
-                                new LocalizedMessage("complex-regex", Map.of("score", score, "max", MAX_ALLOWED_SCORE)),
-                                ProblemType.COMPLEX_REGEX
-                        );
-                    }
-                } catch (InvalidRegExSyntaxException e) {
-                    // Not a valid regex
-                }
-            }
-        });
-    }
+public class Score {
 
     public static double scoreRegEx(RegularExpression regex) {
         return scoreNode(regex.root());
@@ -108,14 +49,14 @@ public class RegexCheck extends IntegratedCheck {
 
     private static double scoreCharacter(RegExCharacter character) {
         if (character.escaped()) {
-            return 2.0;
+            return 0.5;
         } else {
-            return 0.0;
+            return 0.1;
         }
     }
 
     private static double scoreAlternative(Alternative alternative) {
-        return Math.exp(alternative.alternatives().size()) * alternative.alternatives().stream().mapToDouble(RegexCheck::scoreNode).sum();
+        return Math.exp(alternative.alternatives().size() / 5.0) * alternative.alternatives().stream().mapToDouble(Score::scoreNode).sum();
     }
 
     private static double scoreBoundaryMatcher(BoundaryMatcher matcher) {
@@ -123,20 +64,20 @@ public class RegexCheck extends IntegratedCheck {
     }
 
     private static double scoreCaptureGroupReference(CaptureGroupReference ref) {
-        return 10.0;
+        return 5.0;
     }
 
     private static double scoreChain(Chain chain) {
-        return chain.children().stream().mapToDouble(RegexCheck::scoreNode).sum() + 1.0;
+        return chain.children().stream().mapToDouble(Score::scoreNode).sum();
     }
 
     private static double scoreCharacterClass(CharacterClass c) {
-        return (c.negated() ? 4.0 : 1.0) * c.ranges().stream().mapToDouble(RegexCheck::scoreCharacterClassEntry).sum();
+        return (c.negated() ? 2.0 : 1.0) * c.ranges().stream().mapToDouble(Score::scoreCharacterClassEntry).sum();
     }
 
     private static double scoreCharacterClassEntry(CharacterClassEntry entry) {
         if (entry instanceof RegExCharacter c) {
-            return scoreCharacter(c) + 0.1;
+            return scoreCharacter(c);
         } else if (entry instanceof CharacterRange r) {
             return scoreCharacterRange(r);
         } else {
@@ -145,22 +86,22 @@ public class RegexCheck extends IntegratedCheck {
     }
 
     private static double scoreCharacterRange(CharacterRange range) {
-        return 2.0;
+        return 5.0;
     }
 
     private static double scoreGroup(Group group) {
         double multiplier = switch (group.type()) {
-            case CAPTURING -> 2.0;
-            case NON_CAPTURING -> 10.0;
-            case INDEPENDENT_NON_CAPTURING -> 100.0;
+            case CAPTURING -> 1.0;
+            case NON_CAPTURING -> 2.0;
+            case INDEPENDENT_NON_CAPTURING -> 5.0;
         };
 
         if (group.name() != null) {
-            multiplier += 10.0;
+            multiplier += 2.0;
         }
 
         if (group.flags() != null) {
-            multiplier += Math.exp(group.flags().length() + 2);
+            multiplier += Math.exp(group.flags().length());
         }
 
         return multiplier * scoreNode(group.root());
@@ -172,17 +113,16 @@ public class RegexCheck extends IntegratedCheck {
 
     private static double scorePredefinedCharacterClass(PredefinedCharacterClass c) {
         return switch (c.type()) {
-            case ANY, DIGIT, WORD -> 1.0;
-            case NON_DIGIT, WHITESPACE, NON_WORD -> 5.0;
-            case HORIZONTAL_WHITESPACE, NON_HORIZONTAL_WHITESPACE, NON_WHITESPACE, VERTICAL_WHITESPACE, NON_VERTICAL_WHITESPACE ->
-                    10.0;
+            case ANY, DIGIT, WORD -> 0.5;
+            case NON_DIGIT, WHITESPACE, NON_WORD -> 2.0;
+            case HORIZONTAL_WHITESPACE, NON_HORIZONTAL_WHITESPACE, NON_WHITESPACE, VERTICAL_WHITESPACE, NON_VERTICAL_WHITESPACE -> 5.0;
         };
     }
 
     private static double scoreQuantifier(Quantifier quantifier) {
         return switch (quantifier.type()) {
-            case AT_MOST_ONCE, ANY, AT_LEAST_ONCE -> 2.0;
-            case TIMES, OPEN_RANGE, RANGE -> 5.0;
+            case AT_MOST_ONCE, ANY, AT_LEAST_ONCE -> 1.5;
+            case TIMES, OPEN_RANGE, RANGE -> 2.0;
         } * scoreNode(quantifier.child());
     }
 }

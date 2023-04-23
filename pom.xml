@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 <project xmlns="http://maven.apache.org/POM/4.0.0"
-    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-    xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <modelVersion>4.0.0</modelVersion>
 
     <groupId>de.firemage.autograder</groupId>
@@ -44,7 +44,7 @@
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
         <asm.version>9.5</asm.version>
-        <slf4j.version>2.0.6</slf4j.version>
+        <slf4j.version>2.0.7</slf4j.version>
         <jackson.version>2.14.2</jackson.version>
 
         <revision>0.3</revision>
@@ -98,6 +98,11 @@
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-cmd</artifactId>
+                <version>${revision}</version>
+            </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-treeg</artifactId>
                 <version>${revision}</version>
             </dependency>
         </dependencies>
@@ -163,28 +168,28 @@
                     <artifactId>maven-compiler-plugin</artifactId>
                     <version>3.11.0</version>
                     <configuration>
-                      <release>${java.version}</release>
-                      <source>${java.version}</source>
-                      <target>${java.version}</target>
-                      <encoding>UTF-8</encoding>
-                      <fork>true</fork>
-                      <compilerArgs>
-                        <arg>-XDcompilePolicy=simple</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
-                        <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
-                        <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
-                      </compilerArgs>
-                      <meminitial>128m</meminitial>
-                      <maxmem>512m</maxmem>
+                        <release>${java.version}</release>
+                        <source>${java.version}</source>
+                        <target>${java.version}</target>
+                        <encoding>UTF-8</encoding>
+                        <fork>true</fork>
+                        <compilerArgs>
+                            <arg>-XDcompilePolicy=simple</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.api=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.file=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.main=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.model=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.parser=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.processing=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.tree=ALL-UNNAMED</arg>
+                            <arg>-J--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.code=ALL-UNNAMED</arg>
+                            <arg>-J--add-opens=jdk.compiler/com.sun.tools.javac.comp=ALL-UNNAMED</arg>
+                        </compilerArgs>
+                        <meminitial>128m</meminitial>
+                        <maxmem>512m</maxmem>
                     </configuration>
-                  </plugin>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -257,6 +262,7 @@
                 <module>autograder-executor</module>
                 <module>autograder-event</module>
                 <module>autograder-agent</module>
+                <module>autograder-treeg</module>
             </modules>
         </profile>
 
@@ -271,6 +277,7 @@
                 <module>autograder-executor</module>
                 <module>autograder-event</module>
                 <module>autograder-agent</module>
+                <module>autograder-treeg</module>
             </modules>
         </profile>
     </profiles>
