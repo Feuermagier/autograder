@@ -128,6 +128,8 @@ merge-if-exp = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (..
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar
 
+redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
+
 # Debug
 assert-used-desc = Assertions eignen sich nicht zur Fehlerbehandlung
 assert-used-exp = Assertion benutzt
