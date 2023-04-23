@@ -207,6 +207,8 @@ unchecked-type-cast = Es muss sicher gestellt werden, dass der Typ des Objekts m
 
 local-variable-should-be-constant = Die Variable sollte ein private static final Attribut sein.
 
+compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglichen werden, nicht als int-Werte.
+
 # Naming
 bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
 bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen

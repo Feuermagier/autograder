@@ -205,6 +205,8 @@ unchecked-type-cast = It has to be ensured that the type of the object is the sa
 
 local-variable-should-be-constant = The variable should be a private static final attribute.
 
+compare-char-value = char values in the ASCII range should be compared as char values, not as int values.
+
 # Naming
 bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
 bool-getter-name-exp = The method should be called isY() instead of getY()
