@@ -1,0 +1,6 @@
+naming.VariablesHaveDescriptiveNamesCheck
+Variables should have a descriptive name.
+Test.java:6
+Test.java:7
+Test.java:8
+Test.java:9

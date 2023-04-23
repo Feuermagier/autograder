@@ -12,21 +12,40 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatchVariable;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-@ExecutableCheck(reportedProblems = {ProblemType.SINGLE_LETTER_LOCAL_NAME, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE})
+@ExecutableCheck(reportedProblems = {ProblemType.SINGLE_LETTER_LOCAL_NAME, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE, ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME})
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
 
     private static final Set<String> ALLOWED_OBJ_NAMES_IN_EQUALS = Set.of("o", "obj", "other", "object");
+    private static final List<String> TYPE_NAMES = List.of(
+        "string", "list", "array", "map", "set", "int", "long", "float"
+    );
 
     public VariablesHaveDescriptiveNamesCheck() {
         super(new LocalizedMessage("variable-name-desc"));
+    }
+
+    private static boolean hasTypeInName(CtNamedElement ctVariable) {
+        String name = ctVariable.getSimpleName().toLowerCase();
+
+        return TYPE_NAMES.stream().anyMatch(ty -> name.contains(ty) && !name.equals(ty));
+    }
+
+    private void reportProblem(String key, CtNamedElement ctVariable, ProblemType problemType) {
+        this.addLocalProblem(
+            ctVariable,
+            new LocalizedMessage(key, Map.of("name", ctVariable.getSimpleName())),
+            problemType
+        );
     }
 
     @Override
@@ -49,13 +68,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (variable.getSimpleName().length() == 1
                     && !isAllowedLoopCounter(variable)
                     && !isCoordinate(variable)) {
-                    addLocalProblem(variable, new LocalizedMessage("variable-name-exp-single-letter",
-                            Map.of("name", variable.getSimpleName())),
-                        ProblemType.SINGLE_LETTER_LOCAL_NAME);
+                    reportProblem("variable-name-exp-single-letter", variable, ProblemType.SINGLE_LETTER_LOCAL_NAME);
                 } else if (isTypeAbbreviation(variable)) {
-                    addLocalProblem(variable,
-                        new LocalizedMessage("variable-name-exp-type", Map.of("name", variable.getSimpleName())),
-                        ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
+                    reportProblem("variable-name-exp-type", variable, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
+                } else if (hasTypeInName(variable)) {
+                    reportProblem("variable-name-exp-type-in-name", variable, ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME);
                 }
             }
         });

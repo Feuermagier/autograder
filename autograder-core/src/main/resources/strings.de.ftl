@@ -225,6 +225,7 @@ linguistic-exp = Das Code-Element hat einen verwirrenden Namen. Siehe https://pm
 variable-names-desc = Lokale Variablen sollten aussagekräftige Werte haben
 variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-name-exp-type = Unnötige Abkürzung '{$name}'
+variable-name-exp-type-in-name = Der Bezeichner '{$name}' sollte nicht den Typ im Namen haben
 
 # OOP
 concrete-collection-desc = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)

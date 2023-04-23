@@ -223,6 +223,7 @@ linguistic-exp = The code element has a confusing name. See https://pmd.github.i
 variable-names-desc = Local variables must have descriptive names
 variable-name-exp-single-letter = Single letter names such as '{$name}' are usually non-descriptive
 variable-name-exp-type = Don't use unnecessary abbreviations such as '{$name}'
+variable-name-exp-type-in-name = The identifier '{$name}' should not contain its type in the name.
 
 type-has-descriptive-name-pre-suffix = The name contains redundant prefixes or suffixes
 type-has-descriptive-name-exception = A class that inherits from Exception should have 'Exception' at the end of its name
