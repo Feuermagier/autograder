@@ -152,7 +152,7 @@ runtime-ex-caught-desc = RuntimeExceptions sollten niemals gefangen werden (abge
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 
 exception-message-desc = Geworfene Exceptions sollten immer eine Nachricht haben
-exception-message-exp = Nachricht ('message') fehlt oder ist leer
+exception-message-exp = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
 
 type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder Suffixe
 type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben

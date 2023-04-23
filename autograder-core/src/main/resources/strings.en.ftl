@@ -152,7 +152,7 @@ runtime-ex-caught-desc = Never catch runtime exceptions (aside from NumberFormat
 runtime-ex-caught-exp = Runtime exception of type {$exp} caught
 
 exception-message-desc = Thrown exception always need a message
-exception-message-exp = Message is missing or empty
+exception-message-exp = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
 # General
 
