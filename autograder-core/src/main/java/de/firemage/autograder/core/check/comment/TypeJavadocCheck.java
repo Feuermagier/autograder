@@ -13,6 +13,8 @@ import spoon.reflect.code.CtJavaDocTag;
 import spoon.reflect.declaration.CtRecord;
 import spoon.reflect.declaration.CtType;
 
+import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -77,11 +79,33 @@ public class TypeJavadocCheck extends IntegratedCheck {
             .filter(tag -> tag.getType() == CtJavaDocTag.TagType.AUTHOR)
             .toList();
 
+        // check that there is at least one valid author tag.
+        // Why not check that all are valid? Someone might use
+        // an old solution and keep the original authors in the javadoc.
+        //
+        // Those old solutions are never valid, so this would cause
+        // false-positives.
+        Collection<String> invalidAuthors = new ArrayList<>();
+        boolean hasValidAuthor = false;
         for (CtJavaDocTag authorTag : authorTags) {
-            if (!this.pattern.matcher(authorTag.getContent().trim()).matches()) {
-                addLocalProblem(javadoc, new LocalizedMessage("javadoc-type-exp-invalid-author",
-                        Map.of("author", authorTag.getContent().trim())), ProblemType.INVALID_AUTHOR_TAG);
+            String author = authorTag.getContent().trim();
+
+            if (this.pattern.matcher(author).matches()) {
+                hasValidAuthor = true;
+            } else {
+                invalidAuthors.add(author);
             }
+        }
+
+        if (!hasValidAuthor) {
+            this.addLocalProblem(
+                javadoc,
+                new LocalizedMessage(
+                    "javadoc-type-exp-invalid-author",
+                    Map.of("authors", String.join(", ", invalidAuthors))
+                ),
+                ProblemType.INVALID_AUTHOR_TAG
+            );
         }
     }
 }

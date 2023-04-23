@@ -59,7 +59,7 @@ javadoc-method-exp-unexpected-tag = JavaDoc comments of methods must not have '@
 
 javadoc-type-desc = Types (classes, interfaces, ...) must have valid JavaDoc comments
 javadoc-type-exp-unexpected-tag = JavaDoc comments of types must not have '@{$tag}' tags
-javadoc-type-exp-invalid-author = The @author tag must contain *only* your u-shorthand
+javadoc-type-exp-invalid-author = The @author tag should contain your u-shorthand: {$authors}
 
 javadoc-field-desc = Fields must have valid JavaDoc comments
 javadoc-field-exp-unexpected-tag = JavaDoc comments of fields must not have '@{$tag}' tags

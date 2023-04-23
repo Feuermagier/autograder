@@ -62,7 +62,7 @@ javadoc-method-exp-unexpected-tag = JavaDoc-Kommentare von Methoden sollten kein
 
 javadoc-type-desc = Typen (Klassen, Schnittstellen, ...) müssen valide JavaDoc-Kommentare haben
 javadoc-type-exp-unexpected-tag = JavaDoc-Kommentare von Typen sollten keinen '@{$tag}'-Tag haben
-javadoc-type-exp-invalid-author = Im @author-Tag darf *ausschließlich* dein u-Kürzel stehen
+javadoc-type-exp-invalid-author = Im @author-Tag sollte dein u-Kürzel stehen: {$authors}
 
 javadoc-field-desc = Attribute müssen valide JavaDoc-Kommentare haben
 javadoc-field-exp-unexpected-tag = JavaDoc-Kommentare von Attributen sollten keinen '@{$tag}'-Tag haben
