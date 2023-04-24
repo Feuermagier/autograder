@@ -25,10 +25,6 @@ public class UseOperatorAssignment extends IntegratedCheck {
         java.lang.String.class
     );
 
-    public UseOperatorAssignment() {
-        super(new LocalizedMessage("use-operator-assignment-desc"));
-    }
-
     private boolean isCommutativeType(CtTypedElement<?> ctTypedElement) {
         return ctTypedElement.getType() == null
                || NON_COMMUTATIVE_TYPES.stream()

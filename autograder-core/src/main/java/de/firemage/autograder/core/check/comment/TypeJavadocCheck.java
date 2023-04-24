@@ -40,7 +40,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
     }
 
     public TypeJavadocCheck(String regex) {
-        super(new LocalizedMessage("javadoc-type-desc"));
+        super();
         this.pattern = Pattern.compile(regex);
     }
 

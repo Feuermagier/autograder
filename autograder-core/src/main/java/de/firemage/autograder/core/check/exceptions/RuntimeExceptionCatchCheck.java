@@ -17,10 +17,6 @@ import java.util.Map;
 public class RuntimeExceptionCatchCheck extends IntegratedCheck {
     private static final List<String> ALLOWED_EXCEPTIONS = List.of("java.lang.NumberFormatException");
 
-    public RuntimeExceptionCatchCheck() {
-        super(new LocalizedMessage("runtime-ex-caught-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtCatch>() {

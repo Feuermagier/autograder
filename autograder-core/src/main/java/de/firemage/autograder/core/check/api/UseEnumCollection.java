@@ -7,24 +7,13 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConstructorCall;
-import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtInvocation;
-import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtTypeReference;
 
-import java.util.List;
-
 @ExecutableCheck(reportedProblems = { ProblemType.USE_ENUM_COLLECTION })
 public class UseEnumCollection extends IntegratedCheck {
-    public UseEnumCollection() {
-        super(new LocalizedMessage("use-enum-collection"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtConstructorCall<?>>() {

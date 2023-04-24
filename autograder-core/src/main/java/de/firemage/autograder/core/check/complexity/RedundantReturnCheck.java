@@ -9,8 +9,8 @@ import net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryReturnRule;
 @ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_VOID_RETURN})
 public class RedundantReturnCheck extends PMDCheck {
     public RedundantReturnCheck() {
-        super(new LocalizedMessage("redundant-return-desc"),
-            new LocalizedMessage("redundant-return-exp"),
+        super(
+                new LocalizedMessage("redundant-return-exp"),
             new UnnecessaryReturnRule(), ProblemType.REDUNDANT_VOID_RETURN);
     }
 }

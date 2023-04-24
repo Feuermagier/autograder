@@ -17,10 +17,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.INSTANCE_FIELD_CAN_BE_LOCAL})
 public class FieldShouldBeLocalCheck extends IntegratedCheck {
-    public FieldShouldBeLocalCheck() {
-        super(new LocalizedMessage("field-local-desc"));
-    }
-
     private static LocalizedMessage formatExplanation(CtField<?> field) {
         return new LocalizedMessage("field-local-exp", Map.of(
             "field", field.getSimpleName(),

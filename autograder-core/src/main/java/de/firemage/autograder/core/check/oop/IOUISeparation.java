@@ -25,10 +25,6 @@ public class IOUISeparation extends IntegratedCheck {
     private final Map<String, SourcePosition> systemInvocations = new LinkedHashMap<>();
     private final Map<String, SourcePosition> scannerInvocations = new LinkedHashMap<>();
 
-    public IOUISeparation() {
-        super(new LocalizedMessage("ui-output-separation"));
-    }
-
     private boolean hasAccessedSystem(CtInvocation<?> ctInvocation) {
         // System.out.println(String) is a CtInvocation of the method println(String)
         // The target of the invocation is System.out, which is a CtFieldRead

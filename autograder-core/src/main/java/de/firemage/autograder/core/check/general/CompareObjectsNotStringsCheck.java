@@ -17,10 +17,6 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = {ProblemType.OBJECTS_COMPARED_VIA_TO_STRING})
 public class CompareObjectsNotStringsCheck extends IntegratedCheck {
-    public CompareObjectsNotStringsCheck() {
-        super(new LocalizedMessage("compare-objects-desc"));
-    }
-
     private static LocalizedMessage formatExplanation(CtTypeReference<?> type) {
         return new LocalizedMessage("compare-objects-exp", Map.of("type", type.getQualifiedName()));
     }

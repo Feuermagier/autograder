@@ -14,7 +14,7 @@ import java.util.List;
 @ExecutableCheck(reportedProblems = {ProblemType.UNUSED_CODE_ELEMENT})
 public class UnusedCodeElementCheck extends PMDCheck {
     public UnusedCodeElementCheck() {
-        super(new LocalizedMessage("unused-element-desc"), new LocalizedMessage("unused-element-exp"), List.of(
+        super(new LocalizedMessage("unused-element-exp"), List.of(
                 new UnusedLocalVariableRule(),
                 new UnusedFormalParameterRule(),
                 new UnusedPrivateFieldRule(),

@@ -32,10 +32,6 @@ import java.util.Map;
 public class RegexCheck extends IntegratedCheck {
     private static final double MAX_ALLOWED_SCORE = 10.0;
 
-    public RegexCheck() {
-        super(new LocalizedMessage("complex-regex"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtLiteral<String>>() {

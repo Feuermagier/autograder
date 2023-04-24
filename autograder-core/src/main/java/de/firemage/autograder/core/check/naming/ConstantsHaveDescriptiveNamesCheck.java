@@ -26,10 +26,6 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             Map.entry("-->", List.of("arrow"))
     );
 
-    public ConstantsHaveDescriptiveNamesCheck() {
-        super(new LocalizedMessage("constants-name-desc"));
-    }
-
     private static boolean isNonDescriptiveIntegerName(String name, int value) {
         List<String> valueNameOptions = switch (value) {
             case 0 -> List.of("zero", "null", "zeroth", "first");

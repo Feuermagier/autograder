@@ -23,10 +23,6 @@ import spoon.reflect.declaration.CtTypeInformation;
 
 @ExecutableCheck(reportedProblems = {ProblemType.LIST_NOT_COPIED_IN_GETTER})
 public class ListGetterSetterCheck extends IntegratedCheck {
-    public ListGetterSetterCheck() {
-        super(new LocalizedMessage("list-getter-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtReturn<?>>() {

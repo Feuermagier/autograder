@@ -30,10 +30,6 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         "string", "list", "array", "map", "set", "int", "long", "float"
     );
 
-    public VariablesHaveDescriptiveNamesCheck() {
-        super(new LocalizedMessage("variable-name-desc"));
-    }
-
     private static boolean hasTypeInName(CtNamedElement ctVariable) {
         String name = ctVariable.getSimpleName().toLowerCase();
 

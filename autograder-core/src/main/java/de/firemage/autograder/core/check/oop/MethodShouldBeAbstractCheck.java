@@ -21,10 +21,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION})
 public class MethodShouldBeAbstractCheck extends IntegratedCheck {
-    public MethodShouldBeAbstractCheck() {
-        super(new LocalizedMessage("method-abstract-desc"));
-    }
-
     private static LocalizedMessage formatExplanation(CtMethod<?> method) {
         return new LocalizedMessage("method-abstract-exp", Map.of(
             "type", method.getDeclaringType().getQualifiedName(),

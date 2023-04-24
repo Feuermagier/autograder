@@ -19,10 +19,6 @@ import spoon.reflect.visitor.CtScanner;
 
 @ExecutableCheck(reportedProblems = { ProblemType.INSTANCEOF, ProblemType.INSTANCEOF_EMULATION })
 public class InstanceOf extends IntegratedCheck {
-    public InstanceOf() {
-        super(new LocalizedMessage("do-not-use-instanceof"));
-    }
-
     private static boolean isInAllowedContext(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         return ctMethod != null && SpoonUtil.isOverriddenMethod(ctMethod);

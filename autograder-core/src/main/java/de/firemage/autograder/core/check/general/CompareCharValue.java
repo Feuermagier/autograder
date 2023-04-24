@@ -28,9 +28,6 @@ public class CompareCharValue extends IntegratedCheck {
         BinaryOperatorKind.LE,
         BinaryOperatorKind.LT
     );
-    public CompareCharValue() {
-        super(new LocalizedMessage("compare-char-value"));
-    }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {

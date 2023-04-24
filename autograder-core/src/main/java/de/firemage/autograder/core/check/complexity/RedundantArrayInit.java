@@ -23,10 +23,6 @@ import spoon.reflect.reference.CtVariableReference;
 
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_ARRAY_INIT })
 public class RedundantArrayInit extends IntegratedCheck {
-    public RedundantArrayInit() {
-        super(new LocalizedMessage("redundant-array-init-desc"));
-    }
-
     private <L, R> void checkAssignment(
         L lhs,
         CtExpression<R> rhs,

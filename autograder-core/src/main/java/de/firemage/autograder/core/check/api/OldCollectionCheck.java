@@ -11,12 +11,6 @@ import spoon.reflect.code.CtConstructorCall;
 
 @ExecutableCheck(reportedProblems = {ProblemType.DEPRECATED_COLLECTION_USED})
 public class OldCollectionCheck extends IntegratedCheck {
-    public static final LocalizedMessage DESCRIPTION = new LocalizedMessage("old-collection-desc");
-
-    public OldCollectionCheck() {
-        super(DESCRIPTION);
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtConstructorCall<?>>() {

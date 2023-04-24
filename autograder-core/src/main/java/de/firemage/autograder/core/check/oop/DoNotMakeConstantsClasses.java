@@ -21,10 +21,6 @@ import java.util.Objects;
 public class DoNotMakeConstantsClasses extends IntegratedCheck {
     private static final int FIELD_THRESHOLD = 12;
 
-    public DoNotMakeConstantsClasses() {
-        super(new LocalizedMessage("constants-class-exp"));
-    }
-
     private boolean isConstantsClassLike(StaticAnalysis staticAnalysis, CtType<?> ctType) {
         // ignore anonymous classes
         return !ctType.isAnonymous()

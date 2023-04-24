@@ -5,16 +5,13 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 
 public abstract class SpotbugsCheck implements Check {
-    private final LocalizedMessage description;
-
     private final String bug;
 
     private final ProblemType problemType;
-    
+
     private final LocalizedMessage explanation;
 
-    protected SpotbugsCheck(LocalizedMessage description, LocalizedMessage explanation, String bug, ProblemType problemType) {
-        this.description = description;
+    protected SpotbugsCheck(LocalizedMessage explanation, String bug, ProblemType problemType) {
         this.bug = bug;
         this.problemType = problemType;
         this.explanation = explanation;
@@ -23,11 +20,6 @@ public abstract class SpotbugsCheck implements Check {
     @Override
     public LocalizedMessage getLinter() {
         return new LocalizedMessage("linter-spotbugs");
-    }
-
-    @Override
-    public LocalizedMessage getDescription() {
-        return description;
     }
 
     public String getBug() {

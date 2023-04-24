@@ -24,9 +24,6 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = { ProblemType.AVOID_SHADOWING })
 public class AvoidShadowing extends IntegratedCheck {
     private static final List<String> ALLOWED_FIELDS = List.of("serialVersionUID");
-    public AvoidShadowing() {
-        super(new LocalizedMessage("avoid-shadowing"));
-    }
 
     private static Collection<CtFieldReference<?>> getAllVisibleFields(CtTypeInformation ctTypeInformation) {
 

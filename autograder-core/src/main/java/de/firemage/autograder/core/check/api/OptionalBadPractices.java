@@ -15,11 +15,6 @@ import spoon.reflect.reference.CtTypeReference;
 
 @ExecutableCheck(reportedProblems = { ProblemType.OPTIONAL_TRI_STATE, ProblemType.OPTIONAL_ARGUMENT })
 public class OptionalBadPractices extends IntegratedCheck {
-
-    public OptionalBadPractices() {
-        super(new LocalizedMessage("optional-argument"));
-    }
-
     private void checkCtVariable(CtTypedElement<?> ctTypedElement) {
         CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
         if (ctTypeReference == null) {

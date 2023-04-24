@@ -13,12 +13,6 @@ public class CopyPasteCheck implements Check {
         this.tokenCount = tokenCount;
     }
 
-
-    @Override
-    public LocalizedMessage getDescription() {
-        return new LocalizedMessage("description-duplicate-code");
-    }
-
     @Override
     public LocalizedMessage getLinter() {
         return new LocalizedMessage("linter-cpd");

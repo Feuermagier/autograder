@@ -7,22 +7,14 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtLiteral;
-import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtType;
 
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.TYPE_HAS_DESCRIPTIVE_NAME })
 public class TypesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> BAD_PREFIXES_SUFFIXES =
         List.of("object", "class", "record", "interface", "enum");
-
-    public TypesHaveDescriptiveNamesCheck() {
-        super(new LocalizedMessage("type-has-descriptive-name-pre-suffix"));
-    }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {

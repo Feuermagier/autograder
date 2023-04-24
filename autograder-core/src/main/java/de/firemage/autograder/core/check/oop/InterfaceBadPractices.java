@@ -20,10 +20,6 @@ import java.util.Set;
                                       ProblemType.STATIC_INTERFACE, ProblemType.STATIC_METHOD_IN_INTERFACE,
                                       ProblemType.EMPTY_INTERFACE })
 public class InterfaceBadPractices extends IntegratedCheck {
-    public InterfaceBadPractices() {
-        super(new LocalizedMessage("interface-bad-practices-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtInterface<?>>() {

@@ -12,10 +12,6 @@ import spoon.reflect.declaration.CtType;
 
 @ExecutableCheck(reportedProblems = { ProblemType.AVOID_INNER_CLASSES })
 public class AvoidInnerClasses extends IntegratedCheck {
-    public AvoidInnerClasses() {
-        super(new LocalizedMessage("avoid-inner-classes"));
-    }
-
     private void checkCtType(CtType<?> ctType) {
         // only lint non-private static inner classes
         if (SpoonUtil.isInnerClass(ctType) && !ctType.isPrivate() && (ctType.isStatic() || ctType.isInterface() || ctType.isEnum() || ctType.isLocalType())) {

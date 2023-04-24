@@ -24,10 +24,6 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
     private static final Map<BinaryOperatorKind, Integer> OCCURRENCE_THRESHOLDS =
         Map.of(BinaryOperatorKind.PLUS, 2, BinaryOperatorKind.MUL, 3);
 
-    public RepeatedMathOperationCheck() {
-        super(new LocalizedMessage("repeated-math-operation"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtBinaryOperator<?>>() {

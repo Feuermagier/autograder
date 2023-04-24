@@ -9,7 +9,7 @@ import net.sourceforge.pmd.lang.java.rule.bestpractices.ForLoopCanBeForeachRule;
 @ExecutableCheck(reportedProblems = {ProblemType.FOR_CAN_BE_FOREACH})
 public class ForToForEachCheck extends PMDCheck {
     public ForToForEachCheck() {
-        super(new LocalizedMessage("for-foreach-desc"), new LocalizedMessage("for-foreach-exp"),
+        super(new LocalizedMessage("for-foreach-exp"),
             new ForLoopCanBeForeachRule(), ProblemType.FOR_CAN_BE_FOREACH);
     }
 }

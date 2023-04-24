@@ -14,27 +14,19 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.reference.CtVariableReference;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_FORMAT_STRING })
 public class UseFormatString extends IntegratedCheck {
     private static final int MIN_NUMBER_CONCATENATIONS = 3;
-
-    public UseFormatString() {
-        super(new LocalizedMessage("use-format-string"));
-    }
-
 
     private List<CtExpression<?>> getFormatArgs(CtBinaryOperator<?> ctBinaryOperator) {
         List<CtExpression<?>> result = new ArrayList<>();

@@ -8,14 +8,12 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.Effect;
-import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtNewArray;
-import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtSwitch;
 import spoon.reflect.code.CtSwitchExpression;
 import spoon.reflect.code.CtTypeAccess;
@@ -41,10 +39,6 @@ public class ClosedSetOfValues extends IntegratedCheck {
         java.lang.Character.class,
         char.class
     );
-
-    public ClosedSetOfValues() {
-        super(new LocalizedMessage("closed-set-of-values"));
-    }
 
     private static boolean isSupportedType(CtTypeReference<?> ctTypeReference) {
         return SUPPORTED_TYPES

@@ -11,12 +11,6 @@ import spoon.reflect.code.CtComment;
 
 @ExecutableCheck(reportedProblems = {ProblemType.COMMENTED_OUT_CODE})
 public class CommentedOutCodeCheck extends IntegratedCheck {
-    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("commented-out-code-desc");
-
-    public CommentedOutCodeCheck() {
-        super(DESCRIPTION);
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtComment>() {

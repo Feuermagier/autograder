@@ -9,7 +9,7 @@ import net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryConstructorRule;
 @ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_DEFAULT_CONSTRUCTOR})
 public class RedundantConstructorCheck extends PMDCheck {
     public RedundantConstructorCheck() {
-        super(new LocalizedMessage("implicit-constructor-desc"), new LocalizedMessage("implicit-constructor-exp"),
+        super(new LocalizedMessage("implicit-constructor-exp"),
             new UnnecessaryConstructorRule(), ProblemType.REDUNDANT_DEFAULT_CONSTRUCTOR);
     }
 }

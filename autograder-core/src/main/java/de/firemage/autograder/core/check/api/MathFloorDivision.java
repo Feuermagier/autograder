@@ -18,10 +18,6 @@ import java.util.List;
 
 @ExecutableCheck(reportedProblems = { ProblemType.MATH_FLOOR_DIVISION })
 public class MathFloorDivision extends IntegratedCheck {
-    public MathFloorDivision() {
-        super(new LocalizedMessage("math-floor-division"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {

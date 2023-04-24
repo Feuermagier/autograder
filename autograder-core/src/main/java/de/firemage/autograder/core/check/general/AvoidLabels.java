@@ -11,10 +11,6 @@ import spoon.reflect.code.CtStatement;
 
 @ExecutableCheck(reportedProblems = { ProblemType.AVOID_LABELS })
 public class AvoidLabels extends IntegratedCheck {
-    public AvoidLabels() {
-        super(new LocalizedMessage("avoid-labels"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtStatement>() {

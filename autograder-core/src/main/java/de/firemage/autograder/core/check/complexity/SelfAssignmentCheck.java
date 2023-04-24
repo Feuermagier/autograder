@@ -18,11 +18,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_SELF_ASSIGNMENT })
 public class SelfAssignmentCheck extends IntegratedCheck {
-
-    public SelfAssignmentCheck() {
-        super(new LocalizedMessage("self-assignment-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtAssignment<?, ?>>() {

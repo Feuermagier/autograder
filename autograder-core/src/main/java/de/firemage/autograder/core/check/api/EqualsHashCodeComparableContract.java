@@ -13,10 +13,6 @@ import spoon.reflect.declaration.CtType;
 
 @ExecutableCheck(reportedProblems = { ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT })
 public class EqualsHashCodeComparableContract extends IntegratedCheck {
-    public EqualsHashCodeComparableContract() {
-        super(new LocalizedMessage("equals-hashcode-comparable-contract"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtType<?>>() {

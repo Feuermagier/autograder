@@ -18,12 +18,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.STRING_IS_EMPTY_REIMPLEMENTED})
 public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
-    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("string-is-empty-desc");
-
-    public StringIsEmptyReimplementationCheck() {
-        super(DESCRIPTION);
-    }
-
     private static LocalizedMessage formatExplanation(CtElement element) {
         return new LocalizedMessage("string-is-empty-exp-emptiness", Map.of("exp", element.toString()));
     }

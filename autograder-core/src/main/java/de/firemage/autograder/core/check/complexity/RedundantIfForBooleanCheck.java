@@ -21,11 +21,6 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_IF_FOR_BOOLEAN})
 public class RedundantIfForBooleanCheck extends IntegratedCheck {
-
-    public RedundantIfForBooleanCheck() {
-        super(new LocalizedMessage("redundant-if-for-bool-desc"));
-    }
-
     private LocalizedMessage formatReturnProblem(CtExpression<?> expression, boolean negate) {
         return new LocalizedMessage("redundant-if-for-bool-exp-return", Map.of(
             "exp", (negate ? "!" : "") + expression

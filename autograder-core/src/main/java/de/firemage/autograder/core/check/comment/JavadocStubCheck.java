@@ -20,7 +20,7 @@ public class JavadocStubCheck extends IntegratedCheck {
     private final boolean allowGettersSettersWithEmptyDescription;
 
     public JavadocStubCheck(boolean allowGettersSettersWithEmptyDescription) {
-        super(new LocalizedMessage("javadoc-stub-desc"));
+        super();
         this.allowGettersSettersWithEmptyDescription = allowGettersSettersWithEmptyDescription;
     }
 

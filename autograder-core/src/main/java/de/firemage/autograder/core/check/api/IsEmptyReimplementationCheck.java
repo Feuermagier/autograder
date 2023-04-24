@@ -8,10 +8,8 @@ import net.sourceforge.pmd.lang.java.rule.bestpractices.UseCollectionIsEmptyRule
 
 @ExecutableCheck(reportedProblems = {ProblemType.COLLECTION_IS_EMPTY_REIMPLEMENTED})
 public class IsEmptyReimplementationCheck extends PMDCheck {
-    public static final LocalizedMessage DESCRIPTION = new LocalizedMessage("is-empty-reimplemented-desc");
-
     public IsEmptyReimplementationCheck() {
-        super(DESCRIPTION, new LocalizedMessage("is-empty-reimplemented-exp"), new UseCollectionIsEmptyRule(),
+        super(new LocalizedMessage("is-empty-reimplemented-exp"), new UseCollectionIsEmptyRule(),
             ProblemType.COLLECTION_IS_EMPTY_REIMPLEMENTED);
     }
 }

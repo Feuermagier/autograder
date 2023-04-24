@@ -13,10 +13,6 @@ import spoon.reflect.declaration.CtClass;
 @ExecutableCheck(reportedProblems = {ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION,
     ProblemType.CUSTOM_EXCEPTION_INHERITS_ERROR})
 public class CustomExceptionInheritanceCheck extends IntegratedCheck {
-    public CustomExceptionInheritanceCheck() {
-        super(new LocalizedMessage("custom-exception-inheritance-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
