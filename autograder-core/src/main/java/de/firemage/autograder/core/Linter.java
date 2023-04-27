@@ -45,6 +45,10 @@ public class Linter {
         }
     }
 
+    public FluentBundle getFluentBundle() {
+        return fluentBundle;
+    }
+
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
                                    List<ProblemType> problemsToReport,
                                    Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)

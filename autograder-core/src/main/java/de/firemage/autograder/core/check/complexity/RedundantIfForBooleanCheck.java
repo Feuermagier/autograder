@@ -28,7 +28,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
     }
 
     private LocalizedMessage formatAssignProblem(CtExpression<?> expression, CtExpression<?> target, boolean negate) {
-        return new LocalizedMessage("redundant-if-for-bool-exp-return", Map.of(
+        return new LocalizedMessage("redundant-if-for-bool-exp-assign", Map.of(
             "exp", (negate ? "!" : "") + expression,
             "target", target.toString()
         ));

@@ -54,7 +54,7 @@ public class RedundantArrayInit extends IntegratedCheck {
                     // the assigned value is the default value, so it can be removed.
                     this.addLocalProblem(
                         element,
-                        new LocalizedMessage("redundant-array-init-desc"),
+                        new LocalizedMessage("redundant-array-init"),
                         ProblemType.REDUNDANT_ARRAY_INIT
                     );
                 }

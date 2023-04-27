@@ -4,6 +4,7 @@ import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalStatement;
+import spoon.reflect.CtModel;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtBreak;
@@ -19,6 +20,7 @@ import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -40,7 +42,7 @@ public final class SpoonUtil {
     }
 
     public static boolean isString(CtTypeReference<?> type) {
-        return type.getQualifiedName().equals("java.lang.String");
+        return isTypeEqualTo(type, java.lang.String.class);
     }
 
     public static Optional<CtTypeReference<?>> isToStringCall(CtExpression<?> expression) {
@@ -72,8 +74,8 @@ public final class SpoonUtil {
     public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
         if (expression instanceof CtLiteral<?> literal
             && literal.getValue() != null
-            && (literal.getType().getQualifiedName().equals("boolean") ||
-                literal.getType().getQualifiedName().equals("java.lang.Boolean"))) {
+            && (isTypeEqualTo(literal.getType(), boolean.class) ||
+                isTypeEqualTo(literal.getType(), java.lang.Boolean.class))) {
 
             return Optional.of((Boolean) literal.getValue());
         } else {
@@ -141,6 +143,7 @@ public final class SpoonUtil {
      *
      * @return the default value of the given type
      */
+    @SuppressWarnings("unchecked")
     public static <T> CtLiteral<T> getDefaultValue(CtTypeReference<T> ty) {
         if (ty.isPrimitive()) {
             return (CtLiteral<T>) Map.ofEntries(
@@ -195,13 +198,13 @@ public final class SpoonUtil {
         return getEffectiveStatements(List.of(ctStatement));
     }
 
-    public static CtExpression<?> resolveCtExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {
+    public static CtExpression<?> resolveCtExpression(CtModel ctModel, CtExpression<?> ctExpression) {
         if (ctExpression instanceof CtVariableRead<?> ctVariableRead) {
             CtVariableReference<?> ctVariableReference = ctVariableRead.getVariable();
 
             Optional<CtExpression<?>> ctExpressionOptional = SpoonUtil.getEffectivelyFinalExpression(
-                    staticAnalysis,
-                    ctVariableReference
+                ctModel,
+                ctVariableReference
             );
 
             // only inline literals:
@@ -211,6 +214,10 @@ public final class SpoonUtil {
         }
 
         return ctExpression;
+    }
+
+    public static CtExpression<?> resolveCtExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {
+        return resolveCtExpression(staticAnalysis.getModel(), ctExpression);
     }
 
     public static CtStatement unwrapStatement(CtStatement statement) {
@@ -287,6 +294,24 @@ public final class SpoonUtil {
                 .first() == null;
     }
 
+    public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
+        return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || ctModel
+                .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
+                        write.getVariable().equals(ctVariableReference))
+                .first() == null;
+    }
+
+    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
+            CtModel ctModel,
+            CtVariableReference<?> ctVariableReference
+    ) {
+        if (!isEffectivelyFinal(ctModel, ctVariableReference)) {
+            return Optional.empty();
+        }
+
+        return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
+    }
+
     public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
             StaticAnalysis staticAnalysis,
             CtVariableReference<?> ctVariableReference
@@ -296,6 +321,10 @@ public final class SpoonUtil {
         }
 
         return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
+    }
+
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?> expectedClass) {
+        return ctType.getFactory().Type().createReference(expectedClass).equals(ctType);
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
