@@ -36,8 +36,8 @@ public class CompareCharValue extends IntegratedCheck {
             public void process(CtBinaryOperator<?> ctBinaryOperator) {
                 if (!COMPARISON_OPERATORS.contains(ctBinaryOperator.getKind())) return;
 
-                CtExpression<?> lhs = SpoonUtil.resolveCtExpression(staticAnalysis, ctBinaryOperator.getLeftHandOperand());
-                CtExpression<?> rhs = SpoonUtil.resolveCtExpression(staticAnalysis, ctBinaryOperator.getRightHandOperand());
+                CtExpression<?> lhs = SpoonUtil.resolveCtExpression(ctBinaryOperator.getLeftHandOperand());
+                CtExpression<?> rhs = SpoonUtil.resolveCtExpression(ctBinaryOperator.getRightHandOperand());
 
                 CtTypeReference<?> charType = lhs.getFactory().Type().createReference(char.class);
 

@@ -5,7 +5,9 @@ import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalStatement;
 import spoon.reflect.CtModel;
+import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
+import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
@@ -198,7 +200,10 @@ public final class SpoonUtil {
         return getEffectiveStatements(List.of(ctStatement));
     }
 
-    public static CtExpression<?> resolveCtExpression(CtModel ctModel, CtExpression<?> ctExpression) {
+    public static CtExpression<?> resolveCtExpression(CtExpression<?> ctExpression) {
+        CtModel ctModel = ctExpression.getFactory().getModel();
+
+        // inline constants:
         if (ctExpression instanceof CtVariableRead<?> ctVariableRead) {
             CtVariableReference<?> ctVariableReference = ctVariableRead.getVariable();
 
@@ -213,11 +218,25 @@ public final class SpoonUtil {
             }
         }
 
-        return ctExpression;
-    }
+        // evaluate concatenations of (potentially) literals:
+        if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator) {
+            CtExpression<?> left = resolveCtExpression(ctBinaryOperator.getLeftHandOperand());
+            CtExpression<?> right = resolveCtExpression(ctBinaryOperator.getRightHandOperand());
 
-    public static CtExpression<?> resolveCtExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {
-        return resolveCtExpression(staticAnalysis.getModel(), ctExpression);
+            // check if both resolve to literals
+            if (left instanceof CtLiteral<?> leftLiteral
+                    && right instanceof CtLiteral<?> rightLiteral
+                    && ctBinaryOperator.getKind() == BinaryOperatorKind.PLUS) {
+                // check if one of them is a string, if so then we can concatenate them
+                if (leftLiteral.getValue() instanceof String string) {
+                    return makeLiteral(string + rightLiteral.getValue());
+                } else if (rightLiteral.getValue() instanceof String string) {
+                    return makeLiteral(leftLiteral.getValue() + string);
+                }
+            }
+        }
+
+        return ctExpression;
     }
 
     public static CtStatement unwrapStatement(CtStatement statement) {

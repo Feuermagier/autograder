@@ -112,7 +112,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
         boolean areKnown = ctSwitch.getCases()
                 .stream()
                 .flatMap((CtCase<?> e) -> e.getCaseExpressions().stream())
-                .map(e -> SpoonUtil.resolveCtExpression(staticAnalysis, e))
+                .map(SpoonUtil::resolveCtExpression)
                 .allMatch(e -> e instanceof CtLiteral<?>);
 
         if (areKnown && !this.isEnumMapping(ctSwitch)) {
@@ -128,7 +128,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
         // resolve list of constants
         List<CtExpression<?>> elements = values
             .stream()
-            .map(e -> SpoonUtil.resolveCtExpression(staticAnalysis, e))
+            .map(SpoonUtil::resolveCtExpression)
             .collect(Collectors.toList());
 
         // check the size on the distinct elements (to avoid linting e.g. List.of(0, 0, 0, 0, 0))

@@ -109,7 +109,7 @@ public class UseFormatString extends IntegratedCheck {
             return SpoonUtil.makeLiteral("\n");
         }
 
-        return SpoonUtil.resolveCtExpression(staticAnalysis, ctExpression);
+        return SpoonUtil.resolveCtExpression(ctExpression);
     }
 
     private void checkArgs(StaticAnalysis staticAnalysis, CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs) {
@@ -203,11 +203,6 @@ public class UseFormatString extends IntegratedCheck {
         }
 
         Collections.reverse(formatArgs);
-
-        // skip concatenations with less than 3 arguments
-        if (formatArgs.size() < MIN_NUMBER_CONCATENATIONS) {
-            return;
-        }
 
         this.checkArgs(staticAnalysis, ctInvocation, formatArgs);
     }

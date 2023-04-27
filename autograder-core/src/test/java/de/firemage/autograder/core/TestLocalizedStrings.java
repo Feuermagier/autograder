@@ -105,7 +105,7 @@ class TestLocalizedStrings {
     }
 
     private static String resolveKey(CtModel ctModel, List<? extends CtExpression<?>> args) {
-        if (args.isEmpty() || !(SpoonUtil.resolveCtExpression(ctModel, args.get(0)) instanceof CtLiteral<?> ctLiteral
+        if (args.isEmpty() || !(SpoonUtil.resolveCtExpression(args.get(0)) instanceof CtLiteral<?> ctLiteral
                 && ctLiteral.getValue() instanceof String key)) {
             throw new IllegalArgumentException("The first argument must be a string literal: " + args);
         }
