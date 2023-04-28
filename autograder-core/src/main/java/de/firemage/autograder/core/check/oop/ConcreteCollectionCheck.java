@@ -12,7 +12,6 @@ import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtRecord;
 import spoon.reflect.declaration.CtRecordComponent;
 import spoon.reflect.declaration.CtTypeInformation;
@@ -30,10 +29,6 @@ import java.util.stream.Stream;
 @ExecutableCheck(reportedProblems = { ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE })
 public class ConcreteCollectionCheck extends IntegratedCheck {
     private static final List<Class<?>> ALLOWED_TYPES = List.of(java.util.Properties.class);
-
-    public ConcreteCollectionCheck() {
-        super(new LocalizedMessage("concrete-collection-desc"));
-    }
 
     private <T extends CtTypeInformation & FactoryAccessor> boolean isConcreteCollectionType(T ctType) {
         return Stream.of(java.util.Collection.class, java.util.Map.class)

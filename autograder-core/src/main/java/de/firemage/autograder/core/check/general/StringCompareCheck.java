@@ -16,10 +16,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.STRING_COMPARE_BY_REFERENCE })
 public class StringCompareCheck extends IntegratedCheck {
-    public StringCompareCheck() {
-        super(new LocalizedMessage("string-cmp-desc"));
-    }
-
     private static boolean isStringComparison(CtExpression<?> lhs, CtExpression<?> rhs) {
         return SpoonUtil.isString(lhs.getType()) && !SpoonUtil.isNullLiteral(rhs)
                || SpoonUtil.isString(rhs.getType()) && !SpoonUtil.isNullLiteral(lhs);

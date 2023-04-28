@@ -22,10 +22,6 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_GUARD_CLAUSES })
 public class UseGuardClauses extends IntegratedCheck {
-    public UseGuardClauses() {
-        super(new LocalizedMessage("use-guard-clauses"));
-    }
-
     private void reportProblem(CtStatement ctStatement, CtExpression<?> condition) {
         addLocalProblem(
             ctStatement,

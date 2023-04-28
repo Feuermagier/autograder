@@ -19,10 +19,6 @@ import spoon.reflect.declaration.CtTypedElement;
 
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
-    public ExceptionMessageCheck() {
-        super(new LocalizedMessage("exception-message-desc"));
-    }
-
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
         return expression instanceof CtConstructorCall<?> ctorCall
             && ExceptionUtil.isRuntimeException(ctorCall.getType())

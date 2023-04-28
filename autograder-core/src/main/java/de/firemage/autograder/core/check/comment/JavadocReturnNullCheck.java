@@ -18,12 +18,6 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_INCOMPLETE_RETURN_TAG})
 public class JavadocReturnNullCheck extends IntegratedCheck {
-    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("javadoc-return-null-desc");
-
-    public JavadocReturnNullCheck() {
-        super(DESCRIPTION);
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtMethod<?>>() {

@@ -16,10 +16,6 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT})
 public class LocalVariableShouldBeConstant extends IntegratedCheck {
-    public LocalVariableShouldBeConstant() {
-        super(new LocalizedMessage("local-variable-should-be-constant"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtLocalVariable<?>>() {

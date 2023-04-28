@@ -12,10 +12,6 @@ import spoon.reflect.code.CtTypeAccess;
 
 @ExecutableCheck(reportedProblems = { ProblemType.DO_NOT_USE_SYSTEM_EXIT })
 public class DoNotUseSystemExit extends IntegratedCheck {
-    public DoNotUseSystemExit() {
-        super(new LocalizedMessage("do-not-use-system-exit"));
-    }
-
     private boolean hasInvokedSystemExit(CtInvocation<?> ctInvocation) {
         // System.exit(int) is a CtInvocation of the method exit(int)
         // The target of the invocation is System, which is a CtTypeAccess

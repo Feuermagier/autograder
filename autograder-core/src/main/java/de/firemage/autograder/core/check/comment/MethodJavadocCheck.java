@@ -30,10 +30,6 @@ public class MethodJavadocCheck extends IntegratedCheck {
         CtJavaDocTag.TagType.DEPRECATED
     );
 
-    public MethodJavadocCheck() {
-        super(new LocalizedMessage("javadoc-method-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtMethod<?>>() {

@@ -23,7 +23,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.INVALID_COMMENT_LANGUAGE, ProblemType.INCONSISTENT_COMMENT_LANGUAGE})
 public class CommentLanguageCheck extends IntegratedCheck {
-    private static final LocalizedMessage DESCRIPTION = new LocalizedMessage("comment-language-desc");
     private final LanguageDetector detector;
 
     public CommentLanguageCheck() {
@@ -31,7 +30,7 @@ public class CommentLanguageCheck extends IntegratedCheck {
     }
 
     public CommentLanguageCheck(double threshold) {
-        super(DESCRIPTION);
+        super();
         this.detector = LanguageDetectorBuilder.fromAllLanguages().withMinimumRelativeDistance(threshold).build();
     }
 

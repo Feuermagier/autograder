@@ -7,13 +7,11 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
 import spoon.reflect.code.CtThrow;
 import spoon.reflect.declaration.CtConstructor;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.visitor.CtScanner;
@@ -26,11 +24,6 @@ import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_UNDOCUMENTED_THROWS})
 public class ThrowsJavadocCheck extends IntegratedCheck {
-    public ThrowsJavadocCheck() {
-        super(new LocalizedMessage("javadoc-undocumented-throws"));
-    }
-
-
     private void checkCtExecutable(CtExecutable<?> ctExecutable) {
         Optional<CtJavaDoc> doc = SpoonUtil.getJavadoc(ctExecutable);
         if (doc.isEmpty()) {

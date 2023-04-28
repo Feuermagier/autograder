@@ -14,11 +14,6 @@ import spoon.reflect.reference.CtTypeReference;
 
 @ExecutableCheck(reportedProblems = {ProblemType.SCANNER_MUST_BE_CLOSED})
 public class ScannerClosedCheck extends IntegratedCheck {
-
-    public ScannerClosedCheck() {
-        super(new LocalizedMessage("scanner-closed"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtConstructorCall<?>>() {

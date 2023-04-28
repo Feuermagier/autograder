@@ -10,7 +10,6 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.reference.CtExecutableReference;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,10 +17,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_STRING_FORMATTED })
 public class UseStringFormatted extends IntegratedCheck {
-    public UseStringFormatted() {
-        super(new LocalizedMessage("use-string-formatted"));
-    }
-
     private void checkCtInvocation(CtInvocation<?> ctInvocation) {
         boolean hasInvokedStringFormat = ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
                // ensure the method is called on java.lang.String

@@ -13,10 +13,6 @@ import spoon.reflect.reference.CtTypeReference;
 
 @ExecutableCheck(reportedProblems = { ProblemType.DO_NOT_USE_RAW_TYPES })
 public class DoNotUseRawTypes extends IntegratedCheck {
-    public DoNotUseRawTypes() {
-        super(new LocalizedMessage("do-not-use-raw-types-desc"));
-    }
-
     private boolean isRawType(CtTypeReference<?> ctTypeReference) {
         CtType<?> declaration = ctTypeReference.getTypeDeclaration();
 
@@ -24,7 +20,7 @@ public class DoNotUseRawTypes extends IntegratedCheck {
             // reference points to a type not in the class-path
             return false;
         }
-        
+
         if (ctTypeReference.getRoleInParent() == CtRole.DECLARING_TYPE) {
             // Prevent 'Map' in 'Map.Entry<A, B>' from being reported
             return false;

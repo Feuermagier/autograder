@@ -16,10 +16,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_NEGATION})
 public class RedundantNegationCheck extends IntegratedCheck {
-    public RedundantNegationCheck() {
-        super(new LocalizedMessage("redundant-neg-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtUnaryOperator<?>>() {

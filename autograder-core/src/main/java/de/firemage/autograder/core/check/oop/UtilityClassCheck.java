@@ -17,11 +17,6 @@ import spoon.reflect.declaration.CtMethod;
     ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR
 })
 public class UtilityClassCheck extends IntegratedCheck {
-
-    public UtilityClassCheck() {
-        super(new LocalizedMessage("utility-desc"));
-    }
-
     public static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
         return
             // it must obviously be a class

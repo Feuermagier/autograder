@@ -17,10 +17,6 @@ import spoon.reflect.declaration.CtParameter;
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT })
 
 public class UnusedParameter extends IntegratedCheck {
-    public UnusedParameter() {
-        super(new LocalizedMessage("unused-element-desc"));
-    }
-
     private void checkCtExecutable(CtExecutable<?> ctExecutable) {
         for (CtParameter<?> parameter : ctExecutable.getParameters()) {
             boolean isUnused = ctExecutable

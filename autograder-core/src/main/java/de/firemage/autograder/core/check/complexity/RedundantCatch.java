@@ -20,10 +20,6 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_CATCH })
 public class RedundantCatch extends IntegratedCheck {
-    public RedundantCatch() {
-        super(new LocalizedMessage("redundant-catch"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtCatch>() {

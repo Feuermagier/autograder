@@ -9,7 +9,7 @@ import net.sourceforge.pmd.lang.java.rule.bestpractices.AvoidReassigningParamete
 @ExecutableCheck(reportedProblems = {ProblemType.REASSIGNED_PARAMETER})
 public class DontReassignParametersCheck extends PMDCheck {
     public DontReassignParametersCheck() {
-        super(new LocalizedMessage("param-reassign-desc"), new LocalizedMessage("param-reassign-exp"),
+        super(new LocalizedMessage("param-reassign-exp"),
             new AvoidReassigningParametersRule(), ProblemType.REASSIGNED_PARAMETER);
     }
 }

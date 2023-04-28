@@ -15,10 +15,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.FIELD_SHOULD_BE_FINAL})
 public class FieldShouldBeFinalCheck extends IntegratedCheck {
-    public FieldShouldBeFinalCheck() {
-        super(new LocalizedMessage("field-final-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {

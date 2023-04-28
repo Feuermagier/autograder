@@ -14,10 +14,6 @@ import spoon.reflect.declaration.CtType;
 
 @ExecutableCheck(reportedProblems = { ProblemType.MUTABLE_ENUM })
 public class MutableEnum extends IntegratedCheck {
-    public MutableEnum() {
-        super(new LocalizedMessage("mutable-enum"));
-    }
-
     /**
      * Tries to detect if the provided type is mutable. It is very difficult to detect every possible
      * case of mutability, therefore this method might return false negatives.

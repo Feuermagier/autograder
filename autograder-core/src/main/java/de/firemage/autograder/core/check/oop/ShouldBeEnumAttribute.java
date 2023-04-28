@@ -7,28 +7,17 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
-import de.firemage.autograder.core.integrated.effects.TerminalEffect;
-import de.firemage.autograder.core.integrated.effects.TerminalStatement;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAbstractSwitch;
-import spoon.reflect.code.CtBreak;
-import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtStatement;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = {ProblemType.SHOULD_BE_ENUM_ATTRIBUTE})
 public class ShouldBeEnumAttribute extends IntegratedCheck {
-    public ShouldBeEnumAttribute() {
-        super(new LocalizedMessage("should-be-enum-attribute"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtAbstractSwitch<?>>() {

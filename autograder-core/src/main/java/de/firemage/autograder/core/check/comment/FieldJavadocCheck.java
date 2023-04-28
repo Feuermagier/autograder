@@ -24,10 +24,6 @@ public class FieldJavadocCheck extends IntegratedCheck {
         CtJavaDocTag.TagType.DEPRECATED
     );
 
-    public FieldJavadocCheck() {
-        super(new LocalizedMessage("javadoc-field-check"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {

@@ -19,11 +19,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.EXCEPTION_CAUGHT_IN_SURROUNDING_BLOCK})
 public class ExceptionControlFlowCheck extends IntegratedCheck {
-
-    public ExceptionControlFlowCheck() {
-        super(new LocalizedMessage("exception-controlflow-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtTry>() {

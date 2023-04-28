@@ -12,11 +12,6 @@ import spoon.reflect.code.CtTextBlock;
 
 @ExecutableCheck(reportedProblems = {ProblemType.SYSTEM_SPECIFIC_LINE_BREAK})
 public class WrongLineBreakCheck extends IntegratedCheck {
-
-    public WrongLineBreakCheck() {
-        super(new LocalizedMessage("system-dependent-linebreak-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtLiteral<?>>() {

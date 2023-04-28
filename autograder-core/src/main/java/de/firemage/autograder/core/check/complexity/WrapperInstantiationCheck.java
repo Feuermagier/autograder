@@ -9,8 +9,8 @@ import net.sourceforge.pmd.lang.java.rule.bestpractices.PrimitiveWrapperInstanti
 @ExecutableCheck(reportedProblems = {ProblemType.PRIMITIVE_WRAPPER_INSTANTIATION})
 public class WrapperInstantiationCheck extends PMDCheck {
     public WrapperInstantiationCheck() {
-        super(new LocalizedMessage("wrapper-instantiation-desc"),
-            new LocalizedMessage("wrapper-instantiation-exp"),
+        super(
+                new LocalizedMessage("wrapper-instantiation-exp"),
             new PrimitiveWrapperInstantiationRule(),
             ProblemType.PRIMITIVE_WRAPPER_INSTANTIATION);
     }

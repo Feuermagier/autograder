@@ -11,10 +11,6 @@ import spoon.reflect.code.CtAssert;
 
 @ExecutableCheck(reportedProblems = {ProblemType.ASSERT})
 public class AssertCheck extends IntegratedCheck {
-    public AssertCheck() {
-        super(new LocalizedMessage("assert-used"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtAssert<?>>() {

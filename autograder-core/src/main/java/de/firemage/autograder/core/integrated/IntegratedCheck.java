@@ -15,15 +15,10 @@ import java.util.ArrayList;
 import java.util.List;
 
 public abstract class IntegratedCheck implements Check {
-
-    private final LocalizedMessage description;
-
     private final List<Problem> problems = new ArrayList<>();
     private Path root;
 
-    protected IntegratedCheck(LocalizedMessage description) {
-        this.description = description;
-    }
+    protected IntegratedCheck() {}
 
     protected void addGlobalProblem(LocalizedMessage explanation, ProblemType problemType) {
         this.problems.add(new GlobalProblem(this, explanation, problemType));
@@ -49,11 +44,6 @@ public abstract class IntegratedCheck implements Check {
     @Override
     public LocalizedMessage getLinter() {
         return new LocalizedMessage("linter-integrated");
-    }
-
-    @Override
-    public LocalizedMessage getDescription() {
-        return description;
     }
 
     protected Path getRoot() {

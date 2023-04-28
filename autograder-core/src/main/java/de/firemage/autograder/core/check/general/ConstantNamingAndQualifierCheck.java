@@ -18,11 +18,6 @@ import java.util.Set;
 public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
     private static final Set<String> IGNORE_FIELDS = Set.of("serialVersionUID");
 
-
-    public ConstantNamingAndQualifierCheck() {
-        super(new LocalizedMessage("constant-naming-qualifier-desc"));
-    }
-
     private static LocalizedMessage formatExplanation(CtField<?> field) {
         return new LocalizedMessage("constant-naming-qualifier-exp", Map.of(
             "field", field.getSimpleName(),

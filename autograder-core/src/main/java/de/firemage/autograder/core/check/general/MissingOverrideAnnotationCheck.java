@@ -9,7 +9,7 @@ import net.sourceforge.pmd.lang.java.rule.bestpractices.MissingOverrideRule;
 @ExecutableCheck(reportedProblems = {ProblemType.OVERRIDE_ANNOTATION_MISSING})
 public class MissingOverrideAnnotationCheck extends PMDCheck {
     public MissingOverrideAnnotationCheck() {
-        super(new LocalizedMessage("missing-override-desc"), new LocalizedMessage("missing-override-exp"),
+        super(new LocalizedMessage("missing-override-exp"),
             new MissingOverrideRule(), ProblemType.OVERRIDE_ANNOTATION_MISSING);
     }
 }

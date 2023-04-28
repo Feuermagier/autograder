@@ -18,11 +18,6 @@ public class UncheckedTypeCast extends IntegratedCheck {
         "compiler.warn.prob.found.req"
     );
 
-    @SuppressWarnings("")
-    public UncheckedTypeCast() {
-        super(new LocalizedMessage("unchecked-type-cast"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         CompilationResult result = staticAnalysis.getCompilationResult();

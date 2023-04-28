@@ -11,11 +11,6 @@ import spoon.reflect.declaration.CtAnnotation;
 
 @ExecutableCheck(reportedProblems = {ProblemType.SUPPRESS_WARNINGS_USED})
 public class SuppressWarningsCheck extends IntegratedCheck {
-
-    public SuppressWarningsCheck() {
-        super(new LocalizedMessage("suppress-warnings"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtAnnotation<?>>() {

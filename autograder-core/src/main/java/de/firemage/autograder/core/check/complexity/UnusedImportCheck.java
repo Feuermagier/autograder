@@ -9,8 +9,8 @@ import net.sourceforge.pmd.lang.java.rule.codestyle.UnnecessaryImportRule;
 @ExecutableCheck(reportedProblems = {ProblemType.UNUSED_IMPORT})
 public class UnusedImportCheck extends PMDCheck {
     public UnusedImportCheck() {
-        super(new LocalizedMessage("unused-import-desc"),
-            new LocalizedMessage("unused-import-exp"),
+        super(
+                new LocalizedMessage("unused-import-exp"),
             new UnnecessaryImportRule(),
             ProblemType.UNUSED_IMPORT);
     }

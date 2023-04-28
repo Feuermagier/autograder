@@ -14,10 +14,6 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE})
 public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
-    public StaticFieldShouldBeInstanceCheck() {
-        super(new LocalizedMessage("static-field-desc"));
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
