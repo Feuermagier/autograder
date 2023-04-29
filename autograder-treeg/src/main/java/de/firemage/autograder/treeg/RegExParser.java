@@ -64,7 +64,8 @@ public class RegExParser {
             }
         }
 
-        if (children.size() > 1) {
+        if (children.size() != 1) {
+            // May have empty children (e.g. empty regex)
             return new Chain(children);
         } else {
             return children.get(0);
