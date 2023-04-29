@@ -151,10 +151,10 @@ public class UseFormatString extends IntegratedCheck {
         }
 
         // only visit binary operators that evaluate to a String
-        // (should be guaranteed by the visitor)
-        CtTypeReference<?> ctStringType = ctBinaryOperator.getFactory().Type().createReference(java.lang.String.class);
-        if (!(ctStringType.equals(ctBinaryOperator.getType()))) {
-            throw new IllegalStateException("Binary operator does not evaluate to a String");
+        // (should be guaranteed by the visitor) -> seems to not be guaranteed; replacing the throw by a return for now
+        if (!SpoonUtil.isString(ctBinaryOperator.getType())) {
+            //throw new IllegalStateException("Binary operator does not evaluate to a String");
+            return;
         }
 
         this.checkArgs(staticAnalysis, ctBinaryOperator, this.getFormatArgs(ctBinaryOperator));

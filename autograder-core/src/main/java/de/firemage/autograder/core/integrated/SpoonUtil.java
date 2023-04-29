@@ -22,7 +22,6 @@ import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -325,6 +324,11 @@ public final class SpoonUtil {
             CtVariableReference<?> ctVariableReference
     ) {
         if (!isEffectivelyFinal(ctModel, ctVariableReference)) {
+            return Optional.empty();
+        }
+
+        if (ctVariableReference.getDeclaration() == null) {
+            // this pointer
             return Optional.empty();
         }
 
