@@ -26,6 +26,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.support.reflect.code.CtLiteralImpl;
@@ -306,13 +307,18 @@ public final class SpoonUtil {
     }
 
     public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtVariableReference<?> ctVariableReference) {
-        return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || staticAnalysis.getModel()
-                .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
-                        write.getVariable().equals(ctVariableReference))
-                .first() == null;
+        return isEffectivelyFinal(staticAnalysis.getModel(), ctVariableReference);
     }
 
     public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
+        if (ctVariableReference instanceof CtFieldReference<?> field) {
+            if (field.getDeclaringType().isArray() || field.getDeclaringType().isPrimitive()) {
+                // calling getModifiers() on (new int[1]).length throws a Spoon exception: "The field int#length not found"
+                // Probably a bug in Spoon
+                return false;
+            }
+        }
+
         return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || ctModel
                 .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
                         write.getVariable().equals(ctVariableReference))
