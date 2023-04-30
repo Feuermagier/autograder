@@ -77,8 +77,13 @@ public class Application implements Callable<Integer> {
 
     public static void main(String... args) {
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
-        int exitCode = new CommandLine(new Application()).execute(args);
+        int exitCode = runApplication(args);
         System.exit(exitCode);
+    }
+
+    // Useful for testing
+    public static int runApplication(String... args) {
+        return new CommandLine(new Application()).execute(args);
     }
 
     @Override
@@ -127,9 +132,8 @@ public class Application implements Callable<Integer> {
         Consumer<LinterStatus> statusConsumer = status ->
                 System.out.println(linter.translateMessage(status.getMessage()));
 
-        try {
-            UploadedFile uploadedFile = UploadedFile.build(file,
-                    JavaVersion.fromString(this.javaVersion), getTmpDirectory(), statusConsumer);
+        try (UploadedFile uploadedFile = UploadedFile.build(file,
+                JavaVersion.fromString(this.javaVersion), getTmpDirectory(), statusConsumer)) {
 
             if (outputJson) {
                 List<Problem> problems =

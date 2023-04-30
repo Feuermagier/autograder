@@ -35,7 +35,14 @@ public class AnalysisThread {
             try {
                 var task = this.scheduler.getTask();
                 if (task.isPresent()) {
-                    task.get().run(this.scheduler, reporter);
+                    try {
+                        task.get().run(this.scheduler, reporter);
+                    } catch (Exception ex) {
+                        // Report as completed to avoid a deadlock where everybody waits for the failed task
+                        this.scheduler.completeTask();
+                        this.thrownException = ex;
+                        return;
+                    }
 
                     if (this.scheduler.completeTask()) {
                         // Finished
@@ -47,9 +54,6 @@ public class AnalysisThread {
                 }
             } catch (InterruptedException ex) {
                 Thread.currentThread().interrupt();
-                this.thrownException = ex;
-                return;
-            } catch (Exception ex) {
                 this.thrownException = ex;
                 return;
             }
