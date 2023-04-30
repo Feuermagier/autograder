@@ -1,6 +1,6 @@
 package de.firemage.autograder.core;
 
-public abstract class LinterException extends Exception {
+public class LinterException extends Exception {
     public LinterException() {
         super();
     }

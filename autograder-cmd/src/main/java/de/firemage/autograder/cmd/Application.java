@@ -13,8 +13,6 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.visualize.dot.DotGraph;
-import de.firemage.autograder.core.visualize.structure.StructureVisualizer;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -23,11 +21,14 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileDescriptor;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
@@ -132,7 +133,7 @@ public class Application implements Callable<Integer> {
 
             if (outputJson) {
                 List<Problem> problems =
-                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
+                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic, 0);
                 System.out.println(">> Problems <<");
                 printProblemsAsJson(problems, linter);
             } else {
@@ -140,7 +141,7 @@ public class Application implements Callable<Integer> {
                 ProgressAnimation progress = new ProgressAnimation("Checking...");
                 progress.start();
                 List<Problem> problems =
-                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic);
+                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic, 0);
                 progress.finish("Completed checks");
 
                 printProblems(problems, linter);

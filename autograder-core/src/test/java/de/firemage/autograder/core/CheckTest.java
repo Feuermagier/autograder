@@ -72,6 +72,7 @@ public class CheckTest {
 
         /**
          * Checks if the test is dynamic or static.
+         *
          * @return true if the test is dynamic, false otherwise
          */
         public boolean isDynamic() {
@@ -94,40 +95,43 @@ public class CheckTest {
         }
 
         return DynamicTest.stream(
-            folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
-                    .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
-            TestInput::testName,
-            testInput -> {
-                var check = testInput.config().check();
-                var expectedProblems = testInput.config().expectedProblems();
+                folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
+                        .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
+                TestInput::testName,
+                testInput -> {
+                    var check = testInput.config().check();
+                    var expectedProblems = testInput.config().expectedProblems();
 
-                var tmpDirectory = Files.createTempDirectory(null);
+                    var tmpDirectory = Files.createTempDirectory(null);
 
-                var file = UploadedFile.build(testInput.path().resolve("code"), JavaVersion.JAVA_17, tmpDirectory, status -> {});
-                var linter = new Linter(Locale.US);
+                    var file = UploadedFile.build(testInput.path().resolve("code"), JavaVersion.JAVA_17, tmpDirectory, status -> {
+                    });
+                    var linter = new Linter(Locale.US);
 
-                var problems = linter.checkFile(
-                    file,
-                    tmpDirectory,
-                    testInput.path().resolve("tests"),
-                    List.of(),
-                    List.of(check),
-                    status -> {},
-                    !ENABLE_DYNAMIC || !testInput.isDynamic()
-                );
+                    var problems = linter.checkFile(
+                            file,
+                            tmpDirectory,
+                            testInput.path().resolve("tests"),
+                            List.of(),
+                            List.of(check),
+                            status -> {
+                            },
+                            !ENABLE_DYNAMIC || !testInput.isDynamic(),
+                            1 // Use a single thread for performance reasons
+                    );
 
-                for (var problem : problems) {
-                    if (!expectedProblems.remove(problem.getDisplayLocation())) {
-                        fail("The check reported a problem '" + problem.getDisplayLocation() +
-                                "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType().toString() +
-                                " Message: `" + linter.translateMessage(problem.getExplanation()) + "`");
+                    for (var problem : problems) {
+                        if (!expectedProblems.remove(problem.getDisplayLocation())) {
+                            fail("The check reported a problem '" + problem.getDisplayLocation() +
+                                    "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType().toString() +
+                                    " Message: `" + linter.translateMessage(problem.getExplanation()) + "`");
+                        }
+                    }
+
+                    if (!expectedProblems.isEmpty()) {
+                        fail("Problems not reported: " + expectedProblems);
                     }
                 }
-
-                if (!expectedProblems.isEmpty()) {
-                    fail("Problems not reported: " + expectedProblems);
-                }
-            }
         );
     }
 }

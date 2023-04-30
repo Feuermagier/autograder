@@ -1,13 +1,13 @@
 package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.dynamic.DockerConsoleRunner;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.dynamic.RunnerException;
 import de.firemage.autograder.core.dynamic.TestRunResult;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.graph.GraphAnalysis;
+import de.firemage.autograder.core.parallel.AnalysisScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -18,7 +18,6 @@ import java.net.URL;
 import java.nio.file.FileSystem;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -96,14 +95,20 @@ public class IntegratedAnalysis {
         openFileSystems.clear();
     }
 
-    public List<Problem> lint(List<IntegratedCheck> checks, Consumer<LinterStatus> statusConsumer) {
-        statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
-        List<Problem> problems = new ArrayList<>();
-        for (IntegratedCheck check : checks) {
-            problems.addAll(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getSource().getFile()));
-        }
+    public void lint(List<IntegratedCheck> checks, Consumer<LinterStatus> statusConsumer, AnalysisScheduler scheduler) {
+        statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
+        this.staticAnalysis.getCodeModel().ensureModelBuild();
 
-        return problems;
+        statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
+
+        for (IntegratedCheck check : checks) {
+            scheduler.submitTask((s, reporter) -> {
+                long beforeTime = System.nanoTime();
+                reporter.reportProblems(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getSource().getFile()));
+                long afterTime = System.nanoTime();
+                logger.info("Completed check " + check.getClass().getSimpleName() + " in " + ((afterTime - beforeTime) / 1_000_000 + "ms"));
+            });
+        }
     }
 
     public StaticAnalysis getStaticAnalysis() {

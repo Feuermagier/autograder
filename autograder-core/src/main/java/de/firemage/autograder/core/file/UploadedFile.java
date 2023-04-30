@@ -41,7 +41,6 @@ public class UploadedFile implements AutoCloseable {
             return null;
         }
 
-        statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
         var model = CodeModel.buildFor(source, compilationResult.get().jar());
 
         return new UploadedFile(model, source, compilationResult.get());

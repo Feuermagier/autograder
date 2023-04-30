@@ -11,4 +11,5 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface ExecutableCheck {
     ProblemType[] reportedProblems();
+    boolean enabled() default true;
 }

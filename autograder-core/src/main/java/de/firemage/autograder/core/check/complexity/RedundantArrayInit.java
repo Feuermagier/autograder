@@ -21,7 +21,8 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.reference.CtVariableReference;
 
 
-@ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_ARRAY_INIT })
+// Check is bugged
+@ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_ARRAY_INIT }, enabled = false)
 public class RedundantArrayInit extends IntegratedCheck {
     private <L, R> void checkAssignment(
         L lhs,

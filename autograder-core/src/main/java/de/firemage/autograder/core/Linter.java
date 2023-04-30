@@ -7,6 +7,8 @@ import de.firemage.autograder.core.cpd.CPDLinter;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.IntegratedAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.parallel.AnalysisResult;
+import de.firemage.autograder.core.parallel.AnalysisScheduler;
 import de.firemage.autograder.core.pmd.PMDCheck;
 import de.firemage.autograder.core.pmd.PMDLinter;
 import de.firemage.autograder.core.spotbugs.SpotbugsCheck;
@@ -51,18 +53,18 @@ public class Linter {
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
                                    List<ProblemType> problemsToReport,
-                                   Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis)
+                                   Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis,
+                                   int threads)
             throws LinterException, IOException, InterruptedException {
         return this.checkFile(file, tmpLocation, tests, problemsToReport,
                 findChecksForProblemTypes(problemsToReport),
-                statusConsumer, disableDynamicAnalysis);
+                statusConsumer, disableDynamicAnalysis, threads);
     }
 
     public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
                                    List<ProblemType> problemsToReport,
                                    List<Check> checks, Consumer<LinterStatus> statusConsumer,
-                                   boolean disableDynamicAnalysis)
-            throws LinterException, InterruptedException, IOException {
+                                   boolean disableDynamicAnalysis, int threads) throws LinterException {
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
@@ -83,35 +85,52 @@ public class Linter {
             }
         }
 
-        List<Problem> problems = new ArrayList<>();
+        AnalysisScheduler scheduler = new AnalysisScheduler(threads);
 
         if (!pmdChecks.isEmpty()) {
-            statusConsumer.accept(LinterStatus.RUNNING_PMD);
-            problems.addAll(new PMDLinter().lint(file, pmdChecks));
+            scheduler.submitTask((s, reporter) -> {
+                statusConsumer.accept(LinterStatus.RUNNING_PMD);
+                reporter.reportProblems(new PMDLinter().lint(file, pmdChecks));
+            });
         }
 
         if (!cpdChecks.isEmpty()) {
-            statusConsumer.accept(LinterStatus.RUNNING_CPD);
-            problems.addAll(new CPDLinter().lint(file, cpdChecks));
+            scheduler.submitTask((s, reporter) -> {
+                statusConsumer.accept(LinterStatus.RUNNING_CPD);
+                reporter.reportProblems(new CPDLinter().lint(file, cpdChecks));
+            });
         }
 
         if (!spotbugsChecks.isEmpty()) {
-            statusConsumer.accept(LinterStatus.RUNNING_SPOTBUGS);
-            problems.addAll(new SpotbugsLinter().lint(file.getCompilationResult().jar(), spotbugsChecks));
+            scheduler.submitTask((s, reporter) -> {
+                statusConsumer.accept(LinterStatus.RUNNING_SPOTBUGS);
+                reporter.reportProblems(new SpotbugsLinter().lint(file.getCompilationResult().jar(), spotbugsChecks));
+            });
         }
 
         if (!integratedChecks.isEmpty()) {
-            IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
-            if (!disableDynamicAnalysis) {
-                analysis.runDynamicAnalysis(tests, statusConsumer);
-            }
-            problems.addAll(analysis.lint(integratedChecks, statusConsumer));
+            scheduler.submitTask((s, reporter) -> {
+                IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
+                if (!disableDynamicAnalysis) {
+                    analysis.runDynamicAnalysis(tests, statusConsumer);
+                }
+                analysis.lint(integratedChecks, statusConsumer, s);
+            });
+        }
+
+        AnalysisResult result = scheduler.collectProblems();
+        if (result.failed()) {
+            throw new LinterException(result.thrownException());
         }
 
         if (problemsToReport.isEmpty()) {
-            return problems;
+            return result.problems();
         } else {
-            return problems.stream().filter(p -> problemsToReport.contains(p.getProblemType())).toList();
+            return result
+                    .problems()
+                    .stream()
+                    .filter(p -> problemsToReport.contains(p.getProblemType()))
+                    .toList();
         }
     }
 
@@ -141,6 +160,6 @@ public class Linter {
     }
 
     private boolean isRequiredCheck(ExecutableCheck check, List<ProblemType> problems) {
-        return problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));
+        return check.enabled() && problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));
     }
 }

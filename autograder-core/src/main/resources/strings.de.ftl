@@ -196,7 +196,7 @@ type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte
 # OOP
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 
-list-getter-exp = Kopie diese veränderbare Collection bevor du sie zurückgibst, um unbeabsichtigte Veränderungen durch andere Klassen zu verhindern
+list-getter-exp = Kopiere diese veränderbare Collection bevor du sie zurückgibst, um unbeabsichtigte Veränderungen durch andere Klassen zu verhindern
 
 method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
 
