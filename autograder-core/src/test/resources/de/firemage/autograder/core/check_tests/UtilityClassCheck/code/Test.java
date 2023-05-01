@@ -53,3 +53,30 @@ class MyException extends Exception { // Ok
         return "Error: " + message;
     }
 }
+
+final class MyUtilityClassWithNonPrivate {
+    protected MyUtilityClassWithNonPrivate() {  // Not Ok
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static void a() {}
+    public static void b() {}
+}
+
+abstract class MyAbstractUtilityClassWithNonPrivate {
+    protected MyAbstractUtilityClassWithNonPrivate() { // Not Ok
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static void a() {}
+    public static void b() {}
+}
+
+final class MyUtilityClassWithNonPackagePrivate {
+    MyUtilityClassWithNonPackagePrivate() { // Not Ok
+        throw new IllegalStateException("Utility class");
+    }
+
+    public static void a() {}
+    public static void b() {}
+}
