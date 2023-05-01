@@ -11,10 +11,12 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtModifiable;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.UTILITY_CLASS_NOT_FINAL,
-    ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR
+    ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR,
+    ProblemType.UTILITY_CLASS_ABSTRACT
 })
 public class UtilityClassCheck extends IntegratedCheck {
     public static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
@@ -31,55 +33,64 @@ public class UtilityClassCheck extends IntegratedCheck {
                 && ctClass.getFields().stream().allMatch(
                     ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())
                 )
-                // the class should not be abstract
-                && !ctClass.isAbstract()
                 // the class should not extend anything
                 && ctClass.getSuperclass() == null
                 // the class should not implement anything
                 && ctClass.getSuperInterfaces().isEmpty()
-                // the class should not have any inner classes
-                && ctClass.getNestedTypes().isEmpty()
                 // the class itself should not be an inner class
                 && !SpoonUtil.isInnerClass(ctClass);
+    }
+
+    private void checkCtClassConstructor(CtClass<?> ctClass, ProblemType problemType) {
+        // check if there is no constructor, only the implicit default one:
+        if (ctClass.getConstructors().stream().allMatch(CtConstructor::isImplicit)) {
+            addLocalProblem(
+                    ctClass,
+                    new LocalizedMessage("utility-exp-constructor"),
+                    problemType
+            );
+            return;
+        }
+
+        for (CtConstructor<?> ctConstructor : ctClass.getConstructors()) {
+            if (ctConstructor.isImplicit() || ctConstructor.isPrivate() || !ctConstructor.getParameters().isEmpty()) {
+                continue;
+            }
+
+            // if there is a non-private constructor, lint it:
+            addLocalProblem(
+                    ctConstructor,
+                    new LocalizedMessage("utility-exp-constructor"),
+                    problemType
+            );
+        }
     }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
-            public void process(CtClass<?> clazz) {
+            public void process(CtClass<?> ctClass) {
                 // ignore everything that is not a utility class
-                if (!isUtilityClass(staticAnalysis, clazz)) {
+                if (!isUtilityClass(staticAnalysis, ctClass)) {
                     return;
                 }
 
-                if (!clazz.isFinal()) {
-                    addLocalProblem(clazz, new LocalizedMessage("utility-exp-final"),
+                // evaluate abstract utility classes separately, so they can be disabled in the config
+                if (ctClass.isAbstract()) {
+                    checkCtClassConstructor(ctClass, ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR);
+
+                    return;
+                }
+
+                // a utility class should be final
+                if (!ctClass.isFinal()) {
+                    addLocalProblem(ctClass, new LocalizedMessage("utility-exp-final"),
                         ProblemType.UTILITY_CLASS_NOT_FINAL
                     );
                 }
 
-                if (clazz.getConstructors().stream().allMatch(CtConstructor::isImplicit)) {
-                    addLocalProblem(clazz, new LocalizedMessage("utility-exp-constructor"),
-                        ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR
-                    );
-                } else {
-                    clazz.getConstructors().stream()
-                         .filter(c -> !c.isImplicit() && !c.isPrivate() || !c.getParameters().isEmpty())
-                         .forEach(
-                             c -> addLocalProblem(c, new LocalizedMessage("utility-exp-constructor"),
-                                 ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR
-                             ));
-
-                }
-
-                //                    clazz.getFields().stream()
-                //                        .filter(f -> !f.isFinal())
-                //                        .forEach(f -> addLocalProblem(f, new LocalizedMessage
-                //                        ("utility-exp-field"),
-                //                            ProblemType.UTILITY_CLASS_MUTABLE_FIELD));
-
-                // TODO add mutable access to fields, e.g. Collection::add
+                checkCtClassConstructor(ctClass, ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR);
             }
         });
     }
