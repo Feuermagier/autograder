@@ -18,7 +18,7 @@
         <spotbugs.version>6.45.0</spotbugs.version>
 
         <docker.version>3.3.0</docker.version>
-        <jgraph.version>1.5.1</jgraph.version>
+        <jgraph.version>1.5.2</jgraph.version>
         <fluent.version>0.70</fluent.version>
     </properties>
 
