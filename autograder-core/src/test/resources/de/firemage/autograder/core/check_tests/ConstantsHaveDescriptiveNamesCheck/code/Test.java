@@ -21,4 +21,5 @@ public class Test {
     private static final String SPLIT_COLON = ":"; // Not Ok
     private static final String SPLIT_COMMA = ","; // Not Ok
     private static final String SPLIT_ARROW = "-->"; // Not OK
+    private static final String NOT_LOADED = "A simulation must be loaded first"; // Ok
 }

@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
+    private static final int MAX_VALUE_SIZE = 3;
     private static final List<String> NUMBER_PRE_SUFFIXES =
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
@@ -44,6 +45,13 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static boolean isNonDescriptiveStringName(String name, String value) {
         if (NON_DESCRIPTIVE_NAMES.contains(name.toLowerCase())) {
             return true;
+        }
+
+        // the below code will blow up in size based on the value length
+        // a length of for example 23 will look like the autograder is stuck
+        // in an infinite loop.
+        if (value.length() > MAX_VALUE_SIZE) {
+            return false;
         }
 
         Stream<String> options = Stream.of("");
