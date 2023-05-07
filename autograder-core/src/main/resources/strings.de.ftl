@@ -3,6 +3,7 @@ status-compiling = Compiling
 status-spotbugs = Running SpotBugs
 status-pmd = Running PMD
 status-cpd = Running Copy/Paste-Detection
+status-error-prone = Running error-prone
 status-model = Building the code model
 status-docker = Building the Docker image
 status-tests = Executing tests
@@ -13,6 +14,7 @@ linter-cpd = Copy/Paste-Detection
 linter-spotbugs = SpotBugs
 linter-pmd = PMD
 linter-integrated = Integrated Analysis
+linter-error-prone = error-prone
 
 # CPD
 duplicate-code = Duplizierter Code ({$lines}): {$first-path}:{$first-start}-{$first-end} und {$second-path}:{$second-start}-{$second-end}
@@ -39,6 +41,19 @@ use-format-string = `{$formatted}` ist schöner zu lesen.
 math-floor-division = Bei integer division wird immer abgerundet, daher ist das `Math.floor` unnötig.
 
 use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
+
+compare-to-zero = Das Ergebnis von compareTo oder compare sollte nur mit 0 verglichen werden.
+                Es ist eine Implementierungsdetail, ob ein gegebener Typ streng die Werte
+                '-1, 0, +1' oder andere zurückgibt.
+equals-using-hashcode = Equals nur mit hashCode zu implementieren ist fehleranfällig.
+                        Hashes kollidieren häufig, was zu falschen Ergebnissen in equals führt.
+equals-unsafe-cast = Im Javadoc von equals steht, dass es false für inkompatible Typen zurückgeben soll.
+                    Diese Implementierung kann eine ClassCastException werfen.
+equals-incompatible-type = Ein Vergleich zwischen Objekten mit inkompatiblen Typen gibt immer false zurück
+inconsistent-hashcode = Das hashCode-Verhalten ist inkonsistent. Es wird in equals nicht verglichen, aber in hashCode verwendet.
+undefined-equals = Es ist nicht garantiert, dass dieser Typ eine sinnvolle equals-Methode implementiert.
+non-overriding-equals = equals-Methode überschreibt nicht Object.equals
+equals-broken-for-null = equals() kann eine NullPointerException werfen, wenn null übergeben wird
 
 # Comment
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden

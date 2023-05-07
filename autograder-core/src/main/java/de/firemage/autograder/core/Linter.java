@@ -4,6 +4,8 @@ import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.general.CopyPasteCheck;
 import de.firemage.autograder.core.cpd.CPDLinter;
+import de.firemage.autograder.core.errorprone.ErrorProneCheck;
+import de.firemage.autograder.core.errorprone.ErrorProneLinter;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.IntegratedAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -70,6 +72,7 @@ public class Linter {
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
         List<CopyPasteCheck> cpdChecks = new ArrayList<>();
         List<IntegratedCheck> integratedChecks = new ArrayList<>();
+        List<ErrorProneCheck> errorProneChecks = new ArrayList<>();
 
         for (Check check : checks) {
             if (check instanceof PMDCheck pmdCheck) {
@@ -80,6 +83,8 @@ public class Linter {
                 spotbugsChecks.add(spotbugsCheck);
             } else if (check instanceof IntegratedCheck integratedCheck) {
                 integratedChecks.add(integratedCheck);
+            } else if (check instanceof ErrorProneCheck errorProneCheck) {
+                errorProneChecks.add(errorProneCheck);
             } else {
                 throw new IllegalStateException();
             }
@@ -115,6 +120,13 @@ public class Linter {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }
                 analysis.lint(integratedChecks, statusConsumer, s);
+            });
+        }
+
+        if (!errorProneChecks.isEmpty()) {
+            scheduler.submitTask((s, reporter) -> {
+                statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
+                reporter.reportProblems(new ErrorProneLinter().lint(file, errorProneChecks));
             });
         }
 

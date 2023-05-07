@@ -1,0 +1,7 @@
+api.ProblematicEqualsHashCodeComparable
+Detecting problems with equals, hashCode and compareTo implementations
+Test.java:11
+Test.java:21
+Test.java:22
+Test.java:35
+Test.java:36

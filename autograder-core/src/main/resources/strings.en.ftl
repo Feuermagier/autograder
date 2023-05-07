@@ -3,6 +3,7 @@ status-compiling = Compiling
 status-spotbugs = Running SpotBugs
 status-pmd = Running PMD
 status-cpd = Running Copy/Paste-Detection
+status-error-prone = Running error-prone
 status-model = Building the code model
 status-docker = Building the Docker image
 status-tests = Executing tests
@@ -13,6 +14,7 @@ linter-cpd = Copy/Paste-Detection
 linter-spotbugs = SpotBugs
 linter-pmd = PMD
 linter-integrated = Integrated Analysis
+linter-error-prone = error-prone
 
 # CPD
 duplicate-code = Duplicated code ({$lines}): {$first-path}:{$first-start}-{$first-end} and {$second-path}:{$second-start}-{$second-end}
@@ -39,6 +41,19 @@ use-format-string = `{$formatted}` is easier to read.
 math-floor-division = Integer division is always floored, therefore the `Math.floor` is redundant.
 
 use-enum-collection = For maps where an enum is used as a key and for sets as a value, one should use EnumMap/EnumSet.
+
+compare-to-zero = The result of #compareTo or #compare should only be compared to 0.
+                It is an implementation detail whether a given type returns strictly the values
+                '-1, 0, +1' or others.
+equals-using-hashcode = Implementing equals by just comparing hashCodes is fragile.
+                Hashes collide frequently, and this will lead to false positives in equals.
+equals-unsafe-cast = The contract of equals states that it should return false for incompatible
+                    types, while this implementation may throw ClassCastException.
+equals-incompatible-type = An equality test between objects with incompatible types always returns false
+inconsistent-hashcode = Including fields in hashCode which are not compared in equals violates the contract of hashCode.
+undefined-equals = This type is not guaranteed to implement a useful equals method.
+non-overriding-equals = equals method doesn't override Object.equals
+equals-broken-for-null = equals() implementation may throw NullPointerException when given null
 
 # Comment
 commented-out-code-exp = This commented out code should be removed
