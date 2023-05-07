@@ -117,7 +117,6 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
         // the result is written to a temporary file, because I could not find a way to do
         // inter-process communication (e.g. a channel to send back the result before exiting)
         Path resultFileLocation = this.tmpLocation.resolve(Path.of("result.txt"));
-        Path exceptionFileLocation = this.tmpLocation.resolve(Path.of("exception.txt"));
 
         // inject custom jvm arguments:
         newProcessCommandLine.addAll(this.jvmArgs);
@@ -127,9 +126,8 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
         newProcessCommandLine.add(serialize(supplier));
         // the result will be written to the file:
         newProcessCommandLine.add(resultFileLocation.toString());
-        newProcessCommandLine.add(exceptionFileLocation.toString());
 
-        return new VMHandle<>(new ProcessBuilder(newProcessCommandLine), resultFileLocation, exceptionFileLocation);
+        return new VMHandle<>(new ProcessBuilder(newProcessCommandLine), resultFileLocation);
     }
 
     /**
@@ -140,13 +138,11 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
     public static class VMHandle<T extends Serializable> {
         private final Process process;
         private final Path resultFileLocation;
-        private final Path exceptionFileLocation;
         private T value;
 
         private VMHandle(
             ProcessBuilder processBuilder,
-            Path resultFileLocation,
-            Path exceptionFileLocation
+            Path resultFileLocation
         ) throws IOException {
             this.process = processBuilder
                 .redirectOutput(ProcessBuilder.Redirect.INHERIT)
@@ -155,7 +151,6 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
 
             this.value = null;
             this.resultFileLocation = resultFileLocation;
-            this.exceptionFileLocation = exceptionFileLocation;
         }
 
         private T getValue() throws IOException {
@@ -166,18 +161,10 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
             return this.value;
         }
 
-        private Exception getException() throws IOException {
-            return deserialize(Files.readString(this.exceptionFileLocation));
-        }
-
         public T join() throws InterruptedException, IOException {
             int exitCode = this.process.waitFor();
             if (exitCode != 0) {
-                this.getException().printStackTrace();
-                throw new IllegalStateException(
-                    "Process exited with non-zero exit code: " + exitCode,
-                    this.getException()
-                );
+                throw new IllegalStateException("Process exited with non-zero exit code: " + exitCode);
             }
 
             return this.getValue();
@@ -202,11 +189,7 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
 
                 System.exit(0);
             } catch (Exception exception) {
-                try {
-                    Files.writeString(Path.of(args[2]), serialize(exception));
-                } catch (IOException e) {
-                    throw new IllegalStateException("Failed to serialize exception", e);
-                }
+                exception.printStackTrace();
 
                 System.exit(1);
             }
