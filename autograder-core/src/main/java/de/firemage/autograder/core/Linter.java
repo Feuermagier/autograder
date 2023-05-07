@@ -126,7 +126,7 @@ public class Linter {
         if (!errorProneChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
                 statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
-                reporter.reportProblems(new ErrorProneLinter().lint(file, errorProneChecks));
+                reporter.reportProblems(new ErrorProneLinter().lint(file, tmpLocation, errorProneChecks));
             });
         }
 

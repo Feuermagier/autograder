@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -13,7 +14,7 @@ import java.util.Map;
 import java.util.function.Function;
 
 public class ErrorProneLinter {
-    public List<Problem> lint(UploadedFile file, Iterable<? extends ErrorProneCheck> checks) throws IOException {
+    public List<Problem> lint(UploadedFile file, Path tmpLocation, Iterable<? extends ErrorProneCheck> checks) throws IOException {
         Map<ErrorProneLint, Function<ErrorProneDiagnostic, Message>> lintsForChecks = new HashMap<>();
         Map<ErrorProneLint, Check> checksForLints = new HashMap<>();
 
@@ -36,6 +37,7 @@ public class ErrorProneLinter {
 
         ErrorProneCompiler compiler = new ErrorProneCompiler(
             code.getVersion(),
+            TempLocation.fromPath(tmpLocation),
             lints
         );
 

@@ -20,12 +20,11 @@ import java.util.Optional;
 /**
  * A class that can be used to run code in a new JVM.
  *
- * @param jvmArgs     arguments to pass to the new JVM (those are that java -... flags)
- * @param tmpLocation a location where the result of the code can be written to (used for inter-process communication)
+ * @param jvmArgs      arguments to pass to the new JVM (those are that java -... flags)
+ * @param tempLocation a location where the result of the code can be written to (used for inter-process communication)
  */
-public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String> mainClassName) {
-    public static VMLauncher fromDefault() {
-        Path tmpLocation = Path.of(System.getProperty("java.io.tmpdir"));
+public record VMLauncher(List<String> jvmArgs, TempLocation tempLocation, Optional<String> mainClassName) {
+    public static VMLauncher fromDefault(TempLocation tmpLocation) throws IOException {
         Optional<String> mainClassName = Optional.empty();
         {
             String potentialName = System.getProperty("sun.java.command");
@@ -52,7 +51,7 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
                 "--add-exports=jdk.compiler/com.sun.tools.javac.util=ALL-UNNAMED",
                 "--add-exports=jdk.compiler/com.sun.source.tree=ALL-UNNAMED"
             ),
-            tmpLocation,
+            tmpLocation.createTempDirectory("vm"),
             mainClassName
         );
     }
@@ -96,27 +95,13 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
         List<String> newProcessCommandLine = new ArrayList<>();
         newProcessCommandLine.add(currentProcessInfo.command().orElseThrow());
 
-        List<String> currentProcessArgs =
-            currentProcessInfo.arguments().map(Arrays::asList).orElseGet(ArrayList::new);
+        newProcessCommandLine.add("-classpath");
+        newProcessCommandLine.add(ManagementFactory.getRuntimeMXBean().getClassPath());
 
-        if (currentProcessArgs.isEmpty() || this.mainClassName.isEmpty()) {
-            newProcessCommandLine.add("-classpath");
-            newProcessCommandLine.add(ManagementFactory.getRuntimeMXBean().getClassPath());
-        } else {
-            for (String arg : currentProcessArgs) {
-                if (arg.equals(this.mainClassName.get())) {
-                    // everything after the class name will be arguments to the main method
-                    // (which are not needed here)
-                    break;
-                }
-
-                newProcessCommandLine.add(arg);
-            }
-        }
 
         // the result is written to a temporary file, because I could not find a way to do
         // inter-process communication (e.g. a channel to send back the result before exiting)
-        Path resultFileLocation = this.tmpLocation.resolve(Path.of("result.txt"));
+        Path resultFileLocation = this.tempLocation.createTempFile("result.txt");
 
         // inject custom jvm arguments:
         newProcessCommandLine.addAll(this.jvmArgs);
@@ -135,7 +120,7 @@ public record VMLauncher(List<String> jvmArgs, Path tmpLocation, Optional<String
      *
      * @param <T> the type of the result returned by the launched lambda.
      */
-    public static class VMHandle<T extends Serializable> {
+    public static final class VMHandle<T extends Serializable> {
         private final Process process;
         private final Path resultFileLocation;
         private T value;

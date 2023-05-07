@@ -22,9 +22,10 @@ import java.util.stream.Stream;
  * Abstracts away the compiler and ensures that error-prone is executed correctly.
  *
  * @param javaVersion the java version with which to compile
- * @param lints the lints that should be emitted
+ * @param lints       the lints that should be emitted
  */
-record ErrorProneCompiler(JavaVersion javaVersion, List<ErrorProneLint> lints) implements Serializable {
+record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
+                          List<ErrorProneLint> lints) implements Serializable {
     /**
      * Compiles the given source files and returns the emitted lints.
      *
@@ -46,7 +47,7 @@ record ErrorProneCompiler(JavaVersion javaVersion, List<ErrorProneLint> lints) i
         // inherits the exports from the JVM it is running in. Autograder will obviously
         // not have these flags set, so instead of requiring them (would be annoying for
         // all contributors and IDE setup), a new JVM is launched with the flags set.
-        VMLauncher vmLauncher = VMLauncher.fromDefault();
+        VMLauncher vmLauncher = VMLauncher.fromDefault(this.tempLocation);
 
         // use explicit type, so it is serializable
         ArrayList<ErrorProneDiagnostic> diagnostics;
