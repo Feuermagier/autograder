@@ -17,6 +17,7 @@ import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
+    private static final int MAX_VALUE_SIZE = 3;
     private static final List<String> NUMBER_PRE_SUFFIXES =
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
@@ -55,11 +56,12 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (charOptions == null) {
                     return false;
                 }
-                options = options.flatMap(
-                        suffix -> charOptions.stream().flatMap(o -> Stream.of(suffix + o, suffix + "_" + o)));
+                options = options.flatMap(suffix -> charOptions.stream().map(o -> suffix + o));
             }
         }
-        return options.anyMatch(option -> option.equals(name.toLowerCase()));
+
+        String cleanedName = name.toLowerCase().replace("_", "");
+        return options.anyMatch(cleanedName::equals);
     }
 
     private static List<String> listCharOptions(char c) {

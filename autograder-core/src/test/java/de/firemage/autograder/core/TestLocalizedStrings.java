@@ -63,7 +63,9 @@ class TestLocalizedStrings {
             "linter-spotbugs",
             "linter-pmd",
             "linter-integrated",
-            "duplicate-code"
+            "duplicate-code",
+            "status-error-prone",
+            "linter-error-prone"
     );
 
     private static List<String> localizedKeys;
