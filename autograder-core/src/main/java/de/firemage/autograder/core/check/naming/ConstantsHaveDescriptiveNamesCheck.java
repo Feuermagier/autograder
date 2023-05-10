@@ -47,13 +47,6 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             return true;
         }
 
-        // the below code will blow up in size based on the value length
-        // a length of for example 23 will look like the autograder is stuck
-        // in an infinite loop.
-        if (value.length() > MAX_VALUE_SIZE) {
-            return false;
-        }
-
         Stream<String> options = Stream.of("");
         if (value.isEmpty()) {
             options = Stream.of("empty", "blank");
@@ -63,11 +56,12 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                 if (charOptions == null) {
                     return false;
                 }
-                options = options.flatMap(
-                        suffix -> charOptions.stream().flatMap(o -> Stream.of(suffix + o, suffix + "_" + o)));
+                options = options.flatMap(suffix -> charOptions.stream().map(o -> suffix + o));
             }
         }
-        return options.anyMatch(option -> option.equals(name.toLowerCase()));
+
+        String cleanedName = name.toLowerCase().replace("_", "");
+        return options.anyMatch(cleanedName::equals);
     }
 
     private static List<String> listCharOptions(char c) {
