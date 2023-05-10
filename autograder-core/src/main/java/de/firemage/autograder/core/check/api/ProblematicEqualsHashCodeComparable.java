@@ -15,7 +15,6 @@ import java.util.function.Function;
 public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
     @Override
     public Map<ErrorProneLint, Function<ErrorProneDiagnostic, Message>> subscribedLints() {
-        // TODO: add basic tests, problem types and message keys
         return Map.ofEntries(
             Map.entry(
                 // The result of #compareTo or #compare should only be compared to 0.
@@ -98,6 +97,37 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 diagnostic -> Message.of(
                     ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
                     new LocalizedMessage("equals-broken-for-null")
+                )
+            ),
+            Map.entry(
+                // hashcode method on array does not hash array contents
+                //
+                // https://errorprone.info/bugpattern/ArrayHashCode
+                ErrorProneLint.fromString("ArrayHashCode"),
+                diagnostic -> Message.of(
+                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    new LocalizedMessage("array-hash-code")
+                )
+            ),
+            Map.entry(
+                // == must be used in equals method to check equality to itself or an infinite loop will occur.
+                //
+                // https://errorprone.info/bugpattern/EqualsReference
+                ErrorProneLint.fromString("EqualsReference"),
+                diagnostic -> Message.of(
+                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    new LocalizedMessage("equals-reference")
+                )
+            ),
+            Map.entry(
+                // Arrays do not override equals or hashCode, so comparisons will be done on reference equality
+                // only. If neither deduplication nor lookup are needed, consider using a List instead.
+                //
+                // https://errorprone.info/bugpattern/ArrayAsKeyOfSetOrMap
+                ErrorProneLint.fromString("ArrayAsKeyOfSetOrMap"),
+                diagnostic -> Message.of(
+                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    new LocalizedMessage("array-as-key-of-set-or-map")
                 )
             )
         );

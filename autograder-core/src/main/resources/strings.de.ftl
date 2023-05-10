@@ -53,7 +53,11 @@ equals-incompatible-type = Ein Vergleich zwischen Objekten mit inkompatiblen Typ
 inconsistent-hashcode = Das hashCode-Verhalten ist inkonsistent. Es wird in equals nicht verglichen, aber in hashCode verwendet.
 undefined-equals = Es ist nicht garantiert, dass dieser Typ eine sinnvolle equals-Methode implementiert.
 non-overriding-equals = equals-Methode überschreibt nicht Object.equals
-equals-broken-for-null = equals() kann eine NullPointerException werfen, wenn null übergeben wird
+equals-broken-for-null = equals kann eine NullPointerException werfen, wenn null übergeben wird
+array-hash-code = hashCode auf arrays, hasht nicht den Inhalt des Arrays
+equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich selbst zu prüfen, sonst entsteht eine Endlosschleife.
+array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
+                            auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
 # Comment
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden

@@ -53,7 +53,12 @@ equals-incompatible-type = An equality test between objects with incompatible ty
 inconsistent-hashcode = Including fields in hashCode which are not compared in equals violates the contract of hashCode.
 undefined-equals = This type is not guaranteed to implement a useful equals method.
 non-overriding-equals = equals method doesn't override Object.equals
-equals-broken-for-null = equals() implementation may throw NullPointerException when given null
+equals-broken-for-null = equals implementation may throw NullPointerException when given null
+array-hash-code = hashCode method on array does not hash array contents
+equals-reference = == must be used in equals method to check equality to itself or an infinite loop will occur.
+array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so comparisons will be done on reference
+                            equality only. If neither deduplication nor lookup are needed, consider using a List
+                            instead.
 
 # Comment
 commented-out-code-exp = This commented out code should be removed
