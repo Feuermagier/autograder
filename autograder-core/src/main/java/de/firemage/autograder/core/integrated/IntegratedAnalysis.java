@@ -104,7 +104,7 @@ public class IntegratedAnalysis {
         for (IntegratedCheck check : checks) {
             scheduler.submitTask((s, reporter) -> {
                 long beforeTime = System.nanoTime();
-                reporter.reportProblems(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getSource().getFile()));
+                reporter.reportProblems(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getSource().getPath()));
                 long afterTime = System.nanoTime();
                 logger.info("Completed check " + check.getClass().getSimpleName() + " in " + ((afterTime - beforeTime) / 1_000_000 + "ms"));
             });

@@ -67,12 +67,10 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
 
     private List<ErrorProneDiagnostic> internalCompile(SourceInfo input) throws IOException {
         Charset charset = input.getCharset();
-        List<PhysicalFileObject> compilationUnits = input.streamFiles()
-            .map(file -> new PhysicalFileObject(file, input.getCharset()))
-            .toList();
+        List<PhysicalFileObject> compilationUnits = input.compilationUnits();
 
         if (compilationUnits.isEmpty()) {
-            throw new IllegalArgumentException("Nothing found to compile in " + input.getFile());
+            throw new IllegalArgumentException("Nothing found to compile in " + input.getPath());
         }
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -104,14 +102,14 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
         output.close();
 
         if (!isSuccessful) {
-            throw new IllegalArgumentException("Failed to compile %s: %s".formatted(input.getFile(), output));
+            throw new IllegalArgumentException("Failed to compile %s: %s".formatted(input.getPath(), output));
         }
 
         return diagnosticCollector.getDiagnostics()
             .stream()
             // only keep error-prone diagnostics
             .filter(diagnostic -> diagnostic.getCode().equals("compiler.warn.error.prone"))
-            .map(diagnostic -> ErrorProneDiagnostic.from(diagnostic, input.getFile()))
+            .map(diagnostic -> ErrorProneDiagnostic.from(diagnostic, input.getPath()))
             .toList();
     }
 }

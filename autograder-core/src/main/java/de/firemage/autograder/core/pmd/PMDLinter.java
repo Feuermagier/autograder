@@ -37,12 +37,12 @@ public class PMDLinter {
             }
         }
 
-        ProblemRenderer renderer = new ProblemRenderer(idMap, file.getSource().getFile());
+        ProblemRenderer renderer = new ProblemRenderer(idMap, file.getSource().getPath());
 
         try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
             pmd.addRuleSet(RuleSet.create("Autograder Configuration (Generated)", "", null, List.of(), List.of(), rules));
             pmd.addRenderer(renderer);
-            pmd.files().addDirectory(file.getSource().getFile());
+            pmd.files().addDirectory(file.getSource().getPath());
             pmd.performAnalysis();
         }
 

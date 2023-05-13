@@ -1,7 +1,6 @@
 package de.firemage.autograder.core.compiler;
 
 import de.firemage.autograder.core.SourceInfo;
-import de.firemage.autograder.core.file.UploadedFile;
 import org.apache.commons.io.FileUtils;
 
 import javax.tools.DiagnosticCollector;
@@ -35,8 +34,8 @@ public final class Compiler {
     }
 
     public static Optional<CompilationResult> compileToJar(SourceInfo input, Path tmpLocation, JavaVersion javaVersion)
-    throws IOException, CompilationFailureException {
-        return compileAndIgnoreSuppressWarnings(input, tmpLocation, javaVersion, input.getCharset());
+        throws IOException, CompilationFailureException {
+        return compileAndIgnoreSuppressWarnings(input, tmpLocation, javaVersion);
     }
 
     // @SuppressWarnings will result in warnings being ignored (obviously). This is suboptimal, when
@@ -44,14 +43,12 @@ public final class Compiler {
     //
     // This piece of code, tries to patch the @SuppressWarnings annotation to not ignore any warnings.
     private static Optional<CompilationResult> compileAndIgnoreSuppressWarnings(
-        SourceInfo input, Path tmpLocation, JavaVersion javaVersion, Charset charset
+        SourceInfo input, Path tmpLocation, JavaVersion javaVersion
     ) throws IOException, CompilationFailureException {
         Path modifiedOutput = tmpLocation.resolve(input.getName() + "_modified");
         SourceInfo copiedVersion = input.copyTo(modifiedOutput);
 
-        List<PhysicalFileObject> compilationUnits = copiedVersion.streamFiles()
-                                                         .map(file -> new PhysicalFileObject(file, charset))
-                                                         .toList();
+        List<PhysicalFileObject> compilationUnits = copiedVersion.compilationUnits();
         // patch the files:
         for (PhysicalFileObject file : compilationUnits) {
             String content = file.getCharContent(true).toString();
@@ -83,31 +80,30 @@ public final class Compiler {
             }
         }
 
-        Optional<CompilationResult> result = compileWithEncoding(copiedVersion, tmpLocation, javaVersion, charset);
+        Optional<CompilationResult> result = compile(copiedVersion, tmpLocation, javaVersion);
 
+        System.out.println("Copied version %s".formatted(copiedVersion.getPath()));
         copiedVersion.delete();
 
-        Optional<List<CompilationDiagnostic>> diagnostics = result.map(CompilationResult::diagnostics);
+        List<CompilationDiagnostic> diagnostics = result.map(CompilationResult::diagnostics).orElse(List.of());
 
         // now compile the code again, but this time without the patched version (to prevent problems if the patching
         // is broken with the source position)
-        return compileWithEncoding(input, tmpLocation, javaVersion, charset)
-                   .map(res -> new CompilationResult(res.jar(), diagnostics.orElse(List.of())));
+        return compile(input, tmpLocation, javaVersion)
+            .map(res -> new CompilationResult(res.jar(), diagnostics));
     }
 
-    private static Optional<CompilationResult> compileWithEncoding(
-        SourceInfo input, Path tmpLocation, JavaVersion javaVersion,
-        Charset charset
-    )
-    throws IOException, CompilationFailureException {
+    private static Optional<CompilationResult> compile(
+        SourceInfo input, Path tmpLocation, JavaVersion javaVersion
+    ) throws IOException, CompilationFailureException {
 
-        List<PhysicalFileObject> compilationUnits = input.streamFiles()
-                                                         .map(file -> new PhysicalFileObject(file, charset))
-                                                         .toList();
+        List<PhysicalFileObject> compilationUnits = input.compilationUnits();
 
         if (compilationUnits.isEmpty()) {
             return Optional.empty();
         }
+
+        Charset charset = input.getCharset();
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         Path compilerOutput = tmpLocation.resolve(input.getName() + "_compiled");
@@ -132,10 +128,11 @@ public final class Compiler {
 
         if (!successful) {
             throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
-                                                                     .map(d -> new CompilationDiagnostic(d,
-                                                                         input.getFile()
-                                                                     ))
-                                                                     .toList(), input.getFile());
+                .map(d -> new CompilationDiagnostic(
+                    d,
+                    input.getPath()
+                ))
+                .toList(), input.getPath());
         }
 
         Manifest manifest = new Manifest();
@@ -147,10 +144,11 @@ public final class Compiler {
         FileUtils.deleteDirectory(compilerOutput.toFile());
 
         return Optional.of(new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
-                                                                         .map(d -> new CompilationDiagnostic(d,
-                                                                             input.getFile()
-                                                                         ))
-                                                                         .toList()));
+            .map(d -> new CompilationDiagnostic(
+                d,
+                input.getPath()
+            ))
+            .toList()));
     }
 
 

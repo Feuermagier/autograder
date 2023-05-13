@@ -22,7 +22,7 @@ public class CPDLinter {
             CPD cpd = new CPD(cpdConfig);
             cpd.add(file.getSource().getJavaFiles());
             cpd.go();
-            cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getSource().getFile())));
+            cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getSource().getPath())));
         }
         return problems;
     }
