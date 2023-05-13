@@ -1,6 +1,7 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.compiler.PhysicalFileObject;
 import net.sourceforge.pmd.util.datasource.FileDataSource;
 import org.apache.commons.io.FileUtils;
 import org.mozilla.universalchardet.UniversalDetector;
@@ -60,19 +61,25 @@ public class SourceInfo implements Serializable {
         this.charset = new SerializableCharset(Objects.requireNonNullElse(detectedCharset, StandardCharsets.UTF_8));
     }
 
-    public Path getFile() {
+    public Path getPath() {
         return this.file.toPath().toAbsolutePath();
     }
 
     public List<File> getJavaFiles() throws IOException {
-        return streamFiles().toList();
+        return this.streamFiles().toList();
     }
 
-    public Stream<File> streamFiles() throws IOException {
+    private Stream<File> streamFiles() throws IOException {
         return Files.walk(this.file.toPath())
             .filter(p -> p.toString().endsWith(".java"))
             .filter(p -> !p.toString().endsWith("package-info.java"))
             .map(Path::toFile);
+    }
+
+    public List<PhysicalFileObject> compilationUnits() throws IOException {
+        return this.streamFiles()
+            .map(file -> new PhysicalFileObject(file, this.charset))
+            .toList();
     }
 
     public SourceInfo copyTo(Path target) throws IOException {
@@ -81,15 +88,16 @@ public class SourceInfo implements Serializable {
         return new SourceInfo(target, this.version, this.charset);
     }
 
-    public FileSystemFolder getSpoonFile() {
+    FileSystemFolder getSpoonFile() {
         return new FileSystemFolder(this.file);
     }
 
     public List<FileDataSource> getPMDFiles() throws IOException {
-        return Files.walk(this.file.toPath())
-            .filter(p -> p.toString().endsWith(".java"))
-            .map(p -> new FileDataSource(p.toFile()))
-            .toList();
+        try(Stream<Path> stream = Files.walk(this.file.toPath())) {
+            return stream.filter(p -> p.toString().endsWith(".java"))
+                .map(p -> new FileDataSource(p.toFile()))
+                .toList();
+        }
     }
 
     public String getName() {

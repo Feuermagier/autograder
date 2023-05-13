@@ -5,7 +5,10 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.OutputStreamWriter;
+import java.io.Writer;
 import java.nio.charset.Charset;
+import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 
 public class PhysicalFileObject extends SimpleJavaFileObject {
@@ -26,9 +29,19 @@ public class PhysicalFileObject extends SimpleJavaFileObject {
 
     @Override
     public OutputStream openOutputStream() throws IOException {
-        this.file.getParentFile().mkdirs();
-        this.file.createNewFile();
+        Files.createDirectories(this.file.getParentFile().toPath());
+        try {
+            Files.createFile(this.file.toPath());
+        } catch (FileAlreadyExistsException ignored) {
+            // ignored
+        }
 
         return new FileOutputStream(this.file);
+    }
+
+    @Override
+    public Writer openWriter() throws IOException {
+        // ensure that the correct charset is used
+        return new OutputStreamWriter(this.openOutputStream(), this.charset);
     }
 }

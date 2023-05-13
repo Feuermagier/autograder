@@ -17,7 +17,6 @@ import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
-    private static final int MAX_VALUE_SIZE = 3;
     private static final List<String> NUMBER_PRE_SUFFIXES =
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
