@@ -205,9 +205,10 @@ constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte ni
 
 linguistic-desc = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 
-variable-name-exp-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
-variable-name-exp-type = Unnötige Abkürzung '{$name}'
-variable-name-exp-type-in-name = Der Bezeichner '{$name}' sollte nicht den Typ im Namen haben
+variable-name-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
+variable-name-type = Unnötige Abkürzung '{$name}'
+variable-name-type-in-name = Der Bezeichner '{$name}' sollte nicht den Typ im Namen haben
+similar-identifier = Der Bezeichner '{$left}' ist sehr ähnlich zu '{$right}'. Das kann zu Verwechslungen und Tippfehlern führen, weswegen man diesen umbenennen sollte.
 
 type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder Suffixe
 type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben
