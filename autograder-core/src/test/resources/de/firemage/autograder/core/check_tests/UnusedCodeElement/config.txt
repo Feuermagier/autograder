@@ -1,0 +1,4 @@
+unnecessary.UnusedCodeElementCheck
+Unused code should be removed
+Test.java:5
+Test.java:8

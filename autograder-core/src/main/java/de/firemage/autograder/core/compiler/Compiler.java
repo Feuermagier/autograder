@@ -82,7 +82,6 @@ public final class Compiler {
 
         Optional<CompilationResult> result = compile(copiedVersion, tmpLocation, javaVersion);
 
-        System.out.println("Copied version %s".formatted(copiedVersion.getPath()));
         copiedVersion.delete();
 
         List<CompilationDiagnostic> diagnostics = result.map(CompilationResult::diagnostics).orElse(List.of());
