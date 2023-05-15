@@ -135,14 +135,12 @@ assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie fa
     Teil der finalen Lösung sein. Wenn du eine Invariante dokumentieren willst, verwende
     einen Kommentar.
 
-print-stack-trace-desc = Stack Traces sollten in der Abgabe nicht ausgegeben werden
 print-stack-trace-exp = Stack Traces sollten in der Abgabe nicht ausgegeben werden
 
 # Exceptions
 custom-exception-inheritance-exp-runtime = Selbstdefinierte Exceptions sollten immer Checked Exceptions sein
 custom-exception-inheritance-exp-error = Selbstdefinierte Exceptions sollten nicht von Error erben
 
-empty-catch-desc = Alle Exceptions sollten angemessen behandelt werden
 empty-catch-exp = Leerer catch-Block
 
 exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block sofort wieder gefangen

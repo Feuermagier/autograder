@@ -3,21 +3,37 @@ package de.firemage.autograder.core.check.debug;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.pmd.PMDCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
+import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.StaticAnalysis;
+import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtVariableRead;
 
 @ExecutableCheck(reportedProblems = {ProblemType.EXCEPTION_PRINT_STACK_TRACE})
-public class PrintStackTraceCheck extends PMDCheck {
-    private static final String QUERY = """
-        //PrimaryExpression[
-           ( PrimaryPrefix[Name[contains(@Image,'printStackTrace')]]
-           | PrimarySuffix[@Image='printStackTrace']
-           )/following-sibling::*[1][self::PrimarySuffix/Arguments[@Size=0]]
-        ]
-        """;
+public class PrintStackTraceCheck extends IntegratedCheck {
+    private static boolean hasInvokedPrintStackTrace(CtInvocation<?> ctInvocation) {
+        return ctInvocation.getTarget() instanceof CtVariableRead<?> ctVariableRead
+            // ensure the method is called on the correct type
+            && ctVariableRead.getType().isSubtypeOf(
+                ctInvocation.getFactory().Type().createReference(java.lang.Throwable.class)
+            )
+            && ctInvocation.getExecutable().getSimpleName().equals("printStackTrace");
+    }
 
-    public PrintStackTraceCheck() {
-        super(new LocalizedMessage("print-stack-trace-exp"),
-            createXPathRule("print stack trace", "print-stack-trace-desc", QUERY),
-            ProblemType.EXCEPTION_PRINT_STACK_TRACE);
+    @Override
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+        staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {
+            @Override
+            public void process(CtInvocation<?> ctInvocation) {
+                if (hasInvokedPrintStackTrace(ctInvocation)) {
+                    addLocalProblem(
+                        ctInvocation,
+                        new LocalizedMessage("print-stack-trace-exp"),
+                        ProblemType.EXCEPTION_PRINT_STACK_TRACE
+                    );
+                }
+            }
+        });
     }
 }
