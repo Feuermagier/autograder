@@ -2,7 +2,6 @@ package de.firemage.autograder.core.errorprone;
 
 import de.firemage.autograder.core.SourceInfo;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.compiler.PhysicalFileObject;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -67,7 +66,7 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
 
     private List<ErrorProneDiagnostic> internalCompile(SourceInfo input) throws IOException {
         Charset charset = input.getCharset();
-        List<PhysicalFileObject> compilationUnits = input.compilationUnits();
+        List<JavaFileObject> compilationUnits = input.compilationUnits();
 
         if (compilationUnits.isEmpty()) {
             throw new IllegalArgumentException("Nothing found to compile in " + input.getPath());

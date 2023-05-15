@@ -15,8 +15,16 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
     private static final Random RANDOM = new Random();
     private static final String TEMPORARY_DIR_FORMAT = "%s%d";
 
-    static TempLocation fromPath(Path path) {
+    public static TempLocation fromPath(Path path) {
         return new TempLocation(path.toFile());
+    }
+
+    public static TempLocation random() {
+        try {
+            return TempLocation.fromPath(Files.createTempDirectory("random"));
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not create temporary directory", e);
+        }
     }
 
     /**
@@ -72,6 +80,14 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
 
     private Path path() {
         return this.tempLocation.toPath();
+    }
+
+    /**
+     * Returns the path of the temporary location.
+     * @return the path of the temporary location
+     */
+    public Path toPath() {
+        return this.path();
     }
 
     @FunctionalInterface

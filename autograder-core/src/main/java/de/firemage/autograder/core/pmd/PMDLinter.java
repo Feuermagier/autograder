@@ -8,6 +8,9 @@ import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.RulePriority;
 import net.sourceforge.pmd.RuleSet;
 import net.sourceforge.pmd.lang.LanguageRegistry;
+import net.sourceforge.pmd.lang.document.FileCollector;
+
+import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -42,7 +45,14 @@ public class PMDLinter {
         try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
             pmd.addRuleSet(RuleSet.create("Autograder Configuration (Generated)", "", null, List.of(), List.of(), rules));
             pmd.addRenderer(renderer);
-            pmd.files().addDirectory(file.getSource().getPath());
+            FileCollector collector = pmd.files();
+            for (JavaFileObject compilationUnit : file.getSource().compilationUnits()) {
+                collector.addSourceFile(
+                    compilationUnit.getCharContent(false).toString(),
+                    compilationUnit.getName()
+                );
+            }
+
             pmd.performAnalysis();
         }
 
