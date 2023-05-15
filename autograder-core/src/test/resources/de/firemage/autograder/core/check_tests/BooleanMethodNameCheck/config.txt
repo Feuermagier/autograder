@@ -1,0 +1,3 @@
+naming.BooleanMethodNameCheck
+Boolean getter should be prefixed by a verb like is
+Test.java:6

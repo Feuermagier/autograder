@@ -6,7 +6,6 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import org.junit.jupiter.api.Order;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

@@ -1,0 +1,3 @@
+debug.PrintStackTraceCheck
+Do not use printStackTrace in a production code
+Test.java:8
