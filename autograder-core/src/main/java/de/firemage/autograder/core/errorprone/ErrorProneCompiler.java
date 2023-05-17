@@ -76,26 +76,31 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
 
-        boolean isSuccessful = compiler.getTask(
-            output,
-            compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
-            diagnosticCollector,
-            List.of(
-                "-processorpath",
-                System.getProperty("java.class.path"),
-                "-XDcompilePolicy=simple",
-                Stream.concat(
-                        Stream.of(
-                            "-Xplugin:ErrorProne",
-                            "-XepDisableAllChecks"
-                        ),
-                        this.lints.stream().map("-Xep:%s:WARN"::formatted)
-                    )
-                    .collect(Collectors.joining(" "))
-            ),
-            null,
-            compilationUnits
-        ).call();
+        boolean isSuccessful;
+        try (TempLocation tempLocation = this.tempLocation.createTempDirectory("classes")) {
+            isSuccessful = compiler.getTask(
+                output,
+                compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
+                diagnosticCollector,
+                List.of(
+                    "-processorpath",
+                    System.getProperty("java.class.path"),
+                    "-d", // write class files to a temporary directory
+                    tempLocation.toPath().toString(),
+                    "-XDcompilePolicy=simple",
+                    Stream.concat(
+                            Stream.of(
+                                "-Xplugin:ErrorProne",
+                                "-XepDisableAllChecks"
+                            ),
+                            this.lints.stream().map("-Xep:%s:WARN"::formatted)
+                        )
+                        .collect(Collectors.joining(" "))
+                ),
+                null,
+                compilationUnits
+            ).call();
+        }
 
         output.flush();
         output.close();
