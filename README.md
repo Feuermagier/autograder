@@ -57,3 +57,13 @@ The directory [test_submissions](test_submissions) contains two projects you can
 * [A1](test_submissions/A1) is my own submission to a final task at my university.
 
 There is also simple testing framework for checks implemented in the [test directory](autograder-core/src/test/java).
+
+### Compiling the project
+
+The project uses Maven. To compile the project, run
+```
+$ mvn package -DskipTests --file pom.xml
+```
+in the root directory.
+
+The jar will be at `autograder-cmd/target/autograder-cmd.jar`.
