@@ -145,10 +145,11 @@ public final class Linter {
                 spotbugsChecks.add(spotbugsCheck);
             } else if (check instanceof IntegratedCheck integratedCheck) {
                 integratedChecks.add(integratedCheck);
-            } else if (check instanceof ErrorProneCheck errorProneCheck) {
+            }
+
+            // allow checks to implement ErrorProneCheck in addition to extending a parent class
+            if (check instanceof ErrorProneCheck errorProneCheck) {
                 errorProneChecks.add(errorProneCheck);
-            } else {
-                throw new IllegalStateException();
             }
         }
 
