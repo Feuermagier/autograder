@@ -15,7 +15,7 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TestDefaultPackageCheck extends AbstractCheckTest {
     @Test
-    void test() throws IOException, LinterException, InterruptedException {
+    void test() throws IOException, LinterException {
         List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",

@@ -12,6 +12,7 @@ import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
@@ -110,8 +111,8 @@ public class Application implements Callable<Integer> {
             System.out.println("Student source code directory is " + file);
         }
 
-        boolean dynamic = !this.staticOnly && !this.tests.toString().equals("");
-        if (!dynamic && !outputJson) {
+        boolean isDynamicAnalysisEnabled = !this.staticOnly && !this.tests.toString().equals("");
+        if (!isDynamicAnalysisEnabled && !outputJson) {
             CmdUtil.println("Note: Dynamic analysis is disabled.");
             CmdUtil.println();
         }
@@ -128,24 +129,28 @@ public class Application implements Callable<Integer> {
             return IO_EXIT_CODE;
         }
 
-        Linter linter = new Linter(Locale.GERMANY);
+        TempLocation tempLocation = this.getTmpDirectory();
+        Linter linter = Linter.builder(Locale.GERMANY)
+            .threads(0)
+            .tempLocation(tempLocation)
+            .enableDynamicAnalysis(isDynamicAnalysisEnabled)
+            .build();
+
         Consumer<LinterStatus> statusConsumer = status ->
                 System.out.println(linter.translateMessage(status.getMessage()));
 
         try (UploadedFile uploadedFile = UploadedFile.build(file,
-                JavaVersion.fromString(this.javaVersion), getTmpDirectory(), statusConsumer)) {
+                JavaVersion.fromString(this.javaVersion), tempLocation.toPath(), statusConsumer)) {
 
             if (outputJson) {
-                List<Problem> problems =
-                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic, 0);
+                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
                 System.out.println(">> Problems <<");
                 printProblemsAsJson(problems, linter);
             } else {
                 CmdUtil.beginSection("Checks");
                 ProgressAnimation progress = new ProgressAnimation("Checking...");
                 progress.start();
-                List<Problem> problems =
-                        linter.checkFile(uploadedFile, getTmpDirectory(), tests, checks, statusConsumer, !dynamic, 0);
+                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
                 progress.finish("Completed checks");
 
                 printProblems(problems, linter);
@@ -155,7 +160,7 @@ public class Application implements Callable<Integer> {
         } catch (CompilationFailureException e) {
             CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
             return COMPILATION_EXIT_CODE;
-        } catch (LinterException | InterruptedException e) {
+        } catch (LinterException e) {
             e.printStackTrace();
             return MISC_EXIT_CODE;
         } catch (IOException e) {
@@ -166,9 +171,8 @@ public class Application implements Callable<Integer> {
         return 0;
     }
 
-    private Path getTmpDirectory() {
-        //return new File(System.getProperty("java.io.tmpdir")).toPath();
-        return Path.of("tmp");
+    private TempLocation getTmpDirectory() {
+        return TempLocation.fromPath(Path.of("tmp"));
     }
 
     private void printProblems(List<Problem> problems, Linter linter) {

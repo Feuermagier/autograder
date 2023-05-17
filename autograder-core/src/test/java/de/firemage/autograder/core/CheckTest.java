@@ -2,6 +2,7 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -49,15 +50,17 @@ public class CheckTest {
 
         public List<String> expectedProblems() {
             return new ArrayList<>(this.lines.stream()
-                    .skip(2)
-                    .filter(line -> !line.isBlank())
-                    // skip comments
-                    .filter(line -> !line.startsWith("#"))
-                    .toList());
+                .skip(2)
+                .filter(line -> !line.isBlank())
+                // skip comments
+                .filter(line -> !line.startsWith("#"))
+                .toList());
         }
 
         public Check check() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-            return (Check) Class.forName("de.firemage.autograder.core.check." + this.checkPath()).getDeclaredConstructor().newInstance();
+            return (Check) Class.forName("de.firemage.autograder.core.check." + this.checkPath())
+                .getDeclaredConstructor()
+                .newInstance();
         }
     }
 
@@ -94,37 +97,44 @@ public class CheckTest {
             folders = paths.toList();
         }
 
+        TempLocation tempLocation = TempLocation.random();
+
         return DynamicTest.stream(
-                folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
-                        .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
-                TestInput::testName,
-                testInput -> {
-                    var check = testInput.config().check();
-                    var expectedProblems = testInput.config().expectedProblems();
+            folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
+                .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
+            TestInput::testName,
+            testInput -> {
+                var check = testInput.config().check();
+                var expectedProblems = testInput.config().expectedProblems();
 
-                    var tmpDirectory = Files.createTempDirectory(null);
-
-                    var file = UploadedFile.build(testInput.path().resolve("code"), JavaVersion.JAVA_17, tmpDirectory, status -> {
-                    });
-                    var linter = new Linter(Locale.US);
+                try (TempLocation tmpDirectory = tempLocation.createTempDirectory(testInput.config().checkPath())) {
+                    var file = UploadedFile.build(
+                        testInput.path().resolve("code"),
+                        JavaVersion.JAVA_17,
+                        tmpDirectory.toPath(), status -> {
+                        }
+                    );
+                    var linter = Linter.builder(Locale.US)
+                        .enableDynamicAnalysis(ENABLE_DYNAMIC && testInput.isDynamic())
+                        .threads(1) // Use a single thread for performance reasons
+                        .tempLocation(tmpDirectory)
+                        .build();
 
                     var problems = linter.checkFile(
-                            file,
-                            tmpDirectory,
-                            testInput.path().resolve("tests"),
-                            List.of(),
-                            List.of(check),
-                            status -> {
-                            },
-                            !ENABLE_DYNAMIC || !testInput.isDynamic(),
-                            1 // Use a single thread for performance reasons
+                        file,
+                        testInput.path().resolve("tests"),
+                        List.of(),
+                        List.of(check),
+                        status -> {
+                        }
                     );
 
                     for (var problem : problems) {
                         if (!expectedProblems.remove(problem.getDisplayLocation())) {
                             fail("The check reported a problem '" + problem.getDisplayLocation() +
-                                    "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType().toString() +
-                                    " Message: `" + linter.translateMessage(problem.getExplanation()) + "`");
+                                "' but we don't expect a problem to be there. Problem type: " + problem.getProblemType()
+                                .toString() +
+                                " Message: `" + linter.translateMessage(problem.getExplanation()) + "`");
                         }
                     }
 
@@ -132,6 +142,7 @@ public class CheckTest {
                         fail("Problems not reported: " + expectedProblems);
                     }
                 }
+            }
         );
     }
 }

@@ -34,7 +34,7 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
      */
     // For the future in case this turns out to be a problem:
     // There exists a library called https://github.com/google/jimfs to store files in memory.
-    // It seems to support all the targeted platforms (Windows, Linux and Mac OS)
+    // It seems to support all the targeted platforms (Windows, Linux and macOS)
     //
     // Might be worth a try.
     private List<IOFunction<String, Path>> temporaryDirectories() {
@@ -42,12 +42,16 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
             prefix -> makeDirectory(this.tempLocation.toPath(), prefix),
             prefix -> makeDirectory(Path.of(System.getProperty("java.io.tmpdir")), prefix),
             Files::createTempDirectory,
-            prefix -> makeDirectory(Path.of(".").toAbsolutePath(), prefix)
+            prefix -> makeDirectory(Path.of(".", "tmp").toAbsolutePath(), prefix)
         );
     }
 
     private static Path makeDirectory(Path path, String prefix) throws IOException {
         Path absolutePath = path.toAbsolutePath();
+        if (!Files.exists(absolutePath)) {
+            Files.createDirectories(absolutePath);
+        }
+
         if (!Files.isDirectory(absolutePath)) {
             throw new IllegalArgumentException("the path '%s' is not a directory".formatted(absolutePath));
         }
@@ -63,6 +67,9 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
     }
 
     public TempLocation createTempDirectory(String prefix) throws IOException {
+        if (prefix.contains(File.pathSeparator)) {
+            throw new IllegalArgumentException("the prefix '%s' contains a path separator".formatted(prefix));
+        }
         for (IOFunction<String, Path> tempDir : this.temporaryDirectories()) {
             try {
                 return TempLocation.fromPath(tempDir.apply(prefix));
@@ -75,11 +82,7 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
     }
 
     public Path createTempFile(String name) throws IOException {
-        return Files.createFile(this.path().resolve(name));
-    }
-
-    private Path path() {
-        return this.tempLocation.toPath();
+        return Files.createFile(this.toPath().resolve(name));
     }
 
     /**
@@ -87,7 +90,7 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
      * @return the path of the temporary location
      */
     public Path toPath() {
-        return this.path();
+        return this.tempLocation.toPath();
     }
 
     @FunctionalInterface
@@ -98,6 +101,6 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
     @Override
     public void close() throws IOException {
         // delete the temporary directory, will not crash if it fails to delete it
-        FileUtils.deleteQuietly(this.path().toFile());
+        FileUtils.deleteQuietly(this.toPath().toFile());
     }
 }

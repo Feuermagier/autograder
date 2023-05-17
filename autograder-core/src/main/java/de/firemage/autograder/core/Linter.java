@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.general.CopyPasteCheck;
 import de.firemage.autograder.core.cpd.CPDLinter;
 import de.firemage.autograder.core.errorprone.ErrorProneCheck;
 import de.firemage.autograder.core.errorprone.ErrorProneLinter;
+import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.IntegratedAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -26,14 +27,18 @@ import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
 
-public class Linter {
+public final class Linter {
+    private final int threads;
+    private final TempLocation tempLocation;
     private final FluentBundle fluentBundle;
+    private final boolean disableDynamicAnalysis;
 
-    public Linter(Locale locale) {
+    private Linter(Locale locale, TempLocation tempLocation, int threads, boolean disableDynamicAnalysis) {
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
             case "en" -> "/strings.en.ftl";
@@ -41,32 +46,89 @@ public class Linter {
         };
         try {
             FluentResource resource = FTLParser.parse(FTLStream.of(
-                    new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
+                new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
             ));
             this.fluentBundle = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE).addResource(resource).build();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
+
+        this.tempLocation = tempLocation;
+        this.threads = threads;
+        this.disableDynamicAnalysis = disableDynamicAnalysis;
+    }
+
+    public static class Builder {
+        private final Locale locale;
+        private TempLocation tempLocation;
+        private int threads;
+        private boolean disableDynamicAnalysis = true;
+
+        private Builder(Locale locale) {
+            this.locale = locale;
+        }
+
+        public Builder tempLocation(TempLocation tempLocation) {
+            this.tempLocation = tempLocation;
+            return this;
+        }
+
+        public Builder threads(int threads) {
+            this.threads = threads;
+            return this;
+        }
+
+        public Builder enableDynamicAnalysis() {
+            return this.enableDynamicAnalysis(true);
+        }
+
+        public Builder enableDynamicAnalysis(boolean shouldEnable) {
+            this.disableDynamicAnalysis = !shouldEnable;
+            return this;
+        }
+
+        public Linter build() {
+            TempLocation tempLocation = this.tempLocation;
+
+            if (tempLocation == null) {
+                tempLocation = TempLocation.random();
+            }
+
+            return new Linter(this.locale, tempLocation, this.threads, this.disableDynamicAnalysis);
+        }
+    }
+
+    public static Linter defaultLinter(Locale locale) {
+        return Linter.builder(locale).build();
+    }
+
+    public static Builder builder(Locale locale) {
+        return new Builder(locale);
     }
 
     public FluentBundle getFluentBundle() {
         return fluentBundle;
     }
 
-    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
-                                   List<ProblemType> problemsToReport,
-                                   Consumer<LinterStatus> statusConsumer, boolean disableDynamicAnalysis,
-                                   int threads)
-            throws LinterException, IOException, InterruptedException {
-        return this.checkFile(file, tmpLocation, tests, problemsToReport,
-                findChecksForProblemTypes(problemsToReport),
-                statusConsumer, disableDynamicAnalysis, threads);
+    public List<Problem> checkFile(
+        UploadedFile file, Path tests,
+        List<ProblemType> problemsToReport,
+        Consumer<LinterStatus> statusConsumer
+    ) throws LinterException, IOException {
+        return this.checkFile(
+            file,
+            tests,
+            problemsToReport,
+            findChecksForProblemTypes(problemsToReport),
+            statusConsumer
+        );
     }
 
-    public List<Problem> checkFile(UploadedFile file, Path tmpLocation, Path tests,
-                                   List<ProblemType> problemsToReport,
-                                   List<Check> checks, Consumer<LinterStatus> statusConsumer,
-                                   boolean disableDynamicAnalysis, int threads) throws LinterException {
+    public List<Problem> checkFile(
+        UploadedFile file, Path tests,
+        List<ProblemType> problemsToReport,
+        Iterable<? extends Check> checks, Consumer<LinterStatus> statusConsumer
+    ) throws LinterException, IOException {
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
@@ -90,7 +152,7 @@ public class Linter {
             }
         }
 
-        AnalysisScheduler scheduler = new AnalysisScheduler(threads);
+        AnalysisScheduler scheduler = new AnalysisScheduler(this.threads);
 
         if (!pmdChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
@@ -113,10 +175,13 @@ public class Linter {
             });
         }
 
+        TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter");
+        Path tmpLocation = tempLinterLocation.toPath();
+
         if (!integratedChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
                 IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
-                if (!disableDynamicAnalysis) {
+                if (!this.disableDynamicAnalysis) {
                     analysis.runDynamicAnalysis(tests, statusConsumer);
                 }
                 analysis.lint(integratedChecks, statusConsumer, s);
@@ -126,7 +191,7 @@ public class Linter {
         if (!errorProneChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
                 statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
-                reporter.reportProblems(new ErrorProneLinter().lint(file, tmpLocation, errorProneChecks));
+                reporter.reportProblems(new ErrorProneLinter().lint(file, tempLinterLocation, errorProneChecks));
             });
         }
 
@@ -139,10 +204,10 @@ public class Linter {
             return result.problems();
         } else {
             return result
-                    .problems()
-                    .stream()
-                    .filter(p -> problemsToReport.contains(p.getProblemType()))
-                    .toList();
+                .problems()
+                .stream()
+                .filter(p -> problemsToReport.contains(p.getProblemType()))
+                .toList();
         }
     }
 
@@ -155,23 +220,23 @@ public class Linter {
         }
     }
 
-    private List<Check> findChecksForProblemTypes(List<ProblemType> problems) {
+    private List<Check> findChecksForProblemTypes(Collection<ProblemType> problems) {
         Reflections reflections = new Reflections("de.firemage.autograder.core.check");
         return reflections.getTypesAnnotatedWith(ExecutableCheck.class).stream()
-                .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
-                .map(c -> {
-                    try {
-                        return (Check) c.getConstructor().newInstance();
-                    } catch (ReflectiveOperationException e) {
-                        throw new IllegalStateException("Failed to instantiate check " + c.getName(), e);
-                    } catch (ClassCastException e) {
-                        throw new IllegalStateException(c.getName() + " does not inherit from Check");
-                    }
-                })
-                .toList();
+            .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
+            .map(c -> {
+                try {
+                    return (Check) c.getConstructor().newInstance();
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException("Failed to instantiate check " + c.getName(), e);
+                } catch (ClassCastException e) {
+                    throw new IllegalStateException(c.getName() + " does not inherit from Check");
+                }
+            })
+            .toList();
     }
 
-    private boolean isRequiredCheck(ExecutableCheck check, List<ProblemType> problems) {
+    private boolean isRequiredCheck(ExecutableCheck check, Collection<ProblemType> problems) {
         return check.enabled() && problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));
     }
 }

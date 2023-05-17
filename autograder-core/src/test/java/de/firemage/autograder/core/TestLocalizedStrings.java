@@ -187,8 +187,8 @@ class TestLocalizedStrings {
 
         localizedKeys = getAllLocalizedKeys(ctModel, basePackage);
 
-        englishBundle = new Linter(Locale.ENGLISH).getFluentBundle();
-        germanBundle = new Linter(Locale.GERMAN).getFluentBundle();
+        englishBundle = Linter.defaultLinter(Locale.ENGLISH).getFluentBundle();
+        germanBundle = Linter.defaultLinter(Locale.GERMAN).getFluentBundle();
     }
 
     Collection<String> findMissingKeys(FluentBundle bundle) {

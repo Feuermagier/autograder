@@ -15,27 +15,30 @@ import java.util.Locale;
 
 public abstract class AbstractCheckTest {
     protected final TempLocation tempLocation;
+    protected final Linter linter;
 
     protected AbstractCheckTest() {
-        this.tempLocation = TempLocation.random();
+        this(TempLocation.random());
+    }
+
+    private AbstractCheckTest(TempLocation tempLocation) {
+        this.tempLocation = tempLocation;
+        this.linter = Linter.builder(Locale.US)
+            .tempLocation(this.tempLocation)
+            .build();
     }
 
     protected List<Problem> check(
         SourceInfo sourceInfo,
         List<ProblemType> problemTypes
-    ) throws LinterException, IOException, InterruptedException {
-        Linter linter = new Linter(Locale.ENGLISH);
-
-        return linter.checkFile(
+    ) throws LinterException, IOException {
+        return this.linter.checkFile(
             UploadedFile.build(sourceInfo, this.tempLocation.toPath(), status -> {
             }),
-            this.tempLocation.toPath(),
             null,
             new ArrayList<>(problemTypes),
             status -> {
-            },
-            true,
-            4
+            }
         );
     }
 }
