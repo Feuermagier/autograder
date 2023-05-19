@@ -28,8 +28,12 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Set;
+import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public final class Linter {
@@ -221,9 +225,14 @@ public final class Linter {
         }
     }
 
+    private static final Collection<Class<?>> CHECKS = new LinkedHashSet<>(
+        new Reflections("de.firemage.autograder.core.check")
+            .getTypesAnnotatedWith(ExecutableCheck.class)
+    );
+
     private List<Check> findChecksForProblemTypes(Collection<ProblemType> problems) {
-        Reflections reflections = new Reflections("de.firemage.autograder.core.check");
-        return reflections.getTypesAnnotatedWith(ExecutableCheck.class).stream()
+        return CHECKS
+            .stream()
             .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
             .map(c -> {
                 try {
