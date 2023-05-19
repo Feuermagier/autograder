@@ -211,6 +211,10 @@ similar-identifier = Der Bezeichner '{$left}' ist sehr ähnlich zu '{$right}'. D
 type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder Suffixe
 type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben
 
+package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein und alle Buchstaben sollten nach Konvention
+                            klein sein. Zudem sollten keine Sonderzeichen auftreten wie '_'. An folgenden Stellen wird das
+                            nicht eingehalten: '{$positions}'
+
 # OOP
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 

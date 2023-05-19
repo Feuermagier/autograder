@@ -211,6 +211,10 @@ similar-identifier = The identifier '{$left}' is very similar to '{$right}'. Thi
 type-has-descriptive-name-pre-suffix = The name contains redundant prefixes or suffixes
 type-has-descriptive-name-exception = A class that inherits from Exception should have 'Exception' at the end of its name
 
+package-naming-convention = The name of a package should be a single word and all letters should be lowercase by convention.
+                            Additionally, no special characters should occur like '_'. The following positions do not
+                            adhere to this: '{$positions}'
+
 # OOP
 concrete-collection-exp = Use the parent interface instead of a concrete collection class (e.g. List instead of ArrayList)
 
