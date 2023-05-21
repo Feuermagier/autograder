@@ -27,11 +27,11 @@ import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -130,7 +130,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
     }
 
     private static Set<CtLiteral<?>> distinctElements(Collection<? extends CtLiteral<?>> elements) {
-        return new TreeSet<>(elements.stream()
+        return new LinkedHashSet<>(elements.stream()
             .filter(e -> e.getValue() != null)
             .toList());
     }
