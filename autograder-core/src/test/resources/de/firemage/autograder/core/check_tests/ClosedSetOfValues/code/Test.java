@@ -66,3 +66,69 @@ enum Color {
         }
     }
 }
+
+class ClosedSetMethods {
+    public String getDayOfWeek(int day) { // Not Ok
+        if (day == 1) {
+            return "monday";
+        }
+
+        if (day == 2) {
+            return "tuesday";
+        }
+
+        if (day == 3) {
+            return "wednesday";
+        }
+
+        if (day == 4) {
+            return "thursday";
+        }
+
+        if (day == 5) {
+            return "friday";
+        }
+
+        if (day == 6) {
+            return "saturday";
+        }
+
+        if (day == 7) {
+            return "sunday";
+        }
+
+        throw new IllegalArgumentException("Invalid day: " + day);
+    }
+
+    public String getDayOfWeek2(int day) {
+        if (day == 1) {
+            return "monday";
+        }
+
+        if (day == 2) {
+            return "tuesday";
+        }
+
+        if (day == 3) {
+            return "wednesday";
+        }
+
+        if (day == 4) {
+            return "thursday";
+        }
+
+        if (day == 5) {
+            return "friday";
+        }
+
+        if (day == 6) {
+            return "saturday";
+        }
+
+        if (day == 7) {
+            return "sunday";
+        }
+
+        return null;
+    }
+}

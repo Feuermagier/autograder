@@ -247,6 +247,7 @@ should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein
 
 closed-set-of-values-switch = Ein switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte.
 closed-set-of-values-list = Eine Auflistung von endlich vielen Werten sollte als enum modelliert werden.
+closed-set-of-values-method = Die Methode gibt nur die Konstanten Werte '{$values}' zurück. Dabei handelt es sich um endlich viele, weswegen man das als enum modellieren sollte.
 
 do-not-use-instanceof = instanceof sollte nicht verwendet werden. Siehe Ilias Wiki.
 do-not-use-instanceof-emulation = instanceof sollte nicht verwendet werden und auch nicht durch getClass oder ClassCastException emuliert werden. Siehe Ilias Wiki.
