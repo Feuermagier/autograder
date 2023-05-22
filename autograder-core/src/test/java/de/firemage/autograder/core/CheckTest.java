@@ -29,7 +29,7 @@ public class CheckTest {
     // example: List.of("oop.ShouldBeEnumAttribute")
     private static final List<String> ONLY_TEST = List.of();
 
-    private record Config(List<String> lines) {
+    public record Config(List<String> lines) {
         public static Config fromPath(Path path) throws IOException {
             List<String> lines = Files.readAllLines(path.resolve("config.txt"));
 
@@ -48,6 +48,10 @@ public class CheckTest {
             return this.lines.get(1);
         }
 
+        public String qualifiedName() {
+            return "de.firemage.autograder.core.check." + this.checkPath();
+        }
+
         public List<String> expectedProblems() {
             return new ArrayList<>(this.lines.stream()
                 .skip(2)
@@ -58,13 +62,13 @@ public class CheckTest {
         }
 
         public Check check() throws ClassNotFoundException, NoSuchMethodException, InvocationTargetException, InstantiationException, IllegalAccessException {
-            return (Check) Class.forName("de.firemage.autograder.core.check." + this.checkPath())
+            return (Check) Class.forName(this.qualifiedName())
                 .getDeclaredConstructor()
                 .newInstance();
         }
     }
 
-    private record TestInput(Path path, Config config) {
+    public record TestInput(Path path, Config config) {
         public static TestInput fromPath(Path path) {
             try {
                 return new TestInput(path, Config.fromPath(path));

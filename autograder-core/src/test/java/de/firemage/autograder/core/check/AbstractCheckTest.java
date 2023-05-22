@@ -12,6 +12,7 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 
 public abstract class AbstractCheckTest {
     protected final TempLocation tempLocation;
@@ -39,6 +40,15 @@ public abstract class AbstractCheckTest {
             new ArrayList<>(problemTypes),
             status -> {
             }
+        );
+    }
+
+    protected Map.Entry<String, String> dummySourceEntry(String packageName, String className) {
+        return Map.entry(
+            packageName + "." + className,
+            """
+            %spublic class %s {}
+            """.formatted(packageName.isEmpty() ? "" : "package %s;\n\n".formatted(packageName), className)
         );
     }
 }

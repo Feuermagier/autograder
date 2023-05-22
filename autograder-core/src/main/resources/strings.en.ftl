@@ -86,14 +86,12 @@ javadoc-stub-exp-throws = Stub description for exception {$exp}
 javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned in the javadoc comment.
 
 # Complexity
-diamond-desc = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
-diamond-exp = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
+use-diamond-operator = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
 extends-object-desc = Explicitly extending Object is unnecessary
 extends-object-exp = Unnecessary 'extends Object'
 
-for-loop-var-desc = for-loops should have exactly one locally declared control variable
-for-loop-var-exp = Each for-loop should have exactly one control variable
+for-loop-var = Each for-loop should have exactly one control variable
 
 implicit-constructor-exp = Unnecessary default constructor
 
@@ -120,8 +118,7 @@ redundant-neg-exp = '{$original}' should be written as '{$fixed}'
 
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
 
-merge-if-desc = If an else-block consists solely of an if, you can replace it with an else-if
-merge-if-exp = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
+merge-else-if = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
 complex-regex = Nontrivial regex need an explanation (score is {$score}, max allowed score is {$max})
 
@@ -159,14 +156,13 @@ constants-interfaces-exp = Interfaces must not have fields
 
 param-reassign-exp = Don't reassign method/constructor parameters
 
-double-brace-desc = Double Brace Initialization should be avoided
-double-brace-exp = Don't use the obscure 'double brace initialization' syntax
+double-brace-init = Don't use the obscure 'double brace initialization' syntax
 
 equals-handle-null-argument-exp = equals should handle null arguments
 
 field-local-exp = Field '{$field}' of class {$class} should be converted to a local variable as every method overwrites it before reading it
 
-for-foreach-exp = for-loop should be a for-each-loop
+for-foreach = for-loop should be a for-each-loop
 
 missing-override-exp = Missing @Override
 
@@ -195,8 +191,7 @@ compare-char-value = char values in the ASCII range should be compared as char v
 use-guard-clauses = The code cancels the normal control-flow through for example a return. if-else-blocks with those conditions can be written more beautifully using so called guard-clauses. This has the advantage that you can better recognize duplicate code. See for a detailed explanation https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a or https://deviq.com/design-patterns/guard-clause
 
 # Naming
-bool-getter-name-desc = Methods without parameters that return booleans should not have the 'get' prefix but be named 'isXYZ'
-bool-getter-name-exp = The method should be called isY() instead of getY()
+bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.
 
 constants-name-exp = The name '{$name}' is non-descriptive for the value '{$value}'
 constants-name-exp-value = The value '{$value}' of the constant '{$name}' should not be in the name
@@ -253,15 +248,10 @@ do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.
 do-not-use-instanceof-emulation = instanceof should not be used and also not be emulated through getClass or ClassCastException. See Ilias Wiki.
 
 # Structure
-default-package-desc = The default package must not be used
-default-package-exp = Do not use the default package
+
+default-package = The default-package should not be used. The following classes are in the default-package: {$positions}
 
 # Unnecessary
-empty-block-desc = Empty block (if / else / for / while / switch / try)
-empty-block-exp-if = Empty if/else block
-empty-block-exp-while = Empty while block
-empty-block-exp-try = Empty try block
-empty-block-exp-finally = Empty finally block
-empty-block-exp-switch = Empty switch block
+empty-block = Empty blocks should be removed or have a comment explaining why they are empty.
 
 unused-element-exp = Element is unused and should therefore be removed

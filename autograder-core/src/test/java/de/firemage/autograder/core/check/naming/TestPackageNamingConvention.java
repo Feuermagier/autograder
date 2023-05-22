@@ -19,17 +19,6 @@ import static org.junit.jupiter.api.Assertions.*;
 class TestPackageNamingConvention extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "package-naming-convention";
 
-    private static Map.Entry<String, String> dummySourceEntry(String packageName, String className) {
-        return Map.entry(
-            packageName + "." + className,
-            """
-            package %s;
-            
-            public class %s {}
-            """.formatted(packageName, className)
-        );
-    }
-
     @Test
     void testDefaultPackage() throws IOException, LinterException {
         List<Problem> problems = super.check(StringSourceInfo.fromSourceString(

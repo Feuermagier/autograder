@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.check_tests.BooleanMethodNameCheck.code;
+package de.firemage.autograder.core.check_tests.BooleanIdentifierCheck.code;
 
 public class Test {
     public static void main(String[] args) {}

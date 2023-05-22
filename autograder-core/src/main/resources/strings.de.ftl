@@ -85,14 +85,12 @@ javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
 javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im Javadoc-Kommentar erwähnt.
 
 # Complexity
-diamond-desc = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
-diamond-exp = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
+use-diamond-operator = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
 extends-object-desc = Explizit von Object zu erben ist unnötig
 extends-object-exp = Unnötiges 'extends Object'
 
-for-loop-var-desc = for-Schleifen sollten genau eine lokal deklarierte Kontrollvariable haben
-for-loop-var-exp = for-Schleifen sollten genau eine lokal deklarierte Kontrollvariable haben
+for-loop-var = for-Schleifen sollten genau eine lokal deklarierte Kontrollvariable haben
 
 implicit-constructor-exp = Unnötiger Standard-Konstruktor
 
@@ -119,8 +117,7 @@ redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
 
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
 
-merge-if-desc = Besteht ein else-Block nur aus einem if, kann auch else-if verwendet werden
-merge-if-exp = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
+merge-else-if = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
 
@@ -159,14 +156,13 @@ constants-interfaces-exp = Interfaces sollten keine Attribute haben
 
 param-reassign-exp = Parameter sollten nicht neu zugewiesen werden
 
-double-brace-desc = Die obskure 'Double Brace'-Syntax sollte vermieden werden
-double-brace-exp = ie obskure 'Double Brace'-Syntax sollte vermieden werden
+double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
 
 equals-handle-null-argument-exp = Die equals-Methode sollte null-Werte behandeln
 
 field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale Variable sein, da sie in jeder Methode vor dem ersten Lesen überschrieben wird
 
-for-foreach-exp = for-Schleife sollte eine for-each-Schleife sein
+for-foreach = for-Schleife sollte eine for-each-Schleife sein
 
 missing-override-exp = Fehlendes @Override
 
@@ -195,8 +191,7 @@ compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglich
 use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispiel ein return ab. if-else-Blöcke mit solchen Abbrüchen kann man mithilfe von sogenannten guard-clauses schöner schreiben. Das hat unter anderem den Vorteil, dass man doppelten Code leichter erkennt. Siehe für eine detaillierte Erklärung https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a oder https://deviq.com/design-patterns/guard-clause
 
 # Naming
-bool-getter-name-desc = Getter für boolesche Werte sollten das Präfix 'is' haben
-bool-getter-name-exp = Die Methode sollte isY() statt getY() heißen
+bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
 constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
 constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
@@ -254,16 +249,10 @@ do-not-use-instanceof-emulation = instanceof sollte nicht verwendet werden und a
 
 # Structure
 
-default-package-desc = Das default-Paket sollte nicht verwendet werden
-default-package-exp = Das default-Paket sollte nicht verwendet werden
+default-package = Das default-Paket sollte nicht verwendet werden. Die folgenden Klassen sind im default-Paket: {$positions}
 
 # Unnecessary
 
-empty-block-desc = Leerer Block (if / else / for / while / switch / try)
-empty-block-exp-if = Leerer if/else-Block
-empty-block-exp-while = Leerer while-Block
-empty-block-exp-try = Leerer try-Block
-empty-block-exp-finally = Leerer finally-Block
-empty-block-exp-switch = Leerer switch-Block
+empty-block = Leere Blöcke sollten entfernt werden oder einen Kommentar haben, der erklärt warum sie leer sind.
 
 unused-element-exp = Das Element wird nicht verwendet und sollte deswegen entfernt werden

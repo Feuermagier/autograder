@@ -230,7 +230,7 @@ public final class Linter {
             .getTypesAnnotatedWith(ExecutableCheck.class)
     );
 
-    private List<Check> findChecksForProblemTypes(Collection<ProblemType> problems) {
+    public List<Check> findChecksForProblemTypes(Collection<ProblemType> problems) {
         return CHECKS
             .stream()
             .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
