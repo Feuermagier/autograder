@@ -14,6 +14,7 @@ import spoon.reflect.code.CtLambda;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
 
@@ -30,10 +31,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         "string", "list", "array", "map", "set", "int", "long", "float"
     );
 
-    private static boolean hasTypeInName(CtNamedElement ctVariable) {
+    private static <T extends CtNamedElement & CtTypedElement<?>> boolean hasTypeInName(T ctVariable) {
         String name = ctVariable.getSimpleName().toLowerCase();
+        String type = ctVariable.getType().getSimpleName().toLowerCase();
 
-        return TYPE_NAMES.stream().anyMatch(ty -> name.contains(ty) && !name.equals(ty));
+        return TYPE_NAMES.stream().anyMatch(ty -> name.contains(ty) && type.contains(ty) && !name.equals(ty));
     }
 
     private void reportProblem(String key, CtNamedElement ctVariable, ProblemType problemType) {
