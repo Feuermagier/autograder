@@ -29,7 +29,14 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
     @Override
     public void renderFileViolations(Iterator<RuleViolation> violations) {
         violations.forEachRemaining(violation -> {
-            problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, root));
+            // NOTE: the caller of this method catches all exceptions, so if something crashes, it will not be
+            //       visible without that printStackTrace
+            try {
+                this.problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, root));
+            } catch (Exception exception) {
+                exception.printStackTrace();
+                throw exception;
+            }
         });
     }
 

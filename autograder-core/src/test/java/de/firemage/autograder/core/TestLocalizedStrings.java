@@ -34,38 +34,39 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class TestLocalizedStrings {
     private static final Map<Class<?>, List<String>> MANUAL_MAPPING = Map.of(
-            de.firemage.autograder.core.check.complexity.RepeatedMathOperationCheck.class, List.of(
-                "repeated-math-operation-mul",
-                "repeated-math-operation-plus"
-            ),
-            de.firemage.autograder.core.check.naming.ConstantsHaveDescriptiveNamesCheck.class, List.of(
-                "constants-name-exp",
-                "constants-name-exp-value"
-            ),
-            de.firemage.autograder.core.check.naming.VariablesHaveDescriptiveNamesCheck.class, List.of(
-                "variable-name-exp-single-letter",
-                "variable-name-exp-type",
-                "variable-name-exp-type-in-name"
-            )
+        de.firemage.autograder.core.check.complexity.RepeatedMathOperationCheck.class, List.of(
+            "repeated-math-operation-mul",
+            "repeated-math-operation-plus"
+        ),
+        de.firemage.autograder.core.check.naming.ConstantsHaveDescriptiveNamesCheck.class, List.of(
+            "constants-name-exp",
+            "constants-name-exp-value"
+        ),
+        de.firemage.autograder.core.check.naming.VariablesHaveDescriptiveNamesCheck.class, List.of(
+            "variable-name-single-letter",
+            "variable-name-type",
+            "variable-name-type-in-name",
+            "similar-identifier"
+        )
     );
 
     private static final List<String> ALWAYS_USED_KEYS = List.of(
         "status-compiling",
-            "status-compiling",
-            "status-spotbugs",
-            "status-pmd",
-            "status-cpd",
-            "status-model",
-            "status-docker",
-            "status-tests",
-            "status-integrated",
-            "linter-cpd",
-            "linter-spotbugs",
-            "linter-pmd",
-            "linter-integrated",
-            "duplicate-code",
-            "status-error-prone",
-            "linter-error-prone"
+        "status-compiling",
+        "status-spotbugs",
+        "status-pmd",
+        "status-cpd",
+        "status-model",
+        "status-docker",
+        "status-tests",
+        "status-integrated",
+        "linter-cpd",
+        "linter-spotbugs",
+        "linter-pmd",
+        "linter-integrated",
+        "duplicate-code",
+        "status-error-prone",
+        "linter-error-prone"
     );
 
     private static List<String> localizedKeys;
@@ -108,7 +109,7 @@ class TestLocalizedStrings {
 
     private static String resolveKey(CtModel ctModel, List<? extends CtExpression<?>> args) {
         if (args.isEmpty() || !(SpoonUtil.resolveCtExpression(args.get(0)) instanceof CtLiteral<?> ctLiteral
-                && ctLiteral.getValue() instanceof String key)) {
+            && ctLiteral.getValue() instanceof String key)) {
             throw new IllegalArgumentException("The first argument must be a string literal: " + args);
         }
 
@@ -122,18 +123,18 @@ class TestLocalizedStrings {
         for (CtType<?> ctType : getAllTypes(checkPackage)) {
             // skip non-checks
             if (ctType.getAnnotations()
-                    .stream()
-                    .noneMatch(a -> a.getAnnotationType()
-                            .getQualifiedName()
-                            .equals("de.firemage.autograder.core.check.ExecutableCheck")
-                    )
+                .stream()
+                .noneMatch(a -> a.getAnnotationType()
+                    .getQualifiedName()
+                    .equals("de.firemage.autograder.core.check.ExecutableCheck")
+                )
             ) {
                 continue;
             }
 
             Optional<Map.Entry<Class<?>, List<String>>> manualMapping = MANUAL_MAPPING.entrySet().stream()
-                    .filter(entry -> SpoonUtil.isTypeEqualTo(ctType.getReference(), entry.getKey()))
-                    .findAny();
+                .filter(entry -> SpoonUtil.isTypeEqualTo(ctType.getReference(), entry.getKey()))
+                .findAny();
 
             if (manualMapping.isPresent()) {
                 result.addAll(manualMapping.get().getValue());
@@ -141,28 +142,28 @@ class TestLocalizedStrings {
             }
 
             result.addAll(ctType
-                    .filterChildren(ctElement -> ctElement instanceof CtConstructorCall<?> ctConstructorCall
-                            && ctConstructorCall.getType().getSimpleName().equals("LocalizedMessage"))
-                    .map(ctElement -> resolveKey(ctModel, ((CtConstructorCall<?>) ctElement).getArguments()))
-                    .list()
+                .filterChildren(ctElement -> ctElement instanceof CtConstructorCall<?> ctConstructorCall
+                    && ctConstructorCall.getType().getSimpleName().equals("LocalizedMessage"))
+                .map(ctElement -> resolveKey(ctModel, ((CtConstructorCall<?>) ctElement).getArguments()))
+                .list()
             );
 
             // add XPath rules
             result.addAll(ctType.filterChildren(ctElement -> ctElement instanceof CtInvocation<?> ctInvocation
-                                    && ctInvocation.getExecutable().getSimpleName().equals("createXPathRule")
-                                )
-                                .map(ctElement -> ((CtInvocation<?>) ctElement).getArguments().get(1))
-                                .map(key -> resolveKey(ctModel, List.of((CtExpression<?>) key)))
-                                .list());
+                    && ctInvocation.getExecutable().getSimpleName().equals("createXPathRule")
+                )
+                .map(ctElement -> ((CtInvocation<?>) ctElement).getArguments().get(1))
+                .map(key -> resolveKey(ctModel, List.of((CtExpression<?>) key)))
+                .list());
 
             // PMD Rule#setMessage(String) calls
             result.addAll(ctType.filterChildren(ctElement -> ctElement instanceof CtInvocation<?> ctInvocation
-                            && ctInvocation.getExecutable().getSimpleName().equals("setMessage")
-                            && SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), net.sourceforge.pmd.Rule.class)
-                    )
-                    .map(ctElement -> ((CtInvocation<?>) ctElement).getArguments().get(0))
-                    .map(key -> resolveKey(ctModel, List.of((CtExpression<?>) key)))
-                    .list());
+                    && ctInvocation.getExecutable().getSimpleName().equals("setMessage")
+                    && SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), net.sourceforge.pmd.Rule.class)
+                )
+                .map(ctElement -> ((CtInvocation<?>) ctElement).getArguments().get(0))
+                .map(key -> resolveKey(ctModel, List.of((CtExpression<?>) key)))
+                .list());
         }
 
         result.addAll(ALWAYS_USED_KEYS);
@@ -186,8 +187,8 @@ class TestLocalizedStrings {
 
         localizedKeys = getAllLocalizedKeys(ctModel, basePackage);
 
-        englishBundle = new Linter(Locale.ENGLISH).getFluentBundle();
-        germanBundle = new Linter(Locale.GERMAN).getFluentBundle();
+        englishBundle = Linter.defaultLinter(Locale.ENGLISH).getFluentBundle();
+        germanBundle = Linter.defaultLinter(Locale.GERMAN).getFluentBundle();
     }
 
     Collection<String> findMissingKeys(FluentBundle bundle) {
@@ -220,7 +221,7 @@ class TestLocalizedStrings {
         };
         try {
             FluentResource resource = FTLParser.parse(FTLStream.of(
-                    new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
+                new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
             ));
             return resource;
         } catch (IOException e) {
@@ -232,11 +233,11 @@ class TestLocalizedStrings {
         FluentResource resource = this.readFluentResource(locale);
 
         return resource.entries()
-                .stream()
-                .filter(entry -> entry instanceof Message)
-                .map(entry -> ((Message) entry).identifier().name())
-                .filter(key -> localizedKeys.stream().noneMatch(call -> call.equals(key)))
-                .toList();
+            .stream()
+            .filter(entry -> entry instanceof Message)
+            .map(entry -> ((Message) entry).identifier().name())
+            .filter(key -> localizedKeys.stream().noneMatch(call -> call.equals(key)))
+            .toList();
     }
 
     @Test

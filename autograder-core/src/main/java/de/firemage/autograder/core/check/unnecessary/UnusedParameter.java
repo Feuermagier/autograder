@@ -42,7 +42,7 @@ public class UnusedParameter extends IntegratedCheck {
                 if (ctExecutable.isImplicit() || !ctExecutable.getPosition().isValidPosition()) return;
 
                 if (ctExecutable instanceof CtMethod<?> ctMethod) {
-                    if (SpoonUtil.isOverriddenMethod(ctMethod)) {
+                    if (SpoonUtil.isOverriddenMethod(ctMethod) || SpoonUtil.isMainMethod(ctMethod)) {
                         return;
                     }
 

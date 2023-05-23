@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.compiler;
 
-import lombok.Getter;
 import java.util.Arrays;
 
 public enum JavaVersion {
@@ -16,10 +15,7 @@ public enum JavaVersion {
     JAVA_16("16", 16),
     JAVA_17("17", 17);
 
-    @Getter
     private final String versionString;
-
-    @Getter
     private final int versionNumber;
 
     JavaVersion(String versionString, int versionNumber) {
@@ -37,5 +33,13 @@ public enum JavaVersion {
     public static boolean isValidJavaVersion(String s) {
         return Arrays.stream(JavaVersion.class.getEnumConstants())
                 .anyMatch(v -> v.getVersionString().equals(s));
+    }
+
+    public String getVersionString() {
+        return this.versionString;
+    }
+
+    public int getVersionNumber() {
+        return this.versionNumber;
     }
 }

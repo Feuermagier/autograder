@@ -1,0 +1,3 @@
+complexity.ForLoopVariableCheck
+Only one loop variable should be declared in a for loop.
+Test.java:13

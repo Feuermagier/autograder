@@ -2,7 +2,6 @@ package de.firemage.autograder.core.errorprone;
 
 import de.firemage.autograder.core.SourceInfo;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.compiler.PhysicalFileObject;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -67,7 +66,7 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
 
     private List<ErrorProneDiagnostic> internalCompile(SourceInfo input) throws IOException {
         Charset charset = input.getCharset();
-        List<PhysicalFileObject> compilationUnits = input.compilationUnits();
+        List<JavaFileObject> compilationUnits = input.compilationUnits();
 
         if (compilationUnits.isEmpty()) {
             throw new IllegalArgumentException("Nothing found to compile in " + input.getPath());
@@ -77,26 +76,31 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
 
-        boolean isSuccessful = compiler.getTask(
-            output,
-            compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
-            diagnosticCollector,
-            List.of(
-                "-processorpath",
-                System.getProperty("java.class.path"),
-                "-XDcompilePolicy=simple",
-                Stream.concat(
-                        Stream.of(
-                            "-Xplugin:ErrorProne",
-                            "-XepDisableAllChecks"
-                        ),
-                        this.lints.stream().map("-Xep:%s:WARN"::formatted)
-                    )
-                    .collect(Collectors.joining(" "))
-            ),
-            null,
-            compilationUnits
-        ).call();
+        boolean isSuccessful;
+        try (TempLocation tempLocation = this.tempLocation.createTempDirectory("classes")) {
+            isSuccessful = compiler.getTask(
+                output,
+                compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
+                diagnosticCollector,
+                List.of(
+                    "-processorpath",
+                    System.getProperty("java.class.path"),
+                    "-d", // write class files to a temporary directory
+                    tempLocation.toPath().toString(),
+                    "-XDcompilePolicy=simple",
+                    Stream.concat(
+                            Stream.of(
+                                "-Xplugin:ErrorProne",
+                                "-XepDisableAllChecks"
+                            ),
+                            this.lints.stream().map("-Xep:%s:WARN"::formatted)
+                        )
+                        .collect(Collectors.joining(" "))
+                ),
+                null,
+                compilationUnits
+            ).call();
+        }
 
         output.flush();
         output.close();

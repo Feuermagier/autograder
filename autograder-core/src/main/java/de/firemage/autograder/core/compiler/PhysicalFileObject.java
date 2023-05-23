@@ -23,6 +23,12 @@ public class PhysicalFileObject extends SimpleJavaFileObject {
     }
 
     @Override
+    public String getName() {
+        // NOTE: PMD relies on this method to return a valid path as a string
+        return this.file.getPath();
+    }
+
+    @Override
     public CharSequence getCharContent(boolean ignoreEncodingErrors) throws IOException {
         return Files.readString(this.file.toPath(), this.charset);
     }

@@ -26,3 +26,47 @@ class TestCopyConstructor {
         this.b = other.b; // Ok
     }
 }
+
+class TestAttributeReassignment {
+    private boolean isOk;
+
+    public void foo() {
+        this.isOk = isOk; // Not Ok
+        this.isOk = this.isOk; // Not Ok
+        isOk = this.isOk; // Not Ok
+        isOk = isOk; // Not Ok
+    }
+
+    public void foo2(boolean isOk) {
+        this.isOk = isOk; // Ok
+    }
+}
+
+class Parent {
+    protected int a = 0;
+    protected int b = 1;
+}
+
+class TestParentReassignment extends Parent {
+    private int b = 2;
+
+    public void foo() {
+        super.a = a; // Not Ok
+        super.a = super.a; // Not Ok
+        a = super.a; // Not Ok
+        a = a; // Not Ok
+    }
+
+    public void foo2() {
+        super.b = b; // Ok
+        super.b = super.b; // Not Ok
+        b = super.b; // Ok
+        b = b; // Not Ok
+    }
+
+    public void foo3(int b) {
+        super.b = b; // Ok
+        b = super.b; // Ok
+        b = b; // Not Ok
+    }
+}

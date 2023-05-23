@@ -127,7 +127,7 @@ public class CodeModel implements AutoCloseable {
             }
 
             Launcher launcher = new Launcher();
-            launcher.addInputResource(file.getSpoonFile());
+            launcher.addInputResource(file.getSpoonResource());
             launcher.getEnvironment().setShouldCompile(false);
             launcher.getEnvironment().setSourceClasspath(new String[]{jar.toAbsolutePath().toString()});
             launcher.getEnvironment().setNoClasspath(false);

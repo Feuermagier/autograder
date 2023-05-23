@@ -22,6 +22,7 @@ import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
+import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -425,5 +426,15 @@ public final class SpoonUtil {
         if (effects.isEmpty()) return new ArrayList<>();
 
         return effects;
+    }
+
+    /**
+     * Converts the provided source position into a human-readable string.
+     *
+     * @param sourcePosition the source position as given by spoon
+     * @return a human-readable string representation of the source position
+     */
+    public static String formatSourcePosition(SourcePosition sourcePosition) {
+        return String.format("%s:L%d", sourcePosition.getFile().getName(), sourcePosition.getLine());
     }
 }

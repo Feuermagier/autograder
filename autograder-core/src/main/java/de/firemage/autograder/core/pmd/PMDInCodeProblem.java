@@ -20,4 +20,14 @@ public class PMDInCodeProblem extends InCodeProblem {
             check.getExplanation() != null ? check.getExplanation() : new LocalizedMessage(violation.getDescription()),
             check.getProblemType());
     }
+
+    @Override
+    public String toString() {
+        return "PMDInCodeProblem[check=%s, position=%s, explanation=%s, problemType=%s]".formatted(
+            this.getCheck(),
+            this.getPosition(),
+            this.getExplanation(),
+            this.getProblemType()
+        );
+    }
 }

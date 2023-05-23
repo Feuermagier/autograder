@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.file;
 
 import de.firemage.autograder.core.CodeModel;
+import de.firemage.autograder.core.FileSourceInfo;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.SourceInfo;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
@@ -29,12 +30,20 @@ public class UploadedFile implements AutoCloseable {
         this.compilationResult = compilationResult;
     }
 
-    public static UploadedFile build(Path file, JavaVersion version, Path tmpLocation,
-                                     Consumer<LinterStatus> statusConsumer)
-        throws IOException,
-        ModelBuildException, CompilationFailureException {
-        var source = new SourceInfo(file, version);
+    public static UploadedFile build(
+        Path file,
+        JavaVersion version,
+        Path tmpLocation,
+        Consumer<LinterStatus> statusConsumer
+    ) throws IOException, ModelBuildException, CompilationFailureException {
+        return UploadedFile.build(new FileSourceInfo(file, version), tmpLocation, statusConsumer);
+    }
 
+    public static UploadedFile build(
+        SourceInfo source,
+        Path tmpLocation,
+        Consumer<LinterStatus> statusConsumer
+    ) throws IOException, CompilationFailureException {
         statusConsumer.accept(LinterStatus.COMPILING);
         Optional<CompilationResult> compilationResult = Compiler.compileToJar(source, tmpLocation, source.getVersion());
         if (compilationResult.isEmpty()) {
