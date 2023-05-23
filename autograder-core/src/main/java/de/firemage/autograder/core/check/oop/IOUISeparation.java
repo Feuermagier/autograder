@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFieldRead;
@@ -59,10 +60,6 @@ public class IOUISeparation extends IntegratedCheck {
                        .map(CtTypeInformation::getQualifiedName);
     }
 
-    private static String formatSourcePosition(SourcePosition sourcePosition) {
-        return String.format("%s:L%d", sourcePosition.getFile().getName(), sourcePosition.getLine());
-    }
-
     private void checkCtInvocation(CtInvocation<?> ctInvocation) {
         if (this.hasAccessedScanner(ctInvocation)) {
             this.getParentName(ctInvocation).ifPresent(name -> {
@@ -73,7 +70,7 @@ public class IOUISeparation extends IntegratedCheck {
                             "ui-input-separation",
                             Map.of(
                                 "first",
-                                formatSourcePosition(this.scannerInvocations.values().iterator().next())
+                                SpoonUtil.formatSourcePosition(this.scannerInvocations.values().iterator().next())
                             )
                         ),
                         ProblemType.UI_INPUT_SEPARATION
@@ -93,7 +90,7 @@ public class IOUISeparation extends IntegratedCheck {
                             "ui-output-separation",
                             Map.of(
                                 "first",
-                                formatSourcePosition(this.systemInvocations.values().iterator().next())
+                                SpoonUtil.formatSourcePosition(this.systemInvocations.values().iterator().next())
                             )
                         ),
                         ProblemType.UI_OUTPUT_SEPARATION

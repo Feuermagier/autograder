@@ -1,0 +1,13 @@
+unnecessary.EmptyBlockCheck
+Do not have empty blocks without a comment explaining why.
+Test.java:5
+Test.java:7
+Test.java:11-12
+Test.java:12
+Test.java:21
+Test.java:49
+Test.java:53-54
+Test.java:54-55
+Test.java:57-58
+Test.java:62-64
+Test.java:68

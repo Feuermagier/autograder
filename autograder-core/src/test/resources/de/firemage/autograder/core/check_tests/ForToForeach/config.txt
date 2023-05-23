@@ -2,3 +2,12 @@ general.ForToForEachCheck
 For loop should be for-each loop
 Test.java:9
 Test.java:13
+# this is a false-positive: https://github.com/pmd/pmd/issues/4569
+Test.java:18
+Test.java:38
+Test.java:46
+Test.java:54
+Test.java:65
+Test.java:78
+Test.java:87
+Test.java:99

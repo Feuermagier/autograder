@@ -1,0 +1,5 @@
+complexity.DiamondOperatorCheck
+Let type inference infer generics <> for constructors
+Test.java:7
+Test.java:25
+Test.java:43

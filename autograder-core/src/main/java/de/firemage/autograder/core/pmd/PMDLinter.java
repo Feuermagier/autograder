@@ -7,22 +7,29 @@ import net.sourceforge.pmd.PmdAnalysis;
 import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.RulePriority;
 import net.sourceforge.pmd.RuleSet;
+import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.lang.LanguageRegistry;
+import net.sourceforge.pmd.lang.document.FileCollector;
+
+import javax.tools.JavaFileObject;
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class PMDLinter {
+    private static final Language JAVA_LANGUAGE = LanguageRegistry.PMD.getLanguageById("java");
 
     public List<Problem> lint(UploadedFile file, List<PMDCheck> checks) throws IOException {
         PMDConfiguration config = new PMDConfiguration();
 
+        Path root = file.getSource().getPath();
         config.setMinimumPriority(RulePriority.LOW);
         config.setIgnoreIncrementalAnalysis(true);
-        config.setReportShortNames(true);
-        config.setDefaultLanguageVersion(LanguageRegistry.findLanguageByTerseName("java").getVersion(file.getSource().getVersion().getVersionString()));
+        config.addRelativizeRoot(root);
+        config.setDefaultLanguageVersion(JAVA_LANGUAGE.getVersion(file.getSource().getVersion().getVersionString()));
 
         Map<String, PMDCheck> idMap = new HashMap<>();
         List<Rule> rules = new ArrayList<>();
@@ -37,12 +44,19 @@ public class PMDLinter {
             }
         }
 
-        ProblemRenderer renderer = new ProblemRenderer(idMap, file.getSource().getPath());
+        ProblemRenderer renderer = new ProblemRenderer(idMap, root);
 
         try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
             pmd.addRuleSet(RuleSet.create("Autograder Configuration (Generated)", "", null, List.of(), List.of(), rules));
             pmd.addRenderer(renderer);
-            pmd.files().addDirectory(file.getSource().getPath());
+            FileCollector collector = pmd.files();
+            for (JavaFileObject compilationUnit : file.getSource().compilationUnits()) {
+                collector.addSourceFile(
+                    compilationUnit.getCharContent(false).toString(),
+                    compilationUnit.getName()
+                );
+            }
+
             pmd.performAnalysis();
         }
 

@@ -48,9 +48,9 @@ public final class Compiler {
         Path modifiedOutput = tmpLocation.resolve(input.getName() + "_modified");
         SourceInfo copiedVersion = input.copyTo(modifiedOutput);
 
-        List<PhysicalFileObject> compilationUnits = copiedVersion.compilationUnits();
+        List<JavaFileObject> compilationUnits = copiedVersion.compilationUnits();
         // patch the files:
-        for (PhysicalFileObject file : compilationUnits) {
+        for (JavaFileObject file : compilationUnits) {
             String content = file.getCharContent(true).toString();
             Pattern pattern = Pattern.compile("@SuppressWarnings\\((.+?)\\)", Pattern.DOTALL);
             String patched = pattern.matcher(content).replaceAll(matchResult -> {
@@ -82,7 +82,6 @@ public final class Compiler {
 
         Optional<CompilationResult> result = compile(copiedVersion, tmpLocation, javaVersion);
 
-        System.out.println("Copied version %s".formatted(copiedVersion.getPath()));
         copiedVersion.delete();
 
         List<CompilationDiagnostic> diagnostics = result.map(CompilationResult::diagnostics).orElse(List.of());
@@ -97,7 +96,7 @@ public final class Compiler {
         SourceInfo input, Path tmpLocation, JavaVersion javaVersion
     ) throws IOException, CompilationFailureException {
 
-        List<PhysicalFileObject> compilationUnits = input.compilationUnits();
+        List<JavaFileObject> compilationUnits = input.compilationUnits();
 
         if (compilationUnits.isEmpty()) {
             return Optional.empty();

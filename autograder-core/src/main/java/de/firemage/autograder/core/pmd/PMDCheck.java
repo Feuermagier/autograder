@@ -4,6 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
 import net.sourceforge.pmd.Rule;
+import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.lang.LanguageRegistry;
 import net.sourceforge.pmd.lang.rule.XPathRule;
 import net.sourceforge.pmd.lang.rule.xpath.XPathVersion;
@@ -11,6 +12,7 @@ import net.sourceforge.pmd.lang.rule.xpath.XPathVersion;
 import java.util.List;
 
 public abstract class PMDCheck implements Check {
+    private static final Language JAVA_LANGUAGE = LanguageRegistry.PMD.getLanguageById("java");
     private final List<Rule> rules;
 
     private final LocalizedMessage explanation;
@@ -27,6 +29,10 @@ public abstract class PMDCheck implements Check {
         this.problemType = problemType;
 
         for (Rule rule : rules) {
+            if (rule.getLanguage() == null) {
+                rule.setLanguage(JAVA_LANGUAGE);
+            }
+
             if (rule.getMessage() == null) {
                 rule.setMessage("");
             }
@@ -34,10 +40,10 @@ public abstract class PMDCheck implements Check {
     }
 
     protected static XPathRule createXPathRule(String name, String explanation, String expression) {
-        XPathRule rule = new XPathRule(XPathVersion.XPATH_2_0, expression);
+        XPathRule rule = new XPathRule(XPathVersion.XPATH_3_1, expression);
         rule.setName(name);
         rule.setMessage(explanation);
-        rule.setLanguage(LanguageRegistry.findLanguageByTerseName("java"));
+        rule.setLanguage(JAVA_LANGUAGE);
         return rule;
     }
 

@@ -1,3 +1,14 @@
 complexity.SelfAssignmentCheck
 Don't assign a variable to itself.
 Test.java:9
+Test.java:34
+Test.java:35
+Test.java:36
+Test.java:37
+Test.java:54
+Test.java:55
+Test.java:56
+Test.java:57
+Test.java:62
+Test.java:64
+Test.java:70

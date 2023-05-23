@@ -6,6 +6,9 @@ import de.firemage.autograder.core.check.general.CopyPasteCheck;
 import net.sourceforge.pmd.cpd.CPD;
 import net.sourceforge.pmd.cpd.CPDConfiguration;
 import net.sourceforge.pmd.cpd.JavaLanguage;
+import net.sourceforge.pmd.cpd.SourceCode;
+
+import javax.tools.JavaFileObject;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,11 +22,21 @@ public class CPDLinter {
             cpdConfig.setFailOnViolation(false);
             cpdConfig.setLanguage(new JavaLanguage());
             cpdConfig.setMinimumTileSize(check.getTokenCount());
+
+            // NOTE: CPD is marked for removal, but there is no replacement yet
+            // (CpdAnalysis should be added in the future)
             CPD cpd = new CPD(cpdConfig);
-            cpd.add(file.getSource().getJavaFiles());
+
+            for (JavaFileObject compilationUnit : file.getSource().compilationUnits()) {
+                cpd.add(new SourceCode(new SourceCode.ReaderCodeLoader(
+                    compilationUnit.openReader(true),
+                    compilationUnit.getName()
+                )));
+            }
             cpd.go();
             cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getSource().getPath())));
         }
+
         return problems;
     }
 }

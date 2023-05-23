@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.check_tests.VariablesHaveDescriptiveNamesCheck.code;
 
-import java.util.List;
+import java.util.*;
 public class Test {
     private static List<String> list; // Ok
     private static List<String> exampleList; // Not Ok
@@ -8,5 +8,8 @@ public class Test {
     private static int[] intArray; // Not Ok
     private static String s; // Not Ok
     private static String string; // Ok
-    private static int ID_OFFSET;
+
+    int trafficLight1;
+    int trafficLight2; // Not Ok (similar to trafficLight1)
+    int trafficLight3; // Not Ok (similar to trafficLight1)
 }
