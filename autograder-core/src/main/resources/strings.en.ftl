@@ -88,8 +88,7 @@ javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned 
 # Complexity
 use-diamond-operator = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
-extends-object-desc = Explicitly extending Object is unnecessary
-extends-object-exp = Unnecessary 'extends Object'
+extends-object = Explicitly extending Object is unnecessary
 
 for-loop-var = Each for-loop should have exactly one control variable
 

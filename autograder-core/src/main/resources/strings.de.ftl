@@ -87,8 +87,7 @@ javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im 
 # Complexity
 use-diamond-operator = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
-extends-object-desc = Explizit von Object zu erben ist unnötig
-extends-object-exp = Unnötiges 'extends Object'
+extends-object = Explizit von Object zu erben ist unnötig
 
 for-loop-var = for-Schleifen sollten genau eine lokal deklarierte Kontrollvariable haben
 
