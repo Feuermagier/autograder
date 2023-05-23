@@ -1,3 +1,0 @@
-exceptions.EmptyCatchCheck
-Catch blocks should not be empty
-Test.java:7-9

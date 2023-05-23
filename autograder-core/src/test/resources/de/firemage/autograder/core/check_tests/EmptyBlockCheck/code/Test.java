@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.check_tests.EmptyNonCatchBlockCheck.code;
+package de.firemage.autograder.core.check_tests.EmptyBlockCheck.code;
 
 public class Test {
     public static void main(String[] args) {
@@ -8,7 +8,7 @@ public class Test {
 
         try {
             throw new IllegalArgumentException();
-        } catch (Exception e) {
+        } catch (Exception e) { // Not Ok
         } finally {} // Not Ok
     }
 
@@ -56,5 +56,15 @@ public class Test {
 
         switch (a) { // Not Ok
         }
+
+        try {
+            System.out.println("Hello World!");
+        } catch (Exception e) { // Not Ok
+            // effectively empty
+        }
+
+        try {
+            System.out.println("Hello World!");
+        } catch (Exception e) {} // Not Ok
     }
 }

@@ -137,7 +137,7 @@ print-stack-trace-exp = Stack Traces sollten in der Abgabe nicht ausgegeben werd
 custom-exception-inheritance-exp-runtime = Selbstdefinierte Exceptions sollten immer Checked Exceptions sein
 custom-exception-inheritance-exp-error = Selbstdefinierte Exceptions sollten nicht von Error erben
 
-empty-catch-exp = Leerer catch-Block
+empty-catch-block = Leerer catch-Block
 
 exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block sofort wieder gefangen
 

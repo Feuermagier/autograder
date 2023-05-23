@@ -13,10 +13,12 @@ import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtSwitch;
 import spoon.reflect.visitor.CtScanner;
 
-@ExecutableCheck(reportedProblems = {ProblemType.EMPTY_BLOCK})
-public class EmptyNonCatchBlockCheck extends IntegratedCheck {
-    private static boolean isInAllowedContext(CtBlock<?> ctBlock) {
-        return ctBlock.getParent() instanceof CtCatch ctCatch && ctCatch.getBody().equals(ctBlock);
+@ExecutableCheck(reportedProblems = {ProblemType.EMPTY_BLOCK, ProblemType.EMPTY_CATCH})
+public class EmptyBlockCheck extends IntegratedCheck {
+    private static boolean isEmptyBlock(CtBlock<?> ctBlock) {
+        return SpoonUtil.getEffectiveStatements(ctBlock).isEmpty()
+            // allow empty blocks that only contain comments
+            && (ctBlock.getStatements().isEmpty() || !ctBlock.getStatements().stream().allMatch(CtComment.class::isInstance));
     }
 
     @Override
@@ -24,14 +26,20 @@ public class EmptyNonCatchBlockCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtBlock(CtBlock<T> ctBlock) {
-                if (ctBlock.isImplicit() || !ctBlock.getPosition().isValidPosition() || isInAllowedContext(ctBlock)) {
+                if (ctBlock.isImplicit() || !ctBlock.getPosition().isValidPosition()) {
                     super.visitCtBlock(ctBlock);
                     return;
                 }
 
-                if (SpoonUtil.getEffectiveStatements(ctBlock).isEmpty()
-                    // allow empty blocks that only contain comments
-                    && (ctBlock.getStatements().isEmpty() || !ctBlock.getStatements().stream().allMatch(CtComment.class::isInstance))) {
+                if (ctBlock.getParent() instanceof CtCatch ctCatch
+                    && ctCatch.getBody().equals(ctBlock)
+                    && SpoonUtil.getEffectiveStatements(ctBlock).isEmpty()) {
+                    addLocalProblem(
+                        ctCatch,
+                        new LocalizedMessage("empty-catch-block"),
+                        ProblemType.EMPTY_CATCH
+                    );
+                } else if (isEmptyBlock(ctBlock)) {
                     addLocalProblem(
                         ctBlock,
                         new LocalizedMessage("empty-block"),

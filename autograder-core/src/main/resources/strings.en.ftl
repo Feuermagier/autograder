@@ -137,7 +137,7 @@ print-stack-trace-exp = Don't print stack traces in your final solution
 custom-exception-inheritance-exp-runtime = Custom exceptions should be checked exceptions
 custom-exception-inheritance-exp-error = Custom exceptions should not extend Error
 
-empty-catch-exp = Empty catch block
+empty-catch-block = Empty catch block
 
 exception-controlflow-exp-caught = {$exp} thrown and immediately caught in a surrounding block
 
