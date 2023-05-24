@@ -22,13 +22,14 @@ import java.util.Map;
 public class PMDLinter {
     private static final Language JAVA_LANGUAGE = LanguageRegistry.PMD.getLanguageById("java");
 
-    public List<Problem> lint(UploadedFile file, List<PMDCheck> checks) throws IOException {
+    public List<Problem> lint(UploadedFile file, List<PMDCheck> checks, ClassLoader classLoader) throws IOException {
         PMDConfiguration config = new PMDConfiguration();
 
         Path root = file.getSource().getPath();
         config.setMinimumPriority(RulePriority.LOW);
         config.setIgnoreIncrementalAnalysis(true);
         config.addRelativizeRoot(root);
+        config.setClassLoader(classLoader);
         config.setDefaultLanguageVersion(JAVA_LANGUAGE.getVersion(file.getSource().getVersion().getVersionString()));
 
         Map<String, PMDCheck> idMap = new HashMap<>();

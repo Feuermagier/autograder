@@ -35,7 +35,7 @@ public abstract class AbstractCheckTest {
     ) throws LinterException, IOException {
         return this.linter.checkFile(
             UploadedFile.build(sourceInfo, this.tempLocation.toPath(), status -> {
-            }),
+            }, null),
             null,
             new ArrayList<>(problemTypes),
             status -> {

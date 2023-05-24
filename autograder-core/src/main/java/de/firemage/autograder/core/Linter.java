@@ -22,18 +22,16 @@ import fluent.functions.icu.ICUFunctionFactory;
 import fluent.syntax.parser.FTLParser;
 import fluent.syntax.parser.FTLStream;
 import org.reflections.Reflections;
+import org.reflections.scanners.Scanners;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
-import java.util.Set;
-import java.util.TreeSet;
 import java.util.function.Consumer;
 
 public final class Linter {
@@ -41,8 +39,9 @@ public final class Linter {
     private final TempLocation tempLocation;
     private final FluentBundle fluentBundle;
     private final boolean disableDynamicAnalysis;
+    private final ClassLoader classLoader;
 
-    private Linter(Locale locale, TempLocation tempLocation, int threads, boolean disableDynamicAnalysis) {
+    private Linter(Locale locale, TempLocation tempLocation, int threads, boolean disableDynamicAnalysis, ClassLoader classLoader) {
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
             case "en" -> "/strings.en.ftl";
@@ -60,6 +59,7 @@ public final class Linter {
         this.tempLocation = tempLocation;
         this.threads = threads;
         this.disableDynamicAnalysis = disableDynamicAnalysis;
+        this.classLoader = classLoader;
     }
 
     public static class Builder {
@@ -67,6 +67,7 @@ public final class Linter {
         private TempLocation tempLocation;
         private int threads;
         private boolean disableDynamicAnalysis = true;
+        private ClassLoader classLoader;
 
         private Builder(Locale locale) {
             this.locale = locale;
@@ -91,6 +92,11 @@ public final class Linter {
             return this;
         }
 
+        public Builder classLoader(ClassLoader classLoader) {
+            this.classLoader = classLoader;
+            return this;
+        }
+
         public Linter build() {
             TempLocation tempLocation = this.tempLocation;
 
@@ -98,7 +104,7 @@ public final class Linter {
                 tempLocation = TempLocation.random();
             }
 
-            return new Linter(this.locale, tempLocation, this.threads, this.disableDynamicAnalysis);
+            return new Linter(this.locale, tempLocation, this.threads, this.disableDynamicAnalysis, this.classLoader);
         }
     }
 
@@ -157,12 +163,12 @@ public final class Linter {
             }
         }
 
-        AnalysisScheduler scheduler = new AnalysisScheduler(this.threads);
+        AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
 
         if (!pmdChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
                 statusConsumer.accept(LinterStatus.RUNNING_PMD);
-                reporter.reportProblems(new PMDLinter().lint(file, pmdChecks));
+                reporter.reportProblems(new PMDLinter().lint(file, pmdChecks, this.classLoader));
             });
         }
 
@@ -226,7 +232,7 @@ public final class Linter {
     }
 
     private static final Collection<Class<?>> CHECKS = new LinkedHashSet<>(
-        new Reflections("de.firemage.autograder.core.check")
+        new Reflections("de.firemage.autograder.core.check", Scanners.TypesAnnotated)
             .getTypesAnnotatedWith(ExecutableCheck.class)
     );
 

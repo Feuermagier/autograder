@@ -116,7 +116,7 @@ public class CheckTest {
                         testInput.path().resolve("code"),
                         JavaVersion.JAVA_17,
                         tmpDirectory.toPath(), status -> {
-                        }
+                        }, null
                     );
                     var linter = Linter.builder(Locale.US)
                         .enableDynamicAnalysis(ENABLE_DYNAMIC && testInput.isDynamic())

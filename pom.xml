@@ -47,7 +47,7 @@
         <slf4j.version>2.0.7</slf4j.version>
         <jackson.version>2.15.1</jackson.version>
 
-        <revision>0.3</revision>
+        <revision>0.5.6</revision>
     </properties>
 
     <dependencies>

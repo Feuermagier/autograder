@@ -10,16 +10,14 @@ import java.util.Queue;
 import java.util.concurrent.atomic.AtomicInteger;
 
 public class AnalysisScheduler {
+    private final ClassLoader classLoader;
     private final List<AnalysisThread> analysisThreads;
     private final Queue<AnalysisTask> waitingTasks;
     private volatile boolean completionAllowed;
-    private AtomicInteger waitingAndRunningTaskCount;
+    private final AtomicInteger waitingAndRunningTaskCount;
 
-    public AnalysisScheduler() {
-        this(Runtime.getRuntime().availableProcessors() - 2);
-    }
-
-    public AnalysisScheduler(int threads) {
+    public AnalysisScheduler(int threads, ClassLoader classLoader) {
+        this.classLoader = classLoader;
         this.waitingTasks = new ArrayDeque<>();
         this.completionAllowed = false;
         this.waitingAndRunningTaskCount = new AtomicInteger(0);
@@ -56,6 +54,10 @@ public class AnalysisScheduler {
 
     protected boolean completeTask() {
         return this.waitingAndRunningTaskCount.decrementAndGet() == 0 && this.completionAllowed;
+    }
+
+    protected ClassLoader getClassLoader() {
+        return this.classLoader;
     }
 
     /**

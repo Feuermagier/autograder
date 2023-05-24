@@ -140,7 +140,7 @@ public class Application implements Callable<Integer> {
                 System.out.println(linter.translateMessage(status.getMessage()));
 
         try (UploadedFile uploadedFile = UploadedFile.build(file,
-                JavaVersion.fromString(this.javaVersion), tempLocation.toPath(), statusConsumer)) {
+                JavaVersion.fromString(this.javaVersion), tempLocation.toPath(), statusConsumer, null)) {
 
             if (outputJson) {
                 List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);

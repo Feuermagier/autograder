@@ -27,18 +27,33 @@ import java.util.List;
 public class CodeModel implements AutoCloseable {
     private final SourceInfo file;
     private final Path jar;
-    private URLClassLoader classLoader;
+    private final ClassLoader userClassLoader;
+    private final URLClassLoader classLoader;
     private Factory factory;
     private CtModel model;
     private CtPackage basePackage;
 
-    private CodeModel(SourceInfo file, Path jar) {
+    private CodeModel(SourceInfo file, Path jar, ClassLoader classLoader) {
         this.file = file;
         this.jar = jar;
+
+        if (classLoader != null) {
+            this.userClassLoader = classLoader;
+            this.classLoader = null;
+        } else {
+            // Use a custom class loader because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
+            try {
+                this.classLoader =
+                        new URLClassLoader(new URL[]{jar.toUri().toURL()}, Thread.currentThread().getContextClassLoader());
+                this.userClassLoader = null;
+            } catch (MalformedURLException e) {
+                throw new RuntimeException(e);
+            }
+        }
     }
 
-    public static CodeModel buildFor(SourceInfo file, Path jar) {
-        return new CodeModel(file, jar);
+    public static CodeModel buildFor(SourceInfo file, Path jar, ClassLoader classLoader) {
+        return new CodeModel(file, jar, classLoader);
     }
 
     public void ensureModelBuild() {
@@ -118,23 +133,20 @@ public class CodeModel implements AutoCloseable {
                 return;
             }
 
-            // Use a custom class loader because spoon won't close its standard URLClassLoader and will leak the handle to the jar file
-            try {
-                this.classLoader =
-                        new URLClassLoader(new URL[]{jar.toUri().toURL()}, Thread.currentThread().getContextClassLoader());
-            } catch (MalformedURLException e) {
-                throw new RuntimeException(e);
-            }
-
             Launcher launcher = new Launcher();
             launcher.addInputResource(file.getSpoonResource());
             launcher.getEnvironment().setShouldCompile(false);
             launcher.getEnvironment().setSourceClasspath(new String[]{jar.toAbsolutePath().toString()});
             launcher.getEnvironment().setNoClasspath(false);
             launcher.getEnvironment().setCommentEnabled(true);
-            launcher.getEnvironment().setComplianceLevel(file.getVersion().getVersionNumber());
-            launcher.getEnvironment().setInputClassLoader(classLoader);
+            launcher.getEnvironment().setComplianceLevel(this.file.getVersion().getVersionNumber());
             launcher.getEnvironment().setEncoding(file.getCharset());
+
+            if (this.userClassLoader != null) {
+                launcher.getEnvironment().setInputClassLoader(this.userClassLoader);
+            } else {
+                launcher.getEnvironment().setInputClassLoader(this.classLoader);
+            }
 
             CtModel model;
             try {

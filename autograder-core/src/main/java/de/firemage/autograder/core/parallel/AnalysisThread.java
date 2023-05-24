@@ -19,6 +19,10 @@ public class AnalysisThread {
     }
 
     private void run() {
+        if (this.scheduler.getClassLoader() != null) {
+            Thread.currentThread().setContextClassLoader(this.scheduler.getClassLoader());
+        }
+        
         var reporter = new ProblemReporter() {
             @Override
             public void reportProblem(Problem problem) {

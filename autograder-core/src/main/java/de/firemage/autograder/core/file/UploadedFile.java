@@ -34,15 +34,17 @@ public class UploadedFile implements AutoCloseable {
         Path file,
         JavaVersion version,
         Path tmpLocation,
-        Consumer<LinterStatus> statusConsumer
+        Consumer<LinterStatus> statusConsumer,
+        ClassLoader classLoader
     ) throws IOException, ModelBuildException, CompilationFailureException {
-        return UploadedFile.build(new FileSourceInfo(file, version), tmpLocation, statusConsumer);
+        return UploadedFile.build(new FileSourceInfo(file, version), tmpLocation, statusConsumer, classLoader);
     }
 
     public static UploadedFile build(
         SourceInfo source,
         Path tmpLocation,
-        Consumer<LinterStatus> statusConsumer
+        Consumer<LinterStatus> statusConsumer,
+        ClassLoader classLoader
     ) throws IOException, CompilationFailureException {
         statusConsumer.accept(LinterStatus.COMPILING);
         Optional<CompilationResult> compilationResult = Compiler.compileToJar(source, tmpLocation, source.getVersion());
@@ -50,7 +52,7 @@ public class UploadedFile implements AutoCloseable {
             return null;
         }
 
-        var model = CodeModel.buildFor(source, compilationResult.get().jar());
+        var model = CodeModel.buildFor(source, compilationResult.get().jar(), classLoader);
 
         return new UploadedFile(model, source, compilationResult.get());
     }
