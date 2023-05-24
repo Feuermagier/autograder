@@ -149,7 +149,7 @@ exception-message-exp = An exception should always have a message that explains 
 
 compare-objects-exp = Implement an equals method for type {$type} and use it for comparisons
 
-constant-naming-qualifier-exp = The constant field '{$field}' should be static and have a UPPER_SNAKE_CASE name
+variable-should-be = The variable '{$variable}' should be '{$suggestion}'.
 
 constants-interfaces-exp = Interfaces must not have fields
 

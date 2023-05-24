@@ -149,7 +149,7 @@ exception-message-exp = Eine Exception sollte immer eine Nachricht dabei haben, 
 
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
 
-constant-naming-qualifier-exp = Die Konstante '{$field}'  sollte statisch sein und einen UPPER_SNAKE_CASE-Namen haben
+variable-should-be = Die Variable '{$variable}' sollte '{$suggestion}' sein.
 
 constants-interfaces-exp = Interfaces sollten keine Attribute haben
 

@@ -1,5 +1,7 @@
 package de.firemage.autograder.core.integrated;
 
+import com.google.common.base.CaseFormat;
+
 public final class IdentifierNameUtils {
     private IdentifierNameUtils() {
 
@@ -32,10 +34,30 @@ public final class IdentifierNameUtils {
 
     public static boolean isCamelCase(String identifier) {
         for (char c : identifier.toCharArray()) {
-            if (!Character.isAlphabetic(c) || !Character.isDigit(c)) {
+            if (!Character.isAlphabetic(c) && !Character.isDigit(c)) {
                 return false;
             }
         }
         return true;
+    }
+
+    public static String toUpperSnakeCase(String identifier) {
+        return getCaseFormat(identifier).converterTo(CaseFormat.UPPER_UNDERSCORE).convert(identifier);
+    }
+
+    private static CaseFormat getCaseFormat(String identifier) {
+        if (isLowerCamelCase(identifier)) {
+            return CaseFormat.LOWER_CAMEL;
+        }
+
+        if (isUpperCamelCase(identifier)) {
+            return CaseFormat.UPPER_CAMEL;
+        }
+
+        if (isUpperSnakeCase(identifier)) {
+            return CaseFormat.UPPER_UNDERSCORE;
+        }
+
+        throw new IllegalArgumentException("Identifier '%s' is not in a (supported) valid format".formatted(identifier));
     }
 }

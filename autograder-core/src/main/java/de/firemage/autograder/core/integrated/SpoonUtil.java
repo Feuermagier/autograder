@@ -311,6 +311,10 @@ public final class SpoonUtil {
         return isEffectivelyFinal(staticAnalysis.getModel(), ctVariableReference);
     }
 
+    public static boolean isEffectivelyFinal(CtVariableReference<?> ctVariableReference) {
+        return isEffectivelyFinal(ctVariableReference.getFactory().getModel(), ctVariableReference);
+    }
+
     public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
         if (ctVariableReference instanceof CtFieldReference<?> field) {
             if (field.getDeclaringType().isArray() || field.getDeclaringType().isPrimitive()) {

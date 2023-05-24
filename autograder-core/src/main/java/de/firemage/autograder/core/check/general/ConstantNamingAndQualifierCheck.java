@@ -10,33 +10,67 @@ import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtModifiable;
+import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Map;
 import java.util.Set;
 
-@ExecutableCheck(reportedProblems = {ProblemType.CONSTANT_NOT_STATIC_OR_NOT_UPPER_CAMEL_CASE})
+@ExecutableCheck(reportedProblems = {ProblemType.VARIABLE_SHOULD_BE_CONSTANT})
 public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
     private static final Set<String> IGNORE_FIELDS = Set.of("serialVersionUID");
 
-    private static LocalizedMessage formatExplanation(CtField<?> field) {
-        return new LocalizedMessage("constant-naming-qualifier-exp", Map.of(
-            "field", field.getSimpleName(),
-            "class", field.getDeclaringType().getQualifiedName()
-        ));
+    private static String getVisibilityString(CtModifiable ctModifiable) {
+        ModifierKind modifierKind = ctModifiable.getVisibility();
+        if (modifierKind == null) {
+            return "";
+        }
+
+        return modifierKind + " ";
+    }
+
+    private static String makeSuggestion(CtVariable<?> ctVariable) {
+        CtTypeReference<?> ctVariableType = ctVariable.getType();
+
+        return "%sstatic final %s %s = %s".formatted(
+            getVisibilityString(ctVariable),
+            ctVariableType.getSimpleName(),
+            IdentifierNameUtils.toUpperSnakeCase(ctVariable.getSimpleName()),
+            ctVariable.getDefaultExpression().prettyprint()
+        );
     }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
-            public void process(CtField<?> field) {
-                if (field.isFinal()
-                    && (field.getType().unbox().isPrimitive() || SpoonUtil.isString(field.getType()))
-                    && field.getDefaultExpression() != null && !IGNORE_FIELDS.contains(field.getSimpleName())) {
-                    if (!field.isStatic() || !IdentifierNameUtils.isUpperSnakeCase(field.getSimpleName())) {
-                        addLocalProblem(field, formatExplanation(field),
-                            ProblemType.CONSTANT_NOT_STATIC_OR_NOT_UPPER_CAMEL_CASE);
-                    }
+            public void process(CtField<?> ctField) {
+                // skip non-constant fields (and those that should be ignored)
+                if (ctField.isImplicit()
+                    || !ctField.getPosition().isValidPosition()
+                    || !SpoonUtil.isEffectivelyFinal(ctField.getReference())
+                    || ctField.getDefaultExpression() == null
+                    || IGNORE_FIELDS.contains(ctField.getSimpleName())) {
+                    return;
+                }
+
+                // only check primitive types and strings, because other types may be mutable like list
+                // and should therefore not be static, even if they are final
+                if (!ctField.getType().unbox().isPrimitive() && !SpoonUtil.isString(ctField.getType())) {
+                    return;
+                }
+
+                if (!ctField.isStatic() || !IdentifierNameUtils.isUpperSnakeCase(ctField.getSimpleName())) {
+                    addLocalProblem(
+                        ctField,
+                        new LocalizedMessage("variable-should-be", Map.of(
+                            "variable", ctField.getSimpleName(),
+                            "suggestion", makeSuggestion(ctField)
+                        )),
+                        ProblemType.VARIABLE_SHOULD_BE_CONSTANT
+                    );
                 }
             }
         });
