@@ -20,7 +20,7 @@ import java.util.Map;
 import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {
-    ProblemType.VARIABLE_SHOULD_BE_CONSTANT,
+    ProblemType.FIELD_SHOULD_BE_CONSTANT,
     ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
 })
 public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
@@ -77,7 +77,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                             "variable", ctLocalVariable.getSimpleName(),
                             "suggestion", makeSuggestion(ctLocalVariable)
                         )),
-                        ProblemType.VARIABLE_SHOULD_BE_CONSTANT
+                        ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
                     );
 
                     return;
@@ -91,7 +91,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                             "variable", ctField.getSimpleName(),
                             "suggestion", makeSuggestion(ctField)
                         )),
-                        ProblemType.VARIABLE_SHOULD_BE_CONSTANT
+                        ProblemType.FIELD_SHOULD_BE_CONSTANT
                     );
                 }
             }

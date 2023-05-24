@@ -28,11 +28,11 @@ public class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
                     String exampleConstant = "example";
                 }
                 """
-        ), List.of(ProblemType.VARIABLE_SHOULD_BE_CONSTANT));
+        ), List.of(ProblemType.FIELD_SHOULD_BE_CONSTANT));
 
 
         assertEquals(1, problems.size());
-        assertEquals(ProblemType.VARIABLE_SHOULD_BE_CONSTANT, problems.get(0).getProblemType());
+        assertEquals(ProblemType.FIELD_SHOULD_BE_CONSTANT, problems.get(0).getProblemType());
         assertEquals(super.linter.translateMessage(
             new LocalizedMessage(
                 LOCALIZED_MESSAGE_KEY,
@@ -55,11 +55,11 @@ public class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
                     private final int variable = 1;
                 }
                 """
-        ), List.of(ProblemType.VARIABLE_SHOULD_BE_CONSTANT));
+        ), List.of(ProblemType.FIELD_SHOULD_BE_CONSTANT));
 
 
         assertEquals(1, problems.size());
-        assertEquals(ProblemType.VARIABLE_SHOULD_BE_CONSTANT, problems.get(0).getProblemType());
+        assertEquals(ProblemType.FIELD_SHOULD_BE_CONSTANT, problems.get(0).getProblemType());
         assertEquals(super.linter.translateMessage(
                 new LocalizedMessage(
                     LOCALIZED_MESSAGE_KEY,
