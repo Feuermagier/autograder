@@ -311,6 +311,10 @@ public final class SpoonUtil {
         return isEffectivelyFinal(staticAnalysis.getModel(), ctVariableReference);
     }
 
+    public static boolean isEffectivelyFinal(CtVariableReference<?> ctVariableReference) {
+        return isEffectivelyFinal(ctVariableReference.getFactory().getModel(), ctVariableReference);
+    }
+
     public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
         if (ctVariableReference instanceof CtFieldReference<?> field) {
             if (field.getDeclaringType().isArray() || field.getDeclaringType().isPrimitive()) {
@@ -324,6 +328,12 @@ public final class SpoonUtil {
                 .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
                         write.getVariable().equals(ctVariableReference))
                 .first() == null;
+    }
+
+    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
+        CtVariableReference<?> ctVariableReference
+    ) {
+        return getEffectivelyFinalExpression(ctVariableReference.getFactory().getModel(), ctVariableReference);
     }
 
     public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
