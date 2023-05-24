@@ -21,5 +21,7 @@ public class Test {
         this.heyHey = "Hey";
 
         final int numberOfThingsToDo = 4; // Not Ok
+
+        final String someValue = heyHey.substring(0); // Ok, because not a literal
     }
 }

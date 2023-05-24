@@ -331,6 +331,12 @@ public final class SpoonUtil {
     }
 
     public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
+        CtVariableReference<?> ctVariableReference
+    ) {
+        return getEffectivelyFinalExpression(ctVariableReference.getFactory().getModel(), ctVariableReference);
+    }
+
+    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
             CtModel ctModel,
             CtVariableReference<?> ctVariableReference
     ) {

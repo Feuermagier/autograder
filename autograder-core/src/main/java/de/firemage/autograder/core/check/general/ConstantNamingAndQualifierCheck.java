@@ -9,6 +9,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtModifiable;
@@ -28,6 +29,10 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
 
     private static String getVisibilityString(CtModifiable ctModifiable) {
         ModifierKind modifierKind = ctModifiable.getVisibility();
+        if (ctModifiable instanceof CtLocalVariable<?>) {
+            return "private ";
+        }
+
         if (modifierKind == null) {
             return "";
         }
@@ -66,7 +71,8 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (ctVariable instanceof CtLocalVariable<?> ctLocalVariable) {
+                if (ctVariable instanceof CtLocalVariable<?> ctLocalVariable
+                    && SpoonUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression()) instanceof CtLiteral<?>) {
                     // by the check above, ctLocalVariable has a default expression and is effectively final
                     //
                     // this code catches the case where one tries to bypass the checkstyle by doing:
