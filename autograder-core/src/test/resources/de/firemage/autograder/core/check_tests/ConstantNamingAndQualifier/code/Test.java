@@ -19,5 +19,7 @@ public class Test {
     public Test() {
         this.f = -1;
         this.heyHey = "Hey";
+
+        final int numberOfThingsToDo = 4; // Not Ok
     }
 }

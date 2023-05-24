@@ -149,7 +149,7 @@ exception-message-exp = Eine Exception sollte immer eine Nachricht dabei haben, 
 
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
 
-constant-naming-qualifier-exp = Die Konstante '{$field}'  sollte statisch sein und einen UPPER_SNAKE_CASE-Namen haben
+variable-should-be = Die Variable '{$variable}' sollte '{$suggestion}' sein.
 
 constants-interfaces-exp = Interfaces sollten keine Attribute haben
 
@@ -182,8 +182,6 @@ suppress-warnings = @SuppressWarnings unterdrückt Warnungen des Compilers oder 
 scanner-closed = Scanner sollte geschlossen werden
 
 unchecked-type-cast = Es muss sicher gestellt werden, dass der Typ des Objekts mit dem Typ des Casts übereinstimmt. Ansonsten kann der Code abstürzen.
-
-local-variable-should-be-constant = Die Variable sollte ein private static final Attribut sein.
 
 compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglichen werden, nicht als int-Werte.
 
