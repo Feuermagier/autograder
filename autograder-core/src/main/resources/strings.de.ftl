@@ -207,6 +207,8 @@ package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein
                             klein sein. Zudem sollten keine Sonderzeichen auftreten wie '_'. An folgenden Stellen wird das
                             nicht eingehalten: '{$positions}'
 
+variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redundante Zahl am Ende.
+
 # OOP
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
 

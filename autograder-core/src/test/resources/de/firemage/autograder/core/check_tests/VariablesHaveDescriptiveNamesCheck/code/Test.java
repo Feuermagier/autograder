@@ -12,4 +12,6 @@ public class Test {
     int trafficLight1;
     int trafficLight2; // Not Ok (similar to trafficLight1)
     int trafficLight3; // Not Ok (similar to trafficLight1)
+
+    int result1; // Not Ok (could be result)
 }

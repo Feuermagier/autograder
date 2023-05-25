@@ -207,6 +207,8 @@ package-naming-convention = The name of a package should be a single word and al
                             Additionally, no special characters should occur like '_'. The following positions do not
                             adhere to this: '{$positions}'
 
+variable-redundant-number-suffix = The identifier '{$name}' has a redundant number at the end.
+
 # OOP
 concrete-collection-exp = Use the parent interface instead of a concrete collection class (e.g. List instead of ArrayList)
 

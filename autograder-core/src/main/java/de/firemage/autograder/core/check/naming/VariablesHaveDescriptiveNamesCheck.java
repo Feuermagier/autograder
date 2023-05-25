@@ -33,7 +33,8 @@ import java.util.stream.Stream;
     ProblemType.SINGLE_LETTER_LOCAL_NAME,
     ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE,
     ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME,
-    ProblemType.SIMILAR_IDENTIFIER
+    ProblemType.SIMILAR_IDENTIFIER,
+    ProblemType.IDENTIFIER_REDUNDANT_NUMBER_SUFFIX
 })
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
@@ -159,6 +160,29 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         return result;
     }
 
+    private static String removeNumberSuffix(String name) {
+        return name.replaceAll("\\d*$", "");
+    }
+
+    private static boolean hasRedundantNumberSuffix(CtNamedElement ctVariable) {
+        String name = ctVariable.getSimpleName();
+
+        // this tries to detect a variable like result1 that could be renamed to result
+
+        String nameWithoutNumbers = removeNumberSuffix(name);
+        if (nameWithoutNumbers.equals(name) || nameWithoutNumbers.isEmpty()) {
+            return false;
+        }
+
+        // check that the name without numbers is not used by another variable
+        return getSiblings(ctVariable)
+            .stream()
+            .map(CtNamedElement::getSimpleName)
+            // to prevent false-positives with "result1" and "result2"
+            .map(VariablesHaveDescriptiveNamesCheck::removeNumberSuffix)
+            .noneMatch(nameWithoutNumbers::equals);
+    }
+
     private void reportProblem(String key, CtNamedElement ctVariable, ProblemType problemType) {
         this.addLocalProblem(
             ctVariable,
@@ -195,6 +219,12 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                         "variable-name-type-in-name",
                         ctVariable,
                         ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME
+                    );
+                } else if (hasRedundantNumberSuffix(ctVariable)) {
+                    reportProblem(
+                        "variable-redundant-number-suffix",
+                        ctVariable,
+                        ProblemType.IDENTIFIER_REDUNDANT_NUMBER_SUFFIX
                     );
                 } else if (!similarIdentifier.contains(ctVariable.getSimpleName())) {
                     for (CtNamedElement sibling : getSiblings(ctVariable)) {
