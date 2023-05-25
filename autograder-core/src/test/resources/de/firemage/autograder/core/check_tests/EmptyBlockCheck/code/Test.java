@@ -68,3 +68,16 @@ public class Test {
         } catch (Exception e) {} // Not Ok
     }
 }
+
+final class UtilityClass {
+    private UtilityClass() {} // Ok
+
+    private static void foo() {
+        System.out.println("foo");
+    }
+}
+
+class NormalClass {
+    NormalClass() {
+    } // Ok (covered by RedundantConstructorCheck)
+}
