@@ -76,4 +76,17 @@ class TestPackageNamingConvention extends AbstractCheckTest {
             this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
+
+    @Test
+    void testFalsePositive01() throws IOException, LinterException  {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                dummySourceEntry("edu.kit", "Test"),
+                dummySourceEntry("edu.kit.informatik", "Main")
+            )
+        ), List.of(ProblemType.PACKAGE_NAMING_CONVENTION));
+
+        assertEquals(0, problems.size());
+    }
 }
