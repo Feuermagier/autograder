@@ -20,13 +20,17 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group");
 
-    private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol");
+    private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol", "compare");
     private static final Map<String, List<String>> SPECIAL_VALUE_MAPPING = Map.ofEntries(
             Map.entry("->", List.of("arrow")),
             Map.entry("-->", List.of("arrow"))
     );
 
     private static boolean isNonDescriptiveIntegerName(String name, int value) {
+        if (NON_DESCRIPTIVE_NAMES.contains(name.toLowerCase())) {
+            return true;
+        }
+
         List<String> valueNameOptions = switch (value) {
             case 0 -> List.of("zero", "null", "zeroth", "first");
             case -1 -> List.of("minusone", "minus_one", "negative_one", "negativone", "neg_one", "negone");
@@ -65,9 +69,9 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
 
     private static List<String> listCharOptions(char c) {
         return switch (c) {
-            case ' ' -> List.of("space", "whitespace", "white_space");
-            case ',' -> List.of("comma");
-            case '.' -> List.of("point", "dot", "fullstop", "full_stop");
+            case ' ' -> List.of("space", "whitespace", "white_space", "empty", "blank");
+            case ',' -> List.of("comma", "punctuation");
+            case '.' -> List.of("point", "dot", "fullstop", "full_stop", "punctuation");
             case '-' -> List.of("minus", "hyphen", "dash", "line");
             case ':' -> List.of("colon");
             case ';' -> List.of("semi_colon", "semicolon");
