@@ -34,7 +34,7 @@ public abstract class AbstractCheckTest {
         List<ProblemType> problemTypes
     ) throws LinterException, IOException {
         return this.linter.checkFile(
-            UploadedFile.build(sourceInfo, this.tempLocation.toPath(), status -> {
+            UploadedFile.build(sourceInfo, this.tempLocation, status -> {
             }, null),
             null,
             new ArrayList<>(problemTypes),

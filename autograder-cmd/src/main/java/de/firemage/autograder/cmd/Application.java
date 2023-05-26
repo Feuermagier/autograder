@@ -35,6 +35,7 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
+import java.util.stream.Stream;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
         description = "Static code analysis for student java code")
@@ -76,6 +77,12 @@ public class Application implements Callable<Integer> {
     @Spec
     private CommandSpec spec;
 
+    private final TempLocation tempLocation;
+
+    public Application(TempLocation tempLocation) {
+        this.tempLocation = tempLocation;
+    }
+
     public static void main(String... args) {
         System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
         int exitCode = runApplication(args);
@@ -84,7 +91,12 @@ public class Application implements Callable<Integer> {
 
     // Useful for testing
     public static int runApplication(String... args) {
-        return new CommandLine(new Application()).execute(args);
+        // to automatically delete the temp location on exit
+        try (TempLocation tempLocation = TempLocation.of("tmp")) {
+            return new CommandLine(new Application(tempLocation)).execute(args);
+        } catch (IOException exception) {
+            throw new IllegalArgumentException("Could not create temp location", exception);
+        }
     }
 
     @Override
@@ -93,9 +105,9 @@ public class Application implements Callable<Integer> {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
 
-        if (artemisFolders) {
-            try {
-                file = Files.list(file)
+        if (this.artemisFolders) {
+            try (Stream<Path> files = Files.list(this.file)) {
+                this.file = files
                         .filter(child -> !child.endsWith(".metadata"))
                         .findAny()
                         .orElseThrow(() -> new IllegalStateException("No student code found"))
@@ -129,18 +141,21 @@ public class Application implements Callable<Integer> {
             return IO_EXIT_CODE;
         }
 
-        TempLocation tempLocation = this.getTmpDirectory();
         Linter linter = Linter.builder(Locale.GERMANY)
             .threads(0)
-            .tempLocation(tempLocation)
+            .tempLocation(this.tempLocation)
             .enableDynamicAnalysis(isDynamicAnalysisEnabled)
             .build();
 
         Consumer<LinterStatus> statusConsumer = status ->
                 System.out.println(linter.translateMessage(status.getMessage()));
 
-        try (UploadedFile uploadedFile = UploadedFile.build(file,
-                JavaVersion.fromString(this.javaVersion), tempLocation.toPath(), statusConsumer, null)) {
+        try (UploadedFile uploadedFile = UploadedFile.build(
+                file,
+                JavaVersion.fromString(this.javaVersion),
+                this.tempLocation,
+                statusConsumer,
+            null)) {
 
             if (outputJson) {
                 List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
@@ -169,10 +184,6 @@ public class Application implements Callable<Integer> {
         }
 
         return 0;
-    }
-
-    private TempLocation getTmpDirectory() {
-        return TempLocation.fromPath(Path.of("tmp"));
     }
 
     private void printProblems(List<Problem> problems, Linter linter) {

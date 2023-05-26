@@ -19,6 +19,10 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
         return new TempLocation(path.toFile());
     }
 
+    public static TempLocation of(String first, String... other) {
+        return TempLocation.fromPath(Path.of(first, other));
+    }
+
     public static TempLocation random() {
         try {
             return TempLocation.fromPath(Files.createTempDirectory("random"));

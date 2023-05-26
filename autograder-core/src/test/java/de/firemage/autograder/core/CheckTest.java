@@ -115,7 +115,7 @@ public class CheckTest {
                     var file = UploadedFile.build(
                         testInput.path().resolve("code"),
                         JavaVersion.JAVA_17,
-                        tmpDirectory.toPath(), status -> {
+                        tmpDirectory, status -> {
                         }, null
                     );
                     var linter = Linter.builder(Locale.US)
