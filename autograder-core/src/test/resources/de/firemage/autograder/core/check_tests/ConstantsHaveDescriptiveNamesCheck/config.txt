@@ -17,3 +17,5 @@ Test.java:19
 Test.java:21
 Test.java:22
 Test.java:23
+Test.java:24
+Test.java:25
