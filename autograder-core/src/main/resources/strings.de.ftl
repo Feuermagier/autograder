@@ -124,6 +124,8 @@ redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direk
 
 redundant-array-init = Die Zuweisung zu dem array ist unnötig und kann entfernt werden.
 
+redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, aber der Wert '{$value}' wird nicht direkt zugewiesen. Schreibe stattdessen '{$suggestion}'.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,

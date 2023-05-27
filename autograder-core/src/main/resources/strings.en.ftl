@@ -125,6 +125,9 @@ redundant-catch = An exception should not be caught and then rethrown immediatel
 
 redundant-array-init = The assignment to the array is unnecessary and can be removed.
 
+redundant-uninitialized-variable = The variable '{$variable}' has been declared, but the value '{$value}' is not directly assigned. Instead you should write '{$suggestion}'.
+
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
