@@ -46,7 +46,8 @@ class TestLocalizedStrings {
             "variable-name-single-letter",
             "variable-name-type",
             "variable-name-type-in-name",
-            "similar-identifier"
+            "similar-identifier",
+            "variable-redundant-number-suffix"
         )
     );
 
