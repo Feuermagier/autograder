@@ -386,6 +386,10 @@ public final class SpoonUtil {
         return type.getDeclaringType() != null;
     }
 
+    public static boolean isInnerClass(CtTypeReference<?> ctTypeReference) {
+        return ctTypeReference.getDeclaringType() != null;
+    }
+
     public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
         // if the method is defined for the first time, this should return an empty collection
         return !ctMethod.getTopDefinitions().isEmpty();
