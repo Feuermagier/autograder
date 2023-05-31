@@ -5,3 +5,5 @@ Test.java:21
 Test.java:26
 Test.java:27
 Test.java:28
+Test.java:32
+Test.java:40

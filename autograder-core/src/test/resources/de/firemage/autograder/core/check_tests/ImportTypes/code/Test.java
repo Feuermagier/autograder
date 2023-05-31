@@ -26,4 +26,26 @@ class TestContainers {
     private java.util.Scanner[] scanners; // Not Ok - import java.util.Scanner
     private List<java.lang.Integer> integers; // Not Ok - import java.lang.Integer
     private java.lang.Double[][] doubles; // Not Ok - import java.lang.Double
+
+    private void foo(String... varargs) {} // Ok
+
+    private void bar(java.lang.String... varargs) {} // Not Ok - import java.lang.String
+}
+
+class VisualRepresentation {
+    VisualRepresentation(String... lines) { // Ok
+        var stream = Arrays.stream(lines); // Ok
+    }
+
+    VisualRepresentation(java.lang.Integer... values) { // Not Ok
+    }
+
+    private void call(String... varargs) { // Ok
+        takesArray(new String[] {"Hello", "World"}); // Ok
+        String[] array = varargs; // Ok
+        takesArray(array); // Ok
+        takesArray(varargs); // Ok (there is an implicit cast to Object[])
+    }
+
+    private <T> void takesArray(T[] array) {} // Ok
 }
