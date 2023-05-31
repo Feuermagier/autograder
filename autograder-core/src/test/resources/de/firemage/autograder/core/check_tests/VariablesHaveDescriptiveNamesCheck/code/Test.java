@@ -14,4 +14,22 @@ public class Test {
     int trafficLight3; // Not Ok (similar to trafficLight1)
 
     int result1; // Not Ok (could be result)
+
+    int sec; // Not Ok
+    int min; // Not Ok
+}
+
+enum Month {
+    JANUARY,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY,
+    JUNE, // Ok
+    JULY, // Ok
+    AUGUST,
+    SEPTEMBER,
+    OCTOBER,
+    NOVEMBER,
+    DECEMBER
 }

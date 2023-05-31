@@ -44,7 +44,7 @@ class TestLocalizedStrings {
         ),
         de.firemage.autograder.core.check.naming.VariablesHaveDescriptiveNamesCheck.class, List.of(
             "variable-name-single-letter",
-            "variable-name-type",
+            "variable-is-abbreviation",
             "variable-name-type-in-name",
             "similar-identifier",
             "variable-redundant-number-suffix"

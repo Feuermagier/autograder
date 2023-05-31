@@ -44,6 +44,14 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         "string", "list", "array", "map", "set", "int", "long", "float"
     );
 
+    private static final Set<String> KNOWN_ABBREVIATIONS = Set.of(
+        "sec", "min"
+    );
+
+    private static final Set<String> ALLOWED_SIMILAR_IDENTIFER = Set.of(
+        "july", "june"
+    );
+
     private final Set<String> similarIdentifier = new HashSet<>();
 
     private static boolean hasTypeInName(CtNamedElement ctVariable) {
@@ -65,7 +73,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
             && SpoonUtil.isPrimitiveNumeric(variable.getType());
     }
 
-    private static boolean isTypeAbbreviation(CtVariable<?> variable) {
+    private static boolean isAbbreviation(CtVariable<?> variable) {
+        if (KNOWN_ABBREVIATIONS.contains(variable.getSimpleName())) {
+            return true;
+        }
+
         if (variable.getType().isPrimitive()) {
             return false;
         }
@@ -120,6 +132,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private static boolean areSimilar(CtNamedElement variable, CtNamedElement other) {
+        if (ALLOWED_SIMILAR_IDENTIFER.contains(variable.getSimpleName().toLowerCase())
+            || ALLOWED_SIMILAR_IDENTIFER.contains(other.getSimpleName().toLowerCase())) {
+            return false;
+        }
+
         return similarity(variable, other) <= 2;
     }
 
@@ -212,8 +229,8 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     && !isAllowedLoopCounter(ctVariable)
                     && !isCoordinate(ctVariable)) {
                     reportProblem("variable-name-single-letter", ctVariable, ProblemType.SINGLE_LETTER_LOCAL_NAME);
-                } else if (isTypeAbbreviation(ctVariable)) {
-                    reportProblem("variable-name-type", ctVariable, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
+                } else if (isAbbreviation(ctVariable)) {
+                    reportProblem("variable-is-abbreviation", ctVariable, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
                 } else if (hasTypeInName(ctVariable)) {
                     reportProblem(
                         "variable-name-type-in-name",
