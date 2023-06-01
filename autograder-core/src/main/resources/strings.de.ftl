@@ -191,6 +191,8 @@ use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispie
 
 import-types = Statt den Pfad zum Typ anzugeben, sollte '{$type}' importiert werden. Datentypen aus dem selben Paket oder 'java.lang' müssen nicht explizit importiert werden.
 
+use-different-visibility = Die Sichtbarkeit von '{$name}' sollte '{$suggestion}' sein.
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 

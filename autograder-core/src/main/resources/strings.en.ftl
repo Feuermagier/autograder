@@ -192,6 +192,8 @@ use-guard-clauses = The code cancels the normal control-flow through for example
 
 import-types = Instead of qualifying the type, '{$type}' should be imported. Types from the same package or 'java.lang' do not have to be imported explicitly.
 
+use-different-visibility = The visibility of '{$name}' should be '{$suggestion}'.
+
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.
 
