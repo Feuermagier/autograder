@@ -25,7 +25,6 @@ import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtFieldReference;
@@ -396,7 +395,7 @@ public final class SpoonUtil {
         return !ctMethod.getTopDefinitions().isEmpty();
     }
 
-    public static boolean isInOverriddenMethodSignature(CtElement ctElement) {
+    public static boolean isInOverriddenMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
             return false;

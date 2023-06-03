@@ -15,7 +15,6 @@ import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtField;
-import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
@@ -39,7 +38,6 @@ import java.util.stream.Stream;
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
 
-    private static final Set<String> ALLOWED_OBJ_NAMES_IN_EQUALS = Set.of("o", "obj", "other", "object");
     private static final List<String> TYPE_NAMES = List.of(
         "string", "list", "array", "map", "set", "int", "long", "float"
     );
@@ -218,10 +216,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (ALLOWED_OBJ_NAMES_IN_EQUALS.contains(ctVariable.getSimpleName())
-                    && ctVariable.getParent() instanceof CtMethod<?> method
-                    && (SpoonUtil.isEqualsMethod(method) || SpoonUtil.isCompareToMethod(method))) {
+                if (SpoonUtil.isInOverriddenMethod(ctVariable)) {
                     // The parameter of the equals and compareTo methods may be named "o", "obj", ...
+                    //
+                    // skip all overridden methods for consistency
                     return;
                 }
 
