@@ -7,24 +7,23 @@ import spoon.compiler.ModelBuildingException;
 import spoon.processing.AbstractProcessor;
 import spoon.processing.Processor;
 import spoon.reflect.CtModel;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
+import spoon.reflect.visitor.filter.NamedElementFilter;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
-import java.util.List;
 
 /**
  * The model is build lazily to work better with the multithreaded core architecture.
  */
-public class CodeModel implements AutoCloseable {
+public final class CodeModel implements AutoCloseable {
     private final SourceInfo file;
     private final Path jar;
     private final ClassLoader userClassLoader;
@@ -75,38 +74,14 @@ public class CodeModel implements AutoCloseable {
         this.model.processWith(processor);
     }
 
-    public CtClass<?> findClassByName(String name) {
-        this.buildModelMaybe();
-        CtClass<?> clazz = this.model.filterChildren(
-                child -> child instanceof CtClass<?> c && c.getQualifiedName().equals(name)).first();
-        if (clazz == null) {
-            throw new IllegalArgumentException("No class with name '" + name + "' found");
-        }
-        return clazz;
-    }
-
-    public CtMethod<?> findMethodBySignature(CtClass<?> clazz, String signature) {
-        this.buildModelMaybe();
-        CtMethod<?> result = this.model.filterChildren(
-                child -> child instanceof CtMethod<?> method && method.getSignature().equals(signature)).first();
-        if (result == null) {
-            throw new IllegalArgumentException(
-                    "No method in class " + clazz.getQualifiedName() + " with signature '" + signature + "' found");
-        }
-        return result;
-    }
-
+    @SuppressWarnings("unchecked")
     public CtMethod<Void> findMain() {
         this.buildModelMaybe();
-        return this.model.filterChildren(child -> child instanceof CtMethod<?> method && SpoonUtil.isMainMethod(method))
-                .map(c -> (CtMethod<Void>) c)
-                .first();
-    }
-
-    public List<String> getAllPackageNames() {
-        this.buildModelMaybe();
-        return this.model.filterChildren(c -> c instanceof CtPackage).map(p -> ((CtPackage) p).getQualifiedName())
-                .list();
+        return this.getModel()
+            .getElements(new NamedElementFilter<>(CtMethod.class, "main"))
+            .stream()
+            .filter(SpoonUtil::isMainMethod)
+            .findFirst().orElse(null);
     }
 
     public CtPackage getBasePackage() {

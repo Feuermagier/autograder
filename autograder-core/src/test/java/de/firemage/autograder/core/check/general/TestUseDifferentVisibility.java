@@ -10,6 +10,7 @@ import de.firemage.autograder.core.compiler.JavaVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -199,5 +200,112 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 )),
             super.linter.translateMessage(problems.get(0).getExplanation())
         );
+    }
+
+    @Test
+    void testMainMethod() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {}
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+
+        assertEquals(0, problems.size());
+    }
+
+    @Test
+    void testMethodVisibility() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public void foo() {} // Not Ok
+                        
+                        void bar() {} // Not Ok
+                        
+                        private void baz() {} // Ok
+                        
+                        void a() {} // Not Ok
+
+                        private void b() {
+                            a();
+                        }
+                        
+                        public void c() {} // Not Ok
+                        
+                        void d() {} // Ok
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Other",
+                    """
+                    public class Other {
+                        private void call() {
+                            Main main = new Main();
+                            main.c();
+                            main.d();
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        Map<String, String> expected = new LinkedHashMap<>();
+        expected.put("foo", "private");
+        expected.put("bar", "private");
+        expected.put("a", "private");
+        expected.put("c", "default");
+
+        int i = 0;
+        for (var entry : expected.entrySet()) {
+            assertEquals(
+                super.linter.translateMessage(
+                    new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of(
+                            "name", entry.getKey(),
+                            "suggestion", entry.getValue()
+                        )
+                    )),
+                super.linter.translateMessage(problems.get(i).getExplanation())
+            );
+            i += 1;
+        }
+    }
+
+    @Test
+    void testOverriddenMethod() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        @Override
+                        public boolean equals(Object other) {
+                            return true;
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertEquals(0, problems.size());
     }
 }

@@ -7,10 +7,13 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
@@ -58,14 +61,17 @@ public class UseDifferentVisibility extends IntegratedCheck {
         // CtElement::hasParent will recursively call itself until it reaches the root
         // => inefficient and might cause a stack overflow
 
+        // add all parents of the firstElement to a set sorted by distance to the firstElement:
         Set<CtElement> ctParents = new LinkedHashSet<>();
         ctParents.add(firstElement);
         parents(firstElement).forEach(ctParents::add);
 
         for (CtElement other : others) {
+            // only keep the parents that the firstElement and the other have in common
             ctParents.retainAll(Sets.newHashSet(parents(other).iterator()));
         }
 
+        // the first element in the set is the closest common parent
         return ctParents.iterator().next();
     }
 
@@ -106,7 +112,16 @@ public class UseDifferentVisibility extends IntegratedCheck {
         CtElement commonParent = findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
 
+        // if there are no references, the member itself will be returned
         if (ctTypeMember == commonParent) {
+            return Visibility.PRIVATE;
+        }
+
+        // if all references are in the same type as the member, it can be private
+        if (commonParent instanceof CtType<?> ctType
+            && (ctType.equals(declaringType)
+            // special case for inner classes
+            || ctTypeMember.getTopLevelType().equals(ctType))) {
             return Visibility.PRIVATE;
         }
 
@@ -119,53 +134,54 @@ public class UseDifferentVisibility extends IntegratedCheck {
             return Visibility.PUBLIC;
         }
 
-        // if all they share a common parent type, and it is declared there as well, it should be private
-        if (commonParent instanceof CtType<?> ctType
-            && (ctType.equals(declaringType)
-            // special case for inner classes
-            || ctTypeMember.getTopLevelType().equals(ctType))) {
-            return Visibility.PRIVATE;
-        }
-
         return Visibility.of(ctTypeMember);
     }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
+        staticAnalysis.processWith(new AbstractProcessor<CtTypeMember>() {
             @Override
-            public <T> void visitCtField(CtField<T> ctField) {
-                if (!ctField.getPosition().isValidPosition()
-                    || ctField.isImplicit()
-                    || ctField.isPrivate()) {
-                    super.visitCtField(ctField);
+            public void process(CtTypeMember ctTypeMember) {
+                if (!ctTypeMember.getPosition().isValidPosition()
+                    || ctTypeMember.isImplicit()
+                    || ctTypeMember.isPrivate()) {
                     return;
                 }
 
-                Visibility currentVisibility = Visibility.of(ctField);
-                Visibility visibility = getVisibility(ctField, ctField.getType());
+                Visibility currentVisibility = Visibility.of(ctTypeMember);
+                Visibility visibility;
+                if (ctTypeMember instanceof CtField<?> ctField) {
+                    visibility = getVisibility(ctTypeMember, ctField.getType());
+                } else if (ctTypeMember instanceof CtMethod<?> ctMethod) {
+                    if (SpoonUtil.isMainMethod(ctMethod) || SpoonUtil.isOverriddenMethod(ctMethod)) {
+                        return;
+                    }
+
+                    visibility = getVisibility(ctTypeMember, ctMethod.getReference());
+                } else {
+                    return;
+                }
+
                 if (visibility.isMoreRestrictiveThan(currentVisibility)) {
-                    // it does not make sense to subtract for public things that should be default visibility
-                    // so they are emitted as a different problem type
+                    // it does not make sense to deduct for public things that should be default visibility,
+                    // so they are emitted as a different problem type (pedantic)
                     ProblemType problemType = ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC;
                     if (visibility == Visibility.PRIVATE) {
                         problemType = ProblemType.USE_DIFFERENT_VISIBILITY;
                     }
 
                     addLocalProblem(
-                        ctField,
+                        ctTypeMember,
                         new LocalizedMessage(
                             "use-different-visibility",
                             Map.of(
-                                "name", ctField.getSimpleName(),
+                                "name", ctTypeMember.getSimpleName(),
                                 "suggestion", visibility.toString()
                             )
                         ),
                         problemType
                     );
                 }
-
-                super.visitCtField(ctField);
             }
         });
     }
