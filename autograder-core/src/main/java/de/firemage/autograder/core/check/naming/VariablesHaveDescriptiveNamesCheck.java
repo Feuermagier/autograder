@@ -20,6 +20,7 @@ import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
+import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -55,7 +56,14 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static boolean hasTypeInName(CtNamedElement ctVariable) {
         String name = ctVariable.getSimpleName().toLowerCase();
 
-        return TYPE_NAMES.stream().anyMatch(ty -> name.contains(ty) && !name.equals(ty));
+        List<String> referencedTypeNames = ctVariable.getReferencedTypes()
+            .stream()
+            .map(CtTypeReference::getSimpleName)
+            .map(String::toLowerCase)
+            .filter(TYPE_NAMES::contains)
+            .toList();
+
+        return referencedTypeNames.stream().anyMatch(ty -> name.contains(ty) && !name.equals(ty));
     }
 
     private static boolean isLambdaParameter(CtVariable<?> variable) {
@@ -227,21 +235,33 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     && !isAllowedLoopCounter(ctVariable)
                     && !isCoordinate(ctVariable)) {
                     reportProblem("variable-name-single-letter", ctVariable, ProblemType.SINGLE_LETTER_LOCAL_NAME);
-                } else if (isAbbreviation(ctVariable)) {
+                    return;
+                }
+
+                if (isAbbreviation(ctVariable)) {
                     reportProblem("variable-is-abbreviation", ctVariable, ProblemType.IDENTIFIER_IS_ABBREVIATED_TYPE);
-                } else if (hasTypeInName(ctVariable)) {
+                    return;
+                }
+
+                if (hasTypeInName(ctVariable)) {
                     reportProblem(
                         "variable-name-type-in-name",
                         ctVariable,
                         ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME
                     );
-                } else if (hasRedundantNumberSuffix(ctVariable)) {
+                    return;
+                }
+
+                if (hasRedundantNumberSuffix(ctVariable)) {
                     reportProblem(
                         "variable-redundant-number-suffix",
                         ctVariable,
                         ProblemType.IDENTIFIER_REDUNDANT_NUMBER_SUFFIX
                     );
-                } else if (!similarIdentifier.contains(ctVariable.getSimpleName())) {
+                    return;
+                }
+
+                if (!similarIdentifier.contains(ctVariable.getSimpleName())) {
                     for (CtNamedElement sibling : getSiblings(ctVariable)) {
                         if (areSimilar(ctVariable, sibling) && !similarIdentifier.contains(sibling.getSimpleName())) {
                             addLocalProblem(
@@ -262,6 +282,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                             similarIdentifier.add(sibling.getSimpleName());
                         }
                     }
+                    return;
                 }
             }
         });

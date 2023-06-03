@@ -17,6 +17,11 @@ public class Test {
 
     int sec; // Not Ok
     int min; // Not Ok
+
+    int interpret; // Not Ok
+    String interpreters; // Ok
+    List<String> validStrings; // Not Ok
+    Set<Integer> integerSet; // Not Ok
 }
 
 enum Month {
