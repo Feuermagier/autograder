@@ -19,8 +19,6 @@ import spoon.reflect.reference.CtReference;
 import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
-import java.util.Collection;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -28,7 +26,10 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Set;
 
-@ExecutableCheck(reportedProblems = { ProblemType.USE_DIFFERENT_VISIBILITY })
+@ExecutableCheck(reportedProblems = {
+    ProblemType.USE_DIFFERENT_VISIBILITY,
+    ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC
+})
 public class UseDifferentVisibility extends IntegratedCheck {
     // returns all parents of a CtElement
     private static Iterable<CtElement> parents(CtElement ctElement) {
@@ -51,10 +52,6 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 return result;
             }
         };
-    }
-
-    private static <T> Iterable<T> chain(Iterable<? extends T> first, Iterable<? extends T> second) {
-        return () -> Iterators.concat(first.iterator(), second.iterator());
     }
 
     private static CtElement findCommonParent(CtElement firstElement, Iterable<? extends CtElement> others) {
@@ -148,6 +145,13 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 Visibility currentVisibility = Visibility.of(ctField);
                 Visibility visibility = getVisibility(ctField, ctField.getType());
                 if (visibility.isMoreRestrictiveThan(currentVisibility)) {
+                    // it does not make sense to subtract for public things that should be default visibility
+                    // so they are emitted as a different problem type
+                    ProblemType problemType = ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC;
+                    if (visibility == Visibility.PRIVATE) {
+                        problemType = ProblemType.USE_DIFFERENT_VISIBILITY;
+                    }
+
                     addLocalProblem(
                         ctField,
                         new LocalizedMessage(
@@ -157,7 +161,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                                 "suggestion", visibility.toString()
                             )
                         ),
-                        ProblemType.USE_DIFFERENT_VISIBILITY
+                        problemType
                     );
                 }
 

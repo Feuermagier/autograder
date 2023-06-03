@@ -18,6 +18,8 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestUseDifferentVisibility extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "use-different-visibility";
     private static final ProblemType PROBLEM_TYPE = ProblemType.USE_DIFFERENT_VISIBILITY;
+    private static final ProblemType PROBLEM_TYPE_PEDANTIC = ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC;
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(PROBLEM_TYPE, PROBLEM_TYPE_PEDANTIC);
 
     @Test
     void testNoOtherReferences() throws LinterException, IOException {
@@ -33,7 +35,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                 )
             )
-        ), List.of(PROBLEM_TYPE));
+        ), PROBLEM_TYPES);
 
 
         assertEquals(1, problems.size());
@@ -76,7 +78,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                 )
             )
-        ), List.of(PROBLEM_TYPE));
+        ), PROBLEM_TYPES);
 
 
         assertEquals(0, problems.size());
@@ -110,7 +112,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                 )
             )
-        ), List.of(PROBLEM_TYPE));
+        ), PROBLEM_TYPES);
 
 
         assertEquals(0, problems.size());
@@ -141,7 +143,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                 )
             )
-        ), List.of(PROBLEM_TYPE));
+        ), PROBLEM_TYPES);
 
 
         assertEquals(1, problems.size());
@@ -181,7 +183,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                 )
             )
-        ), List.of(PROBLEM_TYPE));
+        ), PROBLEM_TYPES);
 
 
         assertEquals(1, problems.size());
