@@ -132,6 +132,8 @@ redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, 
 
 multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen. Also keine Deklarationen von mehreren Variablen oder Zuweisungen in einer Zeile.
 
+unnecessary-boxing = Statt dem boxed-type sollte man '{$suggestion}' verwenden.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,

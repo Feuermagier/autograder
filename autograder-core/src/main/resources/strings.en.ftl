@@ -135,6 +135,8 @@ merge-nested-if = The nested if can be combined with the outer if. The condition
 
 multiple-inline-statements = There should not be multiple statements in a single line. So no declarations of multiple variables or assignments in the same line.
 
+unnecessary-boxing = Instead of the boxed-type one should use '{$suggestion}'.
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.

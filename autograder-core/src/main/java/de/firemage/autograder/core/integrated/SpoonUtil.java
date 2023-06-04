@@ -65,7 +65,7 @@ public final class SpoonUtil {
     }
 
     public static boolean isNullLiteral(CtExpression<?> expression) {
-        return expression instanceof CtLiteral<?> literal && literal.getValue() == null;
+        return SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal && literal.getValue() == null;
     }
 
     public static boolean isIntegerLiteral(CtExpression<?> expression, int value) {
