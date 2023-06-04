@@ -34,7 +34,8 @@ public class AvoidRecompilingRegex extends IntegratedCheck {
             public void process(CtField<String> ctField) {
                 if (ctField.isImplicit()
                     || !ctField.getPosition().isValidPosition()
-                    || !SpoonUtil.isTypeEqualTo(ctField.getType(), String.class)) {
+                    || !SpoonUtil.isTypeEqualTo(ctField.getType(), String.class)
+                    || ctField.getDefaultExpression() == null) {
                     return;
                 }
 
