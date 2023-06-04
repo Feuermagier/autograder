@@ -16,6 +16,8 @@ linter-pmd = PMD
 linter-integrated = Integrated Analysis
 linter-error-prone = error-prone
 
+merged-problems = {$message} Other problems in {$locations}.
+
 # CPD
 duplicate-code = Duplicated code ({$lines}): {$first-path}:{$first-start}-{$first-end} and {$second-path}:{$second-start}-{$second-end}
 
@@ -115,6 +117,8 @@ repeated-math-operation-plus = Use a multiplication with {$count} instead of add
 
 redundant-neg-exp = '{$original}' should be written as '{$fixed}'
 
+redundant-boolean-equal = It is redundant to explicitly check if a condition equals true or false. Write instead '{$suggestion}'.
+
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
 
 merge-else-if = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
@@ -124,6 +128,14 @@ complex-regex = Nontrivial regex need an explanation (score is {$score}, max all
 redundant-catch = An exception should not be caught and then rethrown immediately.
 
 redundant-array-init = The assignment to the array is unnecessary and can be removed.
+
+redundant-uninitialized-variable = The variable '{$variable}' has been declared, but the value '{$value}' is not directly assigned. Instead you should write '{$suggestion}'.
+
+merge-nested-if = The nested if can be combined with the outer if. The condition for the outer if should then be '{$suggestion}'.
+
+multiple-inline-statements = There should not be multiple statements in a single line. So no declarations of multiple variables or assignments in the same line.
+
+unnecessary-boxing = Instead of the boxed-type one should use '{$suggestion}'.
 
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
@@ -187,6 +199,12 @@ compare-char-value = char values in the ASCII range should be compared as char v
 
 use-guard-clauses = The code cancels the normal control-flow through for example a return. if-else-blocks with those conditions can be written more beautifully using so called guard-clauses. This has the advantage that you can better recognize duplicate code. See for a detailed explanation https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a or https://deviq.com/design-patterns/guard-clause
 
+import-types = Instead of qualifying the type, '{$type}' should be imported. Types from the same package or 'java.lang' do not have to be imported explicitly.
+
+use-different-visibility = The visibility of '{$name}' should be '{$suggestion}'.
+
+avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'Pattern.matches'. Convert the constant to a pattern with the value '{$suggestion}'.
+
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.
 
@@ -196,7 +214,7 @@ constants-name-exp-value = The value '{$value}' of the constant '{$name}' should
 linguistic-desc = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 
 variable-name-single-letter = Single letter names such as '{$name}' are usually non-descriptive
-variable-name-type = Don't use unnecessary abbreviations such as '{$name}'
+variable-is-abbreviation = Don't use unnecessary abbreviations such as '{$name}'
 variable-name-type-in-name = The identifier '{$name}' should not contain its type in the name.
 similar-identifier = The identifier '{$left}' is very similar to '{$right}'. This can lead to confusion and typos, which is why it should be renamed.
 
@@ -206,6 +224,8 @@ type-has-descriptive-name-exception = A class that inherits from Exception shoul
 package-naming-convention = The name of a package should be a single word and all letters should be lowercase by convention.
                             Additionally, no special characters should occur like '_'. The following positions do not
                             adhere to this: '{$positions}'
+
+variable-redundant-number-suffix = The identifier '{$name}' has a redundant number at the end.
 
 # OOP
 concrete-collection-exp = Use the parent interface instead of a concrete collection class (e.g. List instead of ArrayList)

@@ -2,28 +2,37 @@ package de.firemage.autograder.core.pmd;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.Translatable;
 import de.firemage.autograder.core.check.Check;
 import net.sourceforge.pmd.Rule;
+import net.sourceforge.pmd.RuleViolation;
 import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.lang.LanguageRegistry;
-import net.sourceforge.pmd.lang.rule.XPathRule;
-import net.sourceforge.pmd.lang.rule.xpath.XPathVersion;
 
 import java.util.List;
+import java.util.function.Function;
 
 public abstract class PMDCheck implements Check {
     private static final Language JAVA_LANGUAGE = LanguageRegistry.PMD.getLanguageById("java");
     private final List<Rule> rules;
 
-    private final LocalizedMessage explanation;
+    private Function<RuleViolation, Translatable> explanation;
 
     private final ProblemType problemType;
 
-    protected PMDCheck(LocalizedMessage explanation, Rule rule, ProblemType problemType) {
+    protected PMDCheck(Translatable explanation, Rule rule, ProblemType problemType) {
+        this((RuleViolation violation) -> explanation, List.of(rule), problemType);
+    }
+
+    protected PMDCheck(Function<RuleViolation, Translatable> explanation, Rule rule, ProblemType problemType) {
         this(explanation, List.of(rule), problemType);
     }
 
-    protected PMDCheck(LocalizedMessage explanation, List<Rule> rules, ProblemType problemType) {
+    protected PMDCheck(Translatable explanation, List<Rule> rules, ProblemType problemType) {
+        this((RuleViolation violation) -> explanation, rules, problemType);
+    }
+
+    protected PMDCheck(Function<RuleViolation, Translatable> explanation, List<Rule> rules, ProblemType problemType) {
         this.explanation = explanation;
         this.rules = rules;
         this.problemType = problemType;
@@ -39,14 +48,6 @@ public abstract class PMDCheck implements Check {
         }
     }
 
-    protected static XPathRule createXPathRule(String name, String explanation, String expression) {
-        XPathRule rule = new XPathRule(XPathVersion.XPATH_3_1, expression);
-        rule.setName(name);
-        rule.setMessage(explanation);
-        rule.setLanguage(JAVA_LANGUAGE);
-        return rule;
-    }
-
     @Override
     public LocalizedMessage getLinter() {
         return new LocalizedMessage("linter-pmd");
@@ -56,7 +57,7 @@ public abstract class PMDCheck implements Check {
         return rules;
     }
 
-    public LocalizedMessage getExplanation() {
+    public Function<RuleViolation, Translatable> getExplanation() {
         return explanation;
     }
 

@@ -19,13 +19,16 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
+import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.CtTypeMember;
+import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -62,7 +65,7 @@ public final class SpoonUtil {
     }
 
     public static boolean isNullLiteral(CtExpression<?> expression) {
-        return expression instanceof CtLiteral<?> literal && literal.getValue() == null;
+        return SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal && literal.getValue() == null;
     }
 
     public static boolean isIntegerLiteral(CtExpression<?> expression, int value) {
@@ -74,11 +77,19 @@ public final class SpoonUtil {
                literal.getValue().equals(value);
     }
 
+    public static boolean isBoolean(CtTypedElement<?> ctTypedElement) {
+        CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
+        return ctTypeReference != null
+            && (SpoonUtil.isTypeEqualTo(ctTypeReference, boolean.class) || SpoonUtil.isTypeEqualTo(
+            ctTypeReference,
+            Boolean.class
+        ));
+    }
+
     public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
-        if (expression instanceof CtLiteral<?> literal
+        if (SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal
             && literal.getValue() != null
-            && (isTypeEqualTo(literal.getType(), boolean.class) ||
-                isTypeEqualTo(literal.getType(), java.lang.Boolean.class))) {
+            && isBoolean(literal)) {
 
             return Optional.of((Boolean) literal.getValue());
         } else {
@@ -191,6 +202,32 @@ public final class SpoonUtil {
                 return Stream.of(ctStatement);
             }
         }).filter(statement -> !(statement instanceof CtComment)).toList();
+    }
+
+    @SuppressWarnings("unchecked")
+    public static CtExpression<?> negate(CtExpression<?> ctExpression) {
+        // !(a == b) -> a != b
+        if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator
+            && ctBinaryOperator.getKind() == BinaryOperatorKind.EQ) {
+            CtBinaryOperator<?> result = ctBinaryOperator.clone();
+            result.setKind(BinaryOperatorKind.NE);
+            return result;
+        }
+
+        // !(a != b) -> a == b
+        if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator
+            && ctBinaryOperator.getKind() == BinaryOperatorKind.NE) {
+            CtBinaryOperator<?> result = ctBinaryOperator.clone();
+            result.setKind(BinaryOperatorKind.EQ);
+            return result;
+        }
+
+        CtUnaryOperator ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
+
+        ctUnaryOperator.setKind(UnaryOperatorKind.NEG);
+        ctUnaryOperator.setOperand(ctExpression);
+
+        return ctUnaryOperator;
     }
 
     public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {
@@ -382,8 +419,12 @@ public final class SpoonUtil {
      * @param type the type to check, not null
      * @return true if the given type is an inner class, false otherwise
      */
-    public static boolean isInnerClass(CtType<?> type) {
+    public static boolean isInnerClass(CtTypeMember type) {
         return type.getDeclaringType() != null;
+    }
+
+    public static boolean isInnerClass(CtTypeReference<?> ctTypeReference) {
+        return ctTypeReference.getDeclaringType() != null;
     }
 
     public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
@@ -391,7 +432,7 @@ public final class SpoonUtil {
         return !ctMethod.getTopDefinitions().isEmpty();
     }
 
-    public static boolean isInOverriddenMethodSignature(CtElement ctElement) {
+    public static boolean isInOverriddenMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
             return false;

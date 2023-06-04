@@ -8,6 +8,7 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.CompilationResult;
 import de.firemage.autograder.core.compiler.Compiler;
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,8 +34,8 @@ public class UploadedFile implements AutoCloseable {
     public static UploadedFile build(
         Path file,
         JavaVersion version,
-        Path tmpLocation,
-        Consumer<LinterStatus> statusConsumer,
+        TempLocation tmpLocation,
+        Consumer<? super LinterStatus> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, ModelBuildException, CompilationFailureException {
         return UploadedFile.build(new FileSourceInfo(file, version), tmpLocation, statusConsumer, classLoader);
@@ -42,12 +43,13 @@ public class UploadedFile implements AutoCloseable {
 
     public static UploadedFile build(
         SourceInfo source,
-        Path tmpLocation,
-        Consumer<LinterStatus> statusConsumer,
+        TempLocation tmpLocation,
+        Consumer<? super LinterStatus> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, CompilationFailureException {
+        Compiler compiler = new Compiler(tmpLocation, source.getVersion());
         statusConsumer.accept(LinterStatus.COMPILING);
-        Optional<CompilationResult> compilationResult = Compiler.compileToJar(source, tmpLocation, source.getVersion());
+        Optional<CompilationResult> compilationResult = compiler.compileToJar(source);
         if (compilationResult.isEmpty()) {
             return null;
         }

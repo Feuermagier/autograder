@@ -1,23 +1,23 @@
 public class Test {
     public static void main(String[] args) {
-        if (true) {
-            if (false) { // OK
-                
+        if (true) { // Not Ok
+            if (false) {
+
             }
         }
 
-        if (true) {
-            if (false) { // OK
+        if (true) { // Not Ok
+            if (false) {
 
             }
         } else {
-            
+
         }
 
         if (true) {
-            
-        } else if (true) {
-            if (false) { // OK
+
+        } else if (true) { // Not Ok
+            if (false) {
 
             }
         }
@@ -25,9 +25,9 @@ public class Test {
         if (true) {
 
         } else if (true) {
-            
+
         } else {
-            
+
         }
 
         if (true) {
@@ -45,7 +45,7 @@ public class Test {
         } else {
             foo(); // Ok
             if (true) {
-                
+
             }
         }
 
@@ -67,12 +67,12 @@ public class Test {
             if (true) { // Not ok
 
             } else {
-                
+
             }
         }
     }
-    
+
     private static void foo() {
-        
+
     }
 }

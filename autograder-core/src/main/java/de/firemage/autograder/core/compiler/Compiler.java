@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.compiler;
 
 import de.firemage.autograder.core.SourceInfo;
+import de.firemage.autograder.core.errorprone.TempLocation;
 import org.apache.commons.io.FileUtils;
 
 import javax.tools.DiagnosticCollector;
@@ -27,74 +28,67 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
-public final class Compiler {
+public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
     static final Locale COMPILER_LOCALE = Locale.US;
 
-    private Compiler() {
-    }
-
-    public static Optional<CompilationResult> compileToJar(SourceInfo input, Path tmpLocation, JavaVersion javaVersion)
-        throws IOException, CompilationFailureException {
-        return compileAndIgnoreSuppressWarnings(input, tmpLocation, javaVersion);
+    public Optional<CompilationResult> compileToJar(SourceInfo input) throws IOException, CompilationFailureException {
+        return this.compileAndIgnoreSuppressWarnings(input);
     }
 
     // @SuppressWarnings will result in warnings being ignored (obviously). This is suboptimal, when
     // one wants to lint things that the compiler emits like unchecked casts.
     //
     // This piece of code, tries to patch the @SuppressWarnings annotation to not ignore any warnings.
-    private static Optional<CompilationResult> compileAndIgnoreSuppressWarnings(
-        SourceInfo input, Path tmpLocation, JavaVersion javaVersion
+    private Optional<CompilationResult> compileAndIgnoreSuppressWarnings(
+        SourceInfo input
     ) throws IOException, CompilationFailureException {
-        Path modifiedOutput = tmpLocation.resolve(input.getName() + "_modified");
-        SourceInfo copiedVersion = input.copyTo(modifiedOutput);
+        Optional<CompilationResult> compilationResult;
+        try (TempLocation modifiedOutput = this.tempLocation.createTempDirectory(input.getName() + "_modified")) {
+            SourceInfo copiedVersion = input.copyTo(modifiedOutput.toPath());
 
-        List<JavaFileObject> compilationUnits = copiedVersion.compilationUnits();
-        // patch the files:
-        for (JavaFileObject file : compilationUnits) {
-            String content = file.getCharContent(true).toString();
-            Pattern pattern = Pattern.compile("@SuppressWarnings\\((.+?)\\)", Pattern.DOTALL);
-            String patched = pattern.matcher(content).replaceAll(matchResult -> {
-                String group = matchResult.group(1);
-                String result = "";
-                int i = 0;
-                int length = group.length();
-                for (char c : group.toCharArray()) {
-                    if (i == 0) {
-                        result += '{';
-                    } else if (i == length - 1) {
-                        result += '}';
-                    } else if (c == '\r' || c == '\n') {
-                        result += c;
-                    } else {
-                        result += ' ';
+            List<JavaFileObject> compilationUnits = copiedVersion.compilationUnits();
+            // patch the files:
+            for (JavaFileObject file : compilationUnits) {
+                String content = file.getCharContent(true).toString();
+                Pattern pattern = Pattern.compile("@SuppressWarnings\\((.+?)\\)", Pattern.DOTALL);
+                String patched = pattern.matcher(content).replaceAll(matchResult -> {
+                    String group = matchResult.group(1);
+                    String result = "";
+                    int i = 0;
+                    int length = group.length();
+                    for (char c : group.toCharArray()) {
+                        if (i == 0) {
+                            result += '{';
+                        } else if (i == length - 1) {
+                            result += '}';
+                        } else if (c == '\r' || c == '\n') {
+                            result += c;
+                        } else {
+                            result += ' ';
+                        }
+
+                        i++;
                     }
 
-                    i++;
+                    return "@SuppressWarnings(%s)".formatted(result);
+                });
+
+                try (Writer writer = file.openWriter()) {
+                    writer.write(patched);
                 }
-
-                return "@SuppressWarnings(%s)".formatted(result);
-            });
-
-            try (Writer writer = file.openWriter()) {
-                writer.write(patched);
             }
+
+            compilationResult = this.compile(copiedVersion);
         }
 
-        Optional<CompilationResult> result = compile(copiedVersion, tmpLocation, javaVersion);
-
-        copiedVersion.delete();
-
-        List<CompilationDiagnostic> diagnostics = result.map(CompilationResult::diagnostics).orElse(List.of());
+        List<CompilationDiagnostic> diagnostics = compilationResult.map(CompilationResult::diagnostics).orElse(List.of());
 
         // now compile the code again, but this time without the patched version (to prevent problems if the patching
         // is broken with the source position)
-        return compile(input, tmpLocation, javaVersion)
-            .map(res -> new CompilationResult(res.jar(), diagnostics));
+        return this.compile(input).map(res -> new CompilationResult(res.jar(), diagnostics));
     }
 
-    private static Optional<CompilationResult> compile(
-        SourceInfo input, Path tmpLocation, JavaVersion javaVersion
-    ) throws IOException, CompilationFailureException {
+    private Optional<CompilationResult> compile(SourceInfo input) throws IOException, CompilationFailureException {
 
         List<JavaFileObject> compilationUnits = input.compilationUnits();
 
@@ -105,42 +99,45 @@ public final class Compiler {
         Charset charset = input.getCharset();
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
-        Path compilerOutput = tmpLocation.resolve(input.getName() + "_compiled");
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
-        JavaFileManager fileManager = new SeparateBinaryFileManager(
-            compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
-            compilerOutput.toFile(), charset
-        );
-        boolean successful = compiler.getTask(
-            output,
-            fileManager,
-            diagnosticCollector,
-            Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial",
-                "--release=" + javaVersion.getVersionString()
-            ),
-            null,
-            compilationUnits
-        ).call();
-        output.flush();
-        output.close();
 
-        if (!successful) {
-            throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
-                .map(d -> new CompilationDiagnostic(
-                    d,
-                    input.getPath()
-                ))
-                .toList(), input.getPath());
-        }
+        Path jar;
+        try (TempLocation compilerOutput = this.tempLocation.createTempDirectory(input.getName() + "_compiled")) {
+            JavaFileManager fileManager = new SeparateBinaryFileManager(
+                compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
+                compilerOutput.toPath().toFile(), charset
+            );
+            boolean isSuccessful = compiler.getTask(
+                output,
+                fileManager,
+                diagnosticCollector,
+                Arrays.asList("-Xlint:all", "-Xlint:-processing", "-Xlint:-serial",
+                    "--release=" + javaVersion.getVersionString()
+                ),
+                null,
+                compilationUnits
+            ).call();
 
-        Manifest manifest = new Manifest();
-        manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
-        Path jar = tmpLocation.resolve(input.getName() + ".jar");
-        try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar.toFile()), manifest)) {
-            addToJar(compilerOutput.normalize(), compilerOutput.toFile(), jarOut);
+            output.flush();
+            output.close();
+
+            if (!isSuccessful) {
+                throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
+                    .map(d -> new CompilationDiagnostic(
+                        d,
+                        input.getPath()
+                    ))
+                    .toList(), input.getPath());
+            }
+
+            Manifest manifest = new Manifest();
+            manifest.getMainAttributes().put(Attributes.Name.MANIFEST_VERSION, "1.0");
+            jar = this.tempLocation.createTempFile(input.getName() + ".jar");
+            try (JarOutputStream jarOut = new JarOutputStream(new FileOutputStream(jar.toFile()), manifest)) {
+                addToJar(compilerOutput.toPath().normalize(), compilerOutput.toPath().toFile(), jarOut);
+            }
         }
-        FileUtils.deleteDirectory(compilerOutput.toFile());
 
         return Optional.of(new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
             .map(d -> new CompilationDiagnostic(

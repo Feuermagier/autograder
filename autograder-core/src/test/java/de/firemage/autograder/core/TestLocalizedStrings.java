@@ -44,9 +44,10 @@ class TestLocalizedStrings {
         ),
         de.firemage.autograder.core.check.naming.VariablesHaveDescriptiveNamesCheck.class, List.of(
             "variable-name-single-letter",
-            "variable-name-type",
+            "variable-is-abbreviation",
             "variable-name-type-in-name",
-            "similar-identifier"
+            "similar-identifier",
+            "variable-redundant-number-suffix"
         )
     );
 
@@ -66,7 +67,8 @@ class TestLocalizedStrings {
         "linter-integrated",
         "duplicate-code",
         "status-error-prone",
-        "linter-error-prone"
+        "linter-error-prone",
+        "merged-problems"
     );
 
     private static List<String> localizedKeys;

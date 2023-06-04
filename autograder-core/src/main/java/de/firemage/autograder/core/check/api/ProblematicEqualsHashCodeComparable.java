@@ -11,7 +11,19 @@ import de.firemage.autograder.core.errorprone.Message;
 import java.util.Map;
 import java.util.function.Function;
 
-@ExecutableCheck(reportedProblems = {ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT})
+@ExecutableCheck(reportedProblems = {
+    ProblemType.COMPARE_TO_ZERO,
+    ProblemType.EQUALS_USING_HASHCODE,
+    ProblemType.EQUALS_UNSAFE_CAST,
+    ProblemType.EQUALS_INCOMPATIBLE_TYPE,
+    ProblemType.INCONSISTENT_HASH_CODE,
+    ProblemType.UNDEFINED_EQUALS,
+    ProblemType.NON_OVERRIDING_EQUALS,
+    ProblemType.EQUALS_BROKEN_FOR_NULL,
+    ProblemType.ARRAYS_HASHCODE,
+    ProblemType.EQUALS_REFERENCE,
+    ProblemType.ARRAY_AS_KEY_OF_SET_OR_MAP
+})
 public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
     @Override
     public Map<ErrorProneLint, Function<ErrorProneDiagnostic, Message>> subscribedLints() {
@@ -23,7 +35,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/CompareToZero
                 ErrorProneLint.fromString("CompareToZero"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.COMPARE_TO_ZERO,
                     new LocalizedMessage("compare-to-zero")
                 )
             ),
@@ -34,7 +46,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/EqualsUsingHashCode
                 ErrorProneLint.fromString("EqualsUsingHashCode"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.EQUALS_USING_HASHCODE,
                     new LocalizedMessage("equals-using-hashcode")
                 )
             ),
@@ -45,7 +57,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/EqualsUnsafeCast
                 ErrorProneLint.fromString("EqualsUnsafeCast"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.EQUALS_UNSAFE_CAST,
                     new LocalizedMessage("equals-unsafe-cast")
                 )
             ),
@@ -55,7 +67,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/EqualsIncompatibleType
                 ErrorProneLint.fromString("EqualsIncompatibleType"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.EQUALS_INCOMPATIBLE_TYPE,
                     new LocalizedMessage("equals-incompatible-type")
                 )
             ),
@@ -65,7 +77,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/InconsistentHashCode
                 ErrorProneLint.fromString("InconsistentHashCode"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.INCONSISTENT_HASH_CODE,
                     new LocalizedMessage("inconsistent-hashcode")
                 )
             ),
@@ -75,7 +87,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/UndefinedEquals
                 ErrorProneLint.fromString("UndefinedEquals"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.UNDEFINED_EQUALS,
                     new LocalizedMessage("undefined-equals")
                 )
             ),
@@ -85,7 +97,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/NonOverridingEquals
                 ErrorProneLint.fromString("NonOverridingEquals"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.NON_OVERRIDING_EQUALS,
                     new LocalizedMessage("non-overriding-equals")
                 )
             ),
@@ -95,7 +107,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/EqualsBrokenForNull
                 ErrorProneLint.fromString("EqualsBrokenForNull"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.EQUALS_BROKEN_FOR_NULL,
                     new LocalizedMessage("equals-broken-for-null")
                 )
             ),
@@ -105,7 +117,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/ArrayHashCode
                 ErrorProneLint.fromString("ArrayHashCode"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.ARRAYS_HASHCODE,
                     new LocalizedMessage("array-hash-code")
                 )
             ),
@@ -115,7 +127,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/EqualsReference
                 ErrorProneLint.fromString("EqualsReference"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.EQUALS_REFERENCE,
                     new LocalizedMessage("equals-reference")
                 )
             ),
@@ -126,7 +138,7 @@ public class ProblematicEqualsHashCodeComparable implements ErrorProneCheck {
                 // https://errorprone.info/bugpattern/ArrayAsKeyOfSetOrMap
                 ErrorProneLint.fromString("ArrayAsKeyOfSetOrMap"),
                 diagnostic -> Message.of(
-                    ProblemType.EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+                    ProblemType.ARRAY_AS_KEY_OF_SET_OR_MAP,
                     new LocalizedMessage("array-as-key-of-set-or-map")
                 )
             )

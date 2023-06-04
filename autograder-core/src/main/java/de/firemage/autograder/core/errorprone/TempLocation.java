@@ -19,6 +19,10 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
         return new TempLocation(path.toFile());
     }
 
+    public static TempLocation of(String first, String... other) {
+        return TempLocation.fromPath(Path.of(first, other));
+    }
+
     public static TempLocation random() {
         try {
             return TempLocation.fromPath(Files.createTempDirectory("random"));
@@ -82,7 +86,13 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
     }
 
     public Path createTempFile(String name) throws IOException {
-        return Files.createFile(this.toPath().resolve(name));
+        // fix conflicts by adding a random number to the name (e.g. "file.txt" -> "123456789file.txt")
+        Path path = this.toPath().resolve(name);
+        while (path.toFile().exists()) {
+            path = this.toPath().resolve(RANDOM.nextLong() + name);
+        }
+
+        return Files.createFile(path);
     }
 
     /**

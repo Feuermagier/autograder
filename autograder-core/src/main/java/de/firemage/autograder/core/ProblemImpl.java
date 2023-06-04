@@ -2,17 +2,20 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
 
-public abstract class InCodeProblem implements Problem {
+/**
+ * Contains the default implementation of most {@link Problem} methods.
+ */
+public abstract class ProblemImpl implements Problem {
 
     private final Check check;
 
     private final CodePosition position;
 
-    private final LocalizedMessage explanation;
+    private final Translatable explanation;
 
     private final ProblemType problemType;
 
-    protected InCodeProblem(Check check, CodePosition position, LocalizedMessage explanation, ProblemType problemType) {
+    protected ProblemImpl(Check check, CodePosition position, Translatable explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;
@@ -37,7 +40,7 @@ public abstract class InCodeProblem implements Problem {
         return position;
     }
 
-    public LocalizedMessage getExplanation() {
+    public Translatable getExplanation() {
         return explanation;
     }
 

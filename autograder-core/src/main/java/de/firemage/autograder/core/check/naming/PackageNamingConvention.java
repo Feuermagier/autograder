@@ -70,7 +70,7 @@ public class PackageNamingConvention extends IntegratedCheck {
                 .collect(Collectors.toSet());
 
             // check if some parts have already been marked as invalid
-            if (!intersection(invalidParts, markedPackages).isEmpty()) {
+            if (invalidParts.isEmpty() || !intersection(invalidParts, markedPackages).isEmpty()) {
                 // if so, the problem has already been reported somewhere
                 // this is mainly intended to reduce the amount of bloat (keep the annotations to a minimum)
                 return;

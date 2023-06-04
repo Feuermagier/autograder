@@ -12,4 +12,29 @@ public class Test {
     int trafficLight1;
     int trafficLight2; // Not Ok (similar to trafficLight1)
     int trafficLight3; // Not Ok (similar to trafficLight1)
+
+    int result1; // Not Ok (could be result)
+
+    int sec; // Not Ok
+    int min; // Not Ok
+
+    int interpret; // Not Ok
+    String interpreters; // Ok
+    List<String> validStrings; // Not Ok
+    Set<Integer> integerSet; // Not Ok
+}
+
+enum Month {
+    JANUARY,
+    FEBRUARY,
+    MARCH,
+    APRIL,
+    MAY,
+    JUNE, // Ok
+    JULY, // Ok
+    AUGUST,
+    SEPTEMBER,
+    OCTOBER,
+    NOVEMBER,
+    DECEMBER
 }

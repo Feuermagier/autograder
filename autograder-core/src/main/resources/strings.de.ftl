@@ -16,6 +16,8 @@ linter-pmd = PMD
 linter-integrated = Integrated Analysis
 linter-error-prone = error-prone
 
+merged-problems = {$message} Weitere Probleme in {$locations}.
+
 # CPD
 duplicate-code = Duplizierter Code ({$lines}): {$first-path}:{$first-start}-{$first-end} und {$second-path}:{$second-start}-{$second-end}
 
@@ -101,6 +103,8 @@ redundant-modifier-exp = Unnötiger Modifizierer
 
 redundant-return-exp = Unnötiges return
 
+redundant-boolean-equal = Es ist unnötig explizit zu überprüfen, ob eine Bedingung gleich true oder false ist. Schreibe stattdessen '{$suggestion}'.
+
 self-assignment-exp = Nutzlose Zuweisung von '{$rhs}' zu '{$lhs}'
 
 redundant-local-return-exp = Der Wert kann direkt zurückgegeben werden
@@ -123,6 +127,12 @@ complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score
 redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
 
 redundant-array-init = Die Zuweisung zu dem array ist unnötig und kann entfernt werden.
+
+redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, aber der Wert '{$value}' wird nicht direkt zugewiesen. Schreibe stattdessen '{$suggestion}'.
+
+multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen. Also keine Deklarationen von mehreren Variablen oder Zuweisungen in einer Zeile.
+
+unnecessary-boxing = Statt dem boxed-type sollte man '{$suggestion}' verwenden.
 
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
@@ -187,6 +197,14 @@ compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglich
 
 use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispiel ein return ab. if-else-Blöcke mit solchen Abbrüchen kann man mithilfe von sogenannten guard-clauses schöner schreiben. Das hat unter anderem den Vorteil, dass man doppelten Code leichter erkennt. Siehe für eine detaillierte Erklärung https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a oder https://deviq.com/design-patterns/guard-clause
 
+import-types = Statt den Pfad zum Typ anzugeben, sollte '{$type}' importiert werden. Datentypen aus dem selben Paket oder 'java.lang' müssen nicht explizit importiert werden.
+
+use-different-visibility = Die Sichtbarkeit von '{$name}' sollte '{$suggestion}' sein.
+
+avoid-recompiling-regex = Die Konstante wird nur mit 'Pattern.compile' oder 'Pattern.matches' verwendet. Konvertiere die Konstante zu einem Pattern mit dem Wert '{$suggestion}'.
+
+merge-nested-if = Die Verschachtelte if kann mit der äußeren if kombiniert werden. Die Bedingung der äußeren if sollte '{$suggestion}' sein.
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
@@ -196,7 +214,7 @@ constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte ni
 linguistic-desc = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
 
 variable-name-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
-variable-name-type = Unnötige Abkürzung '{$name}'
+variable-is-abbreviation = Unnötige Abkürzung '{$name}'
 variable-name-type-in-name = Der Bezeichner '{$name}' sollte nicht den Typ im Namen haben
 similar-identifier = Der Bezeichner '{$left}' ist sehr ähnlich zu '{$right}'. Das kann zu Verwechslungen und Tippfehlern führen, weswegen man diesen umbenennen sollte.
 
@@ -206,6 +224,8 @@ type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte
 package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein und alle Buchstaben sollten nach Konvention
                             klein sein. Zudem sollten keine Sonderzeichen auftreten wie '_'. An folgenden Stellen wird das
                             nicht eingehalten: '{$positions}'
+
+variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redundante Zahl am Ende.
 
 # OOP
 concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)

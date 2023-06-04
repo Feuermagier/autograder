@@ -35,7 +35,8 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
                 this.problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, root));
             } catch (Exception exception) {
                 exception.printStackTrace();
-                throw exception;
+                // make sure the program stops running
+                System.exit(-1);
             }
         });
     }

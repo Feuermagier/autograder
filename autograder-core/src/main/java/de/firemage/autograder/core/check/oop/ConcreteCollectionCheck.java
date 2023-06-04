@@ -123,7 +123,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
 
     private boolean checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
         if (this.isConcreteCollectionType(ctTypeReference)
-            && !SpoonUtil.isInOverriddenMethodSignature(ctTypeReference)
+            && !SpoonUtil.isInOverriddenMethod(ctTypeReference)
             && !this.isInAllowedContext(ctTypeReference)
             && !this.isAllowedType(ctTypeReference)
         ) {

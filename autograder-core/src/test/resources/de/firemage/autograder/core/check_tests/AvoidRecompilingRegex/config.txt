@@ -1,0 +1,3 @@
+general.AvoidRecompilingRegex
+Use Pattern constants instead of Strings when possible
+Test.java:6

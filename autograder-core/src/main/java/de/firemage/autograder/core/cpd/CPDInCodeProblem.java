@@ -1,8 +1,8 @@
 package de.firemage.autograder.core.cpd;
 
 import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.MultiPositionProblem;
 import de.firemage.autograder.core.PathUtil;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
@@ -10,21 +10,19 @@ import net.sourceforge.pmd.cpd.Mark;
 import net.sourceforge.pmd.cpd.Match;
 
 import java.nio.file.Path;
-import java.util.List;
 import java.util.Map;
 
-public class CPDInCodeProblem extends MultiPositionProblem {
-
+class CPDInCodeProblem extends ProblemImpl {
     private final Match match;
     private final Path root;
 
     public CPDInCodeProblem(Check check, Match match, Path root) {
-        super(check,
-            List.of(
-                markToPosition(match.getFirstMark()),
-                markToPosition(match.getSecondMark())
-            ),
-            formatMatch(match, root), ProblemType.DUPLICATE_CODE);
+        super(
+            check,
+            markToPosition(match.getFirstMark()),
+            formatMatch(match, root),
+            ProblemType.DUPLICATE_CODE
+        );
         this.match = match;
         this.root = root;
     }

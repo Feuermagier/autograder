@@ -56,7 +56,7 @@ public class AvoidShadowing extends IntegratedCheck {
                 }
 
                 // skip fields inside overridden methods
-                if (SpoonUtil.isInOverriddenMethodSignature(ctVariable)) {
+                if (SpoonUtil.isInOverriddenMethod(ctVariable)) {
                     return;
                 }
 
