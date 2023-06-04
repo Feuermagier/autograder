@@ -117,6 +117,8 @@ repeated-math-operation-plus = Use a multiplication with {$count} instead of add
 
 redundant-neg-exp = '{$original}' should be written as '{$fixed}'
 
+redundant-boolean-equal = It is redundant to explicitly check if a condition equals true or false. Write instead '{$suggestion}'.
+
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
 
 merge-else-if = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'

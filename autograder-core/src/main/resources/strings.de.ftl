@@ -103,6 +103,8 @@ redundant-modifier-exp = Unnötiger Modifizierer
 
 redundant-return-exp = Unnötiges return
 
+redundant-boolean-equal = Es ist unnötig explizit zu überprüfen, ob eine Bedingung gleich true oder false ist. Schreibe stattdessen '{$suggestion}'.
+
 self-assignment-exp = Nutzlose Zuweisung von '{$rhs}' zu '{$lhs}'
 
 redundant-local-return-exp = Der Wert kann direkt zurückgegeben werden
