@@ -14,3 +14,13 @@ public class Test {
 class SeeminglyUnusedMainMethod {
     public static void main(String[] args) {} // Ok
 }
+
+class A {
+    int a;
+    String[] b;
+
+    void doSomething() {
+        int a = 0; // Not Ok
+        String[] b = new String[10]; // Not Ok
+    }
+}

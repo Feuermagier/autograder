@@ -2,3 +2,5 @@ unnecessary.UnusedCodeElementCheck
 Unused code should be removed
 Test.java:5
 Test.java:8
+Test.java:23
+Test.java:24
