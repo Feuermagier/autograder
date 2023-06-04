@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.check_tests.ForLoopVariableCheck.code;
+package de.firemage.autograder.core.check_tests.MultipleInlineStatements.code;
 
 import java.util.List;
 
@@ -11,5 +11,8 @@ public class Test {
         }
 
         for (int i = 0, j = 0; i < list.size(); i++, j++) {} // Not Ok
+
+        int a, b, c = 0; // Not Ok
+        a = b = c = 5; // Not Ok
     }
 }

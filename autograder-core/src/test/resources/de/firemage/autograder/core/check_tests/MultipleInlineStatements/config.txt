@@ -1,0 +1,5 @@
+complexity.MultipleInlineStatements
+Only one statement per line
+Test.java:13
+Test.java:15
+Test.java:16
