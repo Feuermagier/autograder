@@ -267,28 +267,17 @@ public final class Linter {
             List<Problem> problemsForCheck = entry.getValue();
             // then go through each check and merge the problems if they exceed the maxProblemsPerCheck
             if (problemsForCheck.size() > this.maxProblemsPerCheck) {
-                Collection<InCodeProblem> inCodeProblems = new ArrayList<>();
-                Collection<Problem> otherProblems = new ArrayList<>();
-
-                for (Problem problem : problemsForCheck) {
-                    if (problem instanceof InCodeProblem inCodeProblem) {
-                        inCodeProblems.add(inCodeProblem);
-                    } else {
-                        otherProblems.add(problem);
-                    }
-                }
-
-                // further partition inCodeProblems by ProblemType (one does not want to merge different types of problems):
-                Map<ProblemType, List<InCodeProblem>> inCodeProblemsByType = inCodeProblems.stream()
+                // further partition the problems by their ProblemType
+                // (one does not want to merge different types of problems):
+                Map<ProblemType, List<Problem>> problemsByType = problemsForCheck.stream()
                     .collect(Collectors.groupingBy(Problem::getProblemType, LinkedHashMap::new, Collectors.toList()));
 
-                problemsForCheck = inCodeProblemsByType.values()
+                problemsForCheck = problemsByType.values()
                     .stream()
                     .flatMap(list -> check.merge(list, this.maxProblemsPerCheck)
                         .stream()
                         .map(Problem.class::cast))
                     .collect(Collectors.toCollection(ArrayList::new));
-                problemsForCheck.addAll(otherProblems);
             }
 
             result.addAll(problemsForCheck);

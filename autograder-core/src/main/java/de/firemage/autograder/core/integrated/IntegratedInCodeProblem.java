@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.InCodeProblem;
+import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.Translatable;
 import de.firemage.autograder.core.check.Check;
@@ -9,7 +9,7 @@ import spoon.reflect.declaration.CtElement;
 
 import java.nio.file.Path;
 
-public class IntegratedInCodeProblem extends InCodeProblem {
+public class IntegratedInCodeProblem extends ProblemImpl {
     private final CtElement element;
 
     public IntegratedInCodeProblem(Check check, CtElement element, Translatable explanation,

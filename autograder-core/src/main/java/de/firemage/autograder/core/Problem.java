@@ -9,5 +9,7 @@ public interface Problem {
 
     String getDisplayLocation();
 
+    CodePosition getPosition();
+
     ProblemType getProblemType();
 }

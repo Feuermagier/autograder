@@ -4,7 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.firemage.autograder.cmd.output.Annotation;
-import de.firemage.autograder.core.InCodeProblem;
+import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.LinterStatus;
@@ -30,9 +30,9 @@ import java.io.PrintStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
-import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -196,19 +196,19 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private void printProblemsAsJson(List<Problem> problems, Linter linter) {
+    private void printProblemsAsJson(Collection<? extends Problem> problems, Linter linter) {
         try {
             ObjectMapper mapper = new ObjectMapper();
-            String jsonOutput = mapper.writeValueAsString(problems.stream().map(p -> {
-                if (p instanceof InCodeProblem inCodeProblem) {
-                    var position = inCodeProblem.getPosition();
-                    return Optional.of(new Annotation(inCodeProblem.getProblemType(),
-                            linter.translateMessage(inCodeProblem.getExplanation()),
-                            position.file().toString().replace("\\", "/"), position.startLine(), position.endLine()));
-                } else {
-                    return Optional.empty();
-                }
-            }).filter(Optional::isPresent).map(Optional::get).toList());
+            String jsonOutput = mapper.writeValueAsString(problems.stream().map(problem -> {
+                CodePosition position = problem.getPosition();
+                return new Annotation(
+                    problem.getProblemType(),
+                    linter.translateMessage(problem.getExplanation()),
+                    position.file().toString().replace("\\", "/"),
+                    position.startLine(),
+                    position.endLine()
+                );
+            }).toList());
             System.out.println(jsonOutput);
         } catch (JsonProcessingException ex) {
             ex.printStackTrace();

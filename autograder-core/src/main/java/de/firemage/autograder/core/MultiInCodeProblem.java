@@ -11,11 +11,11 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MultiInCodeProblem extends InCodeProblem {
+public class MultiInCodeProblem extends ProblemImpl {
 
     public MultiInCodeProblem(
-        InCodeProblem firstProblem,
-        Collection<? extends InCodeProblem> otherProblems
+        Problem firstProblem,
+        Collection<? extends Problem> otherProblems
     ) {
         super(
             firstProblem.getCheck(),
@@ -25,7 +25,7 @@ public class MultiInCodeProblem extends InCodeProblem {
         );
     }
 
-    private static Translatable makeExplanation(InCodeProblem first, Collection<? extends InCodeProblem> problems) {
+    private static Translatable makeExplanation(Problem first, Collection<? extends Problem> problems) {
         return bundle -> {
             String message = first.getExplanation().format(bundle);
             if (!message.endsWith(".")) {
@@ -38,7 +38,7 @@ public class MultiInCodeProblem extends InCodeProblem {
                     "message", message,
                     "locations", displayLocations(
                         first.getPosition().file(),
-                        problems.stream().map(InCodeProblem::getPosition)
+                        problems.stream().map(Problem::getPosition)
                     )
                 )
             ).format(bundle);
