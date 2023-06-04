@@ -197,6 +197,8 @@ import-types = Statt den Pfad zum Typ anzugeben, sollte '{$type}' importiert wer
 
 use-different-visibility = Die Sichtbarkeit von '{$name}' sollte '{$suggestion}' sein.
 
+avoid-recompiling-regex = Die Konstante wird nur mit 'Pattern.compile' oder 'Pattern.matches' verwendet. Konvertiere die Konstante zu einem Pattern mit dem Wert '{$suggestion}'.
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
