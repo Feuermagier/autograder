@@ -29,10 +29,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public final class Linter {
     private final int threads;
@@ -40,8 +43,16 @@ public final class Linter {
     private final FluentBundle fluentBundle;
     private final boolean disableDynamicAnalysis;
     private final ClassLoader classLoader;
+    private final int maxProblemsPerCheck;
 
-    private Linter(Locale locale, TempLocation tempLocation, int threads, boolean disableDynamicAnalysis, ClassLoader classLoader) {
+    private Linter(
+        Locale locale,
+        TempLocation tempLocation,
+        int threads,
+        boolean disableDynamicAnalysis,
+        ClassLoader classLoader,
+        int maxProblemsPerCheck
+    ) {
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
             case "en" -> "/strings.en.ftl";
@@ -60,6 +71,7 @@ public final class Linter {
         this.threads = threads;
         this.disableDynamicAnalysis = disableDynamicAnalysis;
         this.classLoader = classLoader;
+        this.maxProblemsPerCheck = maxProblemsPerCheck;
     }
 
     public static class Builder {
@@ -68,6 +80,7 @@ public final class Linter {
         private int threads;
         private boolean disableDynamicAnalysis = true;
         private ClassLoader classLoader;
+        private int maxProblemsPerCheck = -1;
 
         private Builder(Locale locale) {
             this.locale = locale;
@@ -80,6 +93,11 @@ public final class Linter {
 
         public Builder threads(int threads) {
             this.threads = threads;
+            return this;
+        }
+
+        public Builder maxProblemsPerCheck(int maxProblemsPerCheck) {
+            this.maxProblemsPerCheck = maxProblemsPerCheck;
             return this;
         }
 
@@ -104,7 +122,14 @@ public final class Linter {
                 tempLocation = TempLocation.random();
             }
 
-            return new Linter(this.locale, tempLocation, this.threads, this.disableDynamicAnalysis, this.classLoader);
+            return new Linter(
+                this.locale,
+                tempLocation,
+                this.threads,
+                this.disableDynamicAnalysis,
+                this.classLoader,
+                this.maxProblemsPerCheck
+            );
         }
     }
 
@@ -135,11 +160,12 @@ public final class Linter {
     }
 
     public List<Problem> checkFile(
-        UploadedFile file, Path tests,
-        List<ProblemType> problemsToReport,
-        Iterable<? extends Check> checks, Consumer<LinterStatus> statusConsumer
+        UploadedFile file,
+        Path tests,
+        Collection<ProblemType> problemsToReport,
+        Iterable<? extends Check> checks,
+        Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
-
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
         List<CopyPasteCheck> cpdChecks = new ArrayList<>();
@@ -186,43 +212,92 @@ public final class Linter {
             });
         }
 
-        TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter");
-        Path tmpLocation = tempLinterLocation.toPath();
+        AnalysisResult result;
+        try (TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
+            Path tmpLocation = tempLinterLocation.toPath();
 
-        if (!integratedChecks.isEmpty()) {
-            scheduler.submitTask((s, reporter) -> {
-                IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
-                if (!this.disableDynamicAnalysis) {
-                    analysis.runDynamicAnalysis(tests, statusConsumer);
-                }
-                analysis.lint(integratedChecks, statusConsumer, s);
-            });
+            if (!integratedChecks.isEmpty()) {
+                scheduler.submitTask((s, reporter) -> {
+                    IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
+                    if (!this.disableDynamicAnalysis) {
+                        analysis.runDynamicAnalysis(tests, statusConsumer);
+                    }
+                    analysis.lint(integratedChecks, statusConsumer, s);
+                });
+            }
+
+            if (!errorProneChecks.isEmpty()) {
+                scheduler.submitTask((s, reporter) -> {
+                    statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
+                    reporter.reportProblems(new ErrorProneLinter().lint(file, tempLinterLocation, errorProneChecks));
+                });
+            }
+
+            result = scheduler.collectProblems();
+            if (result.failed()) {
+                throw new LinterException(result.thrownException());
+            }
         }
 
-        if (!errorProneChecks.isEmpty()) {
-            scheduler.submitTask((s, reporter) -> {
-                statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
-                reporter.reportProblems(new ErrorProneLinter().lint(file, tempLinterLocation, errorProneChecks));
-            });
-        }
-
-        AnalysisResult result = scheduler.collectProblems();
-        if (result.failed()) {
-            throw new LinterException(result.thrownException());
-        }
-
-        if (problemsToReport.isEmpty()) {
-            return result.problems();
-        } else {
-            return result
+        List<Problem> unreducedProblems = result.problems();
+        if (!problemsToReport.isEmpty()) {
+            unreducedProblems = result
                 .problems()
                 .stream()
                 .filter(p -> problemsToReport.contains(p.getProblemType()))
                 .toList();
         }
+
+        return this.mergeProblems(unreducedProblems);
     }
 
-    public String translateMessage(LocalizedMessage message) {
+    private List<Problem> mergeProblems(Collection<? extends Problem> unreducedProblems) {
+        // -1 means no limit (useful for unit tests, where one wants to see all problems)
+        if (this.maxProblemsPerCheck == -1) {
+            return new ArrayList<>(unreducedProblems);
+        }
+
+        // first group all problems by the check that created them
+        Map<Check, List<Problem>> problems = unreducedProblems.stream()
+            .collect(Collectors.groupingBy(Problem::getCheck, LinkedHashMap::new, Collectors.toList()));
+
+        List<Problem> result = new ArrayList<>();
+        for (Map.Entry<Check, List<Problem>> entry : problems.entrySet()) {
+            Check check = entry.getKey();
+            List<Problem> problemsForCheck = entry.getValue();
+            // then go through each check and merge the problems if they exceed the maxProblemsPerCheck
+            if (problemsForCheck.size() > this.maxProblemsPerCheck) {
+                Collection<InCodeProblem> inCodeProblems = new ArrayList<>();
+                Collection<Problem> otherProblems = new ArrayList<>();
+
+                for (Problem problem : problemsForCheck) {
+                    if (problem instanceof InCodeProblem inCodeProblem) {
+                        inCodeProblems.add(inCodeProblem);
+                    } else {
+                        otherProblems.add(problem);
+                    }
+                }
+
+                // further partition inCodeProblems by ProblemType (one does not want to merge different types of problems):
+                Map<ProblemType, List<InCodeProblem>> inCodeProblemsByType = inCodeProblems.stream()
+                    .collect(Collectors.groupingBy(Problem::getProblemType, LinkedHashMap::new, Collectors.toList()));
+
+                problemsForCheck = inCodeProblemsByType.values()
+                    .stream()
+                    .flatMap(list -> check.merge(list, this.maxProblemsPerCheck)
+                        .stream()
+                        .map(Problem.class::cast))
+                    .collect(Collectors.toCollection(ArrayList::new));
+                problemsForCheck.addAll(otherProblems);
+            }
+
+            result.addAll(problemsForCheck);
+        }
+
+        return result;
+    }
+
+    public String translateMessage(Translatable message) {
         String output = message.format(this.fluentBundle);
         if (output.startsWith("Unknown messageID '")) {
             return output.substring("Unknown messageID '".length(), output.length() - 1);

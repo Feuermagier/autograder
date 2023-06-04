@@ -10,7 +10,7 @@ public class MultiPositionProblem implements Problem {
     private final LocalizedMessage explanation;
 
     private final List<CodePosition> positions;
-    
+
     private final ProblemType problemType;
 
     public MultiPositionProblem(Check check, List<CodePosition> positions, LocalizedMessage explanation,

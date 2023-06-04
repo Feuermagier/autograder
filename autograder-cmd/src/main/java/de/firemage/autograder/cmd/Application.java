@@ -145,6 +145,7 @@ public class Application implements Callable<Integer> {
             .threads(0)
             .tempLocation(this.tempLocation)
             .enableDynamicAnalysis(isDynamicAnalysisEnabled)
+            .maxProblemsPerCheck(10)
             .build();
 
         Consumer<LinterStatus> statusConsumer = status ->

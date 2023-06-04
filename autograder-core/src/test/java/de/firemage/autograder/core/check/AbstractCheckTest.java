@@ -19,13 +19,18 @@ public abstract class AbstractCheckTest {
     protected final Linter linter;
 
     protected AbstractCheckTest() {
-        this(TempLocation.random());
+        this(-1);
     }
 
-    private AbstractCheckTest(TempLocation tempLocation) {
+    protected AbstractCheckTest(int limit) {
+        this(TempLocation.random(), limit);
+    }
+
+    private AbstractCheckTest(TempLocation tempLocation, int limit) {
         this.tempLocation = tempLocation;
         this.linter = Linter.builder(Locale.US)
             .tempLocation(this.tempLocation)
+            .maxProblemsPerCheck(limit)
             .build();
     }
 
