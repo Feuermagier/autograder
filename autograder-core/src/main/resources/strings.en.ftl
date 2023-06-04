@@ -131,6 +131,7 @@ redundant-array-init = The assignment to the array is unnecessary and can be rem
 
 redundant-uninitialized-variable = The variable '{$variable}' has been declared, but the value '{$value}' is not directly assigned. Instead you should write '{$suggestion}'.
 
+merge-nested-if = The nested if can be combined with the outer if. The condition for the outer if should then be '{$suggestion}'.
 
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.

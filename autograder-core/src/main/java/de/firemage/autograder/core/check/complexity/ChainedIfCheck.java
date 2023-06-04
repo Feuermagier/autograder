@@ -13,14 +13,37 @@ import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtStatement;
 
 import java.util.List;
+import java.util.Map;
 
-@ExecutableCheck(reportedProblems = {ProblemType.UNMERGED_ELSE_IF})
+@ExecutableCheck(reportedProblems = { ProblemType.MERGE_NESTED_IF, ProblemType.UNMERGED_ELSE_IF })
 public class ChainedIfCheck extends IntegratedCheck {
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtIf>() {
             @Override
             public void process(CtIf ctIf) {
+                // check if the if-statement has a nested if:
+                List<CtStatement> thenStatements = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
+                if (thenStatements.size() == 1
+                    && thenStatements.get(0) instanceof CtIf nestedIf
+                    && (nestedIf.getElseStatement() == null
+                        || SpoonUtil.getEffectiveStatements(nestedIf.getElseStatement()).isEmpty())) {
+                    addLocalProblem(
+                        ctIf.getCondition(),
+                        new LocalizedMessage(
+                            "merge-nested-if",
+                            Map.of(
+                                "suggestion", ctIf.getFactory().createBinaryOperator(
+                                    ctIf.getCondition(),
+                                    nestedIf.getCondition(),
+                                    spoon.reflect.code.BinaryOperatorKind.AND
+                                ).prettyprint()
+                            )
+                        ),
+                        ProblemType.MERGE_NESTED_IF
+                    );
+                }
+
                 CtStatement elseStatement = ctIf.getElseStatement();
                 if (!(elseStatement instanceof CtBlock<?> ctBlock) || ctBlock.getStatements().isEmpty()) {
                     return;
