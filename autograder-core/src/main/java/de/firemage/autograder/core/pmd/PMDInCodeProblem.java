@@ -17,7 +17,7 @@ public class PMDInCodeProblem extends ProblemImpl {
                 violation.getBeginLine(),
                 violation.getBeginColumn(),
                 violation.getBeginColumn()),
-            check.getExplanation() != null ? check.getExplanation() : new LocalizedMessage(violation.getDescription()),
+            check.getExplanation() != null ? check.getExplanation().apply(violation) : new LocalizedMessage(violation.getDescription()),
             check.getProblemType());
     }
 
