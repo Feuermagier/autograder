@@ -62,6 +62,8 @@ array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so compa
                             equality only. If neither deduplication nor lookup are needed, consider using a List
                             instead.
 
+common-reimplementation = The code can be simplified to '{$suggestion}'.
+
 # Comment
 commented-out-code-exp = This commented out code should be removed
 

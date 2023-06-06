@@ -36,10 +36,12 @@ import spoon.reflect.reference.CtVariableReference;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
@@ -256,11 +258,27 @@ public final class SpoonUtil {
             }
         }
 
-        // evaluate concatenations of (potentially) literals:
         if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator) {
             CtExpression<?> left = resolveCtExpression(ctBinaryOperator.getLeftHandOperand());
             CtExpression<?> right = resolveCtExpression(ctBinaryOperator.getRightHandOperand());
 
+            // a + 0 or a - 0
+            if (right instanceof CtLiteral<?> literal
+                && literal.getValue() instanceof Integer integer
+                && integer == 0
+                && Set.of(BinaryOperatorKind.MINUS, BinaryOperatorKind.PLUS).contains(ctBinaryOperator.getKind())) {
+                return left;
+            }
+
+            // 0 + a (0 - a != a)
+            if (left instanceof CtLiteral<?> literal
+                && literal.getValue() instanceof Integer integer
+                && integer == 0
+                && ctBinaryOperator.getKind() == BinaryOperatorKind.PLUS) {
+                return right;
+            }
+
+            // evaluate concatenations of (potentially) literals:
             // check if both resolve to literals
             if (left instanceof CtLiteral<?> leftLiteral
                     && right instanceof CtLiteral<?> rightLiteral
@@ -390,8 +408,8 @@ public final class SpoonUtil {
     }
 
     public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
-            StaticAnalysis staticAnalysis,
-            CtVariableReference<?> ctVariableReference
+        StaticAnalysis staticAnalysis,
+        CtVariableReference<?> ctVariableReference
     ) {
         if (!isEffectivelyFinal(staticAnalysis, ctVariableReference)) {
             return Optional.empty();
@@ -400,8 +418,10 @@ public final class SpoonUtil {
         return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
     }
 
-    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?> expectedClass) {
-        return ctType.getFactory().Type().createReference(expectedClass).equals(ctType);
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
+        return Arrays.stream(expected)
+            .map(ctClass -> ctType.getFactory().Type().createReference(ctClass))
+            .anyMatch(ctType::equals);
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {

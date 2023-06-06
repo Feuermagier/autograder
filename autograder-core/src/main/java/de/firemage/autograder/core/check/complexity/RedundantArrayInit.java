@@ -65,7 +65,6 @@ public class RedundantArrayInit extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        // TODO: is getModel().getRootPackage() correct?
         staticAnalysis.getModel().getRootPackage().accept(new ScopedVisitor() {
             @Override
             public <T, A extends T> void visitCtAssignment(CtAssignment<T, A> assignment) {

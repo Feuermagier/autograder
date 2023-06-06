@@ -61,6 +61,8 @@ equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich s
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
+common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
+
 # Comment
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
 
