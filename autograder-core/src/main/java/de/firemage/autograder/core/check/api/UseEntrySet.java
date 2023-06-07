@@ -17,7 +17,7 @@ import spoon.reflect.visitor.filter.InvocationFilter;
 
 import java.util.List;
 
-@ExecutableCheck(reportedProblems = {ProblemType.STRING_IS_EMPTY_REIMPLEMENTED})
+@ExecutableCheck(reportedProblems = {ProblemType.USE_ENTRY_SET})
 public class UseEntrySet extends IntegratedCheck {
     private static boolean hasInvokedKeySet(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() != null
@@ -61,7 +61,7 @@ public class UseEntrySet extends IntegratedCheck {
                     addLocalProblem(
                         ctForEach.getExpression(),
                         new LocalizedMessage("use-entry-set"),
-                        ProblemType.STRING_IS_EMPTY_REIMPLEMENTED
+                        ProblemType.USE_ENTRY_SET
                     );
                 }
             }
