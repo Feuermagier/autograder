@@ -76,3 +76,25 @@ public class Test {
 
     }
 }
+
+// Tests from https://github.com/pmd/pmd/blob/e8dbb54cb5ed682d9dfd4f54895f4bbd73be728e/pmd-java/src/test/resources/net/sourceforge/pmd/lang/java/rule/design/xml/CollapsibleIfStatements.xml#L4
+class PmdTests {
+    void callable(boolean x, boolean y) {
+        if (x) { // Not Ok
+            if (y) {
+            }
+        }
+
+        if (x) { // Ok
+            int z = 5;
+            if (y) {
+            }
+        }
+
+        if (x) { // Ok
+            if (y) {
+            }
+            int z = 5;
+        }
+    }
+}

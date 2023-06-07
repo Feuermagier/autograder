@@ -29,4 +29,9 @@ class B extends A {
     public boolean equals(Object obj) {
         return obj instanceof B; // Ok
     }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName(); // Ok
+    }
 }

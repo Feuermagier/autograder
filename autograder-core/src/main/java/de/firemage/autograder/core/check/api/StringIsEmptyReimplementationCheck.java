@@ -54,7 +54,9 @@ public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
     private boolean equalsWithEmptyString(CtInvocation<?> invocation) {
         CtExecutableReference<?> executable = invocation.getExecutable();
         return executable.getSignature().equals("equals(java.lang.Object)")
-            && SpoonUtil.isStringLiteral(invocation.getArguments().get(0), "");
+            && (SpoonUtil.isStringLiteral(invocation.getArguments().get(0), "")
+             // detect "".equals(s)
+            || SpoonUtil.isStringLiteral(invocation.getTarget(), ""));
     }
 
     private boolean lengthZeroCheck(CtInvocation<?> invocation) {
@@ -68,6 +70,7 @@ public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
 
     private boolean lengthGreaterThanZeroCheck(CtInvocation<?> invocation) {
         CtExecutableReference<?> executable = invocation.getExecutable();
+
         if (!executable.getSignature().equals("length()")) {
             return false;
         }

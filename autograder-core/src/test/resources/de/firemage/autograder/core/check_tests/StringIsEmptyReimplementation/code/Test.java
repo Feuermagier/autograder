@@ -27,5 +27,6 @@ public class Test {
         var h = 0 < foo.length(); // Not Ok
         var i = 0 <= foo.length(); // Ok
         var j = 1 <= foo.length(); // Not Ok
+        var k = "".equals("hello"); // Not Ok
     }
 }

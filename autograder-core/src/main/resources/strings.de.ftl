@@ -61,6 +61,10 @@ equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich s
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
+common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
+
+use-entry-set = Verwende hier 'entrySet' statt 'keySet'.
+
 # Comment
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
 
@@ -263,6 +267,10 @@ closed-set-of-values-method = Die Methode gibt nur die Konstanten Werte '{$value
 
 do-not-use-instanceof = instanceof sollte nicht verwendet werden. Siehe Ilias Wiki.
 do-not-use-instanceof-emulation = instanceof sollte nicht verwendet werden und auch nicht durch getClass oder ClassCastException emuliert werden. Siehe Ilias Wiki.
+
+abstract-class-without-abstract-method = Abstrakte Klassen sollten mindestens eine abstrakte Methode haben.
+composition-over-inheritance = Die Oberklasse hat nur Felder. Statt Vererbung sollte hier Komposition verwendet werden. Zum Beispiel ein interface mit dem getter: '{$suggestion}'.
+should-be-interface = Die Klasse hat nur Methoden und keine Felder. Statt Vererbung sollte hier ein Interface mit Standard-Implementierungen verwendet werden.
 
 # Structure
 

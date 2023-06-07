@@ -45,6 +45,10 @@ public final class IdentifierNameUtils {
         return getCaseFormat(identifier).converterTo(CaseFormat.UPPER_UNDERSCORE).convert(identifier);
     }
 
+    public static String toLowerCamelCase(String identifier) {
+        return getCaseFormat(identifier).converterTo(CaseFormat.LOWER_CAMEL).convert(identifier);
+    }
+
     private static CaseFormat getCaseFormat(String identifier) {
         if (isLowerCamelCase(identifier)) {
             return CaseFormat.LOWER_CAMEL;

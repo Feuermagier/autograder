@@ -62,6 +62,10 @@ array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so compa
                             equality only. If neither deduplication nor lookup are needed, consider using a List
                             instead.
 
+common-reimplementation = The code can be simplified to '{$suggestion}'.
+
+use-entry-set = Use 'entrySet' here instead of 'keySet'.
+
 # Comment
 commented-out-code-exp = This commented out code should be removed
 
@@ -263,6 +267,10 @@ closed-set-of-values-method = The method only returns the constant values '{$val
 
 do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.
 do-not-use-instanceof-emulation = instanceof should not be used and also not be emulated through getClass or ClassCastException. See Ilias Wiki.
+
+abstract-class-without-abstract-method = Abstract classes should have at least one abstract method.
+composition-over-inheritance = The parent class has only fields. Instead of inheritance, composition should be used. For example through an interface with the getter: '{$suggestion}'.
+should-be-interface = The parent class has only methods without fields. Instead of inheritance an interface with default-implementations should be used.
 
 # Structure
 
