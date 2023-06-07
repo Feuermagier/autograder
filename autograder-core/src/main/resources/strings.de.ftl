@@ -63,6 +63,8 @@ array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. D
 
 common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 
+use-entry-set = Verwende hier 'entrySet' statt 'keySet'.
+
 # Comment
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
 

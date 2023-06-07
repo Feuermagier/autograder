@@ -64,6 +64,8 @@ array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so compa
 
 common-reimplementation = The code can be simplified to '{$suggestion}'.
 
+use-entry-set = Use 'entrySet' here instead of 'keySet'.
+
 # Comment
 commented-out-code-exp = This commented out code should be removed
 

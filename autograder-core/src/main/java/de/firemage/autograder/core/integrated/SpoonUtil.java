@@ -241,6 +241,8 @@ public final class SpoonUtil {
     }
 
     public static CtExpression<?> resolveCtExpression(CtExpression<?> ctExpression) {
+        if (ctExpression == null) return null;
+
         CtModel ctModel = ctExpression.getFactory().getModel();
 
         // inline constants:
@@ -422,6 +424,10 @@ public final class SpoonUtil {
         return Arrays.stream(expected)
             .map(ctClass -> ctType.getFactory().Type().createReference(ctClass))
             .anyMatch(ctType::equals);
+    }
+
+    public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
+        return ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().createReference(expected));
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
