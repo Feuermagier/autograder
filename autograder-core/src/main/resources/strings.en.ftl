@@ -266,6 +266,10 @@ closed-set-of-values-method = The method only returns the constant values '{$val
 do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.
 do-not-use-instanceof-emulation = instanceof should not be used and also not be emulated through getClass or ClassCastException. See Ilias Wiki.
 
+abstract-class-without-abstract-method = Abstract classes should have at least one abstract method.
+composition-over-inheritance = The parent class has only fields. Instead of inheritance, composition should be used. For example through an interface with the getter: '{$suggestion}'.
+should-be-interface = The parent class has only methods without fields. Instead of inheritance an interface with default-implementations should be used.
+
 # Structure
 
 default-package = The default-package should not be used. The following classes are in the default-package: {$positions}
