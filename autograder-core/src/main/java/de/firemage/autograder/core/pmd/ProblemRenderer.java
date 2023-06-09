@@ -23,7 +23,7 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
         super("Custom renderer", "Creates InCodeProblems");
         this.checks = checks;
         this.root = root;
-        super.setWriter(new NullWriter());
+        super.setWriter(NullWriter.INSTANCE);
     }
 
     @Override

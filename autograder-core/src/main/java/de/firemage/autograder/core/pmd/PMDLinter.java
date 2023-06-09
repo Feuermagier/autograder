@@ -10,6 +10,7 @@ import net.sourceforge.pmd.RuleSet;
 import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.lang.LanguageRegistry;
 import net.sourceforge.pmd.lang.document.FileCollector;
+import net.sourceforge.pmd.lang.document.FileId;
 
 import javax.tools.JavaFileObject;
 import java.io.IOException;
@@ -53,8 +54,8 @@ public class PMDLinter {
             FileCollector collector = pmd.files();
             for (JavaFileObject compilationUnit : file.getSource().compilationUnits()) {
                 collector.addSourceFile(
-                    compilationUnit.getCharContent(false).toString(),
-                    compilationUnit.getName()
+                    FileId.fromPathLikeString(compilationUnit.getName()),
+                    compilationUnit.getCharContent(false).toString()
                 );
             }
 

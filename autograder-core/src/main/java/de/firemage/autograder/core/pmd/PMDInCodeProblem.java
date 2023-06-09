@@ -12,7 +12,7 @@ public class PMDInCodeProblem extends ProblemImpl {
     public PMDInCodeProblem(PMDCheck check, RuleViolation violation, Path root) {
         super(check,
             new CodePosition(
-                relativize(root, Path.of(violation.getFilename())),
+                relativize(root, Path.of(violation.getFileId().getAbsolutePath())),
                 violation.getBeginLine(),
                 violation.getBeginLine(),
                 violation.getBeginColumn(),
