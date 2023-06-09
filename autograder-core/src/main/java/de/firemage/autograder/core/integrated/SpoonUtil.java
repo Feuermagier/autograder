@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import com.google.common.collect.Streams;
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -30,6 +31,8 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
@@ -227,7 +230,7 @@ public final class SpoonUtil {
         CtUnaryOperator ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
 
         ctUnaryOperator.setKind(UnaryOperatorKind.NEG);
-        ctUnaryOperator.setOperand(ctExpression);
+        ctUnaryOperator.setOperand(ctExpression.clone());
 
         return ctUnaryOperator;
     }
@@ -331,21 +334,60 @@ public final class SpoonUtil {
         return method.getType().getQualifiedName().equals("void");
     }
 
+    public static boolean isSignatureEqualTo(
+        CtExecutableReference<?> ctExecutableReference,
+        Class<?> returnType,
+        String methodName,
+        Class<?>... parameterTypes
+    ) {
+        TypeFactory factory = ctExecutableReference.getFactory().Type();
+        return SpoonUtil.isSignatureEqualTo(
+            ctExecutableReference,
+            factory.createReference(returnType),
+            methodName,
+            Arrays.stream(parameterTypes).map(factory::createReference).toArray(CtTypeReference[]::new)
+        );
+    }
+
+    public static boolean isSignatureEqualTo(
+        CtExecutableReference<?> ctExecutableReference,
+        CtTypeReference<?> returnType,
+        String methodName,
+        CtTypeReference<?>... parameterTypes
+    ) {
+        // check that they both return the same type
+        return SpoonUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)
+            // their names should match:
+            && ctExecutableReference.getSimpleName().equals(methodName)
+            // the number of parameters should match
+            && ctExecutableReference.getParameters().size() == parameterTypes.length
+            && Streams.zip(
+                // combine both the parameters of the executable and the expected types
+                ctExecutableReference.getParameters().stream(),
+                Arrays.stream(parameterTypes),
+                // evaluate if the type of the parameter is equal to the expected type:
+                SpoonUtil::isTypeEqualTo
+                // On this stream of booleans, check if all are true
+            ).allMatch(value -> value);
+    }
+
     public static boolean isEqualsMethod(CtMethod<?> method) {
-        return method.getSimpleName().equals("equals")
-               && method.isPublic()
-               && method.getType().getQualifiedName().equals("boolean")
-               && method.getParameters().size() == 1
-               && method.getParameters().get(0).getType().getQualifiedName().equals("java.lang.Object");
+        return SpoonUtil.isSignatureEqualTo(
+            method.getReference(),
+            boolean.class,
+            "equals",
+            java.lang.Object.class
+        );
     }
 
     public static boolean isCompareToMethod(CtMethod<?> method) {
-        return method.getSimpleName().equals("compareTo")
-               && method.isPublic()
-               && method.getType().getQualifiedName().equals("boolean")
-               && method.getParameters().size() == 1
-               && method.getParameters().get(0).getType().getQualifiedName()
-                        .equals(method.getDeclaringType().getQualifiedName());
+        return method.isPublic()
+                && SpoonUtil.isSignatureEqualTo(
+                    method.getReference(),
+                    method.getFactory().Type().createReference(int.class),
+                    "compareTo",
+                    method.getDeclaringType().getReference()
+                );
     }
 
     public static Optional<CtJavaDoc> getJavadoc(CtElement element) {
@@ -421,9 +463,17 @@ public final class SpoonUtil {
     }
 
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
-        return Arrays.stream(expected)
-            .map(ctClass -> ctType.getFactory().Type().createReference(ctClass))
-            .anyMatch(ctType::equals);
+        TypeFactory factory = ctType.getFactory().Type();
+        return SpoonUtil.isTypeEqualTo(
+            ctType,
+            Arrays.stream(expected)
+                .map(factory::createReference)
+                .toArray(CtTypeReference[]::new)
+        );
+    }
+
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, CtTypeReference<?>... expected) {
+        return Arrays.asList(expected).contains(ctType);
     }
 
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
@@ -431,12 +481,14 @@ public final class SpoonUtil {
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
-        return method.getSimpleName().equals("main")
-            && method.getType().getQualifiedName().equals("void")
-            && method.isStatic()
+        return method.isStatic()
             && method.isPublic()
-            && method.getParameters().size() == 1
-            && method.getParameters().get(0).getType().getQualifiedName().equals("java.lang.String[]");
+            && SpoonUtil.isSignatureEqualTo(
+                method.getReference(),
+                void.class,
+                "main",
+                java.lang.String[].class
+            );
     }
 
     /**

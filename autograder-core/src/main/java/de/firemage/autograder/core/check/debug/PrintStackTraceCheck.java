@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtInvocation;
@@ -15,9 +16,7 @@ public class PrintStackTraceCheck extends IntegratedCheck {
     private static boolean hasInvokedPrintStackTrace(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() instanceof CtVariableRead<?> ctVariableRead
             // ensure the method is called on the correct type
-            && ctVariableRead.getType().isSubtypeOf(
-                ctInvocation.getFactory().Type().createReference(java.lang.Throwable.class)
-            )
+            && SpoonUtil.isSubtypeOf(ctVariableRead.getType(), java.lang.Throwable.class)
             && ctInvocation.getExecutable().getSimpleName().equals("printStackTrace");
     }
 

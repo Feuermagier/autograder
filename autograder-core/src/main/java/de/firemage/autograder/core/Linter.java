@@ -166,6 +166,11 @@ public final class Linter {
         Iterable<? extends Check> checks,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
+        // the file is null if the student did not upload source code
+        if (file == null) {
+            return new ArrayList<>();
+        }
+
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
         List<CopyPasteCheck> cpdChecks = new ArrayList<>();
