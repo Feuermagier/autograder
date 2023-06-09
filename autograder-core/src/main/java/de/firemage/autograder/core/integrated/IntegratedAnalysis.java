@@ -101,14 +101,19 @@ public class IntegratedAnalysis {
 
         statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
 
-        for (IntegratedCheck check : checks) {
-            scheduler.submitTask((s, reporter) -> {
+        // Execute checks in sequence to avoid race conditions in spoon.
+        // Some queries on the spoon model have writes that are not synchronized.
+        //
+        // This has caused a crash, where one queried if a type (from java.lang) is a subtype of another type,
+        // which would invoke the shadow model. This is built lazily, and seems to cause a race-condition.
+        scheduler.submitTask((s, reporter) -> {
+            for (IntegratedCheck check : checks) {
                 long beforeTime = System.nanoTime();
                 reporter.reportProblems(check.run(this.staticAnalysis, this.dynamicAnalysis, this.file.getSource().getPath()));
                 long afterTime = System.nanoTime();
                 logger.info("Completed check " + check.getClass().getSimpleName() + " in " + ((afterTime - beforeTime) / 1_000_000 + "ms"));
-            });
-        }
+            }
+        });
     }
 
     public StaticAnalysis getStaticAnalysis() {
