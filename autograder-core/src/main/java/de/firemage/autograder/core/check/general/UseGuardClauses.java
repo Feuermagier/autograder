@@ -34,7 +34,8 @@ public class UseGuardClauses extends IntegratedCheck {
         CtUnaryOperator<T> ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
 
         ctUnaryOperator.setKind(kind);
-        ctUnaryOperator.setOperand(ctExpression);
+        // the clone is necessary, so the original expression from the CtModel does not get a new parent
+        ctUnaryOperator.setOperand(ctExpression.clone());
 
         return ctUnaryOperator;
     }

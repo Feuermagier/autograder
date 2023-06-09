@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check.general;
 
-import com.google.common.collect.Iterators;
 import com.google.common.collect.Sets;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
@@ -19,7 +18,6 @@ import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.reference.CtReference;
-import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
 import java.util.Iterator;
