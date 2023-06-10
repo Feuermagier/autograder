@@ -4,6 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
+import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -27,6 +28,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {
@@ -47,23 +49,44 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         "sec", "min"
     );
 
-    private static final Set<String> ALLOWED_SIMILAR_IDENTIFER = Set.of(
+    private static final Set<String> ALLOWED_SIMILAR_IDENTIFIER = Set.of(
         "july", "june"
     );
 
     private final Set<String> similarIdentifier = new HashSet<>();
 
-    private static boolean hasTypeInName(CtNamedElement ctVariable) {
-        String name = ctVariable.getSimpleName().toLowerCase();
+    private static Set<String> typeNameAlternatives(String typeName) {
+        Set<String> result = new HashSet<>(Set.of(typeName));
 
+        if (!typeName.endsWith("s")) {
+            // string -> strings, int -> ints, ...
+            result.add(typeName + "s");
+        }
+
+        if (typeName.equals("int")) {
+            result.addAll(typeNameAlternatives("integer"));
+        }
+
+        return result;
+    }
+
+    private static boolean hasTypeInName(CtNamedElement ctVariable) {
         List<String> referencedTypeNames = ctVariable.getReferencedTypes()
             .stream()
             .map(CtTypeReference::getSimpleName)
             .map(String::toLowerCase)
             .filter(TYPE_NAMES::contains)
+            .flatMap(name -> typeNameAlternatives(name).stream())
             .toList();
 
-        return referencedTypeNames.stream().anyMatch(ty -> name.contains(ty) && !name.equals(ty));
+        Set<String> words = IdentifierNameUtils.split(ctVariable.getSimpleName()).collect(Collectors.toSet());
+        if (words.size() == 1) {
+            // if the variable name is only one word, any violation would be the type name itself
+            // like `int integer` or `String string`, which is explicitly allowed
+            return false;
+        }
+
+        return referencedTypeNames.stream().anyMatch(words::contains);
     }
 
     private static boolean isLambdaParameter(CtVariable<?> variable) {
@@ -138,8 +161,8 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private static boolean areSimilar(CtNamedElement variable, CtNamedElement other) {
-        if (ALLOWED_SIMILAR_IDENTIFER.contains(variable.getSimpleName().toLowerCase())
-            || ALLOWED_SIMILAR_IDENTIFER.contains(other.getSimpleName().toLowerCase())) {
+        if (ALLOWED_SIMILAR_IDENTIFIER.contains(variable.getSimpleName().toLowerCase())
+            || ALLOWED_SIMILAR_IDENTIFIER.contains(other.getSimpleName().toLowerCase())) {
             return false;
         }
 

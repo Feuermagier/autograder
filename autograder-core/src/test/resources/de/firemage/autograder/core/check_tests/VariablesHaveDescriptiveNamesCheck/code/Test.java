@@ -18,10 +18,15 @@ public class Test {
     int sec; // Not Ok
     int min; // Not Ok
 
-    int interpret; // Not Ok
+    int interpret; // Ok
     String interpreters; // Ok
     List<String> validStrings; // Not Ok
     Set<Integer> integerSet; // Not Ok
+
+    int pointer; // Ok
+    int pointerValue; // Ok
+    int flagInternal; // Ok
+    int playerPointer; // Ok
 }
 
 enum Month {
