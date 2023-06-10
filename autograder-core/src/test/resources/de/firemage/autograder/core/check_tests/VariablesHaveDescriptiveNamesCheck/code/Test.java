@@ -27,6 +27,15 @@ public class Test {
     int pointerValue; // Ok
     int flagInternal; // Ok
     int playerPointer; // Ok
+
+    int maxValue; // Ok
+    int minValue; // Ok
+
+    int maximumValue; // Ok
+    int minimumValue; // Ok
+
+    int maxNumber; // Ok
+    int minNumber; // Ok
 }
 
 enum Month {

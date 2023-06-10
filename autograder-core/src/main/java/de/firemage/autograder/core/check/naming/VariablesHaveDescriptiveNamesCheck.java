@@ -53,6 +53,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         "july", "june"
     );
 
+    private static final Set<String> ALLOWED_SIMILAR_IDENTIFIER_CONTAINS = Set.of(
+        "max", "min", "maximum", "minimum"
+    );
+
     private final Set<String> similarIdentifier = new HashSet<>();
 
     private static Set<String> typeNameAlternatives(String typeName) {
@@ -139,7 +143,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
      *
      * @param variable the first variable
      * @param other    the second variable
-     * @return a value of 0 means they are equal, a value of 1 means they differ at one character, a value of 2 means they differ by at two characters, ...
+     * @return a value of 0 means they are equal, a value of 1 means they differ at one character, a value of 2 means they differ by two characters, ...
      */
     private static int similarity(CtNamedElement variable, CtNamedElement other) {
         String name = variable.getSimpleName();
@@ -163,6 +167,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static boolean areSimilar(CtNamedElement variable, CtNamedElement other) {
         if (ALLOWED_SIMILAR_IDENTIFIER.contains(variable.getSimpleName().toLowerCase())
             || ALLOWED_SIMILAR_IDENTIFIER.contains(other.getSimpleName().toLowerCase())) {
+            return false;
+        }
+
+        if (ALLOWED_SIMILAR_IDENTIFIER_CONTAINS.stream().anyMatch(variable.getSimpleName().toLowerCase()::contains)
+            || ALLOWED_SIMILAR_IDENTIFIER_CONTAINS.stream().anyMatch(other.getSimpleName().toLowerCase()::contains)) {
             return false;
         }
 
