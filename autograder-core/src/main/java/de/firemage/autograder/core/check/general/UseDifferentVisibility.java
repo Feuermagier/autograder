@@ -20,64 +20,14 @@ import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
-import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
     ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC
 })
 public class UseDifferentVisibility extends IntegratedCheck {
-    // returns all parents of a CtElement
-    private static Iterable<CtElement> parents(CtElement ctElement) {
-        return () -> new Iterator<>() {
-            private CtElement current = ctElement;
-
-            @Override
-            public boolean hasNext() {
-                return this.current.isParentInitialized();
-            }
-
-            @Override
-            public CtElement next() throws NoSuchElementException {
-                if (!this.hasNext()) {
-                    throw new NoSuchElementException("No more parents");
-                }
-
-                CtElement result = this.current.getParent();
-                this.current = result;
-                return result;
-            }
-        };
-    }
-
-    private static CtElement findCommonParent(CtElement firstElement, Iterable<? extends CtElement> others) {
-        // CtElement::hasParent will recursively call itself until it reaches the root
-        // => inefficient and might cause a stack overflow
-
-        // add all parents of the firstElement to a set sorted by distance to the firstElement:
-        Set<CtElement> ctParents = new LinkedHashSet<>();
-        ctParents.add(firstElement);
-        parents(firstElement).forEach(ctParents::add);
-
-        for (CtElement other : others) {
-            // only keep the parents that the firstElement and the other have in common
-            ctParents.retainAll(Sets.newHashSet(parents(other).iterator()));
-        }
-
-        // the first element in the set is the closest common parent
-        try {
-            return ctParents.iterator().next();
-        } catch (Exception e) {
-            e.printStackTrace();
-            throw e;
-        }
-    }
-
     private enum Visibility implements Comparable<Visibility> {
         PRIVATE,
         DEFAULT,
@@ -112,7 +62,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
 
         List<CtReference> references = ctModel.getElements(new DirectReferenceFilter<>(ctReference)).stream().filter(ctElement -> !ctElement.isImplicit()).toList();
 
-        CtElement commonParent = findCommonParent(ctTypeMember, references);
+        CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
 
         // if there are no references, the member itself will be returned
