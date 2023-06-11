@@ -70,7 +70,12 @@ public class UseDifferentVisibility extends IntegratedCheck {
         }
 
         // the first element in the set is the closest common parent
-        return ctParents.iterator().next();
+        try {
+            return ctParents.iterator().next();
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw e;
+        }
     }
 
     private enum Visibility implements Comparable<Visibility> {
@@ -105,7 +110,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
     private static Visibility getVisibility(CtTypeMember ctTypeMember, CtReference ctReference) {
         CtModel ctModel = ctReference.getFactory().getModel();
 
-        List<CtReference> references = ctModel.getElements(new DirectReferenceFilter<>(ctReference));
+        List<CtReference> references = ctModel.getElements(new DirectReferenceFilter<>(ctReference)).stream().filter(ctElement -> !ctElement.isImplicit()).toList();
 
         CtElement commonParent = findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
@@ -147,18 +152,16 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 }
 
                 Visibility currentVisibility = Visibility.of(ctTypeMember);
-                Visibility visibility;
-                if (ctTypeMember instanceof CtField<?> ctField) {
-                    visibility = getVisibility(ctTypeMember, ctField.getType());
-                } else if (ctTypeMember instanceof CtMethod<?> ctMethod) {
-                    if (SpoonUtil.isMainMethod(ctMethod) || SpoonUtil.isOverriddenMethod(ctMethod)) {
-                        return;
-                    }
-
-                    visibility = getVisibility(ctTypeMember, ctMethod.getReference());
-                } else {
+                if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || SpoonUtil.isOverriddenMethod(ctMethod))) {
                     return;
                 }
+
+                // only check methods and fields
+                if (!(ctTypeMember instanceof CtMethod<?>) || !(ctTypeMember instanceof CtField<?>)) {
+                    return;
+                }
+
+                Visibility visibility = getVisibility(ctTypeMember, ctTypeMember.getReference());
 
                 if (visibility.isMoreRestrictiveThan(currentVisibility)) {
                     // it does not make sense to deduct for public things that should be default visibility,

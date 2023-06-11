@@ -10,8 +10,8 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
 import spoon.reflect.code.*;
 import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtRecord;
 import spoon.reflect.declaration.CtRecordComponent;
 import spoon.reflect.declaration.CtTypeInformation;
@@ -172,22 +172,18 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             }
 
             @Override
-            public <T> void visitCtConstructor(CtConstructor<T> ctConstructor) {
-                // do not visit default constructor
-                if (!ctConstructor.isImplicit()) {
-                    super.visitCtConstructor(ctConstructor);
-                }
-            }
-
-            @Override
             public void visitCtRecord(CtRecord ctRecord) {
                 this.enter(ctRecord);
                 this.scan(CtRole.ANNOTATION, ctRecord.getAnnotations());
                 this.scan(CtRole.INTERFACE, ctRecord.getSuperInterfaces());
-                // this.scan(CtRole.TYPE_MEMBER, ctRecord.getTypeMembers());
                 this.scan(CtRole.TYPE_PARAMETER, ctRecord.getFormalCtTypeParameters());
                 for (CtRecordComponent component : ctRecord.getRecordComponents()) {
-                    this.visitCtField(component.toField());
+                    CtField<?> ctField = component.toField();
+                    // the toField does not set the parent
+                    // this is a problem, because when one queries the AST, one might get this node
+                    // and it will not have a parent
+                    ctField.setParent(ctRecord);
+                    this.visitCtField(ctField);
                 }
                 this.scan(CtRole.COMMENT, ctRecord.getComments());
                 this.exit(ctRecord);
