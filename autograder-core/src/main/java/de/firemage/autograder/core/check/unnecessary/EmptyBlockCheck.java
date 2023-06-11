@@ -26,20 +26,18 @@ public class EmptyBlockCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtBlock(CtBlock<T> ctBlock) {
-                if (ctBlock.isImplicit() || !ctBlock.getPosition().isValidPosition()) {
+                if (ctBlock.isImplicit() || !ctBlock.getPosition().isValidPosition() || !isEmptyBlock(ctBlock)) {
                     super.visitCtBlock(ctBlock);
                     return;
                 }
 
-                if (ctBlock.getParent() instanceof CtCatch ctCatch
-                    && ctCatch.getBody().equals(ctBlock)
-                    && SpoonUtil.getEffectiveStatements(ctBlock).isEmpty()) {
+                if (ctBlock.getParent() instanceof CtCatch ctCatch && ctCatch.getBody().equals(ctBlock)) {
                     addLocalProblem(
                         ctCatch,
                         new LocalizedMessage("empty-catch-block"),
                         ProblemType.EMPTY_CATCH
                     );
-                } else if (isEmptyBlock(ctBlock)) {
+                } else {
                     addLocalProblem(
                         ctBlock,
                         new LocalizedMessage("empty-block"),
