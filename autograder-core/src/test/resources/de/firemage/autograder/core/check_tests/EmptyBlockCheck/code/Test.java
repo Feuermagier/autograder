@@ -8,7 +8,7 @@ public class Test {
 
         try {
             throw new IllegalArgumentException();
-        } catch (Exception e) { // Not Ok
+        } catch (Exception e) /* Not Ok */ {
         } finally {} // Not Ok
     }
 
@@ -59,7 +59,7 @@ public class Test {
 
         try {
             System.out.println("Hello World!");
-        } catch (Exception e) { // Not Ok
+        } catch (Exception e) { // Ok
             // effectively empty
         }
 

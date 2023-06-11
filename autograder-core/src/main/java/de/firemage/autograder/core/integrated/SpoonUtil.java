@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import com.google.common.collect.Sets;
 import com.google.common.collect.Streams;
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
@@ -41,8 +42,11 @@ import spoon.support.reflect.code.CtLiteralImpl;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
@@ -97,6 +101,17 @@ public final class SpoonUtil {
             && isBoolean(literal)) {
 
             return Optional.of((Boolean) literal.getValue());
+        } else {
+            return Optional.empty();
+        }
+    }
+
+    public static Optional<String> tryGetStringLiteral(CtExpression<?> expression) {
+        if (SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal
+            && literal.getValue() != null
+            && isTypeEqualTo(literal.getType(), java.lang.String.class)) {
+
+            return Optional.of((String) literal.getValue());
         } else {
             return Optional.empty();
         }
@@ -489,6 +504,59 @@ public final class SpoonUtil {
                 "main",
                 java.lang.String[].class
             );
+    }
+
+    /**
+     * Returns an iterable over all parents of the given element.
+     *
+     * @param ctElement the element to get the parents of
+     * @return an iterable over all parents, the given element is not included
+     */
+    public static Iterable<CtElement> parents(CtElement ctElement) {
+        return () -> new Iterator<>() {
+            private CtElement current = ctElement;
+
+            @Override
+            public boolean hasNext() {
+                return this.current.isParentInitialized();
+            }
+
+            @Override
+            public CtElement next() throws NoSuchElementException {
+                if (!this.hasNext()) {
+                    throw new NoSuchElementException("No more parents");
+                }
+
+                CtElement result = this.current.getParent();
+                this.current = result;
+                return result;
+            }
+        };
+    }
+
+    /**
+     * Finds the closest common parent of the given elements.
+     *
+     * @param firstElement the first element to find the common parent of
+     * @param others any amount of other elements to find the common parent of
+     * @return the closest common parent of the given elements or the firstElement itself if others is empty
+     */
+    public static CtElement findCommonParent(CtElement firstElement, Iterable<? extends CtElement> others) {
+        // CtElement::hasParent will recursively call itself until it reaches the root
+        // => inefficient and might cause a stack overflow
+
+        // add all parents of the firstElement to a set sorted by distance to the firstElement:
+        Set<CtElement> ctParents = new LinkedHashSet<>();
+        ctParents.add(firstElement);
+        parents(firstElement).forEach(ctParents::add);
+
+        for (CtElement other : others) {
+            // only keep the parents that the firstElement and the other have in common
+            ctParents.retainAll(Sets.newHashSet(parents(other).iterator()));
+        }
+
+        // the first element in the set is the closest common parent
+        return ctParents.iterator().next();
     }
 
     /**

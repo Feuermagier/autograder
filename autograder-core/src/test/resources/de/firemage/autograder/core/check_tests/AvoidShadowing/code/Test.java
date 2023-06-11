@@ -5,7 +5,7 @@ public class Test {
     static int y;
     private int z;
 
-    public static void main(String[] args) {
+    public void foo() {
         int x = 4; // Not Ok
         int y = 5; // Not Ok
         final int z = 5; // Not Ok
@@ -62,4 +62,10 @@ class Child extends Parent {
     private int x;
 
     void parent(int x) {} // Ok
+}
+
+class ShadowInStaticContext {
+    private String string;
+
+    public static void doSomething(String string) {} // Ok
 }

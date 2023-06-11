@@ -21,14 +21,14 @@ import java.util.Objects;
 public class DoNotMakeConstantsClasses extends IntegratedCheck {
     private static final int FIELD_THRESHOLD = 12;
 
-    private boolean isConstantsClassLike(StaticAnalysis staticAnalysis, CtType<?> ctType) {
+    private boolean isConstantsClassLike(CtType<?> ctType) {
         // ignore anonymous classes
         return !ctType.isAnonymous()
             // should have at least one field
             && !ctType.getFields().isEmpty()
             // all fields should be static and effectively final (no assignments)
             && ctType.getFields().stream().allMatch(
-                ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())
+                ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(ctField.getReference())
             )
             // the class should not be abstract
             && !ctType.isAbstract()
@@ -40,7 +40,7 @@ public class DoNotMakeConstantsClasses extends IntegratedCheck {
             && !SpoonUtil.isInnerClass(ctType);
     }
 
-    private boolean isConstantsEnum(StaticAnalysis staticAnalysis, CtType<?> ctType) {
+    private boolean isConstantsEnum(CtType<?> ctType) {
         return ctType.isEnum()
                && ctType.getMethods().size() <= 3
                && ctType instanceof CtEnum<?> ctEnum
@@ -65,22 +65,28 @@ public class DoNotMakeConstantsClasses extends IntegratedCheck {
                 && ctEnum.getEnumValues().size() > FIELD_THRESHOLD;
     }
 
-    private boolean isConstantsClass(StaticAnalysis staticAnalysis, CtType<?> ctType) {
+    private boolean isConstantsClass(CtType<?> ctType) {
+        int fieldCount = (int) ctType.getFields()
+            .stream()
+            // only count not private fields
+            .filter(ctField -> !ctField.isPrivate())
+            .count();
+
         return
             // for now only classes are detected (enums are more complicated)
             ctType.isClass()
             // the class should not extend anything
             && ctType.getSuperclass() == null
-            && this.isConstantsClassLike(staticAnalysis, ctType)
+            && this.isConstantsClassLike(ctType)
             // must have no method or the number of fields must be above a threshold
-            && (ctType.getMethods().isEmpty() || ctType.getFields().size() > FIELD_THRESHOLD);
+            && ((ctType.getMethods().isEmpty() && fieldCount > 1) || fieldCount > FIELD_THRESHOLD);
     }
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtType<?>>() {
             @Override
             public void process(CtType<?> ctType) {
-                if (isConstantsClass(staticAnalysis, ctType) || isConstantsEnum(staticAnalysis, ctType)) {
+                if (isConstantsClass(ctType) || isConstantsEnum(ctType)) {
                     addLocalProblem(
                         ctType,
                         new LocalizedMessage("constants-class-exp"),

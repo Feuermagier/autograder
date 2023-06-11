@@ -10,12 +10,14 @@ import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.SpoonException;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.SourcePositionHolder;
 import spoon.reflect.cu.position.DeclarationSourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.ParentNotInitializedException;
 import spoon.reflect.reference.CtArrayTypeReference;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Map;
@@ -35,6 +37,8 @@ public class ImportTypes extends IntegratedCheck {
         return !ctTypeReference.isSimplyQualified()
             && !ctTypeReference.isPrimitive()
             && !ctTypeReference.isGenerics()
+            // to ignore String[]::new
+            && ctTypeReference.getParent(CtExecutableReferenceExpression.class) == null
             && !SpoonUtil.isInnerClass(ctTypeReference);
     }
 

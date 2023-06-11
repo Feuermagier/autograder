@@ -91,9 +91,8 @@ public class CommonReimplementation extends IntegratedCheck {
             && !(ctAssignment instanceof CtOperatorAssignment<?, ?>)
             && ctAssignment.getAssigned() instanceof CtArrayAccess<?, ?> lhs
             && ctAssignment.getAssignment() instanceof CtArrayAccess<?, ?> rhs
-            // ensure that both the left and right simply access an array
-            && lhs.getTarget() instanceof CtVariableAccess<?> lhsArray
-            && rhs.getTarget() instanceof CtVariableAccess<?> rhsArray
+            && lhs.getTarget() != null
+            && rhs.getTarget() != null
             && lhs.getIndexExpression().equals(rhs.getIndexExpression())
             && lhs.getIndexExpression() instanceof CtVariableRead<Integer> index
             && index.getVariable().equals(forLoopRange.loopVariable())) {
@@ -104,9 +103,9 @@ public class CommonReimplementation extends IntegratedCheck {
                     Map.of(
                         // System.arraycopy(src, srcPos, dest, destPos, length)
                         "suggestion", "System.arraycopy(%s, %s, %s, %s, %s)".formatted(
-                            rhsArray.prettyprint(),
+                            rhs.getTarget().prettyprint(),
                             forLoopRange.start().prettyprint(),
-                            lhsArray.prettyprint(),
+                            lhs.getTarget().prettyprint(),
                             forLoopRange.start().prettyprint(),
                             forLoopRange.length().prettyprint()
                         )

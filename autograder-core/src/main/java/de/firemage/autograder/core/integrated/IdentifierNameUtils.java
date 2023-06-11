@@ -2,6 +2,9 @@ package de.firemage.autograder.core.integrated;
 
 import com.google.common.base.CaseFormat;
 
+import java.util.Arrays;
+import java.util.stream.Stream;
+
 public final class IdentifierNameUtils {
     private IdentifierNameUtils() {
 
@@ -47,6 +50,18 @@ public final class IdentifierNameUtils {
 
     public static String toLowerCamelCase(String identifier) {
         return getCaseFormat(identifier).converterTo(CaseFormat.LOWER_CAMEL).convert(identifier);
+    }
+
+    /**
+     * Splits an identifier into its parts. For example "getFooBar" will be split into "get", "foo" and "bar".
+     *
+     * @param identifier the identifier to split up, must not be null and should follow a known naming convention
+     * @return the parts of the identifier, every word is in lowercase
+     */
+    public static Stream<String> split(String identifier) {
+        // should not return null, because identifier should not be null
+        return Arrays.stream(toUpperSnakeCase(identifier).split("_"))
+            .map(String::toLowerCase);
     }
 
     private static CaseFormat getCaseFormat(String identifier) {

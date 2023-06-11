@@ -49,3 +49,9 @@ class VisualRepresentation {
 
     private <T> void takesArray(T[] array) {} // Ok
 }
+
+class FalsePositiveToArray {
+    public static  <T> String[] takesList(List<T> list) {
+        return list.stream().map(Object::toString).toArray(String[]::new); // Ok
+    }
+}

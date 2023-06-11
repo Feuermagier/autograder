@@ -41,3 +41,15 @@ class TestInSwitchDefault {
         }
     }
 }
+
+class TestExceptionCatchAndThrow {
+    private java.io.File file;
+
+    public String[] readFile() {
+        try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(this.file))) {
+            return reader.lines().toArray(String[]::new);
+        } catch (final java.io.IOException e) {
+            throw new RuntimeException(e); // Ok
+        }
+    }
+}
