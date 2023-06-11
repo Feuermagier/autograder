@@ -157,7 +157,7 @@ exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block 
 
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 
-exception-message-exp = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
+exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
 
 # General
 

@@ -12,17 +12,34 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtThrow;
+import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtTypedElement;
 
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
         return expression instanceof CtConstructorCall<?> ctorCall
             && ExceptionUtil.isRuntimeException(ctorCall.getType())
-            && ctorCall.getArguments().stream().noneMatch(ExceptionMessageCheck::isNonBlankString);
+            && !hasMessage(ctorCall.getArguments());
+    }
+
+    private static boolean hasMessage(Iterable<? extends CtExpression<?>> arguments) {
+        for (CtExpression<?> ctExpression : arguments) {
+            String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
+
+            if (literal != null) {
+                return !literal.isBlank();
+            }
+
+            // allow wrapping exceptions into a new exception
+            if (ctExpression instanceof CtVariableAccess<?> ctVariableAccess
+                && SpoonUtil.isSubtypeOf(ctVariableAccess.getType(), java.lang.Throwable.class)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private static boolean isInAllowedContext(CtElement ctElement) {
@@ -32,22 +49,17 @@ public class ExceptionMessageCheck extends IntegratedCheck {
         return ctCase != null && ctCase.getCaseExpressions().isEmpty();
     }
 
-    private static boolean isNonBlankString(CtTypedElement<?> expression) {
-        if (!SpoonUtil.isString(expression.getType())) {
-            return false;
-        }
-
-        return !(expression instanceof CtLiteral<?> literal) || !((String) literal.getValue()).isBlank();
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtThrow>() {
             @Override
             public void process(CtThrow throwStmt) {
                 if (isExceptionWithoutMessage(throwStmt.getThrownExpression()) && !isInAllowedContext(throwStmt)) {
-                    addLocalProblem(throwStmt, new LocalizedMessage("exception-message-exp"),
-                        ProblemType.EXCEPTION_WITHOUT_MESSAGE);
+                    addLocalProblem(
+                        throwStmt,
+                        new LocalizedMessage("exception-message"),
+                        ProblemType.EXCEPTION_WITHOUT_MESSAGE
+                    );
                 }
             }
         });

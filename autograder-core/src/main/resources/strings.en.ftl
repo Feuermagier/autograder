@@ -159,7 +159,7 @@ exception-controlflow-exp-caught = {$exp} thrown and immediately caught in a sur
 
 runtime-ex-caught-exp = Runtime exception of type {$exp} caught
 
-exception-message-exp = An exception should always have a message that explains what the problem is and ideally how it occurred.
+exception-message = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
 # General
 

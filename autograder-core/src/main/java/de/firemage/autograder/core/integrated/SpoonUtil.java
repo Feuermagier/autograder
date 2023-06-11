@@ -106,6 +106,17 @@ public final class SpoonUtil {
         }
     }
 
+    public static Optional<String> tryGetStringLiteral(CtExpression<?> expression) {
+        if (SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal
+            && literal.getValue() != null
+            && isTypeEqualTo(literal.getType(), java.lang.String.class)) {
+
+            return Optional.of((String) literal.getValue());
+        } else {
+            return Optional.empty();
+        }
+    }
+
     // equals impl of CtLiteral seems to be broken
     public static boolean areLiteralsEqual(
         CtLiteral<?> left,
