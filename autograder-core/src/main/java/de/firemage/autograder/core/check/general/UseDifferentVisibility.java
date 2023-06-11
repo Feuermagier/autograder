@@ -107,11 +107,14 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 }
 
                 // only check methods and fields
-                if (!(ctTypeMember instanceof CtMethod<?>) || !(ctTypeMember instanceof CtField<?>)) {
+                Visibility visibility;
+                if (ctTypeMember instanceof CtMethod<?> ctMethod) {
+                    visibility = getVisibility(ctMethod, ctMethod.getReference());
+                } else if (ctTypeMember instanceof CtField<?> ctField) {
+                    visibility = getVisibility(ctField, ctField.getReference());
+                } else {
                     return;
                 }
-
-                Visibility visibility = getVisibility(ctTypeMember, ctTypeMember.getReference());
 
                 if (visibility.isMoreRestrictiveThan(currentVisibility)) {
                     // it does not make sense to deduct for public things that should be default visibility,
