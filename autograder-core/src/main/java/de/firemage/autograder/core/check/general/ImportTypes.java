@@ -141,7 +141,6 @@ public class ImportTypes extends IntegratedCheck {
 
                     SourcePosition position = resolveArraySourcePosition(ctArrayTypeReference);
                     if (isFullyQualifiedType(arrayType) && position != null) {
-                        // TODO
                         reportProblem(position, arrayType);
                     }
 

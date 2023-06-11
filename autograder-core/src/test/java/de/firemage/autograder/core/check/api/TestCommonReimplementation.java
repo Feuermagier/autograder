@@ -179,4 +179,43 @@ class TestCommonReimplementation extends AbstractCheckTest {
             this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
+
+    @Test
+    void testDoubleArrayCopy() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "MatrixUtils",
+            """
+                public class MatrixUtils {
+                    public static int[][] copyMatrix(int[][] matrix) {
+                        int n = matrix.length;
+                        int m = matrix[0].length;
+
+                        int[][] result = new int[n][m];
+                        for (int i = 0; i < n; i++) {
+                            for (int j = 0; j < m; j++) { // Not Ok (= System.arraycopy(matrix[i], 0, result[i], 0, m))
+                                result[i][j] = matrix[i][j];
+                            }
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY));
+
+
+        assertEquals(1, problems.size());
+        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY, problems.get(0).getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", "System.arraycopy(matrix[i], 0, result[i], 0, m)"
+                    )
+                )),
+            this.linter.translateMessage(problems.get(0).getExplanation())
+        );
+    }
 }
