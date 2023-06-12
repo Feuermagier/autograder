@@ -39,19 +39,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
 
-        assertEquals(1, problems.size());
-        assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
-        assertEquals(
-            super.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "name", "exampleVariable",
-                        "suggestion", "private"
-                    )
-                )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEquals(0, problems.size());
     }
 
     @Test
@@ -246,6 +234,17 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         public void c() {} // Not Ok
                         
                         void d() {} // Ok
+                        
+                        void e() {
+                            // so that all methods are used
+                            foo();
+                            bar();
+                            baz();
+                            a();
+                            b();
+                            c();
+                            d();
+                        } 
                     }
                     """
                 ),
@@ -257,6 +256,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                             Main main = new Main();
                             main.c();
                             main.d();
+                            main.e();
                         }
                     }
                     """

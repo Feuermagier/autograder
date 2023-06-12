@@ -587,6 +587,15 @@ public final class SpoonUtil {
         return isOverriddenMethod(ctMethod);
     }
 
+    public static boolean isInMainMethod(CtElement ctElement) {
+        CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
+        if (ctMethod == null) {
+            return false;
+        }
+
+        return isMainMethod(ctMethod);
+    }
+
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
         return TerminalStatement.of(ctStatement).or(() -> AssignmentStatement.of(ctStatement));
     }

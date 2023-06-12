@@ -66,6 +66,8 @@ common-reimplementation = The code can be simplified to '{$suggestion}'.
 
 use-entry-set = Use 'entrySet' here instead of 'keySet'.
 
+char-range = The code can be simplified to '{$suggestion}'.
+
 # Comment
 commented-out-code-exp = This commented out code should be removed
 
@@ -279,4 +281,4 @@ default-package = The default-package should not be used. The following classes 
 # Unnecessary
 empty-block = Empty blocks should be removed or have a comment explaining why they are empty.
 
-unused-element-exp = Element is unused and should therefore be removed
+unused-element = '{$name}' is unused and should therefore be removed

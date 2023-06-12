@@ -7,7 +7,7 @@ public class Test {
 
     private static void foo() {} // Not Ok
 
-    public static void bar() {} // Ok (might be used)
+    public static void bar() {} // Not Ok
 }
 
 // the main method can be called even if the class is only package visible
@@ -16,11 +16,16 @@ class SeeminglyUnusedMainMethod {
 }
 
 class A {
-    int a;
-    String[] b;
+    int a; // Not Ok
+    String[] b; // Not Ok
 
     void doSomething() {
         int a = 0; // Not Ok
         String[] b = new String[10]; // Not Ok
     }
+
+    @Override
+    public boolean equals(Object o) { // Ok (overridden method)
+        return super.equals(o);
+    } // Ok
 }
