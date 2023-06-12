@@ -66,6 +66,8 @@ common-reimplementation = The code can be simplified to '{$suggestion}'.
 
 use-entry-set = Use 'entrySet' here instead of 'keySet'.
 
+char-range = The code can be simplified to '{$suggestion}'.
+
 # Comment
 commented-out-code-exp = This commented out code should be removed
 
