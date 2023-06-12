@@ -177,14 +177,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
                 this.scan(CtRole.ANNOTATION, ctRecord.getAnnotations());
                 this.scan(CtRole.INTERFACE, ctRecord.getSuperInterfaces());
                 this.scan(CtRole.TYPE_PARAMETER, ctRecord.getFormalCtTypeParameters());
-                for (CtRecordComponent component : ctRecord.getRecordComponents()) {
-                    CtField<?> ctField = component.toField();
-                    // the toField does not set the parent
-                    // this is a problem, because when one queries the AST, one might get this node
-                    // and it will not have a parent
-                    ctField.setParent(ctRecord);
-                    this.visitCtField(ctField);
-                }
+                ctRecord.getFields().forEach(this::visitCtField);
                 this.scan(CtRole.COMMENT, ctRecord.getComments());
                 this.exit(ctRecord);
             }
