@@ -25,12 +25,21 @@ import de.firemage.autograder.treeg.ast.RegExCharacter;
 import de.firemage.autograder.treeg.ast.RegExNode;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtStatement;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtVariable;
 
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.COMPLEX_REGEX})
 public class RegexCheck extends IntegratedCheck {
     private static final double MAX_ALLOWED_SCORE = 10.0;
+
+    private static boolean hasComment(CtElement ctElement) {
+        return !ctElement.getComments().isEmpty()
+            || ctElement.getParent() instanceof CtVariable<?> ctVariable && hasComment(ctVariable);
+    }
+
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
@@ -45,6 +54,11 @@ public class RegexCheck extends IntegratedCheck {
 
                 if (value.length() <= 4) {
                     // Ignore short strings for performance reasons (how complex can those regex be?!)
+                    return;
+                }
+
+                if (hasComment(literal)) {
+                    // Ignore regex with comments explaining what they do
                     return;
                 }
 

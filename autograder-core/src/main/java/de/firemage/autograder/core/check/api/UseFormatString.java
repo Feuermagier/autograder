@@ -66,16 +66,19 @@ public class UseFormatString extends IntegratedCheck {
     private String buildFormattedString(Iterable<? extends CtExpression<?>> ctExpressions) {
         StringBuilder formatString = new StringBuilder();
         Collection<String> args = new ArrayList<>();
+
         for (CtExpression<?> ctExpression : ctExpressions) {
             if (ctExpression instanceof CtLiteral<?> ctLiteral) {
                 CtTypeInformation ctTypeInformation = ctLiteral.getType();
                 if (ctLiteral.getValue() instanceof String value) {
+                    // replace a system-dependant newline with %n
                     if (value.equals("\n")) {
                         formatString.append("%n");
                     } else {
                         formatString.append(value);
                     }
                 } else if (ctTypeInformation.isPrimitive() && !ctTypeInformation.isArray()) {
+                    // inline literals:
                     formatString.append(ctLiteral.getValue());
                 }
 
@@ -93,7 +96,7 @@ public class UseFormatString extends IntegratedCheck {
         return "\"%s\".formatted(%s)".formatted(formatString.toString(), String.join(", ", args));
     }
 
-    private CtExpression<?> resolveExpression(StaticAnalysis staticAnalysis, CtExpression<?> ctExpression) {
+    private CtExpression<?> resolveExpression(CtExpression<?> ctExpression) {
         // convert System.lineSeparator() to "\n" which will later be converted to %n
         if (ctExpression instanceof CtInvocation<?> ctInvocation
             && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
@@ -109,13 +112,13 @@ public class UseFormatString extends IntegratedCheck {
             return SpoonUtil.makeLiteral("\n");
         }
 
-        return SpoonUtil.resolveCtExpression(ctExpression);
+        return ctExpression;
     }
 
-    private void checkArgs(StaticAnalysis staticAnalysis, CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs) {
+    private void checkArgs(CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs) {
         Collection<CtExpression<?>> args = new ArrayList<>();
         for (var expression : formatArgs) {
-            args.add(this.resolveExpression(staticAnalysis, expression));
+            args.add(this.resolveExpression(expression));
         }
 
         // skip concatenations with less than 3 arguments
@@ -132,7 +135,7 @@ public class UseFormatString extends IntegratedCheck {
         );
     }
 
-    private void checkCtBinaryOperator(StaticAnalysis staticAnalysis, CtBinaryOperator<?> ctBinaryOperator) {
+    private void checkCtBinaryOperator(CtBinaryOperator<?> ctBinaryOperator) {
         // Do not visit nested binary operators
         //
         // For example this expression:
@@ -153,14 +156,13 @@ public class UseFormatString extends IntegratedCheck {
         // only visit binary operators that evaluate to a String
         // (should be guaranteed by the visitor) -> seems to not be guaranteed; replacing the throw by a return for now
         if (!SpoonUtil.isString(ctBinaryOperator.getType())) {
-            //throw new IllegalStateException("Binary operator does not evaluate to a String");
             return;
         }
 
-        this.checkArgs(staticAnalysis, ctBinaryOperator, this.getFormatArgs(ctBinaryOperator));
+        this.checkArgs(ctBinaryOperator, this.getFormatArgs(ctBinaryOperator));
     }
 
-    private void checkCtInvocation(StaticAnalysis staticAnalysis, CtInvocation<?> ctInvocation) {
+    private void checkCtInvocation(CtInvocation<?> ctInvocation) {
         // sb.append("a").append("b").append("c") instead of sb.append("abc")
         // same for sb.append("a").append(someVar) instead of sb.append("a%s", someVar)
         CtTypeReference<?> stringBuilderType = ctInvocation.getFactory().Type().createReference(java.lang.StringBuilder.class);
@@ -204,7 +206,7 @@ public class UseFormatString extends IntegratedCheck {
 
         Collections.reverse(formatArgs);
 
-        this.checkArgs(staticAnalysis, ctInvocation, formatArgs);
+        this.checkArgs(ctInvocation, formatArgs);
     }
 
     @Override
@@ -213,9 +215,9 @@ public class UseFormatString extends IntegratedCheck {
             @Override
             public void process(CtExpression<String> ctExpression) {
                 if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator) {
-                    checkCtBinaryOperator(staticAnalysis, ctBinaryOperator);
+                    checkCtBinaryOperator(ctBinaryOperator);
                 } else if (ctExpression instanceof CtInvocation<?> ctInvocation) {
-                    checkCtInvocation(staticAnalysis, ctInvocation);
+                    checkCtInvocation(ctInvocation);
                 }
             }
         });

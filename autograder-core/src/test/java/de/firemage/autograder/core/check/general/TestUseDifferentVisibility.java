@@ -273,7 +273,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         int i = 0;
         for (var entry : expected.entrySet()) {
             assertEquals(
-                super.linter.translateMessage(
+                this.linter.translateMessage(
                     new LocalizedMessage(
                         LOCALIZED_MESSAGE_KEY,
                         Map.of(
@@ -281,7 +281,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                             "suggestion", entry.getValue()
                         )
                     )),
-                super.linter.translateMessage(problems.get(i).getExplanation())
+                this.linter.translateMessage(problems.get(i).getExplanation())
             );
             i += 1;
         }
