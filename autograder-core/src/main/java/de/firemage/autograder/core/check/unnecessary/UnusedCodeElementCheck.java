@@ -22,7 +22,7 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
 public class UnusedCodeElementCheck extends IntegratedCheck {
-    private <T extends CtModifiable & CtNamedElement> void checkUnused(T  ctElement, CtReference ctReference) {
+    private void checkUnused(CtNamedElement ctElement, CtReference ctReference) {
         if (ctElement.isImplicit() || !ctElement.getPosition().isValidPosition()) {
             return;
         }
@@ -32,17 +32,17 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             .getElements(new DirectReferenceFilter<>(ctReference))
             .isEmpty();
 
-        if (isUnused && ctElement.isPrivate()) {
+
+        ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;
+        if (ctElement instanceof CtModifiable ctModifiable && ctModifiable.isPrivate()) {
+            problemType = ProblemType.UNUSED_CODE_ELEMENT_PRIVATE;
+        }
+
+        if (isUnused) {
             addLocalProblem(
                 ctElement,
                 new LocalizedMessage("unused-element", Map.of("name", ctElement.getSimpleName())),
-                ProblemType.UNUSED_CODE_ELEMENT_PRIVATE
-            );
-        } else if (isUnused) {
-            addLocalProblem(
-                ctElement,
-                new LocalizedMessage("unused-element", Map.of("name", ctElement.getSimpleName())),
-                ProblemType.UNUSED_CODE_ELEMENT
+                problemType
             );
         }
     }
