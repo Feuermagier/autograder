@@ -67,7 +67,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
 
         // if there are no references, the member itself will be returned
         if (ctTypeMember == commonParent) {
-            return Visibility.PRIVATE;
+            return Visibility.of(ctTypeMember);
         }
 
         // if all references are in the same type as the member, it can be private
