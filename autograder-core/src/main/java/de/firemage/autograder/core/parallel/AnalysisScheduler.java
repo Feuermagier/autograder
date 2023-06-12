@@ -4,6 +4,7 @@ import de.firemage.autograder.core.Problem;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.Queue;
@@ -24,8 +25,13 @@ public class AnalysisScheduler {
 
         this.analysisThreads = new ArrayList<>();
         int actualThreads = threads > 0 ? threads : Math.max(Runtime.getRuntime().availableProcessors() - 2, 1);
+
+        if (actualThreads == 1) {
+            return;
+        }
+
         for (int i = 0; i < actualThreads; i++) {
-            var thread = new AnalysisThread(this);
+            var thread = new AnalysisThread(this, i);
             thread.start();
             this.analysisThreads.add(thread);
         }
@@ -65,6 +71,14 @@ public class AnalysisScheduler {
      * Never add more tasks *outside already submitted tasks* after calling this method, because they may never be executed.
      */
     public AnalysisResult collectProblems() {
+        if (this.analysisThreads.isEmpty()) {
+            return executeChecksSingleThreaded();
+        } else {
+            return collectProblemsFromThreads();
+        }
+    }
+
+    private AnalysisResult collectProblemsFromThreads() {
         this.completionAllowed = true;
 
         List<Problem> allProblems = new ArrayList<>();
@@ -79,6 +93,33 @@ public class AnalysisScheduler {
                 allProblems.addAll(result.problems());
             } catch (InterruptedException e) {
                 throw new IllegalStateException(e);
+            }
+        }
+
+        return AnalysisResult.forSuccess(allProblems);
+    }
+
+    private AnalysisResult executeChecksSingleThreaded() {
+        List<Problem> allProblems = new ArrayList<>();
+
+        var reporter = new ProblemReporter() {
+            @Override
+            public void reportProblem(Problem problem) {
+                allProblems.add(problem);
+            }
+
+            @Override
+            public void reportProblems(Collection<Problem> problems) {
+                allProblems.addAll(problems);
+            }
+        };
+
+        while (!this.waitingTasks.isEmpty()) {
+            try {
+                var task = this.waitingTasks.poll();
+                task.run(this, reporter);
+            } catch (Exception e) {
+                return AnalysisResult.forFailure(e);
             }
         }
 
