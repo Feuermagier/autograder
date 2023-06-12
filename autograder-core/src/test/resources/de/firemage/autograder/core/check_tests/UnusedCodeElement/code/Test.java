@@ -23,4 +23,9 @@ class A {
         int a = 0; // Not Ok
         String[] b = new String[10]; // Not Ok
     }
+
+    @Override
+    public boolean equals(Object o) { // Ok (overridden method)
+        return super.equals(o);
+    } // Ok
 }
