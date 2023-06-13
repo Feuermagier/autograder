@@ -32,6 +32,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
@@ -225,26 +226,60 @@ public final class SpoonUtil {
     }
 
     @SuppressWarnings("unchecked")
-    public static CtExpression<?> negate(CtExpression<?> ctExpression) {
-        // !(a == b) -> a != b
-        if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator
-            && ctBinaryOperator.getKind() == BinaryOperatorKind.EQ) {
-            CtBinaryOperator<?> result = ctBinaryOperator.clone();
-            result.setKind(BinaryOperatorKind.NE);
-            return result;
-        }
-
-        // !(a != b) -> a == b
-        if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator
-            && ctBinaryOperator.getKind() == BinaryOperatorKind.NE) {
-            CtBinaryOperator<?> result = ctBinaryOperator.clone();
-            result.setKind(BinaryOperatorKind.EQ);
-            return result;
+    public static <T> CtExpression<T> negate(CtExpression<T> ctExpression) {
+        if (ctExpression instanceof CtBinaryOperator<T> ctBinaryOperator) {
+            CtBinaryOperator<T> result = ctBinaryOperator.clone();
+            switch (ctBinaryOperator.getKind()) {
+                // !(a == b) -> a != b
+                case EQ -> {
+                    result.setKind(BinaryOperatorKind.NE);
+                    return result;
+                }
+                // !(a != b) -> a == b
+                case NE -> {
+                    result.setKind(BinaryOperatorKind.EQ);
+                    return result;
+                }
+                // !(a && b) -> !a || !b
+                case AND -> {
+                    result.setKind(BinaryOperatorKind.OR);
+                    result.setLeftHandOperand(negate(result.getLeftHandOperand()));
+                    result.setRightHandOperand(negate(result.getRightHandOperand()));
+                    return result;
+                }
+                // !(a || b) -> !a && !b
+                case OR -> {
+                    result.setKind(BinaryOperatorKind.AND);
+                    result.setLeftHandOperand(negate(result.getLeftHandOperand()));
+                    result.setRightHandOperand(negate(result.getRightHandOperand()));
+                    return result;
+                }
+                // !(a >= b) -> a < b
+                case GE -> {
+                    result.setKind(BinaryOperatorKind.LT);
+                    return result;
+                }
+                // !(a > b) -> a <= b
+                case GT -> {
+                    result.setKind(BinaryOperatorKind.LE);
+                    return result;
+                }
+                // !(a <= b) -> a > b
+                case LE -> {
+                    result.setKind(BinaryOperatorKind.GT);
+                    return result;
+                }
+                // !(a < b) -> a >= b
+                case LT -> {
+                    result.setKind(BinaryOperatorKind.GE);
+                    return result;
+                }
+            }
         }
 
         CtUnaryOperator ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
 
-        ctUnaryOperator.setKind(UnaryOperatorKind.NEG);
+        ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
         ctUnaryOperator.setOperand(ctExpression.clone());
 
         return ctUnaryOperator;
@@ -258,7 +293,8 @@ public final class SpoonUtil {
         return getEffectiveStatements(List.of(ctStatement));
     }
 
-    public static CtExpression<?> resolveCtExpression(CtExpression<?> ctExpression) {
+    @SuppressWarnings("unchecked")
+    public static <T> CtExpression<T> resolveCtExpression(CtExpression<T> ctExpression) {
         if (ctExpression == null) return null;
 
         CtModel ctModel = ctExpression.getFactory().getModel();
@@ -274,7 +310,7 @@ public final class SpoonUtil {
 
             // only inline literals:
             if (ctExpressionOptional.isPresent() && ctExpressionOptional.get() instanceof CtLiteral<?> ctLiteral) {
-                return ctLiteral;
+                return (CtLiteral<T>) ctLiteral;
             }
         }
 
@@ -287,7 +323,7 @@ public final class SpoonUtil {
                 && literal.getValue() instanceof Integer integer
                 && integer == 0
                 && Set.of(BinaryOperatorKind.MINUS, BinaryOperatorKind.PLUS).contains(ctBinaryOperator.getKind())) {
-                return left;
+                return (CtExpression<T>) left;
             }
 
             // 0 + a (0 - a != a)
@@ -295,7 +331,7 @@ public final class SpoonUtil {
                 && literal.getValue() instanceof Integer integer
                 && integer == 0
                 && ctBinaryOperator.getKind() == BinaryOperatorKind.PLUS) {
-                return right;
+                return (CtExpression<T>) right;
             }
 
             // evaluate concatenations of (potentially) literals:
@@ -305,9 +341,9 @@ public final class SpoonUtil {
                     && ctBinaryOperator.getKind() == BinaryOperatorKind.PLUS) {
                 // check if one of them is a string, if so then we can concatenate them
                 if (leftLiteral.getValue() instanceof String string) {
-                    return makeLiteral(string + rightLiteral.getValue());
+                    return (CtExpression<T>) makeLiteral(string + rightLiteral.getValue());
                 } else if (rightLiteral.getValue() instanceof String string) {
-                    return makeLiteral(leftLiteral.getValue() + string);
+                    return (CtExpression<T>) makeLiteral(leftLiteral.getValue() + string);
                 }
             }
         }
@@ -384,6 +420,77 @@ public final class SpoonUtil {
                 SpoonUtil::isTypeEqualTo
                 // On this stream of booleans, check if all are true
             ).allMatch(value -> value);
+    }
+
+    /**
+     * Creates a static invocation of the given method on the given target type.
+     *
+     * @param targetType the type on which the method is defined
+     * @param methodName the name of the method
+     * @param parameters the parameters to pass to the method
+     * @return the invocation
+     * @param <T> the result type of the invocation
+     */
+    public static <T> CtInvocation<T> createStaticInvocation(
+        CtTypeReference<?> targetType,
+        String methodName,
+        CtExpression<?>... parameters
+    ) {
+        Factory factory = targetType.getFactory();
+        CtMethod<T> methodHandle = targetType.getTypeDeclaration().getMethod(
+            methodName,
+            Arrays.stream(parameters).map(CtTypedElement::getType).toArray(CtTypeReference[]::new)
+        );
+
+        return factory.createInvocation(
+            factory.createTypeAccess(methodHandle.getDeclaringType().getReference()),
+            methodHandle.getReference(),
+            parameters
+        );
+    }
+
+    private static boolean requiresCast(CtTypedElement<?> ctTypedElement, CtTypeReference<?> targetType) {
+        CtTypeReference<?> currentType = ctTypedElement.getType();
+        if (currentType.equals(targetType)) {
+            return false;
+        }
+
+        // implicit boxing/unboxing:
+        if (currentType.isPrimitive() && currentType.box().equals(targetType)) {
+            return false;
+        }
+
+        if (targetType.isPrimitive() && targetType.box().equals(currentType)) {
+            return false;
+        }
+
+        // NOTE: primitive widening is not implemented yet (e.g. int -> long)
+
+        return true;
+    }
+
+    public static <T> CtExpression<T> castExpression(CtExpression<?> ctExpression, Class<?> targetType) {
+        return castExpression(ctExpression, ctExpression.getFactory().Type().createReference(targetType));
+    }
+
+    public static <T> CtExpression<T> castExpression(CtExpression<?> ctExpression, CtTypeReference<?> targetType) {
+        CtExpression result = ctExpression.clone();
+
+        List<CtTypeReference<?>> typeCasts = ctExpression.getTypeCasts();
+        if (!typeCasts.isEmpty() && typeCasts.get(typeCasts.size()-1).equals(targetType)) {
+            return result;
+        }
+
+        // only add a cast if it is necessary
+        if (ctExpression.getType().equals(targetType)) {
+            return result;
+        }
+
+        if (requiresCast(ctExpression, targetType)) {
+            result.addTypeCast(targetType.clone());
+        }
+
+        return ctExpression.setType(targetType.clone());
     }
 
     public static boolean isEqualsMethod(CtMethod<?> method) {
