@@ -36,6 +36,8 @@ public class Test {
 
     int maxNumber; // Ok
     int minNumber; // Ok
+
+    int max_number; // Ok (wrong case, previoulsy resulted in a crash)
 }
 
 enum Month {

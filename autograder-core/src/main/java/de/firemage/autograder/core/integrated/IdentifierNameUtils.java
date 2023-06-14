@@ -77,6 +77,10 @@ public final class IdentifierNameUtils {
             return CaseFormat.UPPER_UNDERSCORE;
         }
 
-        throw new IllegalArgumentException("Identifier '%s' is not in a (supported) valid format".formatted(identifier));
+        if (isUpperSnakeCase(identifier.toUpperCase())) {
+            return CaseFormat.LOWER_UNDERSCORE;
+        }
+
+        throw new IllegalArgumentException("Identifier '%s' is not in a (supported) naming convention".formatted(identifier));
     }
 }
