@@ -46,7 +46,7 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
             prefix -> makeDirectory(this.tempLocation.toPath(), prefix),
             prefix -> makeDirectory(Path.of(System.getProperty("java.io.tmpdir")), prefix),
             Files::createTempDirectory,
-            prefix -> makeDirectory(Path.of(".", "tmp").toAbsolutePath(), prefix)
+            prefix -> makeDirectory(Path.of(".", ".autograder-tmp").toAbsolutePath(), prefix)
         );
     }
 
