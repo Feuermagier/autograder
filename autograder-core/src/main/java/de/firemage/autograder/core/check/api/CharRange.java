@@ -13,14 +13,12 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.function.UnaryOperator;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CHAR_RANGE })
 public class CharRange extends IntegratedCheck {
@@ -75,7 +73,7 @@ public class CharRange extends IntegratedCheck {
     );
 
     private static Optional<CtExpression<Boolean>> makeSuggestion(CtExpression<Character> ctExpression, Range<Character> range) {
-        return Optional.ofNullable(MAPPING.get(range).suggest(
+        return Optional.ofNullable(MAPPING.get(range)).map(fn -> fn.suggest(
             ctExpression.getFactory(),
             ctExpression,
             ctExpression.getFactory().Type().createReference(java.lang.Character.class)
@@ -119,8 +117,8 @@ public class CharRange extends IntegratedCheck {
                 // - (<literal> <op> <expr>) && (<literal> <op> <expr>)
                 // or swapped
 
-                CtRange<Character> leftRange = CtRange.of((CtBinaryOperator<Boolean>) left).orElse(null);
-                CtRange<Character> rightRange = CtRange.of((CtBinaryOperator<Boolean>) right).orElse(null);
+                CtRange<Character> leftRange = CtRange.ofCharRange((CtBinaryOperator<Boolean>) left).orElse(null);
+                CtRange<Character> rightRange = CtRange.ofCharRange((CtBinaryOperator<Boolean>) right).orElse(null);
 
                 if (leftRange == null || rightRange == null) {
                     return;

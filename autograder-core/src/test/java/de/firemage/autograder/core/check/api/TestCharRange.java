@@ -106,6 +106,34 @@ public class TestCharRange extends AbstractCheckTest {
     }
 
     @Test
+    void testNormalization() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public static boolean isLowerCase(char c) {
+                        return c > '/' && ':' > c;
+                    }
+                }
+                """
+        ), List.of(ProblemType.CHAR_RANGE));
+
+        assertEquals(1, problems.size());
+        assertEquals(ProblemType.CHAR_RANGE, problems.get(0).getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", "Character.isDigit(c)"
+                    )
+                )),
+            this.linter.translateMessage(problems.get(0).getExplanation())
+        );
+    }
+
+    @Test
     void testIsUpperCase() throws LinterException, IOException {
         List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
