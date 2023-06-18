@@ -40,7 +40,6 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
-import spoon.support.reflect.code.CtCodeElementImpl;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
@@ -414,7 +413,7 @@ public final class SpoonUtil {
      * @return the cloned version with the operands swapped or the given operator if it is not supported
      * @param <T> the type the operator evaluates to
      */
-    private static <T> CtBinaryOperator<T> swapCtBinaryOperator(CtBinaryOperator<T> ctBinaryOperator) {
+    public static <T> CtBinaryOperator<T> swapCtBinaryOperator(CtBinaryOperator<T> ctBinaryOperator) {
         CtBinaryOperator result = ctBinaryOperator.clone();
 
         // NOTE: this only implements a few cases, for other non-commutative operators, this will break code
