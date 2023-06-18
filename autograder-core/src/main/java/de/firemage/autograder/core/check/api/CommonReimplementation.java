@@ -11,6 +11,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
+import spoon.reflect.code.CtArrayWrite;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
@@ -18,12 +19,12 @@ import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtOperatorAssignment;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
-import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
@@ -37,7 +38,9 @@ import java.util.Set;
     ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY,
     ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT,
     ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN,
-    ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL
+    ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL,
+    ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL,
+    ProblemType.COMMON_REIMPLEMENTATION_MODULO
 })
 public class CommonReimplementation extends IntegratedCheck {
     private void checkStringRepeat(CtFor ctFor) {
@@ -270,6 +273,100 @@ public class CommonReimplementation extends IntegratedCheck {
         }
     }
 
+    private void checkArraysFill(CtFor ctFor) {
+        ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
+
+        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+
+        if (statements.size() != 1
+            || forLoopRange == null
+            || !(statements.get(0) instanceof CtAssignment<?, ?> ctAssignment)
+            || !(ctAssignment.getAssigned() instanceof CtArrayWrite<?> ctArrayWrite)
+            || !(ctArrayWrite.getIndexExpression() instanceof CtVariableRead<?> index)
+            || !(index.getVariable().equals(forLoopRange.loopVariable()))) {
+            return;
+        }
+
+        // return if the for loop uses the loop variable (would not be a simple repetition)
+        if (!ctAssignment.getAssignment().getElements(new DirectReferenceFilter<>(forLoopRange.loopVariable())).isEmpty()) {
+            return;
+        }
+
+        this.addLocalProblem(
+            ctFor,
+            new LocalizedMessage(
+                "common-reimplementation",
+                Map.of(
+                    "suggestion", "Arrays.fill(%s, %s, %s, %s)".formatted(
+                        ctArrayWrite.getTarget().prettyprint(),
+                        forLoopRange.start().prettyprint(),
+                        forLoopRange.end().prettyprint(),
+                        ctAssignment.getAssignment().prettyprint()
+                    )
+                )
+            ),
+            ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL
+        );
+    }
+
+    private void checkModulo(CtIf ctIf) {
+        List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
+        if (ctIf.getElseStatement() != null
+            || thenBlock.size() != 1
+            || !(thenBlock.get(0) instanceof CtAssignment<?, ?> thenAssignment)
+            || !(thenAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite)
+            || !(ctIf.getCondition() instanceof CtBinaryOperator<Boolean> ctBinaryOperator)
+            || !Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE, BinaryOperatorKind.GE, BinaryOperatorKind.GT, BinaryOperatorKind.EQ)
+                .contains(ctBinaryOperator.getKind())) {
+            return;
+        }
+
+        // must assign a value of 0
+        if (!(SpoonUtil.resolveCtExpression(thenAssignment.getAssignment()) instanceof CtLiteral<?> ctLiteral)
+            || !(ctLiteral.getValue() instanceof Integer integer)
+            || integer != 0) {
+            return;
+        }
+
+        CtVariableReference<?> assignedVariable = ctVariableWrite.getVariable();
+
+        CtBinaryOperator<Boolean> condition = SpoonUtil.normalizeBy(
+            (left, right) -> right instanceof CtVariableAccess<?> ctVariableAccess && ctVariableAccess.getVariable().equals(assignedVariable),
+            ctBinaryOperator
+        );
+
+        // the assigned variable is not on either side
+        if (!(condition.getLeftHandOperand() instanceof CtVariableAccess<?> ctVariableAccess)
+            || !(ctVariableAccess.getVariable().equals(assignedVariable))) {
+            return;
+        }
+
+        // if (variable >= 3) {
+        //    variable = 0;
+        // }
+        //
+        // is equal to
+        //
+        // variable %= 3;
+        if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
+            CtExpression<?> right = condition.getRightHandOperand();
+
+            addLocalProblem(
+                ctIf,
+                new LocalizedMessage(
+                    "common-reimplementation",
+                    Map.of(
+                        "suggestion", "%s %%= %s".formatted(
+                            assignedVariable.prettyprint(),
+                            right.prettyprint()
+                        )
+                    )
+                ),
+                ProblemType.COMMON_REIMPLEMENTATION_MODULO
+            );
+        }
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
@@ -282,6 +379,7 @@ public class CommonReimplementation extends IntegratedCheck {
 
                 checkArrayCopy(ctFor);
                 checkStringRepeat(ctFor);
+                checkArraysFill(ctFor);
                 super.visitCtFor(ctFor);
             }
 
@@ -304,6 +402,7 @@ public class CommonReimplementation extends IntegratedCheck {
                 }
 
                 checkMaxMin(ctIf);
+                checkModulo(ctIf);
                 super.visitCtIf(ctIf);
             }
         });

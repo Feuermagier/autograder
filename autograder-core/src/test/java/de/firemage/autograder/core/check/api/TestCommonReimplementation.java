@@ -492,4 +492,95 @@ class TestCommonReimplementation extends AbstractCheckTest {
             this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
+
+
+    @Test
+    void testArraysFill() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    private static final String INITIAL_VALUE = "X";
+
+                    public static void init(String[] array) {
+                        for (int i = 0; i < array.length; i++) {
+                            array[i] = INITIAL_VALUE;
+                        }
+                        
+                        for (int i = 0; i < array.length; i++) {
+                            array[i] = INITIAL_VALUE + i; // ignored because it uses i
+                        }
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
+
+        assertEquals(1, problems.size());
+        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL, problems.get(0).getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", "Arrays.fill(array, 0, array.length, INITIAL_VALUE)"
+                    )
+                )),
+            this.linter.translateMessage(problems.get(0).getExplanation())
+        );
+    }
+
+    @Test
+    void testModulo() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    private static final int EMPTY = 0;
+
+                    public static int adjust(int value, int limit) {
+                        int result = value;
+
+                        if (result > limit) {
+                            result = 0;
+                        }
+
+                        if (limit <= result) {
+                            result = 0;
+                        }
+                        
+                        if (result == limit) {
+                            result = 0;
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MODULO));
+
+        List<String> expectedSuggestions = List.of(
+            "result %= (limit + 1)",
+            "result %= limit",
+            "result %= limit"
+        );
+
+        assertEquals(expectedSuggestions.size(), problems.size());
+        for (int i = 0; i < expectedSuggestions.size(); i++) {
+            Problem problem = problems.get(i);
+
+            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MODULO, problem.getProblemType());
+            assertEquals(
+                this.linter.translateMessage(
+                    new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of(
+                            "suggestion", expectedSuggestions.get(i)
+                        )
+                    )),
+                this.linter.translateMessage(problem.getExplanation())
+            );
+        }
+    }
 }
