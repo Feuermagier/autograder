@@ -63,7 +63,7 @@ public record ForLoopRange(
             } else {
                 end = end.getFactory().createBinaryOperator(
                     end,
-                    SpoonUtil.makeLiteral(1),
+                    SpoonUtil.makeLiteral(end.getType(), 1),
                     BinaryOperatorKind.PLUS
                 );
             }

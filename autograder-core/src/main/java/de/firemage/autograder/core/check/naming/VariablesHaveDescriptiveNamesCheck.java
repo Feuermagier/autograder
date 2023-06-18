@@ -251,6 +251,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
             public void process(CtVariable<?> ctVariable) {
+                if (ctVariable.isImplicit() || !ctVariable.getPosition().isValidPosition()) {
+                    return;
+                }
+
                 if (ctVariable instanceof CtCatchVariable || isLambdaParameter(ctVariable)) {
                     // Catch vars and lambda vars have less strict rules, e.g. it is ok to write "Exception e" or "NullPointerException npe"
                     return;

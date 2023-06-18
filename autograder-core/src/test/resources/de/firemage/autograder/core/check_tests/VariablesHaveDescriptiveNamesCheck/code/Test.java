@@ -36,6 +36,8 @@ public class Test {
 
     int maxNumber; // Ok
     int minNumber; // Ok
+
+    int max_number; // Ok (wrong case, previoulsy resulted in a crash)
 }
 
 enum Month {
@@ -51,4 +53,22 @@ enum Month {
     OCTOBER,
     NOVEMBER,
     DECEMBER
+}
+
+// crashes if implicit identifiers are not ignored
+enum BuildingType {
+    HOUSE("H") {
+        @Override
+        public boolean isHousing() {
+            return true;
+        }
+    };
+
+    private final String symbol;
+
+    BuildingType(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public abstract boolean isHousing();
 }

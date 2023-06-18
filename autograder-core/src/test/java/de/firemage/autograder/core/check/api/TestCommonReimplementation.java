@@ -218,4 +218,369 @@ class TestCommonReimplementation extends AbstractCheckTest {
             this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
+
+    @Test
+    void testMax() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    public static void foo(int a, int b) {
+                        int left = a;
+                        int right = b;
+                        
+                        if (left < right) {
+                            left = right;
+                        }
+
+                        if (left <= right) {
+                            left = right;
+                        }
+
+                        if (right > left) {
+                            left = right;
+                        }
+
+                        if (right >= left) {
+                            left = right;
+                        }
+
+                        if (0 >= left) {
+                            left = 0;
+                        }
+                        
+                        if (1 > left) {
+                            left = 1;
+                        }
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN));
+
+
+        List<String> expectedProblems = List.of(
+            "left = Math.max(left, right)",
+            "left = Math.max(left, right)",
+            "left = Math.max(left, right)",
+            "left = Math.max(left, right)",
+            "left = Math.max(left, 0)",
+            "left = Math.max(left, 1)"
+        );
+
+        assertEquals(expectedProblems.size(), problems.size());
+        for (int i = 0; i < problems.size(); i++) {
+            Problem problem = problems.get(i);
+
+            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN, problem.getProblemType());
+            assertEquals(
+                this.linter.translateMessage(
+                    new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of(
+                            "suggestion", expectedProblems.get(i)
+                        )
+                    )),
+                this.linter.translateMessage(problem.getExplanation())
+            );
+        }
+    }
+
+    @Test
+    void testMin() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    public static void foo(int a, int b) {
+                        int left = a;
+                        int right = b;
+                        
+                        if (right < left) {
+                            left = right;
+                        }
+
+                        if (right <= left) {
+                            left = right;
+                        }
+
+                        if (left > right) {
+                            left = right;
+                        }
+
+                        if (left >= right) {
+                            left = right;
+                        }
+
+                        if (left >= 0) {
+                            left = 0;
+                        }
+                        
+                        if (left > 1) {
+                            left = 1;
+                        }
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN));
+
+
+        List<String> expectedProblems = List.of(
+            "left = Math.min(left, right)",
+            "left = Math.min(left, right)",
+            "left = Math.min(left, right)",
+            "left = Math.min(left, right)",
+            "left = Math.min(left, 0)",
+            "left = Math.min(left, 1)"
+        );
+
+        assertEquals(expectedProblems.size(), problems.size());
+        for (int i = 0; i < problems.size(); i++) {
+            Problem problem = problems.get(i);
+
+            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN, problem.getProblemType());
+            assertEquals(
+                this.linter.translateMessage(
+                    new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of(
+                            "suggestion", expectedProblems.get(i)
+                        )
+                    )),
+                this.linter.translateMessage(problem.getExplanation())
+            );
+        }
+    }
+
+
+    @Test
+    void testMinMaxWithElse() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    public static void foo(int a, int b) {
+                        int result = 0;
+
+                        if (a < b) {
+                            result = a;
+                        } else {
+                            result = b;
+                        }
+
+                        if (a <= b) {
+                            result = a;
+                        } else {
+                            result = b;
+                        }
+
+                        if (a < b) {
+                            result = b;
+                        } else {
+                            result = a;
+                        }
+
+                        if (a <= b) {
+                            result = b;
+                        } else {
+                            result = a;
+                        }
+                        
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN));
+
+        List<String> expectedProblems = List.of(
+            "result = Math.min(b, a)",
+            "result = Math.min(b, a)",
+            "result = Math.max(a, b)",
+            "result = Math.max(a, b)"
+        );
+
+        assertEquals(expectedProblems.size(), problems.size());
+        for (int i = 0; i < problems.size(); i++) {
+            Problem problem = problems.get(i);
+
+            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN, problem.getProblemType());
+            assertEquals(
+                this.linter.translateMessage(
+                    new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of(
+                            "suggestion", expectedProblems.get(i)
+                        )
+                    )),
+                this.linter.translateMessage(problem.getExplanation())
+            );
+        }
+    }
+
+
+    @Test
+    void testAddAllArray() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public class Main {
+                    public static <T> Collection<T> toCollection(T[] array) {
+                        Collection<T> result = new ArrayList<>();
+                        
+                        for (T element : array) {
+                            result.add(element);
+                        }
+                        
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL));
+
+        assertEquals(1, problems.size());
+        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL, problems.get(0).getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", "result.addAll(Arrays.asList(array))"
+                    )
+                )),
+            this.linter.translateMessage(problems.get(0).getExplanation())
+        );
+    }
+
+    @Test
+    void testAddAll() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public class Main {
+                    public static <T> Collection<T> toCollection(Iterable<T> input) {
+                        Collection<T> result = new ArrayList<>();
+                        
+                        for (T element : input) {
+                            result.add(element);
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL));
+
+        assertEquals(1, problems.size());
+        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL, problems.get(0).getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", "result.addAll(input)"
+                    )
+                )),
+            this.linter.translateMessage(problems.get(0).getExplanation())
+        );
+    }
+
+
+    @Test
+    void testArraysFill() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    private static final String INITIAL_VALUE = "X";
+
+                    public static void init(String[] array) {
+                        for (int i = 0; i < array.length; i++) {
+                            array[i] = INITIAL_VALUE;
+                        }
+                        
+                        for (int i = 0; i < array.length; i++) {
+                            array[i] = INITIAL_VALUE + i; // ignored because it uses i
+                        }
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
+
+        assertEquals(1, problems.size());
+        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL, problems.get(0).getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", "Arrays.fill(array, 0, array.length, INITIAL_VALUE)"
+                    )
+                )),
+            this.linter.translateMessage(problems.get(0).getExplanation())
+        );
+    }
+
+    @Test
+    void testModulo() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    private static final int EMPTY = 0;
+
+                    public static int adjust(int value, int limit) {
+                        int result = value;
+
+                        if (result > limit) {
+                            result = 0;
+                        }
+
+                        if (limit <= result) {
+                            result = 0;
+                        }
+                        
+                        if (result == limit) {
+                            result = 0;
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MODULO));
+
+        List<String> expectedSuggestions = List.of(
+            "result %= (limit + 1)",
+            "result %= limit",
+            "result %= limit"
+        );
+
+        assertEquals(expectedSuggestions.size(), problems.size());
+        for (int i = 0; i < expectedSuggestions.size(); i++) {
+            Problem problem = problems.get(i);
+
+            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MODULO, problem.getProblemType());
+            assertEquals(
+                this.linter.translateMessage(
+                    new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of(
+                            "suggestion", expectedSuggestions.get(i)
+                        )
+                    )),
+                this.linter.translateMessage(problem.getExplanation())
+            );
+        }
+    }
 }
