@@ -128,6 +128,10 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
             public void process(CtField<?> field) {
+                if (field.isImplicit() || !field.getPosition().isValidPosition()) {
+                    return;
+                }
+
                 if (!field.isFinal()
                     || field.getDefaultExpression() == null
                     || !(field.getDefaultExpression() instanceof CtLiteral<?> literal)) {

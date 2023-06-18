@@ -40,6 +40,7 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.CtVisitor;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
@@ -240,6 +241,7 @@ public final class SpoonUtil {
     public static <T> CtLiteral<T> minimumValue(CtLiteral<T> ctLiteral) {
         CtLiteral result = ctLiteral.getFactory().createLiteral();
         result.setBase(LiteralBase.DECIMAL);
+        result.setType(ctLiteral.getType().clone());
 
         // - byte
         // - short
@@ -278,6 +280,7 @@ public final class SpoonUtil {
     public static <T> CtLiteral<T> maximumValue(CtLiteral<T> ctLiteral) {
         CtLiteral result = ctLiteral.getFactory().createLiteral();
         result.setBase(LiteralBase.DECIMAL);
+        result.setType(ctLiteral.getType().clone());
 
         // - byte
         // - short
@@ -377,9 +380,11 @@ public final class SpoonUtil {
         if (isCharacter.test(ctBinaryOperator.getRightHandOperand().getType())) {
             // for character use an integer literal
             step.setValue(1);
+            step.setType(ctBinaryOperator.getFactory().Type().CHARACTER_PRIMITIVE);
         } else {
             // this assumes that < and > are only used with numbers
             step.setValue(convert(ctBinaryOperator.getRightHandOperand().getType(), ((Number) 1).doubleValue()));
+            step.setType(ctBinaryOperator.getRightHandOperand().getType());
         }
 
         CtBinaryOperator<T> result = ctBinaryOperator.clone();
@@ -403,7 +408,13 @@ public final class SpoonUtil {
 
         // NOTE: this is a workaround for https://github.com/INRIA/spoon/issues/5273
         PartialEvaluator evaluator = new VisitorEvaluator();
-        return evaluator.evaluate(result);
+        CtBinaryOperator<T> res = evaluator.evaluate(result);
+
+        // ensure that all literals have a type (workaround for broken PartialEvaluator implementation)
+        CtVisitor ctVisitor = new VisitorCtLiteralTypeFixer(ctBinaryOperator.getFactory());
+        res.accept(ctVisitor);
+
+        return res;
     }
 
     /**

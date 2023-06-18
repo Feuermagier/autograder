@@ -54,3 +54,21 @@ enum Month {
     NOVEMBER,
     DECEMBER
 }
+
+// crashes if implicit identifiers are not ignored
+enum BuildingType {
+    HOUSE("H") {
+        @Override
+        public boolean isHousing() {
+            return true;
+        }
+    };
+
+    private final String symbol;
+
+    BuildingType(String symbol) {
+        this.symbol = symbol;
+    }
+
+    public abstract boolean isHousing();
+}
