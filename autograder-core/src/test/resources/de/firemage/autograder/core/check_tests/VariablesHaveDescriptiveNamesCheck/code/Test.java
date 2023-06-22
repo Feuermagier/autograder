@@ -38,6 +38,11 @@ public class Test {
     int minNumber; // Ok
 
     int max_number; // Ok (wrong case, previoulsy resulted in a crash)
+
+    private void test() {
+        Test[] tests = new Test[5];
+        for (Test test : tests) { } // Ok
+    }
 }
 
 enum Month {
