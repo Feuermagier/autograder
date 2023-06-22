@@ -31,6 +31,7 @@ public abstract class AbstractCheckTest {
         this.linter = Linter.builder(Locale.US)
             .tempLocation(this.tempLocation)
             .maxProblemsPerCheck(limit)
+            .threads(1)
             .build();
     }
 

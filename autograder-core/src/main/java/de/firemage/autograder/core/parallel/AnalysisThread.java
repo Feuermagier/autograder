@@ -12,10 +12,10 @@ public class AnalysisThread {
     private final List<Problem> reportedProblems;
     private Exception thrownException;
 
-    public AnalysisThread(AnalysisScheduler scheduler) {
+    public AnalysisThread(AnalysisScheduler scheduler, int threadIndex) {
         this.scheduler = scheduler;
         this.reportedProblems = new ArrayList<>();
-        this.thread = new Thread(this::run);
+        this.thread = new Thread(this::run, "Autograder-Analysis-Thread-" + threadIndex);
     }
 
     private void run() {

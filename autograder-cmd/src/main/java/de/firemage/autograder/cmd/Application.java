@@ -92,7 +92,7 @@ public class Application implements Callable<Integer> {
     // Useful for testing
     public static int runApplication(String... args) {
         // to automatically delete the temp location on exit
-        try (TempLocation tempLocation = TempLocation.of("tmp")) {
+        try (TempLocation tempLocation = TempLocation.of(".autograder-tmp")) {
             return new CommandLine(new Application(tempLocation)).execute(args);
         } catch (IOException exception) {
             throw new IllegalArgumentException("Could not create temp location", exception);
