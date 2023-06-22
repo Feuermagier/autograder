@@ -34,6 +34,7 @@ public class Train {
      * Creates a new train with no parts and an unambiguous id
      */
     public Train() {
+//        edu.kit.informatik.Terminal.printError("foo");
         this.id = ID_SUPPLIER.nextId();
     }
 

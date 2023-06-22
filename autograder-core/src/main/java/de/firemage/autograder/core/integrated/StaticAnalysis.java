@@ -5,7 +5,10 @@ import de.firemage.autograder.core.compiler.CompilationResult;
 import spoon.processing.Processor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
+
+import java.util.Collection;
 
 public class StaticAnalysis {
     private final CodeModel model;
@@ -34,5 +37,9 @@ public class StaticAnalysis {
 
     public <E extends CtElement> void processWith(Processor<E> processor) {
         this.model.processWith(processor);
+    }
+
+    public Collection<CtType<?>> getAllTypes() {
+        return this.model.getModel().getAllTypes();
     }
 }

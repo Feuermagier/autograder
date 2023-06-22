@@ -132,24 +132,7 @@ public final class CodeModel implements AutoCloseable {
             this.factory = launcher.getFactory();
 
             // Find the base package
-            model.processWith(new AbstractProcessor<CtType<?>>() {
-                @Override
-                public void process(CtType<?> type) {
-                    if (type.getPackage() == null || type.getPackage().getQualifiedName().startsWith("java.")) {
-                        return;
-                    }
-
-                    if (basePackage == null) {
-                        basePackage = type.getPackage();
-                        return;
-                    }
-
-                    var typePackage = type.getPackage().getQualifiedName();
-                    while (!typePackage.startsWith(basePackage.getQualifiedName())) {
-                        basePackage = basePackage.getDeclaringPackage();
-                    }
-                }
-            });
+            this.basePackage = SpoonUtil.findCommonPackage(model.getAllTypes());
 
             // Only set the model at the end when everything has been initialized
             this.model = model;

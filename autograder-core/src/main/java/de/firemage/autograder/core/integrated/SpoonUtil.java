@@ -30,6 +30,8 @@ import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtPackage;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.ModifierKind;
@@ -1006,5 +1008,24 @@ public final class SpoonUtil {
      */
     public static String formatSourcePosition(SourcePosition sourcePosition) {
         return String.format("%s:L%d", sourcePosition.getFile().getName(), sourcePosition.getLine());
+    }
+
+    public static CtPackage findCommonPackage(Collection<CtType<?>> types) {
+        if (types.isEmpty()) {
+            throw new IllegalArgumentException("types must not be empty");
+        }
+
+        CtPackage commonPackage = types.iterator().next().getPackage();
+
+        for (var type : types) {
+            while (!type.getPackage().equals(commonPackage) && !type.getPackage().hasParent(commonPackage)) {
+                commonPackage = commonPackage.getDeclaringPackage();
+                if (commonPackage == null) {
+                    return null;
+                }
+            }
+        }
+
+        return commonPackage;
     }
 }

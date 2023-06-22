@@ -18,7 +18,7 @@ import java.util.stream.Stream;
 @ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
-            List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group", "constant", "value_of");
+            List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "args", "group", "constant", "value_of");
 
     private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol", "constant", "const", "compare");
     private static final Map<String, List<String>> SPECIAL_VALUE_MAPPING = Map.ofEntries(

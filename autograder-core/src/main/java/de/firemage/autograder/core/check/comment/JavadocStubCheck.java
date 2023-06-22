@@ -33,6 +33,10 @@ public class JavadocStubCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtJavaDoc>() {
             @Override
             public void process(CtJavaDoc javadoc) {
+                if (javadoc.getParent() instanceof CtMethod<?> method && method.isPrivate()) {
+                    return;
+                }
+
                 if (allowGettersSettersWithEmptyDescription
                     && javadoc.getParent() instanceof CtMethod<?> method
                     && (SpoonUtil.isGetter(method) || SpoonUtil.isSetter(method))) {
