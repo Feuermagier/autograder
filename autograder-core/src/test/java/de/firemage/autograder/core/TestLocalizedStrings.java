@@ -80,7 +80,7 @@ class TestLocalizedStrings {
         ctModel.processWith(new AbstractProcessor<CtType<?>>() {
             @Override
             public void process(CtType<?> type) {
-                if (type.getPackage() == null || type.getPackage().getQualifiedName().startsWith("java.")) {
+                if (type.getPackage() == null || type.getPackage().getQualifiedName().startsWith("java.") || type.getPackage().getQualifiedName().startsWith("spoon.")) {
                     return;
                 }
 
