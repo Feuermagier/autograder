@@ -12,7 +12,7 @@ import spoon.support.reflect.eval.VisitorPartialEvaluator;
  * with character literals on both sides, because {@link Character} can not be cast to {@link Number}.
  */
 public class VisitorEvaluator extends VisitorPartialEvaluator {
-    protected void setResult(CtElement result) {
+    /*protected void setResult(CtElement result) {
         try {
             FieldUtils.writeField(this, "result", result, true);
         } catch (IllegalAccessException exception) {
@@ -26,7 +26,7 @@ public class VisitorEvaluator extends VisitorPartialEvaluator {
         } catch (IllegalAccessException exception) {
             throw new IllegalStateException("VisitorPartialEvaluator#result is no longer accessible", exception);
         }
-    }
+    }*/
 
     private static CtLiteral<Integer> toIntegerLiteral(CtLiteral<Character> ctLiteral) {
         return SpoonUtil.makeLiteral(

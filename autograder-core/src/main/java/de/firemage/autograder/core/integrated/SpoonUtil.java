@@ -345,6 +345,18 @@ public final class SpoonUtil {
         return number;
     }
 
+    private static <T> CtExpression<?> partiallyEvaluate(CtExpression<T> ctExpression) {
+        // NOTE: this is a workaround for https://github.com/INRIA/spoon/issues/5273
+        PartialEvaluator evaluator = new VisitorEvaluator();
+        CtExpression<?> res = evaluator.evaluate(ctExpression).clone();
+
+        // ensure that all literals have a type (workaround for broken PartialEvaluator implementation)
+        CtVisitor ctVisitor = new VisitorCtLiteralTypeFixer(ctExpression.getFactory());
+        res.accept(ctVisitor);
+
+        return res;
+    }
+
     /**
      * Converts a binary operator like 'a < b' to 'a <= b - 1' or 'a > b' to 'a >= b + 1'.
      *
@@ -406,7 +418,7 @@ public final class SpoonUtil {
             ));
         }
 
-        // NOTE: this is a workaround for https://github.com/INRIA/spoon/issues/5273
+        // TODO: this should call the SpoonUtil.partiallyEvaluate
         PartialEvaluator evaluator = new VisitorEvaluator();
         CtBinaryOperator<T> res = evaluator.evaluate(result);
 
@@ -585,7 +597,7 @@ public final class SpoonUtil {
 
             if (left instanceof CtLiteral<?> && right instanceof CtLiteral<?>) {
                 // TODO: this should be able to handle much more
-                return ctBinaryOperator.clone().partiallyEvaluate();
+                return (CtExpression<T>) partiallyEvaluate(ctBinaryOperator.clone());
             }
 
             // a + 0 or a - 0
