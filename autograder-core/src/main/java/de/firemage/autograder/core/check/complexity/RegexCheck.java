@@ -29,15 +29,22 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 
+import java.util.List;
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.COMPLEX_REGEX})
 public class RegexCheck extends IntegratedCheck {
     private static final double MAX_ALLOWED_SCORE = 10.0;
+    private static final List<String> REGEX_HINTS = List.of("?", "<", ">", "+", "*", "[", "]", "$", "^", "|", "\\");
+    private static final int MIN_REGEX_HINTS = 2;
 
     private static boolean hasComment(CtElement ctElement) {
         return !ctElement.getComments().isEmpty()
             || ctElement.getParent() instanceof CtVariable<?> ctVariable && hasComment(ctVariable);
+    }
+
+    private static boolean looksLikeRegex(String value) {
+        return REGEX_HINTS.stream().filter(value::contains).count() >= MIN_REGEX_HINTS;
     }
 
 
@@ -160,7 +167,7 @@ public class RegexCheck extends IntegratedCheck {
 
     private static double scoreGroup(Group group) {
         double multiplier = switch (group.type()) {
-            case CAPTURING -> 2.0;
+            case CAPTURING -> 1.5;
             case NON_CAPTURING -> 10.0;
             case INDEPENDENT_NON_CAPTURING -> 100.0;
         };
