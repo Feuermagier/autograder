@@ -11,6 +11,7 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtVariable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
@@ -50,21 +51,33 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             return true;
         }
 
-        Stream<String> options = Stream.of("");
+        String cleanedName = name.toLowerCase().replace("_", "");
+
+        List<String> options = new ArrayList<>();
+        options.add(""); // Empty string is prefix of everything
+
         if (value.isEmpty()) {
-            options = Stream.of("empty", "blank");
+            options = List.of("empty", "blank");
         } else {
             for (char c : value.toCharArray()) {
                 var charOptions = listCharOptions(c);
                 if (charOptions == null) {
                     return false;
                 }
-                options = options.flatMap(suffix -> charOptions.stream().map(o -> suffix + o));
+                options = options
+                        .stream()
+                        .flatMap(suffix -> charOptions.stream().map(o -> suffix + o))
+                        .filter(cleanedName::startsWith)
+                        .toList();
+
+                if (options.isEmpty()) {
+                    // Matching no longer possible, since we only ever add suffixes to the options
+                    return false;
+                }
             }
         }
 
-        String cleanedName = name.toLowerCase().replace("_", "");
-        return options.anyMatch(cleanedName::equals);
+        return options.contains(cleanedName);
     }
 
     private static List<String> listCharOptions(char c) {
@@ -77,7 +90,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             case ';' -> List.of("semi_colon", "semicolon");
             case '_' -> List.of("underscore", "dash", "line");
             case '/', '\\' -> List.of("slash", "backslash");
-            default -> Character.isAlphabetic(c) ? List.of(Character.toLowerCase(c) + "") : null;
+            default -> Character.isAlphabetic(c) ? List.of(String.valueOf(Character.toLowerCase(c))) : null;
         };
     }
 
