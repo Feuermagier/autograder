@@ -38,6 +38,10 @@ public class Test {
     int minNumber; // Ok
 
     int max_number; // Ok (wrong case, previoulsy resulted in a crash)
+
+    String datePattern; // Ok
+    String namePattern; // Ok
+    String timePattern; // Ok
 }
 
 enum Month {
