@@ -39,6 +39,11 @@ public class Test {
 
     int max_number; // Ok (wrong case, previoulsy resulted in a crash)
 
+    private void test() {
+        Test[] tests = new Test[5];
+        for (Test test : tests) { } // Ok
+    }
+
     String datePattern; // Ok
     String namePattern; // Ok
     String timePattern; // Ok

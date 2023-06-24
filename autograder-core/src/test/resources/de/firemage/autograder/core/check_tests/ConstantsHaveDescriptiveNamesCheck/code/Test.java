@@ -30,4 +30,7 @@ public class Test {
     private static final String EMPTY = " "; // Not Ok
     private static final String BLANK = " "; // Not Ok
     private static final int COMPARE = 0; // Not Ok
+
+    private static final String ERROR_MESSAGE = "The start and the end of an edge can not be the same vertex."; // Ok
+    private static final String This_is_a_very_long_string = "This is a very long string, which, should, test, the, ability, of, the, code, to, handle, long, strings"; // Ok
 }

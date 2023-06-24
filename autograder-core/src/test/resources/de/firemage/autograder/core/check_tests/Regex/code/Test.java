@@ -16,4 +16,7 @@ public class Test {
     private static final String COMPLICATED_REGEX_1 = "^(?<identifier>\\d+),(?<street>\\d+),(?<velocity>\\d+),(?<acceleration>\\d+)$";
     // Inline comments should be acceptable as well
     private static final String COMPLICATED_REGEX_2 = "^(?<identifier>\\d+),(?<street>\\d+),(?<velocity>\\d+),(?<acceleration>\\d+)$";
+
+    private static final String FORMAT_STRING_1 = "coordinate (%s, %s) is invalid!";
+    private static final String FORMAT_STRING_2 = "coordinate (%s, %s)\n is invalid?\n";
 }
