@@ -175,7 +175,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
             return false;
         }
 
-        return similarity(variable, other) <= 2;
+        return similarity(variable, other) <= 1;
     }
 
     private static <I, O> Stream<O> filterByType(Stream<I> stream, Class<? extends O> type) {

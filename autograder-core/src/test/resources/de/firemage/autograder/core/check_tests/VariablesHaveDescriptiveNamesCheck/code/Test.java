@@ -43,6 +43,10 @@ public class Test {
         Test[] tests = new Test[5];
         for (Test test : tests) { } // Ok
     }
+
+    String datePattern; // Ok
+    String namePattern; // Ok
+    String timePattern; // Ok
 }
 
 enum Month {

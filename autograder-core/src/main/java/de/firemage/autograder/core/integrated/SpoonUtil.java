@@ -41,6 +41,7 @@ import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtVisitor;
+import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
@@ -961,6 +962,10 @@ public final class SpoonUtil {
         }
 
         return isOverriddenMethod(ctMethod);
+    }
+
+    public static List<CtMethod<?>> getOverridingMethods(CtMethod<?> ctMethod) {
+        return ctMethod.getFactory().getModel().getElements(new OverridingMethodFilter(ctMethod).includingSelf(false));
     }
 
     public static boolean isInMainMethod(CtElement ctElement) {

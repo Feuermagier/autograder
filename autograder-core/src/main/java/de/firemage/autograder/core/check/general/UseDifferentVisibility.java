@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check.general;
 
-import com.google.common.collect.Sets;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -21,7 +20,10 @@ import spoon.reflect.reference.CtReference;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
 import java.util.List;
+import java.util.ArrayList;
 import java.util.Map;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
@@ -60,7 +62,20 @@ public class UseDifferentVisibility extends IntegratedCheck {
     private static Visibility getVisibility(CtTypeMember ctTypeMember, CtReference ctReference) {
         CtModel ctModel = ctReference.getFactory().getModel();
 
-        List<CtReference> references = ctModel.getElements(new DirectReferenceFilter<>(ctReference)).stream().filter(ctElement -> !ctElement.isImplicit()).toList();
+        List<CtReference> references = ctModel.getElements(new DirectReferenceFilter<>(ctReference))
+            .stream()
+            .filter(ctElement -> !ctElement.isImplicit())
+            .collect(Collectors.toCollection(ArrayList::new));
+
+        // implementing an abstract method is not considered a reference to the method
+        // therefore those are added manually here:
+        if (ctTypeMember instanceof CtMethod<?> ctMethod) {
+            for (CtMethod<?> overridingMethod : SpoonUtil.getOverridingMethods(ctMethod)) {
+                if (!overridingMethod.isImplicit()) {
+                    references.add(overridingMethod.getReference());
+                }
+            }
+        }
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
@@ -112,6 +127,21 @@ public class UseDifferentVisibility extends IntegratedCheck {
                     visibility = getVisibility(ctMethod, ctMethod.getReference());
                 } else if (ctTypeMember instanceof CtField<?> ctField) {
                     visibility = getVisibility(ctField, ctField.getReference());
+
+                    // special case for fields that are referenced by other fields in the same class
+                    // For more details see the test case TestUseDifferentVisibility#testBackwardReference
+                    Optional<Visibility> referencingVisibility = ctField.getDeclaringType()
+                        .getFields()
+                        .stream()
+                        // filter out the field itself and those that do not reference the field
+                        .filter(field -> field != ctField
+                            && !field.getElements(new DirectReferenceFilter<>(ctField.getReference())).isEmpty())
+                        .map(field -> getVisibility(field, field.getReference()))
+                        .max(Visibility::compareTo);
+
+                    if (referencingVisibility.isPresent() && visibility.isMoreRestrictiveThan(referencingVisibility.get())) {
+                        visibility = referencingVisibility.get();
+                    }
                 } else {
                     return;
                 }
