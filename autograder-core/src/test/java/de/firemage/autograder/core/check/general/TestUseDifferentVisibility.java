@@ -30,10 +30,10 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Example",
                     """
-                    public class Example {
-                        String exampleVariable;
-                    }
-                    """
+                        public class Example {
+                            String exampleVariable;
+                        }
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -50,21 +50,21 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Example",
                     """
-                    public class Example {
-                        String exampleVariable;
-                    }
-                    """
+                        public class Example {
+                            String exampleVariable;
+                        }
+                        """
                 ),
                 Map.entry(
                     "Other",
                     """
-                    public class Other {
-                        private static void foo() {
-                            Example example = new Example();
-                            example.exampleVariable = "foo";
+                        public class Other {
+                            private static void foo() {
+                                Example example = new Example();
+                                example.exampleVariable = "foo";
+                            }
                         }
-                    }
-                    """
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -81,24 +81,24 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "com.Example",
                     """
-                    package com;
-                    public class Example {
-                        public String exampleVariable;
-                    }
-                    """
+                        package com;
+                        public class Example {
+                            public String exampleVariable;
+                        }
+                        """
                 ),
                 Map.entry(
                     "Other",
                     """
-                    import com.Example;
+                        import com.Example;
 
-                    public class Other {
-                        private static void foo() {
-                            Example example = new Example();
-                            example.exampleVariable = "foo";
+                        public class Other {
+                            private static void foo() {
+                                Example example = new Example();
+                                example.exampleVariable = "foo";
+                            }
                         }
-                    }
-                    """
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -115,21 +115,21 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Example",
                     """
-                    public class Example {
-                        public String exampleVariable;
-                    
-                        private void foo() {
-                            exampleVariable = "foo";
-                        }
-                        
-                        static class Inner {
-                            private void bar() {
-                                Example example = new Example();
-                                example.exampleVariable = "bar";
+                        public class Example {
+                            public String exampleVariable;
+                                            
+                            private void foo() {
+                                exampleVariable = "foo";
+                            }
+                            
+                            static class Inner {
+                                private void bar() {
+                                    Example example = new Example();
+                                    example.exampleVariable = "bar";
+                                }
                             }
                         }
-                    }
-                    """
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -158,18 +158,18 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Example",
                     """
-                    public class Example {
-                    
-                        private void foo() {
-                            Inner inner = new Inner();
-                            inner.exampleVariable = "foo";
+                        public class Example {
+                                            
+                            private void foo() {
+                                Inner inner = new Inner();
+                                inner.exampleVariable = "foo";
+                            }
+                            
+                            static class Inner {
+                                public String exampleVariable;
+                            }
                         }
-                        
-                        static class Inner {
-                            public String exampleVariable;
-                        }
-                    }
-                    """
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -198,10 +198,10 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Main",
                     """
-                    public class Main {
-                        public static void main(String[] args) {}
-                    }
-                    """
+                        public class Main {
+                            public static void main(String[] args) {}
+                        }
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -218,48 +218,48 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Main",
                     """
-                    public class Main {
-                        public void foo() {} // Not Ok
-                        
-                        void bar() {} // Not Ok
-                        
-                        private void baz() {} // Ok
-                        
-                        void a() {} // Not Ok
+                        public class Main {
+                            public void foo() {} // Not Ok
+                            
+                            void bar() {} // Not Ok
+                            
+                            private void baz() {} // Ok
+                            
+                            void a() {} // Not Ok
 
-                        private void b() {
-                            a();
+                            private void b() {
+                                a();
+                            }
+                            
+                            public void c() {} // Not Ok
+                            
+                            void d() {} // Ok
+                            
+                            void e() {
+                                // so that all methods are used
+                                foo();
+                                bar();
+                                baz();
+                                a();
+                                b();
+                                c();
+                                d();
+                            } 
                         }
-                        
-                        public void c() {} // Not Ok
-                        
-                        void d() {} // Ok
-                        
-                        void e() {
-                            // so that all methods are used
-                            foo();
-                            bar();
-                            baz();
-                            a();
-                            b();
-                            c();
-                            d();
-                        } 
-                    }
-                    """
+                        """
                 ),
                 Map.entry(
                     "Other",
                     """
-                    public class Other {
-                        private void call() {
-                            Main main = new Main();
-                            main.c();
-                            main.d();
-                            main.e();
+                        public class Other {
+                            private void call() {
+                                Main main = new Main();
+                                main.c();
+                                main.d();
+                                main.e();
+                            }
                         }
-                    }
-                    """
+                        """
                 )
             )
         ), PROBLEM_TYPES);
@@ -295,13 +295,13 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Main",
                     """
-                    public class Main {
-                        @Override
-                        public boolean equals(Object other) {
-                            return true;
+                        public class Main {
+                            @Override
+                            public boolean equals(Object other) {
+                                return true;
+                            }
                         }
-                    }
-                    """
+                        """
                 )
             )
         ), PROBLEM_TYPES);
