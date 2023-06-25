@@ -38,6 +38,12 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             case 1 -> List.of("one", "second");
             case 2 -> List.of("two", "third");
             case 3 -> List.of("three", "fourth");
+            case 4 -> List.of("four", "fifth");
+            case 5 -> List.of("five", "sixth");
+            case 6 -> List.of("six", "seventh");
+            case 7 -> List.of("seven", "eighth");
+            case 8 -> List.of("eight", "ninth");
+            case 9 -> List.of("nine", "tenth");
             default -> List.of();
         };
         return valueNameOptions.stream()
@@ -100,6 +106,11 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         String valueString = "null";
         if (value.getValue() != null) {
             valueString = value.getValue().toString().toLowerCase();
+        }
+
+        if (valueString.length() == 1 && Character.isAlphabetic(valueString.charAt(0))) {
+            String c = String.valueOf(valueString.charAt(0));
+            return lowerCaseName.startsWith(c + "_") || lowerCaseName.endsWith("_" + c) || lowerCaseName.contains("_" + c + "_");
         }
 
         // convert special characters like : to their names (colon)

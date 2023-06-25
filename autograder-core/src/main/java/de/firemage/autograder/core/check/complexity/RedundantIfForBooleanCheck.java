@@ -14,6 +14,8 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtUnaryOperator;
+import spoon.reflect.code.UnaryOperatorKind;
 
 import java.util.List;
 import java.util.Map;
@@ -23,15 +25,28 @@ import java.util.Optional;
 public class RedundantIfForBooleanCheck extends IntegratedCheck {
     private LocalizedMessage formatReturnProblem(CtExpression<?> expression, boolean negate) {
         return new LocalizedMessage("redundant-if-for-bool-exp-return", Map.of(
-            "exp", (negate ? "!" : "") + expression
+            "exp", formatBooleanExpression(expression, negate)
         ));
     }
 
     private LocalizedMessage formatAssignProblem(CtExpression<?> expression, CtExpression<?> target, boolean negate) {
         return new LocalizedMessage("redundant-if-for-bool-exp-assign", Map.of(
-            "exp", (negate ? "!" : "") + expression,
+            "exp", formatBooleanExpression(expression, negate),
             "target", target.toString()
         ));
+    }
+
+    private static String formatBooleanExpression(CtExpression<?> expression, boolean negate) {
+        if (!negate) {
+            return expression.toString();
+        }
+
+        if (expression instanceof CtUnaryOperator<?> unaryOperator && unaryOperator.getKind() == UnaryOperatorKind.NOT) {
+            // Expression already starts with a negation
+            return unaryOperator.getOperand().toString();
+        } else {
+            return "!" + expression;
+        }
     }
 
     @Override

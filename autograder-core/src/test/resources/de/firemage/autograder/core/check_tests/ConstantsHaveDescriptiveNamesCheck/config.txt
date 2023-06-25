@@ -24,3 +24,5 @@ Test.java:25
 Test.java:30
 Test.java:31
 Test.java:32
+Test.java:36
+Test.java:38
