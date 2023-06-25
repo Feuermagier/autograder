@@ -28,4 +28,8 @@ class A {
     public boolean equals(Object o) { // Ok (overridden method)
         return super.equals(o);
     } // Ok
+
+    void foo() { // Not ok
+        foo();
+    }
 }

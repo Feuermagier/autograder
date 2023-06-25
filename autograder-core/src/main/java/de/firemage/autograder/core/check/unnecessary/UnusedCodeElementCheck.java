@@ -27,10 +27,17 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             return;
         }
 
-        boolean isUnused = ctElement.getFactory()
+        var references = ctElement.getFactory()
             .getModel()
-            .getElements(new DirectReferenceFilter<>(ctReference))
-            .isEmpty();
+            .getElements(new DirectReferenceFilter<>(ctReference));
+
+        boolean isUnused;
+        if (ctElement instanceof CtMethod<?> method) {
+            // Methods are also unused if they are only called by themselves, i.e. they are recursive
+            isUnused = references.stream().allMatch(r -> method.equals(r.getParent(CtMethod.class)));
+        } else {
+            isUnused = references.isEmpty();
+        }
 
 
         ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;
