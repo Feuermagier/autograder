@@ -4,7 +4,7 @@ import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.SourceInfo;
+import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
@@ -50,8 +50,9 @@ public abstract class AbstractCheckTest {
     }
 
     protected Map.Entry<String, String> dummySourceEntry(String packageName, String className) {
+        String name = packageName.isEmpty() ? className : packageName + "." + className;
         return Map.entry(
-            packageName + "." + className,
+            name,
             """
             %spublic class %s {}
             """.formatted(packageName.isEmpty() ? "" : "package %s;\n\n".formatted(packageName), className)

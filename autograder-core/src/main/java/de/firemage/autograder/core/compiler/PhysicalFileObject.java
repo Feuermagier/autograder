@@ -1,5 +1,9 @@
 package de.firemage.autograder.core.compiler;
 
+import de.firemage.autograder.core.file.CompilationUnit;
+import de.firemage.autograder.core.file.SourcePath;
+
+import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import java.io.File;
 import java.io.FileOutputStream;
@@ -11,21 +15,23 @@ import java.nio.charset.Charset;
 import java.nio.file.FileAlreadyExistsException;
 import java.nio.file.Files;
 
-public class PhysicalFileObject extends SimpleJavaFileObject {
+public class PhysicalFileObject extends SimpleJavaFileObject implements CompilationUnit {
 
     private final File file;
+    private final SourcePath path;
     private final Charset charset;
 
-    public PhysicalFileObject(File file, Charset charset) {
+    public PhysicalFileObject(File file, Charset charset, SourcePath path) {
         super(file.toURI(), Kind.SOURCE);
         this.file = file;
+        this.path = path;
         this.charset = charset;
     }
 
     @Override
     public String getName() {
-        // NOTE: PMD relies on this method to return a valid path as a string
-        return this.file.getPath();
+        // NOTE: PMD relies on this method to return something that looks like a path
+        return this.path().toString();
     }
 
     @Override
@@ -48,6 +54,21 @@ public class PhysicalFileObject extends SimpleJavaFileObject {
     @Override
     public Writer openWriter() throws IOException {
         // ensure that the correct charset is used
-        return new OutputStreamWriter(this.openOutputStream(), this.charset);
+        return new OutputStreamWriter(this.openOutputStream(), this.charset());
+    }
+
+    @Override
+    public JavaFileObject toJavaFileObject() {
+        return this;
+    }
+
+    @Override
+    public Charset charset() {
+        return this.charset;
+    }
+
+    @Override
+    public SourcePath path() {
+        return this.path;
     }
 }

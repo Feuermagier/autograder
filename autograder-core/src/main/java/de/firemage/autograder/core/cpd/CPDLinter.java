@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.cpd;
 
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.check.general.CopyPasteCheck;
 import net.sourceforge.pmd.cpd.CPD;
@@ -27,14 +28,15 @@ public class CPDLinter {
             // (CpdAnalysis should be added in the future)
             CPD cpd = new CPD(cpdConfig);
 
-            for (JavaFileObject compilationUnit : file.getSource().compilationUnits()) {
+            for (CompilationUnit compilationUnit : file.getSource().compilationUnits()) {
+                JavaFileObject javaFileObject = compilationUnit.toJavaFileObject();
                 cpd.add(new SourceCode(new SourceCode.ReaderCodeLoader(
-                    compilationUnit.openReader(true),
-                    compilationUnit.getName()
+                    javaFileObject.openReader(true),
+                    compilationUnit.path().toString()
                 )));
             }
             cpd.go();
-            cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getSource().getPath())));
+            cpd.getMatches().forEachRemaining(match -> problems.add(new CPDInCodeProblem(check, match, file.getSource())));
         }
 
         return problems;

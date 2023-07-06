@@ -6,6 +6,7 @@ import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalStatement;
+import org.apache.commons.compress.utils.FileNameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
@@ -1022,6 +1023,6 @@ public final class SpoonUtil {
      * @return a human-readable string representation of the source position
      */
     public static String formatSourcePosition(SourcePosition sourcePosition) {
-        return String.format("%s:L%d", sourcePosition.getFile().getName(), sourcePosition.getLine());
+        return String.format("%s:L%d", FileNameUtils.getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
     }
 }

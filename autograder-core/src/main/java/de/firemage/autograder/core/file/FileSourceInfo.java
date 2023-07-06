@@ -1,5 +1,6 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.core.file;
 
+import de.firemage.autograder.core.SerializableCharset;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.compiler.PhysicalFileObject;
 import org.apache.commons.io.FileUtils;
@@ -9,7 +10,6 @@ import org.slf4j.LoggerFactory;
 import spoon.compiler.SpoonResource;
 import spoon.support.compiler.FileSystemFolder;
 
-import javax.tools.JavaFileObject;
 import java.io.File;
 import java.io.IOException;
 import java.nio.charset.Charset;
@@ -43,6 +43,7 @@ public class FileSourceInfo implements SourceInfo {
         this.version = version;
 
         Charset detectedCharset = null;
+        // TODO: make this based on the file
         for (File javaFile : this.streamFiles().toList()) {
             String fileCharsetName = UniversalDetector.detectCharset(javaFile);
             if (fileCharsetName == null) {
@@ -63,8 +64,8 @@ public class FileSourceInfo implements SourceInfo {
     }
 
     @Override
-    public Path getPath() {
-        return this.file.toPath().toAbsolutePath();
+    public Path path() {
+        return this.file.toPath();
     }
 
     private Stream<File> streamFiles() throws IOException {
@@ -75,9 +76,13 @@ public class FileSourceInfo implements SourceInfo {
     }
 
     @Override
-    public List<JavaFileObject> compilationUnits() throws IOException {
+    public List<CompilationUnit> compilationUnits() throws IOException {
         return this.streamFiles()
-            .map(file -> new PhysicalFileObject(file, this.charset))
+            .map(file -> {
+                Path root = this.path();
+                Path relative = root.relativize(file.toPath());
+                return new PhysicalFileObject(file, this.charset, SourcePath.of(relative));
+            })
             .collect(Collectors.toList()); // toList does not work here
     }
 
@@ -94,17 +99,7 @@ public class FileSourceInfo implements SourceInfo {
     }
 
     @Override
-    public void delete() throws IOException {
-        FileUtils.deleteDirectory(this.file);
-    }
-
-    @Override
     public JavaVersion getVersion() {
         return version;
-    }
-
-    @Override
-    public Charset getCharset() {
-        return charset;
     }
 }

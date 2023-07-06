@@ -8,29 +8,29 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
+import de.firemage.autograder.core.file.SourceInfo;
 import spoon.reflect.declaration.CtElement;
 
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 
 public abstract class IntegratedCheck implements Check {
     private final List<Problem> problems = new ArrayList<>();
-    private Path root;
+    private SourceInfo sourceInfo;
 
     protected IntegratedCheck() {}
 
     protected void addLocalProblem(CtElement element, Translatable explanation, ProblemType problemType) {
-        this.problems.add(new IntegratedInCodeProblem(this, element, explanation, problemType, this.root));
+        this.problems.add(new IntegratedInCodeProblem(this, element, explanation, problemType, this.sourceInfo));
     }
 
     protected void addLocalProblem(CodePosition position, Translatable explanation, ProblemType problemType) {
         this.problems.add(new ProblemImpl(this, position, explanation, problemType) {});
     }
 
-    public List<Problem> run(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis, Path root) {
+    public List<Problem> run(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis, SourceInfo sourceInfo) {
         this.problems.clear();
-        this.root = root;
+        this.sourceInfo = sourceInfo;
         this.check(staticAnalysis, dynamicAnalysis);
         return this.problems;
     }
@@ -42,7 +42,7 @@ public abstract class IntegratedCheck implements Check {
         return new LocalizedMessage("linter-integrated");
     }
 
-    protected Path getRoot() {
-        return root;
+    protected SourceInfo getRoot() {
+        return this.sourceInfo;
     }
 }

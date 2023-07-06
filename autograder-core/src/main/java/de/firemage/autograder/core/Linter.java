@@ -213,7 +213,7 @@ public final class Linter {
         if (!spotbugsChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
                 statusConsumer.accept(LinterStatus.RUNNING_SPOTBUGS);
-                reporter.reportProblems(new SpotbugsLinter().lint(file.getCompilationResult().jar(), spotbugsChecks));
+                reporter.reportProblems(new SpotbugsLinter().lint(file, file.getCompilationResult().jar(), spotbugsChecks));
             });
         }
 
