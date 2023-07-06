@@ -58,12 +58,10 @@ public class FileSourceInfo implements SourceInfo {
     }
 
     private Stream<File> streamFiles() throws IOException {
-        try (Stream<Path> fileStream = Files.walk(this.file.toPath())) {
-            return fileStream
-                .filter(p -> p.toString().endsWith(".java"))
-                .filter(p -> !p.toString().endsWith("package-info.java"))
-                .map(Path::toFile);
-        }
+        return Files.walk(this.file.toPath())
+            .filter(p -> p.toString().endsWith(".java"))
+            .filter(p -> !p.toString().endsWith("package-info.java"))
+            .map(Path::toFile);
     }
 
     @Override
