@@ -71,14 +71,19 @@ public interface SourceInfo extends Serializable {
             // path should be relative
             relative = path;
         }
-        System.out.println("root: %s, path: %s, relative: %s".formatted(root, path, relative));
 
         return this.getCompilationUnit(SourcePath.of(relative));
     }
 
     default CompilationUnit getCompilationUnit(URI uri) {
-        System.out.println(uri);
-        return this.getCompilationUnit(Path.of(uri.getPath().substring(1)));
+        Path path = Path.of(uri.getPath());
+        if (uri.getScheme().equals("string")) {
+            // virtual files have a path like string:///path/to/file
+            // and getPath() returns /path/to/file, so the first slash has to be removed
+            path = Path.of(uri.getPath().substring(1));
+        }
+
+        return this.getCompilationUnit(path);
     }
 
     /**
