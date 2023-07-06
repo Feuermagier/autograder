@@ -71,11 +71,13 @@ public interface SourceInfo extends Serializable {
             // path should be relative
             relative = path;
         }
+        System.out.println("root: %s, path: %s, relative: %s".formatted(root, path, relative));
 
         return this.getCompilationUnit(SourcePath.of(relative));
     }
 
     default CompilationUnit getCompilationUnit(URI uri) {
+        System.out.println(uri);
         return this.getCompilationUnit(Path.of(uri.getPath().substring(1)));
     }
 
