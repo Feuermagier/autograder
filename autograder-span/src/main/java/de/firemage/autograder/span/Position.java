@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.span;
+package de.firemage.autograder.span;
 
 /**
  * Represents a position in a file.

@@ -1,14 +1,6 @@
-package de.firemage.autograder.core.span;
+package de.firemage.autograder.span;
 
-import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.file.StringSourceInfo;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import spoon.Launcher;
-import spoon.reflect.declaration.CtClass;
-import spoon.reflect.declaration.CtMethod;
 
 import java.util.Optional;
 
@@ -194,73 +186,6 @@ class TestFormatter {
                | |_^ this is a multiline span\
             """,
             formatter.render(Text.fromString(0, sourceCode))
-        );
-    }
-
-    @Test
-    @Disabled("Requires more work to correctly span the method")
-    void testSpanMethod() {
-        Text sourceCode = Text.fromString(0, """
-        public class MatrixUtils {
-            public static int[][] copyMatrix(int[][] matrix) {
-                int n = matrix.length;
-                int m = matrix[0].length;
-
-                int[][] result = new int[n][m];
-                for (int i = 0; i < n; i++) {
-                    for (int j = 0; j < m; j++) { // Not Ok (= System.arraycopy(matrix[i], 0, result[i], 0, m))
-                        result[i][j] = matrix[i][j];
-                    }
-                }
-
-                return result;
-            }
-        }""");
-
-        SourceInfo sourceInfo = StringSourceInfo.fromSourceString(JavaVersion.JAVA_17, "MatrixUtils", sourceCode.text());
-
-        CtClass<?> matrixUtils = Launcher.parseClass(sourceCode.text());
-
-        CtMethod<?> ctMethod = matrixUtils.getMethodsByName("copyMatrix").get(0);
-
-        System.out.println(ctMethod.getPosition().isValidPosition());
-        System.out.println("L%d:%d - L%d:%d".formatted(
-            ctMethod.getPosition().getLine(),
-            ctMethod.getPosition().getColumn(),
-            ctMethod.getPosition().getEndLine(),
-            ctMethod.getPosition().getEndColumn()
-        ));
-
-        CodePosition codePosition = CodePosition.fromSourcePosition(
-            ctMethod.getPosition(),
-            ctMethod,
-            sourceInfo
-        );
-
-        Formatter formatter = new Formatter(
-            "\n",
-            new Highlight(Span.of(codePosition), Optional.of("this method is unused"), Style.ERROR),
-            1
-        );
-
-        assertEquals(
-            """
-              1 |     public static int[][] copyMatrix(int[][] matrix) {
-                |                           ^^^^^^^^^^ this method is unused
-              2 |         int n = matrix.length;
-              3 |         int m = matrix[0].length;
-              4 |
-              5 |         int[][] result = new int[n][m];
-              6 |         for (int i = 0; i < n; i++) {
-              7 |             for (int j = 0; j < m; j++) { // Not Ok (= System.arraycopy(matrix[i], 0, result[i], 0, m))
-              8 |                 result[i][j] = matrix[i][j];
-              9 |             }
-             10 |         }
-             11 |
-             12 |         return result;
-             13 |     }\
-            """,
-            formatter.render(sourceCode)
         );
     }
 }

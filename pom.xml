@@ -105,6 +105,11 @@
                 <artifactId>autograder-treeg</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-span</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 

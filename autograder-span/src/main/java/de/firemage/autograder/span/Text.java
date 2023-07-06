@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.span;
+package de.firemage.autograder.span;
 
 import com.google.common.collect.Streams;
 

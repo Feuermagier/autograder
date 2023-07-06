@@ -14,10 +14,12 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.span.Formatter;
-import de.firemage.autograder.core.span.Highlight;
-import de.firemage.autograder.core.span.Span;
-import de.firemage.autograder.core.span.Text;
+import de.firemage.autograder.span.Formatter;
+import de.firemage.autograder.span.Highlight;
+import de.firemage.autograder.span.Position;
+import de.firemage.autograder.span.Span;
+import de.firemage.autograder.span.Style;
+import de.firemage.autograder.span.Text;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -37,6 +39,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -104,6 +107,17 @@ public class Application implements Callable<Integer> {
         } catch (IOException exception) {
             throw new IllegalArgumentException("Could not create temp location", exception);
         }
+    }
+
+    private static Highlight highlightFromCodePosition(CodePosition codePosition, String label) {
+        return new Highlight(
+            new Span(
+                new Position(codePosition.startLine() - 1, codePosition.startColumn() - 1),
+                new Position(codePosition.endLine() - 1, codePosition.endColumn() - 1)
+            ),
+            Optional.ofNullable(label),
+            Style.ERROR
+        );
     }
 
     @Override
@@ -184,11 +198,9 @@ public class Application implements Callable<Integer> {
                         .map(problem -> {
                             CodePosition position = problem.getPosition();
                             Text sourceText = Text.fromString(0, position.readString());
-                            System.out.println(problem.getPosition());
-                            System.out.println(sourceText.subText(Span.of(position)));
                             Formatter formatter = new Formatter(
                                 System.lineSeparator(),
-                                Highlight.from(position, linter.translateMessage(problem.getExplanation()))
+                                highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
                             );
 
                             return formatter.render(sourceText);

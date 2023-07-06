@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.span;
+package de.firemage.autograder.span;
 
 final class RenderState {
     private boolean isInMultiline;

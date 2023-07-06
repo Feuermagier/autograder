@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.span;
+package de.firemage.autograder.span;
 
 import java.util.ArrayList;
 import java.util.List;

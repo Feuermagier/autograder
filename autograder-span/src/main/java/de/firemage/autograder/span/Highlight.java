@@ -1,19 +1,9 @@
-package de.firemage.autograder.core.span;
-
-import de.firemage.autograder.core.CodePosition;
+package de.firemage.autograder.span;
 
 import java.util.Optional;
 
 public record Highlight(Span span, Optional<String> label, Style style) {
     // TODO: support multiline labels (required for correctly displaying things)
-
-    public static Highlight from(CodePosition codePosition, String label) {
-        return new Highlight(
-            Span.of(codePosition),
-            Optional.ofNullable(label),
-            Style.ERROR
-        );
-    }
 
     public boolean isMultilineStart(int lineNumber) {
         return !this.span.isInline() && this.span.start().line() == lineNumber;

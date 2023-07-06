@@ -1,6 +1,5 @@
-package de.firemage.autograder.core.span;
+package de.firemage.autograder.span;
 
-import de.firemage.autograder.core.CodePosition;
 import org.apache.commons.lang3.ObjectUtils;
 
 import java.util.Optional;
@@ -13,12 +12,7 @@ import java.util.Optional;
  */
 public record Span(Position start, Position end) {
     // TODO: consider adding a last position to the span for marking the end of a line
-    public static Span of(CodePosition codePosition) {
-        return new Span(
-            new Position(codePosition.startLine() - 1, codePosition.startColumn() - 1),
-            new Position(codePosition.endLine() - 1, codePosition.endColumn() - 1)
-        );
-    }
+
 
     /**
      * Creates a span which covers the entire string.
