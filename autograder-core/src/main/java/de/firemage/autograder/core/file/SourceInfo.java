@@ -76,11 +76,13 @@ public interface SourceInfo extends Serializable {
     }
 
     default CompilationUnit getCompilationUnit(URI uri) {
-        Path path = Path.of(uri.getPath());
+        Path path;
         if (uri.getScheme().equals("string")) {
             // virtual files have a path like string:///path/to/file
             // and getPath() returns /path/to/file, so the first slash has to be removed
             path = Path.of(uri.getPath().substring(1));
+        } else {
+            path = Path.of(uri);
         }
 
         return this.getCompilationUnit(path);

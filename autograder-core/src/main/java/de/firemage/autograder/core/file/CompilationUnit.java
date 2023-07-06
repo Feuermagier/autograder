@@ -2,12 +2,13 @@ package de.firemage.autograder.core.file;
 
 import javax.tools.JavaFileObject;
 import java.io.IOException;
+import java.io.Serializable;
 import java.nio.charset.Charset;
 
 /**
  * Represents a compilation unit, which is a source file that can be compiled.
  */
-public interface CompilationUnit {
+public interface CompilationUnit extends Serializable {
     /**
      * Converts this compilation unit to a {@link JavaFileObject}.
      *
