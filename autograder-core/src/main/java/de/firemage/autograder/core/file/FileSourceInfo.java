@@ -16,8 +16,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.HashMap;
 import java.util.List;
-import java.util.Objects;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -26,41 +28,28 @@ public class FileSourceInfo implements SourceInfo {
 
     private final File file;
     private final JavaVersion version;
-    private final SerializableCharset charset;
+    private final Map<SourcePath, SerializableCharset> charsetCache;
 
-    private FileSourceInfo(Path file, JavaVersion version, Charset charset) {
-        this.file = file.toFile();
-        this.version = version;
-        this.charset = new SerializableCharset(charset);
-    }
-
-    public FileSourceInfo(Path file, JavaVersion version) throws IOException {
-        if (!file.toFile().isDirectory()) {
+    FileSourceInfo(Path path, JavaVersion version) {
+        if (!path.toFile().isDirectory()) {
             throw new IllegalArgumentException("The file must be a directory");
         }
 
-        this.file = file.toFile();
+        this.file = path.toAbsolutePath().normalize().toFile();
         this.version = version;
+        this.charsetCache = new HashMap<>();
+    }
 
-        Charset detectedCharset = null;
-        // TODO: make this based on the file
-        for (File javaFile : this.streamFiles().toList()) {
-            String fileCharsetName = UniversalDetector.detectCharset(javaFile);
-            if (fileCharsetName == null) {
-                continue;
+    private SerializableCharset detectCharset(File file, SourcePath sourcePath) {
+        return this.charsetCache.computeIfAbsent(sourcePath, key -> {
+            try {
+                return new SerializableCharset(Optional.ofNullable(UniversalDetector.detectCharset(file))
+                    .map(Charset::forName)
+                    .orElse(StandardCharsets.UTF_8));
+            } catch (IOException e) {
+                throw new IllegalArgumentException("Failed to read file '%s' for detecting charset".formatted(sourcePath), e);
             }
-            Charset fileCharset = Charset.forName(fileCharsetName);
-            if (!fileCharset.equals(StandardCharsets.US_ASCII)) {
-                if (detectedCharset != null && !fileCharset.equals(detectedCharset)) {
-                    throw new IOException("Java files with incompatible encodings found - some are " + detectedCharset +
-                        ", but others are " + fileCharset);
-                } else {
-                    detectedCharset = fileCharset;
-                }
-            }
-        }
-
-        this.charset = new SerializableCharset(Objects.requireNonNullElse(detectedCharset, StandardCharsets.UTF_8));
+        });
     }
 
     @Override
@@ -69,10 +58,12 @@ public class FileSourceInfo implements SourceInfo {
     }
 
     private Stream<File> streamFiles() throws IOException {
-        return Files.walk(this.file.toPath())
-            .filter(p -> p.toString().endsWith(".java"))
-            .filter(p -> !p.toString().endsWith("package-info.java"))
-            .map(Path::toFile);
+        try (Stream<Path> fileStream = Files.walk(this.file.toPath())) {
+            return fileStream
+                .filter(p -> p.toString().endsWith(".java"))
+                .filter(p -> !p.toString().endsWith("package-info.java"))
+                .map(Path::toFile);
+        }
     }
 
     @Override
@@ -81,7 +72,9 @@ public class FileSourceInfo implements SourceInfo {
             .map(file -> {
                 Path root = this.path();
                 Path relative = root.relativize(file.toPath());
-                return new PhysicalFileObject(file, this.charset, SourcePath.of(relative));
+                SourcePath sourcePath = SourcePath.of(relative);
+                SerializableCharset charset = this.detectCharset(file, sourcePath);
+                return new PhysicalFileObject(file, charset, sourcePath);
             })
             .collect(Collectors.toList()); // toList does not work here
     }
@@ -90,7 +83,7 @@ public class FileSourceInfo implements SourceInfo {
     public SourceInfo copyTo(Path target) throws IOException {
         FileUtils.copyDirectory(this.file, target.toFile());
 
-        return new FileSourceInfo(target, this.version, this.charset);
+        return new FileSourceInfo(target, this.version);
     }
 
     @Override
