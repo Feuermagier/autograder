@@ -14,6 +14,10 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
+import de.firemage.autograder.core.span.Formatter;
+import de.firemage.autograder.core.span.Highlight;
+import de.firemage.autograder.core.span.Span;
+import de.firemage.autograder.core.span.Text;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -73,6 +77,9 @@ public class Application implements Callable<Integer> {
     @Option(names = {
             "--pass-config"}, description = "Interpret the first parameter not as the path to a config file, but as the contents of the config file")
     private boolean passConfig;
+
+    @Option(names = {"-p", "--output-pretty"}, description = "Pretty print the output", defaultValue = "false")
+    private boolean isPrettyOutput;
 
     @Spec
     private CommandSpec spec;
@@ -162,6 +169,34 @@ public class Application implements Callable<Integer> {
                 List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
                 System.out.println(">> Problems <<");
                 printProblemsAsJson(problems, linter);
+            } else if (isPrettyOutput) {
+                CmdUtil.beginSection("Checks");
+                ProgressAnimation progress = new ProgressAnimation("Checking...");
+                progress.start();
+                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+                progress.finish("Completed checks");
+
+                if (problems.isEmpty()) {
+                    CmdUtil.println("No problems found - good job!");
+                } else {
+                    CmdUtil.println("Found " + problems.size() + " problem(s):");
+                    problems.stream()
+                        .map(problem -> {
+                            CodePosition position = problem.getPosition();
+                            Text sourceText = Text.fromString(0, position.readString());
+                            System.out.println(problem.getPosition());
+                            System.out.println(sourceText.subText(Span.of(position)));
+                            Formatter formatter = new Formatter(
+                                System.lineSeparator(),
+                                Highlight.from(position, linter.translateMessage(problem.getExplanation()))
+                            );
+
+                            return formatter.render(sourceText);
+                        })
+                        .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
+                }
+
+                CmdUtil.endSection();
             } else {
                 CmdUtil.beginSection("Checks");
                 ProgressAnimation progress = new ProgressAnimation("Checking...");
