@@ -166,4 +166,8 @@ class Street {
 ////////////////// The check previously crashed on the following tests
 class ABC {
     private Stack<Object>[][] foo;
+
+    void bar() {
+        int x = foo[0][0].size();
+    }
 }

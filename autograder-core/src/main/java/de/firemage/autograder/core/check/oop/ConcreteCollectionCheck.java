@@ -81,6 +81,14 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             return true;
         }
 
+        // Array access
+        if (ctTypeReference.getParent(CtArrayTypeReference.class) != null &&
+                (ctTypeReference.getParent(CtVariableAccess.class) != null
+                        || ctTypeReference.getParent(CtArrayAccess.class) != null
+                        || ctTypeReference.getParent(CtFieldAccess.class) != null)) {
+            return true;
+        }
+
         // ArrayList.class
         CtFieldRead<?> ctFieldRead = ctTypeReference.getParent(CtFieldRead.class);
         if (ctFieldRead != null) {
