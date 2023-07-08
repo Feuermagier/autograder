@@ -129,9 +129,9 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         ) {
             // A record has both a getter and an attribute -> visited twice and both are implicit...
             CtElement element = ctTypeReference;
-            if (!ctTypeReference.getPosition().isValidPosition()
-                && (ctTypeReference.getParent(CtArrayTypeReference.class) != null)) {
-                    element = ctTypeReference.getParent(CtArrayTypeReference.class);
+            while (!element.getPosition().isValidPosition()
+                && (element.getParent(CtArrayTypeReference.class) != null)) {
+                    element = element.getParent(CtArrayTypeReference.class);
             }
 
             this.addLocalProblem(

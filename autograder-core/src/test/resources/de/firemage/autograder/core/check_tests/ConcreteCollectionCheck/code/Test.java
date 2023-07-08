@@ -162,3 +162,8 @@ class Street {
         this.carsOnStreet = null; // Ok
     }
 }
+
+////////////////// The check previously crashed on the following tests
+class ABC {
+    private Stack<Object>[][] foo;
+}
