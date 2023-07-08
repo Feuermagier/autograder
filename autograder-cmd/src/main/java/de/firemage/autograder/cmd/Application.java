@@ -20,6 +20,7 @@ import de.firemage.autograder.span.Position;
 import de.firemage.autograder.span.Span;
 import de.firemage.autograder.span.Style;
 import de.firemage.autograder.span.Text;
+import org.apache.commons.io.output.NullPrintStream;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -39,6 +40,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
@@ -94,7 +96,7 @@ public class Application implements Callable<Integer> {
     }
 
     public static void main(String... args) {
-        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, StandardCharsets.UTF_8));
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, System.console().charset()));
         int exitCode = runApplication(args);
         System.exit(exitCode);
     }
@@ -118,6 +120,59 @@ public class Application implements Callable<Integer> {
             Optional.ofNullable(label),
             Style.ERROR
         );
+    }
+
+    private void execute(
+        Linter linter,
+        List<ProblemType> checks,
+        UploadedFile uploadedFile,
+        Consumer<LinterStatus> statusConsumer
+    ) throws LinterException, IOException {
+        if (outputJson) {
+            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+            System.out.println(">> Problems <<");
+            printProblemsAsJson(problems, linter);
+            return;
+        }
+
+        if (isPrettyOutput) {
+            CmdUtil.beginSection("Checks");
+            ProgressAnimation progress = new ProgressAnimation("Checking...");
+            progress.start();
+            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+            progress.finish("Completed checks");
+
+            if (problems.isEmpty()) {
+                CmdUtil.println("No problems found - good job!");
+            } else {
+                CmdUtil.println("Found " + problems.size() + " problem(s):");
+                problems.stream()
+                    .map(problem -> {
+                        CodePosition position = problem.getPosition();
+                        Text sourceText = Text.fromString(0, position.readString());
+                        Formatter formatter = new Formatter(
+                            System.lineSeparator(),
+                            highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
+                        );
+
+                        return formatter.render(sourceText);
+                    })
+                    .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
+            }
+
+            CmdUtil.endSection();
+            return;
+        }
+
+        CmdUtil.beginSection("Checks");
+        ProgressAnimation progress = new ProgressAnimation("Checking...");
+        progress.start();
+        List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+        progress.finish("Completed checks");
+
+        printProblems(problems, linter);
+
+        CmdUtil.endSection();
     }
 
     @Override
@@ -178,48 +233,7 @@ public class Application implements Callable<Integer> {
                 this.tempLocation,
                 statusConsumer,
             null)) {
-
-            if (outputJson) {
-                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
-                System.out.println(">> Problems <<");
-                printProblemsAsJson(problems, linter);
-            } else if (isPrettyOutput) {
-                CmdUtil.beginSection("Checks");
-                ProgressAnimation progress = new ProgressAnimation("Checking...");
-                progress.start();
-                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
-                progress.finish("Completed checks");
-
-                if (problems.isEmpty()) {
-                    CmdUtil.println("No problems found - good job!");
-                } else {
-                    CmdUtil.println("Found " + problems.size() + " problem(s):");
-                    problems.stream()
-                        .map(problem -> {
-                            CodePosition position = problem.getPosition();
-                            Text sourceText = Text.fromString(0, position.readString());
-                            Formatter formatter = new Formatter(
-                                System.lineSeparator(),
-                                highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
-                            );
-
-                            return formatter.render(sourceText);
-                        })
-                        .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
-                }
-
-                CmdUtil.endSection();
-            } else {
-                CmdUtil.beginSection("Checks");
-                ProgressAnimation progress = new ProgressAnimation("Checking...");
-                progress.start();
-                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
-                progress.finish("Completed checks");
-
-                printProblems(problems, linter);
-
-                CmdUtil.endSection();
-            }
+            this.execute(linter, checks, uploadedFile, statusConsumer);
         } catch (CompilationFailureException e) {
             CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
             return COMPILATION_EXIT_CODE;
