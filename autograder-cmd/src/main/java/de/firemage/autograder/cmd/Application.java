@@ -28,11 +28,14 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
+import java.io.Console;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintStream;
+import java.nio.charset.Charset;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -92,8 +95,12 @@ public class Application implements Callable<Integer> {
         this.tempLocation = tempLocation;
     }
 
+    private static Charset getConsoleCharset() {
+        return System.console() == null ? StandardCharsets.UTF_8 : System.console().charset();
+    }
+
     public static void main(String... args) {
-        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, System.console().charset()));
+        System.setOut(new PrintStream(new FileOutputStream(FileDescriptor.out), true, getConsoleCharset()));
         int exitCode = runApplication(args);
         System.exit(exitCode);
     }
