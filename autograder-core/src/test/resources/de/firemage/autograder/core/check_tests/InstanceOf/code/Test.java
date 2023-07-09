@@ -9,29 +9,29 @@ class A {}
 class B extends A {
     void foo() {
         A value = new B();
-        if (value instanceof B) { // Not Ok
+        if (value instanceof B) { /*@ not ok @*/
             // do something
         }
 
-        if (value.getClass().equals(B.class)) { // Not Ok
+        if (value.getClass().equals(B.class)) { /*@ not ok @*/
             // do something
         }
 
         try {
             B b = (B) value;
             // do something
-        } catch (ClassCastException ignored) { // Not Ok
+        } catch (ClassCastException ignored) { /*@ not ok @*/
             // not of type B
         }
     }
 
     @Override
     public boolean equals(Object obj) {
-        return obj instanceof B; // Ok
+        return obj instanceof B; /*@ ok @*/
     }
 
     @Override
     public String toString() {
-        return this.getClass().getSimpleName(); // Ok
+        return this.getClass().getSimpleName(); /*@ ok @*/
     }
 }

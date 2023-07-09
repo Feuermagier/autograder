@@ -2,7 +2,6 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.compiler.JavaVersion;
 import org.apache.commons.io.FileUtils;
-import spoon.compiler.SpoonFile;
 import spoon.compiler.SpoonResource;
 import spoon.support.compiler.VirtualFile;
 import spoon.support.compiler.VirtualFolder;
@@ -22,10 +21,10 @@ import java.util.List;
 import java.util.Map;
 
 public final class StringSourceInfo implements SourceInfo {
-    private final List<VirtualFileObject> compilationUnits;
+    private final List<StringSource> compilationUnits;
     private final JavaVersion version;
 
-    private StringSourceInfo(JavaVersion version, List<VirtualFileObject> compilationUnits) {
+    private StringSourceInfo(JavaVersion version, List<StringSource> compilationUnits) {
         this.compilationUnits = compilationUnits;
         this.version = version;
     }
@@ -35,9 +34,9 @@ public final class StringSourceInfo implements SourceInfo {
     }
 
     public static SourceInfo fromSourceStrings(JavaVersion version, Map<String, String> sources) {
-        List<VirtualFileObject> compilationUnits = new ArrayList<>();
+        List<StringSource> compilationUnits = new ArrayList<>();
         for (Map.Entry<String, String> entry : sources.entrySet()) {
-            compilationUnits.add(new VirtualFileObject(ClassPath.fromString(entry.getKey()), entry.getValue()));
+            compilationUnits.add(new StringSource(ClassPath.fromString(entry.getKey()), entry.getValue()));
         }
 
         return new StringSourceInfo(version, compilationUnits);
@@ -50,7 +49,7 @@ public final class StringSourceInfo implements SourceInfo {
 
     @Override
     public List<JavaFileObject> compilationUnits() {
-        return new ArrayList<>(this.compilationUnits);
+        return this.compilationUnits.stream().map(source -> (JavaFileObject) new VirtualFileObject(source.classPath, source.code)).toList();
     }
 
     @Override
@@ -70,8 +69,8 @@ public final class StringSourceInfo implements SourceInfo {
     public SpoonResource getSpoonResource() {
         VirtualFolder result = new VirtualFolder();
 
-        for (VirtualFileObject file : this.compilationUnits) {
-            result.addFile(file.toSpoonFile());
+        for (StringSource file : this.compilationUnits) {
+            result.addFile(new VirtualFile(file.code, file.classPath.name()));
         }
 
         return result;
@@ -92,8 +91,12 @@ public final class StringSourceInfo implements SourceInfo {
         return StandardCharsets.UTF_8;
     }
 
-    // TODO: this class is not serializable...
-    private static final class VirtualFileObject extends SimpleJavaFileObject implements Serializable {
+    // This class exists only to make StringSourceInfo serializable because VirtualFileObject isn't serializable
+    private record StringSource(ClassPath classPath, String code) implements Serializable {
+
+    }
+
+    private static final class VirtualFileObject extends SimpleJavaFileObject {
         private final ClassPath classPath;
         private final String code;
 
@@ -112,24 +115,24 @@ public final class StringSourceInfo implements SourceInfo {
         public CharSequence getCharContent(boolean ignoreEncodingErrors) {
             return this.code;
         }
-
-        private SpoonFile toSpoonFile() {
-            return new VirtualFile(this.code, this.classPath.name());
-        }
     }
 
     private record ClassPath(String path, String name) implements Serializable {
         public static ClassPath fromString(String string) {
             List<String> parts = Arrays.asList(string.split("\\.", -1));
             return new ClassPath(
-                String.join(".", parts.subList(0, parts.size() - 1)),
-                parts.get(parts.size() - 1)
+                    String.join(".", parts.subList(0, parts.size() - 1)),
+                    parts.get(parts.size() - 1)
             );
         }
 
         @Override
         public String toString() {
-            return this.path + "." + this.name;
+            if (this.path.isBlank()) {
+                return this.name;
+            } else {
+                return this.path + "." + this.name;
+            }
         }
 
         public Path toPath() {

@@ -12,7 +12,7 @@ enum Color {
 
     @Override
     public String toString() {
-        return switch (this) { // Not Ok
+        return switch (this) { /*@ not ok @*/
             case RED -> "red";
             case GREEN -> "green";
             case BLUE -> "blue";
@@ -20,7 +20,7 @@ enum Color {
     }
 
     public String toString2() {
-        return switch (this) { // Not Ok
+        return switch (this) { /*@ not ok @*/
             case RED -> "red";
             case GREEN -> "green";
             case BLUE -> "blue";
@@ -30,7 +30,7 @@ enum Color {
 
 
     public String toString3() {
-        return switch (this) { // Not Ok
+        return switch (this) { /*@ not ok @*/
             case RED -> "red";
             case GREEN -> {
                 yield "green";
@@ -43,7 +43,7 @@ enum Color {
 
     public String toString4() {
         String value;
-        switch (this) { // Not Ok
+        switch (this) { /*@ not ok @*/
             case RED: {
                 value = "red";
                 break;

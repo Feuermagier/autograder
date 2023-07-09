@@ -2,52 +2,45 @@ package de.firemage.autograder.core.check_tests.VariablesHaveDescriptiveNamesChe
 
 import java.util.*;
 public class Test {
-    private static List<String> list; // Ok
-    private static List<String> exampleList; // Not Ok
-    private static int[] exampleIntArray; // Not Ok
-    private static int[] intArray; // Not Ok
-    private static String s; // Not Ok
-    private static String string; // Ok
-
+    private static List<String> list; /*@ ok @*/
+    private static List<String> exampleList; /*@ not ok @*/
+    private static int[] exampleIntArray; /*@ not ok @*/
+    private static int[] intArray; /*@ not ok @*/
+    private static String s; /*@ not ok @*/
+    private static String string; /*@ ok @*/
     int trafficLight1;
-    int trafficLight2; // Not Ok (similar to trafficLight1)
-    int trafficLight3; // Not Ok (similar to trafficLight1)
+    int trafficLight2; /*@ not ok; similar to trafficLight1 @*/
+    int trafficLight3; /*@ not ok; similar to trafficLight1 @*/
 
-    int result1; // Not Ok (could be result)
+    int result1; /*@ not ok; could be result @*/
 
-    int sec; // Not Ok
-    int min; // Not Ok
-
-    int interpret; // Ok
-    String interpreters; // Ok
-    List<String> validStrings; // Not Ok
-    Set<Integer> integerSet; // Not Ok
-
-    int pointer; // Ok
-    int pointerValue; // Ok
-    int flagInternal; // Ok
-    int playerPointer; // Ok
-
-    int maxValue; // Ok
-    int minValue; // Ok
-
-    int maximumValue; // Ok
-    int minimumValue; // Ok
-
-    int maxNumber; // Ok
-    int minNumber; // Ok
-
-    int max_number; // Ok (wrong case, previoulsy resulted in a crash)
+    int sec; /*@ not ok @*/
+    int min; /*@ not ok @*/
+    int interpret; /*@ ok @*/
+    String interpreters; /*@ ok @*/
+    List<String> validStrings; /*@ not ok @*/
+    Set<Integer> integerSet; /*@ not ok @*/
+    int pointer; /*@ ok @*/
+    int pointerValue; /*@ ok @*/
+    int flagInternal; /*@ ok @*/
+    int playerPointer; /*@ ok @*/
+    int maxValue; /*@ ok @*/
+    int minValue; /*@ ok @*/
+    int maximumValue; /*@ ok @*/
+    int minimumValue; /*@ ok @*/
+    int maxNumber; /*@ ok @*/
+    int minNumber; /*@ ok @*/
+    int max_number; /*@ ok; wrong case, previoulsy resulted in a crash @*/
 
     private void test() {
         Test[] tests = new Test[5];
-        for (Test test : tests) { } // Ok
-        for (char c: "abc".toCharArray()) { } // Ok
+        for (Test test : tests) { } /*@ ok @*/
+        for (char c: "abc".toCharArray()) { } /*@ ok @*/
     }
 
-    String datePattern; // Ok
-    String namePattern; // Ok
-    String timePattern; // Ok
+    String datePattern; /*@ ok @*/
+    String namePattern; /*@ ok @*/
+    String timePattern; /*@ ok @*/
 }
 
 enum Month {
@@ -56,8 +49,8 @@ enum Month {
     MARCH,
     APRIL,
     MAY,
-    JUNE, // Ok
-    JULY, // Ok
+    JUNE, /*@ ok @*/
+    JULY, /*@ ok @*/
     AUGUST,
     SEPTEMBER,
     OCTOBER,

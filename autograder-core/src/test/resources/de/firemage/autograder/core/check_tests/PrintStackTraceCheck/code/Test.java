@@ -5,13 +5,13 @@ public class Test {
         try {
             throw new Exception();
         } catch (Exception e) {
-            e.printStackTrace(); // Not Ok
+            e.printStackTrace(); /*@ not ok @*/
         }
 
         try {
             throw new Exception();
         } catch (Exception e) {
-            System.out.println(e); // Ok
+            System.out.println(e); /*@ ok @*/
         }
     }
 }

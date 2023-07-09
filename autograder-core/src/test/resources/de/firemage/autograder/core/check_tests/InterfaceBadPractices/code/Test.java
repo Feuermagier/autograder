@@ -3,18 +3,17 @@ package de.firemage.autograder.core.check_tests.InterfaceBadPractices.code;
 public class Test {
     public static void main(String[] args) {}
 
-    private static interface MyInterface {} // Not Ok
+    private static interface MyInterface {} /*@ not ok @*/
 }
 
-interface MyConstantsInterface {
-    int MY_CONSTANT = 42; // Not Ok
-    String ANOTHER_CONSTANT = "Hello World"; // Not Ok
+interface MyConstantsInterface { /*@ not ok @*/
+    int MY_CONSTANT = 42;
+    String ANOTHER_CONSTANT = "Hello World";
 }
 
 interface MyConstantsInterfaceWithMethods {
-    int MY_CONSTANT = 42; // Not Ok
-    String ANOTHER_CONSTANT = "Hello World"; // Not Ok
-
+    int MY_CONSTANT = 42; /*@ not ok @*/
+    String ANOTHER_CONSTANT = "Hello World"; /*@ not ok @*/
     void doSomething();
 
     default void doSomethingElse() {}
@@ -25,18 +24,18 @@ interface MyInterfaceWithStaticMethod {
 
     default void doSomethingElse() {}
 
-    static void doesSomething2() {} // Not Ok
+    static void doesSomething2() {} /*@ not ok @*/
 }
 
-interface Bar { // Not Ok
+interface Bar { /*@ not ok @*/
 }
 
-interface Foo {
-    public static final int FOO = 1; // Not Ok
+interface Foo { /*@ not ok @*/
+    public static final int FOO = 1;
 }
 
 class OuterClass {
-    interface InnerInterface { // Ok
+    interface InnerInterface { /*@ ok @*/
         void doSomething();
     }
 }

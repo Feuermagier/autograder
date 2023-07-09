@@ -3,9 +3,9 @@ package de.firemage.autograder.core.check_tests.InheritanceBadPractices.code;
 public class Test {}
 
 
-abstract class ExampleParent { // Not Ok (composition over inheritance)
+abstract class ExampleParent { /*@ not ok; (composition over inheritance) @*/
     private String field;
-    public ExampleParent() { // Not Ok
+    public ExampleParent() { /*@ not ok @*/
         this.field = "test";
     }
 }
@@ -17,7 +17,7 @@ class Subclass extends ExampleParent {
 }
 
 
-abstract class ToDisplay { // Not Ok
+abstract class ToDisplay { /*@ not ok @*/
     public abstract String toDisplay();
 }
 

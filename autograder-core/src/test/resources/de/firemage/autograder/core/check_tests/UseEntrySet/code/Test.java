@@ -9,7 +9,7 @@ public class Test {
         Map<Color, Integer> storedColors = new HashMap<>();
         Map<Color, Integer> result = new HashMap<>();
 
-        for (Color color : storedColors.keySet()) { // Not Ok
+        for (Color color : storedColors.keySet()) { /*@ not ok @*/
             if (storedColors.get(color) > 0) {
                 result.put(color, storedColors.get(color));
             }
@@ -48,55 +48,55 @@ class KeySetInsteadOfEntrySetCheckExtendedClass extends KeySetInsteadOfEntrySetC
     InnerClass inner;
 
     public void method() {
-        for (String value : list) { // Ok
+        for (String value : list) { /*@ ok @*/
         }
-        for (String value : list()) { // Ok
+        for (String value : list()) { /*@ ok @*/
         }
-        for (String value : new String[] {}) { // Ok
+        for (String value : new String[] {}) { /*@ ok @*/
         }
-        for (String key2 : map.keySet()) { // Ok
+        for (String key2 : map.keySet()) { /*@ ok @*/
             Object value1 = map.get(key);
             Object value2 = map.get(getKey());
             Object value3 = map2.get(key2);
         }
-        for (String key5 : this.map3[0].keySet()) { // Not Ok
+        for (String key5 : this.map3[0].keySet()) { /*@ not ok @*/
             Object value = this.map3[0].get(key5);
         }
-        for (String key5 : inner.inner.map.keySet()) { // Not Ok
+        for (String key5 : inner.inner.map.keySet()) { /*@ not ok @*/
             Object value = inner.inner.map.get(key5);
         }
-        for (String key5 : keySet()) { // Ok
+        for (String key5 : keySet()) { /*@ ok @*/
             Object value = map3[0].get(key5);
         }
-        for (String key5 : super.inner.map.keySet()) { // Not Ok
+        for (String key5 : super.inner.map.keySet()) { /*@ not ok @*/
             Object value = super.inner.map.get(key5);
         }
-        for (String key5 : this.inner.map.keySet()) { // Not Ok
+        for (String key5 : this.inner.map.keySet()) { /*@ not ok @*/
             Object value = this.inner.map.get(key5);
         }
-        for (java.util.Map.Entry<String, Object> key6 : map.entrySet()) { // Ok
+        for (java.util.Map.Entry<String, Object> key6 : map.entrySet()) { /*@ ok @*/
             Object value = map.get(key6);
         }
 
-        for (String key3 : keySet()) { // Not Ok
+        for (String key3 : keySet()) { /*@ not ok @*/
             Object value = get(key3);
         }
-        for (String key4 : this.keySet()) { // Not Ok
+        for (String key4 : this.keySet()) { /*@ not ok @*/
             Object value = this.get(key4);
         }
-        for (String key5 : super.keySet()) { // Not Ok
+        for (String key5 : super.keySet()) { /*@ not ok @*/
             Object value = super.get(key5);
         }
-        for (String key5 : map.keySet()) { // Not Ok
+        for (String key5 : map.keySet()) { /*@ not ok @*/
             Object value = map.get(key5);
         }
-        for (String key5 : super.map.keySet()) { // Not Ok
+        for (String key5 : super.map.keySet()) { /*@ not ok @*/
             Object value = super.map.get(key5);
         }
-        for (String key5 : super.map.keySet()) { // Ok
+        for (String key5 : super.map.keySet()) { /*@ ok @*/
             Object value = this.map.get(key5);
         }
-        for (String key5 : this.map.keySet()) { // Not Ok
+        for (String key5 : this.map.keySet()) { /*@ not ok @*/
             Object value = this.map.get(key5);
         }
     }

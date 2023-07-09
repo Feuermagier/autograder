@@ -2,14 +2,12 @@ package de.firemage.autograder.core.check_tests.EmptyBlockCheck.code;
 
 public class Test {
     public static void main(String[] args) {
-        if (true) {} // Not Ok
-
-        while (args[0].isEmpty()) {} // Not Ok
-
+        if (true) {} /*@ not ok @*/
+        while (args[0].isEmpty()) {} /*@ not ok @*/
         try {
             throw new IllegalArgumentException();
-        } catch (Exception e) /* Not Ok */ {
-        } finally {} // Not Ok
+        } catch (Exception e) {  /*@ not ok @*/
+        } finally {} /*@ not ok @*/
     }
 
     interface A {
@@ -18,19 +16,19 @@ public class Test {
 
     class B implements A {
         @Override
-        public void call() {} // Not Ok
+        public void call() {} /*@ not ok @*/
     }
 
     class C implements A {
         @Override
         public void call() {
             // empty for some good reason
-        } // Ok
+        } /*@ ok @*/
     }
 
     void foo(int a) {
         switch (a) {
-            case 1: // Ok
+            case 1: /*@ ok @*/
                 break;
             default:
                 break;
@@ -46,32 +44,30 @@ public class Test {
         }
 
         // empty block
-        {} // Not Ok
-
+        {} /*@ not ok @*/
         if (a == 5) {
             System.out.println("a is 5");
-        } else if (a == 3) {
-        } else {
-        } // Not Ok
+        } else if (a == 3) { /*@ not ok @*/
+        } else { /*@ not ok @*/
+        }
 
-        switch (a) { // Not Ok
+        switch (a) { /*@ not ok @*/
         }
 
         try {
             System.out.println("Hello World!");
-        } catch (Exception e) { // Ok
+        } catch (Exception e) { /*@ ok @*/
             // effectively empty
         }
 
         try {
             System.out.println("Hello World!");
-        } catch (Exception e) {} // Not Ok
+        } catch (Exception e) {} /*@ not ok @*/
     }
 }
 
 final class UtilityClass {
-    private UtilityClass() {} // Ok
-
+    private UtilityClass() {} /*@ ok @*/
     private static void foo() {
         System.out.println("foo");
     }
@@ -79,5 +75,5 @@ final class UtilityClass {
 
 class NormalClass {
     NormalClass() {
-    } // Ok (covered by RedundantConstructorCheck)
+    } //?# ok (covered by RedundantConstructorCheck)
 }

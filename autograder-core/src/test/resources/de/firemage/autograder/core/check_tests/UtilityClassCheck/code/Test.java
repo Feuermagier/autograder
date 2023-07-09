@@ -1,8 +1,7 @@
 package de.firemage.autograder.core.check_tests.UtilityClassCheck.code;
 
-public class Test {} // Ok
-
-final class UtilityClass { // Ok
+public class Test {} /*@ ok @*/
+final class UtilityClass { /*@ ok @*/
     private UtilityClass() {
         throw new IllegalStateException("Utility class");
     }
@@ -13,23 +12,22 @@ final class UtilityClass { // Ok
 }
 
 
-final class WithoutPrivateConstructor { // Not Ok
+final class WithoutPrivateConstructor { /*@ not ok @*/
     public static void a() {}
 }
 
-class WithPrivateConstructorButNotFinal { // Not Ok
+class WithPrivateConstructorButNotFinal { /*@ not ok @*/
     private WithPrivateConstructorButNotFinal() {}
 
     public static void a() {}
 }
 
-class WithPublicConstructor { // Not Ok
-    public WithPublicConstructor() {}
-
+class WithPublicConstructor { /*@ not ok @*/
+    public WithPublicConstructor() {} /*@ not ok @*/
     public static void a() {}
 }
 
-class WithInnerClass { // Ok
+class WithInnerClass { /*@ ok @*/
     private final String a;
     private final String b;
 
@@ -38,13 +36,13 @@ class WithInnerClass { // Ok
         this.b = b;
     }
 
-    public static class InnerClass { // Ok (will be ignored for simplicity)
+    public static class InnerClass { //?# ok (will be ignored for simplicity)
         public static void a() {}
     }
 }
 
 // see https://github.com/Feuermagier/autograder/issues/83
-class MyException extends Exception { // Ok
+class MyException extends Exception { /*@ ok @*/
     public MyException(String message) {
         super(updateMessage(message));
     }
@@ -55,7 +53,7 @@ class MyException extends Exception { // Ok
 }
 
 final class MyUtilityClassWithNonPrivate {
-    protected MyUtilityClassWithNonPrivate() {  // Not Ok
+    protected MyUtilityClassWithNonPrivate() {  /*@ not ok @*/
         throw new IllegalStateException("Utility class");
     }
 
@@ -64,7 +62,7 @@ final class MyUtilityClassWithNonPrivate {
 }
 
 abstract class MyAbstractUtilityClassWithNonPrivate {
-    protected MyAbstractUtilityClassWithNonPrivate() { // Not Ok
+    protected MyAbstractUtilityClassWithNonPrivate() { /*@ not ok @*/
         throw new IllegalStateException("Utility class");
     }
 
@@ -73,7 +71,7 @@ abstract class MyAbstractUtilityClassWithNonPrivate {
 }
 
 final class MyUtilityClassWithNonPackagePrivate {
-    MyUtilityClassWithNonPackagePrivate() { // Not Ok
+    MyUtilityClassWithNonPackagePrivate() { /*@ not ok @*/
         throw new IllegalStateException("Utility class");
     }
 

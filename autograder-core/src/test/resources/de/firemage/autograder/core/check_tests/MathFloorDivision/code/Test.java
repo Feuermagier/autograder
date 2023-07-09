@@ -4,6 +4,6 @@ public class Test {
     public static void main(String[] args) {
         int a = 5;
         int b = 2;
-        int c = (int) Math.floor(a / b) + 1; // Not Ok
+        int c = (int) Math.floor(a / b) + 1; /*@ not ok @*/
     }
 }

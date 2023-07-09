@@ -7,31 +7,27 @@ public class Test {
         int c = 1;
         int d = 1;
 
-        a = a + b; // Not Ok
-        a = a - b; // Not Ok
-        a = a * b; // Not Ok
-        a = a / b; // Not Ok
-        a = a % b; // Not Ok
-
-        a = b + a; // Not Ok
-        a = b - a; // Ok
-        a = b * a; // Not Ok
-        a = b / a; // Ok
-        a = b % a; // Ok
-
+        a = a + b; /*@ not ok @*/
+        a = a - b; /*@ not ok @*/
+        a = a * b; /*@ not ok @*/
+        a = a / b; /*@ not ok @*/
+        a = a % b; /*@ not ok @*/
+        a = b + a; /*@ not ok @*/
+        a = b - a; /*@ ok @*/
+        a = b * a; /*@ not ok @*/
+        a = b / a; /*@ ok @*/
+        a = b % a; /*@ ok @*/
         int[] arr = new int[10];
-        arr[0] = arr[0] + 1; // Not Ok
-        arr[0] = arr[1] + 1; // Ok
-
-        a = a - b + c; // Ok
-        a = b - c + a; // Not Ok
-        a = (b + c) * a; // Not Ok
-        a = b + c * a; // Ok
-        a = b - a + c; // Ok
-        a = a - b + c - d; // Ok
-
+        arr[0] = arr[0] + 1; /*@ not ok @*/
+        arr[0] = arr[1] + 1; /*@ ok @*/
+        a = a - b + c; /*@ ok @*/
+        a = b - c + a; /*@ not ok @*/
+        a = (b + c) * a; /*@ not ok @*/
+        a = b + c * a; /*@ ok @*/
+        a = b - a + c; /*@ ok @*/
+        a = a - b + c - d; /*@ ok @*/
         String s = "a";
-        s = s + " "; // Not Ok
-        s = " " + s; // Ok
+        s = s + " "; /*@ not ok @*/
+        s = " " + s; /*@ ok @*/
     }
 }

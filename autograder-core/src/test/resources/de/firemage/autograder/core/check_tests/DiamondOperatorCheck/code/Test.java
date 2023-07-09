@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Test {
     public static void main(String[] args) {
-        List<String> list = new ArrayList<String>(); // Not Ok
+        List<String> list = new ArrayList<String>(); /*@ not ok @*/
     }
 }
 
@@ -22,7 +22,7 @@ class ReproduceIssueInReturn {
 
 
     Pair<VegetableType, Integer> makePair(VegetableType vegetable, int price) {
-        return new Pair<VegetableType, Integer>(vegetable, price); // Not Ok
+        return new Pair<VegetableType, Integer>(vegetable, price); /*@ not ok @*/
     }
 }
 
@@ -40,7 +40,7 @@ class ReproduceSuperCallIssue {
 
     class F extends C {
         F() {
-            super(new ArrayList<A>(List.of(A.B, A.C))); // Not Ok
+            super(new ArrayList<A>(List.of(A.B, A.C))); /*@ not ok @*/
         }
     }
 }

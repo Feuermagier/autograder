@@ -1,29 +1,25 @@
 package de.firemage.autograder.core.check_tests.DoNotUseRawTypes.code;
 
 import java.util.*;
-// placeholder for future imports to not destroy the line numbers
-// placeholder for future imports to not destroy the line numbers
-// placeholder for future imports to not destroy the line numbers
 
 public class Test {
-    private List l1; // Not Ok
-    private List<String> l2; // Ok
-    private Map l3; // Not Ok
-    private Map<String, String> l4; // Ok
-    private Set l5; // Not Ok
-    private Map<String, Set> l6; // Not Ok
-    private Map<String, Set>[] l7; // Not Ok
-    private Map<String, Set>[][] l8; // Not Ok
-    private Map<ArrayList, HashMap>[][] l9; // Not Ok
-
+    private List l1; /*@ not ok @*/
+    private List<String> l2; /*@ ok @*/
+    private Map l3; /*@ not ok @*/
+    private Map<String, String> l4; /*@ ok @*/
+    private Set l5; /*@ not ok @*/
+    private Map<String, Set> l6; /*@ not ok @*/
+    private Map<String, Set>[] l7; /*@ not ok @*/
+    private Map<String, Set>[][] l8; /*@ not ok @*/
+    private Map<ArrayList /*@ not ok @*/, HashMap /*@ not ok @*/>[][] l9;
     public static void main(String[] args) {
     }
 
     void example1() {
-        List aList = new ArrayList(); // Not OK
+        List /*@ not ok @*/ aList = new ArrayList /*@ not ok @*/();
         String s = "Hello World!";
         aList.add(s);
         String c = (String)aList.get(0);
-        for (Map.Entry<String, String> entry : l4.entrySet()) {} // Ok
+        for (Map.Entry<String, String> entry : l4.entrySet()) {} /*@ ok @*/
     }
 }

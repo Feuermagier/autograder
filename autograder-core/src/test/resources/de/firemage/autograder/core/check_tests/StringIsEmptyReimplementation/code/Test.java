@@ -12,21 +12,21 @@ import java.util.Vector;
 public class Test {
     public static void main(String[] args) {
         String foo = "";
-        foo.isEmpty(); // Ok
-        foo.isBlank(); // Ok
-        foo.equals(""); // Not Ok
-        foo.equals("foo"); // Ok
-        foo.equals(null); // Ok
-        var a = foo.length() == 0; // Not Ok
-        var b = foo.length() == 1; // Ok
-        var c = foo.length() >= 0; // Ok
-        var d = foo.length() >= 1; // Not Ok
-        var e = foo.length() > 1; // Ok
-        var f = foo.length() > 0; // Not Ok
-        var g = 1 < foo.length(); // Ok
-        var h = 0 < foo.length(); // Not Ok
-        var i = 0 <= foo.length(); // Ok
-        var j = 1 <= foo.length(); // Not Ok
-        var k = "".equals("hello"); // Not Ok
+        foo.isEmpty(); /*@ ok @*/
+        foo.isBlank(); /*@ ok @*/
+        foo.equals(""); /*@ not ok @*/
+        foo.equals("foo"); /*@ ok @*/
+        foo.equals(null); /*@ ok @*/
+        var a = foo.length() == 0; /*@ not ok @*/
+        var b = foo.length() == 1; /*@ ok @*/
+        var c = foo.length() >= 0; /*@ ok @*/
+        var d = foo.length() >= 1; /*@ not ok @*/
+        var e = foo.length() > 1; /*@ ok @*/
+        var f = foo.length() > 0; /*@ not ok @*/
+        var g = 1 < foo.length(); /*@ ok @*/
+        var h = 0 < foo.length(); /*@ not ok @*/
+        var i = 0 <= foo.length(); /*@ ok @*/
+        var j = 1 <= foo.length(); /*@ not ok @*/
+        var k = "".equals("hello"); /*@ not ok @*/
     }
 }

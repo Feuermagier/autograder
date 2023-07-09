@@ -2,28 +2,27 @@ package de.firemage.autograder.core.check_tests.AvoidInnerClasses.code;
 
 public class Test {
     public static void main(String[] args) {
-        class InnerClass { // Not Ok
+        class InnerClass { /*@ not ok @*/
         }
     }
 
-    static class InnerClass { // Not Ok
-
-        static class InnerClass2 { // Not Ok
+    static class InnerClass { /*@ not ok @*/
+        static class InnerClass2 { /*@ not ok @*/
         }
     }
 
-    private static class Node { // Ok
+    private static class Node { /*@ ok @*/
     }
 
-    public class Node2 { // Ok
+    public class Node2 { /*@ ok @*/
     }
 
-    enum InnerEnum { // Not Ok
+    enum InnerEnum { /*@ not ok @*/
     }
 
-    interface InnerInterface { // Not Ok
+    interface InnerInterface { /*@ not ok @*/
     }
 
-    record InnerRecord() { // Not Ok
+    record InnerRecord() { /*@ not ok @*/
     }
 }

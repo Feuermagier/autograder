@@ -11,35 +11,35 @@ public class Test {
     private final String[][] array2d = new String[2][2];
 
     public Test() {
-        return; // Ok
+        return; /*@ ok @*/
     }
 
     public static void main(String[] args) {
-        Supplier<List<String>> lambda = () -> { return List.of("a"); }; // Ok
+        Supplier<List<String>> lambda = () -> { return List.of("a"); }; /*@ ok @*/
     }
 
     public List<Integer> getList1() {
-        return this.list; // Not Ok
+        return this.list; /*@ not ok @*/
     }
 
     public List<Integer> getList2() {
-        return list; // Not Ok
+        return list; /*@ not ok @*/
     }
 
     public List<Integer> getList3() {
-        return new ArrayList<>(this.list); // Ok
+        return new ArrayList<>(this.list); /*@ ok @*/
     }
 
     public List<Integer> getList4() {
-        return Collections.unmodifiableList(this.list); // Ok
+        return Collections.unmodifiableList(this.list); /*@ ok @*/
     }
 
     public int[] getArray() {
-        return this.array;  // Not Ok
+        return this.array;  /*@ not ok @*/
     }
 
     public String[][] getArray2d() {
-        return this.array2d;  // Not Ok
+        return this.array2d;  /*@ not ok @*/
     }
 }
 
@@ -57,6 +57,6 @@ enum FieldKind {
     }
 
     public Vegetable[] getPossibleVegetables() {
-        return this.possibleVegetables; // Not Ok
+        return this.possibleVegetables; /*@ not ok @*/
     }
 }

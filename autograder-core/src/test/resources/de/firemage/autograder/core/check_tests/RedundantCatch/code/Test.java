@@ -12,7 +12,7 @@ public class Test {
             execute();
         } catch (IllegalArgumentException exception) {
             // caught the exception
-            throw exception; // Not Ok
+            throw exception; /*@ not ok @*/
         }
     }
 }
