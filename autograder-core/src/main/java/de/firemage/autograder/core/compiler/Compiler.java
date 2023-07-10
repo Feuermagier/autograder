@@ -1,8 +1,8 @@
 package de.firemage.autograder.core.compiler;
 
-import de.firemage.autograder.core.SourceInfo;
+import de.firemage.autograder.core.file.CompilationUnit;
+import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.errorprone.TempLocation;
-import org.apache.commons.io.FileUtils;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -18,6 +18,7 @@ import java.io.StringWriter;
 import java.io.Writer;
 import java.nio.charset.Charset;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
@@ -28,7 +29,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
-public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
+public record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
     static final Locale COMPILER_LOCALE = Locale.US;
 
     public Optional<CompilationResult> compileToJar(SourceInfo input) throws IOException, CompilationFailureException {
@@ -46,10 +47,11 @@ public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion)
         try (TempLocation modifiedOutput = this.tempLocation.createTempDirectory(input.getName() + "_modified")) {
             SourceInfo copiedVersion = input.copyTo(modifiedOutput.toPath());
 
-            List<JavaFileObject> compilationUnits = copiedVersion.compilationUnits();
+            List<CompilationUnit> compilationUnits = copiedVersion.compilationUnits();
             // patch the files:
-            for (JavaFileObject file : compilationUnits) {
-                String content = file.getCharContent(true).toString();
+            for (CompilationUnit file : compilationUnits) {
+                JavaFileObject javaFileObject = file.toJavaFileObject();
+                String content = file.readString();
                 Pattern pattern = Pattern.compile("@SuppressWarnings\\((.+?)\\)", Pattern.DOTALL);
                 String patched = pattern.matcher(content).replaceAll(matchResult -> {
                     String group = matchResult.group(1);
@@ -73,7 +75,7 @@ public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion)
                     return "@SuppressWarnings(%s)".formatted(result);
                 });
 
-                try (Writer writer = file.openWriter()) {
+                try (Writer writer = javaFileObject.openWriter()) {
                     writer.write(patched);
                 }
             }
@@ -90,24 +92,29 @@ public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion)
 
     private Optional<CompilationResult> compile(SourceInfo input) throws IOException, CompilationFailureException {
 
-        List<JavaFileObject> compilationUnits = input.compilationUnits();
+        List<CompilationUnit> compilationUnits = input.compilationUnits();
 
         if (compilationUnits.isEmpty()) {
             return Optional.empty();
         }
 
-        Charset charset = input.getCharset();
+        // TODO: charset should be for each file individually, this requires changing SeparateBinaryFileManager
+        Charset charset = compilationUnits.get(0).charset();
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
 
+        List<CompilationDiagnostic> diagnostics = new ArrayList<>();
+
         Path jar;
         try (TempLocation compilerOutput = this.tempLocation.createTempDirectory(input.getName() + "_compiled")) {
             JavaFileManager fileManager = new SeparateBinaryFileManager(
                 compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
-                compilerOutput.toPath().toFile(), charset
+                compilerOutput.toPath().toFile(),
+                charset
             );
+
             boolean isSuccessful = compiler.getTask(
                 output,
                 fileManager,
@@ -116,19 +123,18 @@ public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion)
                     "--release=" + javaVersion.getVersionString()
                 ),
                 null,
-                compilationUnits
+                compilationUnits.stream().map(CompilationUnit::toJavaFileObject).toList()
             ).call();
 
             output.flush();
             output.close();
 
+            diagnostics.addAll(diagnosticCollector.getDiagnostics().stream()
+                .map(diagnostic -> new CompilationDiagnostic(diagnostic, input))
+                .toList());
+
             if (!isSuccessful) {
-                throw new CompilationFailureException(diagnosticCollector.getDiagnostics().stream()
-                    .map(d -> new CompilationDiagnostic(
-                        d,
-                        input.getPath()
-                    ))
-                    .toList(), input.getPath());
+                throw new CompilationFailureException(diagnostics);
             }
 
             Manifest manifest = new Manifest();
@@ -139,12 +145,7 @@ public final record Compiler(TempLocation tempLocation, JavaVersion javaVersion)
             }
         }
 
-        return Optional.of(new CompilationResult(jar, diagnosticCollector.getDiagnostics().stream()
-            .map(d -> new CompilationDiagnostic(
-                d,
-                input.getPath()
-            ))
-            .toList()));
+        return Optional.of(new CompilationResult(jar, diagnostics));
     }
 
 

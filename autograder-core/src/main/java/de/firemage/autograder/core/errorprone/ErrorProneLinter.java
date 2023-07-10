@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.errorprone;
 
 import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.SourceInfo;
+import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.file.UploadedFile;
 

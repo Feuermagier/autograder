@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.spotbugs;
 
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.file.SourceInfo;
 import edu.umd.cs.findbugs.AbstractBugReporter;
 import edu.umd.cs.findbugs.AnalysisError;
 import edu.umd.cs.findbugs.BugCollection;
@@ -16,11 +17,13 @@ import java.util.List;
 
 public class InCodeBugReporter extends AbstractBugReporter {
     private final BugCollection bugCollection;
+    private final SourceInfo sourceInfo;
 
-    public InCodeBugReporter(Project project) {
+    public InCodeBugReporter(Project project, SourceInfo sourceInfo) {
         super.setPriorityThreshold(Confidence.LOW.getConfidenceValue());
         super.setRankThreshold(BugRanker.VISIBLE_RANK_MAX);
         bugCollection = new SortedBugCollection(project);
+        this.sourceInfo = sourceInfo;
     }
 
     @Override
@@ -59,7 +62,7 @@ public class InCodeBugReporter extends AbstractBugReporter {
         for (BugInstance bug : this.bugCollection.getCollection()) {
             for (SpotbugsCheck check : checks) {
                 if (check.getBug().equals(bug.getType())) {
-                    problems.add(new SpotbugsInCodeProblem(check, bug));
+                    problems.add(new SpotbugsInCodeProblem(check, bug, this.sourceInfo));
                 }
             }
         }

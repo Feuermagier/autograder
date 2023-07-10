@@ -21,7 +21,7 @@ public class SeparateBinaryFileManager extends ForwardingJavaFileManager<Standar
 
     @Override
     public JavaFileObject getJavaFileForOutput(Location location, String className, JavaFileObject.Kind kind, FileObject sibling) throws IOException {
-        return new PhysicalFileObject(new File(binaryRootDirectory, createFileNameFromClass(className)), this.charset);
+        return new PhysicalFileObject(new File(binaryRootDirectory, createFileNameFromClass(className)), this.charset, null);
     }
 
     private String createFileNameFromClass(String className) {

@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.errorprone;
 
-import de.firemage.autograder.core.SourceInfo;
+import de.firemage.autograder.core.file.CompilationUnit;
+import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.compiler.JavaVersion;
 
 import javax.tools.DiagnosticCollector;
@@ -65,11 +66,12 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
     }
 
     private List<ErrorProneDiagnostic> internalCompile(SourceInfo input) throws IOException {
-        Charset charset = input.getCharset();
-        List<JavaFileObject> compilationUnits = input.compilationUnits();
+        List<CompilationUnit> compilationUnits = input.compilationUnits();
+        // TODO: charset should be for each file individually
+        Charset charset = compilationUnits.get(0).charset();
 
         if (compilationUnits.isEmpty()) {
-            throw new IllegalArgumentException("Nothing found to compile in " + input.getPath());
+            throw new IllegalArgumentException("Nothing found to compile in " + input.path());
         }
 
         JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
@@ -98,7 +100,7 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
                         .collect(Collectors.joining(" "))
                 ),
                 null,
-                compilationUnits
+                compilationUnits.stream().map(CompilationUnit::toJavaFileObject).toList()
             ).call();
         }
 
@@ -106,14 +108,14 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
         output.close();
 
         if (!isSuccessful) {
-            throw new IllegalArgumentException("Failed to compile %s: %s".formatted(input.getPath(), output));
+            throw new IllegalArgumentException("Failed to compile %s: %s".formatted(input.path(), output));
         }
 
         return diagnosticCollector.getDiagnostics()
             .stream()
             // only keep error-prone diagnostics
             .filter(diagnostic -> diagnostic.getCode().equals("compiler.warn.error.prone"))
-            .map(diagnostic -> ErrorProneDiagnostic.from(diagnostic, input.getPath()))
+            .map(diagnostic -> ErrorProneDiagnostic.from(diagnostic, input))
             .toList();
     }
 }

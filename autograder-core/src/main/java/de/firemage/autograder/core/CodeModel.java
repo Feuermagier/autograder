@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import spoon.Launcher;
@@ -115,7 +116,10 @@ public final class CodeModel implements AutoCloseable {
             launcher.getEnvironment().setNoClasspath(false);
             launcher.getEnvironment().setCommentEnabled(true);
             launcher.getEnvironment().setComplianceLevel(this.file.getVersion().getVersionNumber());
-            launcher.getEnvironment().setEncoding(file.getCharset());
+            // The encoding might differ by file
+            launcher.getEnvironment().setEncodingProvider(
+                (spoonFile, fileBytes) -> this.file.getCompilationUnit(Path.of(spoonFile.getPath())).charset()
+            );
 
             if (this.userClassLoader != null) {
                 launcher.getEnvironment().setInputClassLoader(this.userClassLoader);

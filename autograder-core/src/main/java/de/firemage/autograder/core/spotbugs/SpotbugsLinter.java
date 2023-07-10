@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.spotbugs;
 
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.file.UploadedFile;
 import edu.umd.cs.findbugs.DetectorFactoryCollection;
 import edu.umd.cs.findbugs.FindBugs2;
 import edu.umd.cs.findbugs.Project;
@@ -11,10 +12,10 @@ import java.nio.file.Path;
 import java.util.List;
 
 public class SpotbugsLinter {
-    public List<Problem> lint(Path jar, List<SpotbugsCheck> checks) throws IOException, InterruptedException {
+    public List<Problem> lint(UploadedFile file, Path jar, List<SpotbugsCheck> checks) throws IOException, InterruptedException {
         try (Project project = new Project()) {
             project.addFile(jar.toAbsolutePath().toString());
-            InCodeBugReporter reporter = new InCodeBugReporter(project);
+            InCodeBugReporter reporter = new InCodeBugReporter(project, file.getSource());
 
             try (FindBugs2 findBugs = new FindBugs2()) {
                 findBugs.setBugReporter(reporter);

@@ -22,6 +22,11 @@
             <artifactId>autograder-core</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-span</artifactId>
+        </dependency>
+
         <!-- Picocli -->
         <dependency>
             <groupId>info.picocli</groupId>
@@ -47,7 +52,6 @@
             <artifactId>jackson-databind</artifactId>
             <version>${jackson.version}</version>
         </dependency>
-
     </dependencies>
 
     <build>
