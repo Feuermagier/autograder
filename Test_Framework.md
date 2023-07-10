@@ -7,7 +7,8 @@ Meta comments are enclosed in `/*@` and `@*/`, i.e. they are valid Java block co
 The framework will parse them and remove the comments before passing the code to the Autograder, so that they do no impact the actual source code to check.
 In particular, they can be also used within standard Java strings and comments.
 
-The content of a meta comment consists of up to three parts, separated by semicolons.
+The content of a meta comment consists of up to three parts, separated by semicolons:
+`/*@ <tag> ; <optional comment> ;  <optional expected problem type> @*/`
 Whitespace around the parts is ignored.
 The first part must be a tag from the following table:
 
