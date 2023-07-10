@@ -75,5 +75,5 @@ final class UtilityClass {
 
 class NormalClass {
     NormalClass() {
-    } //?# ok (covered by RedundantConstructorCheck)
+    } /*@ ok; covered by RedundantConstructorCheck @*/
 }

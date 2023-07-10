@@ -18,7 +18,7 @@ public class Test {
     }
 
     private Test(int a) {
-        throw new IllegalArgumentException("Error"); //?# ok (constructor is private)
+        throw new IllegalArgumentException("Error"); /*@ ok; constructor is private @*/
     }
 
     /**
@@ -41,6 +41,6 @@ public class Test {
      * @throws NullPointerException if the argument is null
      */
     private static void b() {
-        throw new IllegalArgumentException("Error"); //?# ok (method is private)
+        throw new IllegalArgumentException("Error"); /*@ ok; method is private @*/
     }
 }

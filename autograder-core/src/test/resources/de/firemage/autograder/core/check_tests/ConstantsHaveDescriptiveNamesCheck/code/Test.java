@@ -7,7 +7,7 @@ public class Test {
     private static final String ERROR = ""; /*@ not ok @*/
     private static final String REGEX = ""; /*@ not ok @*/
     private static final int VALUE_A = 1; /*@ ok @*/
-    private static final Object d = null; //?# ok (covered by descriptive variable check)
+    private static final Object d = null; /*@ ok; covered by descriptive variable check) @*/
     private static final boolean TRUE = true; /*@ not ok @*/
     private static final boolean FALSE = false; /*@ not ok @*/
     private static final String UP = "up"; /*@ not ok @*/

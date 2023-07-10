@@ -36,7 +36,7 @@ class WithInnerClass { /*@ ok @*/
         this.b = b;
     }
 
-    public static class InnerClass { //?# ok (will be ignored for simplicity)
+    public static class InnerClass { /*@ ok; will be ignored for simplicity @*/
         public static void a() {}
     }
 }

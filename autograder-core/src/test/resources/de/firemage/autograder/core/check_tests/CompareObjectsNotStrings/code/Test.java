@@ -12,11 +12,11 @@ public class Test {
             System.out.println("Hi");
         }
 
-        if (a.equals(b.toString())) { //?# ok...
+        if (a.equals(b.toString())) { /*@ ok @*/
             System.out.println("Hi");
         }
 
-        if (a.toString().equals(b)) { //?# ok...
+        if (a.toString().equals(b)) { /*@ ok @*/
             System.out.println("Hi");
         }
 

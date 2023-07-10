@@ -40,9 +40,9 @@ class TestFiniteListing {
     private static final char[] VALID_ARRAY = {'R', 'x', 'X', '|', '\\', '/', '_', '*', ' '}; /*@ not ok @*/
     private static final List<Character> VALID_LIST = List.of('R', 'x', 'X', '|', '\\', '/', '_', '*', ' '); /*@ not ok @*/
     private static final Set<String> FINITE_SET = Set.of("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"); /*@ not ok @*/
-    private static final char[] NOT_ENOUGH_DISTINCT_VALUES_ARRAY = { 'a', 'b', 'b', 'a' }; //?# ok (2 distinct values)
-    private static final List<Character> NOT_ENOUGH_DISTINCT_VALUES_LIST = List.of('a', 'b', 'b', 'a'); //?# ok (2 distinct values)
-    private static final Set<String> NOT_ENOUGH_DISTINCT_VALUES_SET = Set.of("monday", "monday", "monday", "monday"); //?# ok (1 distinct value)
+    private static final char[] NOT_ENOUGH_DISTINCT_VALUES_ARRAY = { 'a', 'b', 'b', 'a' }; /*@ ok; 2 distinct values @*/
+    private static final List<Character> NOT_ENOUGH_DISTINCT_VALUES_LIST = List.of('a', 'b', 'b', 'a'); /*@ ok; 2 distinct values @*/
+    private static final Set<String> NOT_ENOUGH_DISTINCT_VALUES_SET = Set.of("monday", "monday", "monday", "monday"); /*@ ok; 1 distinct value @*/
 }
 
 enum Color {

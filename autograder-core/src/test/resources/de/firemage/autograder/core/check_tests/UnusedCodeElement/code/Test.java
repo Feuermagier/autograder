@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.check_tests.UnusedCodeElement.code;
 
 public class Test {
-    public static void main(String[] args) { //?# ok (main method and args are used)
+    public static void main(String[] args) { /*@ ok; main method and args are used @*/
         String firstArg = args[0]; /*@ not ok @*/
     }
 
@@ -23,7 +23,7 @@ class A {
     }
 
     @Override
-    public boolean equals(Object o) { //?# ok (overridden method)
+    public boolean equals(Object o) { /*@ ok; overridden method @*/
         return super.equals(o);
     } /*@ ok @*/
     void foo() { /*@ not ok @*/
