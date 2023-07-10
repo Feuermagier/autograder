@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.pmd;
 
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.UploadedFile;
 import net.sourceforge.pmd.PMDConfiguration;
 import net.sourceforge.pmd.PmdAnalysis;
@@ -14,7 +15,6 @@ import net.sourceforge.pmd.lang.document.FileId;
 
 import javax.tools.JavaFileObject;
 import java.io.IOException;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -26,10 +26,8 @@ public class PMDLinter {
     public List<Problem> lint(UploadedFile file, List<PMDCheck> checks, ClassLoader classLoader) throws IOException {
         PMDConfiguration config = new PMDConfiguration();
 
-        Path root = file.getSource().getPath();
         config.setMinimumPriority(RulePriority.LOW);
         config.setIgnoreIncrementalAnalysis(true);
-        config.addRelativizeRoot(root);
         config.setClassLoader(classLoader);
         config.setDefaultLanguageVersion(JAVA_LANGUAGE.getVersion(file.getSource().getVersion().getVersionString()));
 
@@ -46,16 +44,16 @@ public class PMDLinter {
             }
         }
 
-        ProblemRenderer renderer = new ProblemRenderer(idMap, root);
+        ProblemRenderer renderer = new ProblemRenderer(idMap, file.getSource());
 
         try (PmdAnalysis pmd = PmdAnalysis.create(config)) {
             pmd.addRuleSet(RuleSet.create("Autograder Configuration (Generated)", "", null, List.of(), List.of(), rules));
             pmd.addRenderer(renderer);
             FileCollector collector = pmd.files();
-            for (JavaFileObject compilationUnit : file.getSource().compilationUnits()) {
+            for (CompilationUnit compilationUnit : file.getSource().compilationUnits()) {
                 collector.addSourceFile(
-                    FileId.fromPathLikeString(compilationUnit.getName()),
-                    compilationUnit.getCharContent(false).toString()
+                    FileId.fromPathLikeString(compilationUnit.path().toString()),
+                    compilationUnit.readString()
                 );
             }
 

@@ -1,12 +1,12 @@
 package de.firemage.autograder.core.pmd;
 
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.file.SourceInfo;
 import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.Report;
 import net.sourceforge.pmd.RuleViolation;
 import net.sourceforge.pmd.renderers.AbstractIncrementingRenderer;
 import org.apache.commons.io.output.NullWriter;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
@@ -15,14 +15,14 @@ import java.util.Map;
 
 @Slf4j
 public class ProblemRenderer extends AbstractIncrementingRenderer {
-    private final Path root;
+    private final SourceInfo sourceInfo;
     private final Map<String, PMDCheck> checks;
     private final List<Problem> problems = new ArrayList<>();
 
-    public ProblemRenderer(Map<String, PMDCheck> checks, Path root) {
+    public ProblemRenderer(Map<String, PMDCheck> checks, SourceInfo sourceInfo) {
         super("Custom renderer", "Creates InCodeProblems");
         this.checks = checks;
-        this.root = root;
+        this.sourceInfo = sourceInfo;
         super.setWriter(NullWriter.INSTANCE);
     }
 
@@ -32,7 +32,7 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
             // NOTE: the caller of this method catches all exceptions, so if something crashes, it will not be
             //       visible without that printStackTrace
             try {
-                this.problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, root));
+                this.problems.add(new PMDInCodeProblem(this.checks.get(violation.getRule().getName()), violation, sourceInfo));
             } catch (Exception exception) {
                 exception.printStackTrace();
                 // make sure the program stops running

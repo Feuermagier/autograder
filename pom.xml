@@ -105,6 +105,11 @@
                 <artifactId>autograder-treeg</artifactId>
                 <version>${revision}</version>
             </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-span</artifactId>
+                <version>${revision}</version>
+            </dependency>
         </dependencies>
     </dependencyManagement>
 
@@ -263,6 +268,7 @@
                 <module>autograder-event</module>
                 <module>autograder-agent</module>
                 <module>autograder-treeg</module>
+                <module>autograder-span</module>
             </modules>
         </profile>
 
@@ -278,6 +284,7 @@
                 <module>autograder-event</module>
                 <module>autograder-agent</module>
                 <module>autograder-treeg</module>
+                <module>autograder-span</module>
             </modules>
         </profile>
     </profiles>

@@ -1,8 +1,7 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.core.file;
 
 import de.firemage.autograder.core.compiler.JavaVersion;
 import org.apache.commons.io.FileUtils;
-import spoon.compiler.SpoonFile;
 import spoon.compiler.SpoonResource;
 import spoon.support.compiler.VirtualFile;
 import spoon.support.compiler.VirtualFolder;
@@ -22,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 
 public final class StringSourceInfo implements SourceInfo {
+    private static final String VIRTUAL_FOLDER = "virtualSrc";
     private final List<VirtualFileObject> compilationUnits;
     private final JavaVersion version;
 
@@ -44,26 +44,25 @@ public final class StringSourceInfo implements SourceInfo {
     }
 
     @Override
-    public Path getPath() {
-        return Path.of("stringSrc");
-    }
-
-    @Override
-    public List<JavaFileObject> compilationUnits() {
+    public List<CompilationUnit> compilationUnits() {
         return new ArrayList<>(this.compilationUnits);
     }
 
     @Override
     public SourceInfo copyTo(Path target) throws IOException {
-        Charset charset = this.getCharset();
-        for (JavaFileObject file : this.compilationUnits()) {
-            Path targetFile = target.resolve(file.getName());
+        for (CompilationUnit file : this.compilationUnits()) {
+            Path targetFile = target.resolve(Path.of(file.path().toString()));
             FileUtils.createParentDirectories(targetFile.toFile());
 
-            Files.writeString(targetFile, file.getCharContent(false), charset);
+            Files.writeString(targetFile, file.readString(), file.charset());
         }
 
         return new FileSourceInfo(target, this.version);
+    }
+
+    @Override
+    public Path path() {
+        return Path.of(VIRTUAL_FOLDER);
     }
 
     @Override
@@ -71,15 +70,10 @@ public final class StringSourceInfo implements SourceInfo {
         VirtualFolder result = new VirtualFolder();
 
         for (VirtualFileObject file : this.compilationUnits) {
-            result.addFile(file.toSpoonFile());
+            result.addFile(new VirtualFile(file.getCode(), SourcePath.of(this.path()).resolve(file.path()).toString()));
         }
 
         return result;
-    }
-
-    @Override
-    public void delete() {
-        // nothing to delete (source code is in memory)
     }
 
     @Override
@@ -87,25 +81,28 @@ public final class StringSourceInfo implements SourceInfo {
         return this.version;
     }
 
-    @Override
-    public Charset getCharset() {
-        return StandardCharsets.UTF_8;
-    }
-
     // TODO: this class is not serializable...
-    private static final class VirtualFileObject extends SimpleJavaFileObject implements Serializable {
+    private static final class VirtualFileObject extends SimpleJavaFileObject implements Serializable, CompilationUnit {
         private final ClassPath classPath;
         private final String code;
 
         private VirtualFileObject(ClassPath classPath, String code) {
-            super(classPath.toUri(), Kind.SOURCE);
+            super(virtualUri(classPath), Kind.SOURCE);
             this.classPath = classPath;
             this.code = code;
         }
 
+        private static URI virtualUri(ClassPath classPath) {
+            return URI.create("string:///%s/%s%s".formatted(
+                VIRTUAL_FOLDER,
+                classPath.toString().replace('.', '/'),
+                JavaFileObject.Kind.SOURCE.extension
+            ));
+        }
+
         @Override
         public String getName() {
-            return this.classPath.toPath() + JavaFileObject.Kind.SOURCE.extension;
+            return this.path().toString();
         }
 
         @Override
@@ -113,31 +110,54 @@ public final class StringSourceInfo implements SourceInfo {
             return this.code;
         }
 
-        private SpoonFile toSpoonFile() {
-            return new VirtualFile(this.code, this.classPath.name());
+        public String getCode() {
+            return this.code;
+        }
+
+        @Override
+        public JavaFileObject toJavaFileObject() {
+            return this;
+        }
+
+        @Override
+        public SourcePath path() {
+            return this.classPath.toPath();
+        }
+
+        @Override
+        public Charset charset() {
+            // virtual files are always UTF-8
+            return StandardCharsets.UTF_8;
         }
     }
 
-    private record ClassPath(String path, String name) implements Serializable {
-        public static ClassPath fromString(String string) {
+    private record ClassPath(List<String> path, String name) implements Serializable {
+        private static ClassPath fromString(String string) {
+            if (string.startsWith(".")) {
+                throw new IllegalArgumentException("Class path must not start with a dot: '%s'".formatted(string));
+            }
             List<String> parts = Arrays.asList(string.split("\\.", -1));
             return new ClassPath(
-                String.join(".", parts.subList(0, parts.size() - 1)),
+                new ArrayList<>(parts.subList(0, parts.size() - 1)),
                 parts.get(parts.size() - 1)
             );
         }
 
+        private List<String> segments() {
+            List<String> result = new ArrayList<>(this.path);
+            result.add(this.name);
+            return result;
+        }
+
         @Override
         public String toString() {
-            return this.path + "." + this.name;
+            return String.join(".", this.segments());
         }
 
-        public Path toPath() {
-            return Path.of(this.path.replace('.', '/'), this.name);
-        }
-
-        public URI toUri() {
-            return URI.create("string:///" + this.toString().replace('.', '/') + JavaFileObject.Kind.SOURCE.extension);
+        SourcePath toPath() {
+            List<String> segments = new ArrayList<>(this.path);
+            segments.add(this.name + JavaFileObject.Kind.SOURCE.extension);
+            return SourcePath.of(segments);
         }
     }
 }
