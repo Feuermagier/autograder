@@ -1,8 +1,8 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.core.file.SourcePath;
 import org.apache.commons.io.FilenameUtils;
 
-import java.nio.file.Path;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -45,16 +45,16 @@ public class MultiInCodeProblem extends ProblemImpl {
         };
     }
 
-    private static String displayLocations(Path firstFile, Stream<CodePosition> positions) {
-        Map<Path, List<CodePosition>> positionsByFile = positions
+    private static String displayLocations(SourcePath firstFile, Stream<CodePosition> positions) {
+        Map<SourcePath, List<CodePosition>> positionsByFile = positions
             .collect(Collectors.groupingBy(CodePosition::file, LinkedHashMap::new, Collectors.toList()));
 
         boolean withoutFilename = positionsByFile.size() == 1 && positionsByFile.containsKey(firstFile);
 
         StringJoiner joiner = new StringJoiner(", ");
         // Format should look like this: File:(L1, L2, L3), File2:(L4, L5), File3:L5
-        for (Map.Entry<Path, List<CodePosition>> entry : positionsByFile.entrySet()) {
-            Path path = entry.getKey();
+        for (Map.Entry<SourcePath, List<CodePosition>> entry : positionsByFile.entrySet()) {
+            SourcePath path = entry.getKey();
             List<CodePosition> filePositions = entry.getValue();
 
             String lines = filePositions.stream()
@@ -70,7 +70,7 @@ public class MultiInCodeProblem extends ProblemImpl {
                 continue;
             }
 
-            joiner.add("%s:%s".formatted(FilenameUtils.getBaseName(path.getFileName().toString()), lines));
+            joiner.add("%s:%s".formatted(FilenameUtils.getBaseName(path.getName()), lines));
         }
 
         return joiner.toString();

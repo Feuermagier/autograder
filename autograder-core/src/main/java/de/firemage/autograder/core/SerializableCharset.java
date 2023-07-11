@@ -1,5 +1,7 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.core.file.SourceInfo;
+
 import java.io.Serializable;
 import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
@@ -30,7 +32,7 @@ public final class SerializableCharset extends Workaround implements Serializabl
         this(Charset.forName(name));
     }
 
-    SerializableCharset(Charset charset) {
+    public SerializableCharset(Charset charset) {
         super(charset.name(), charset.aliases().toArray(new String[0]));
 
         this.name = charset.name();

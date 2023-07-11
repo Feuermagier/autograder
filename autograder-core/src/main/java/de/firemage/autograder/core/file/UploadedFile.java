@@ -1,9 +1,7 @@
 package de.firemage.autograder.core.file;
 
 import de.firemage.autograder.core.CodeModel;
-import de.firemage.autograder.core.FileSourceInfo;
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.SourceInfo;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.CompilationResult;
 import de.firemage.autograder.core.compiler.Compiler;

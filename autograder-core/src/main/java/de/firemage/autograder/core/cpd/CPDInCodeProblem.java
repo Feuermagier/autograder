@@ -3,9 +3,10 @@ package de.firemage.autograder.core.cpd;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.PathUtil;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.Check;
+import de.firemage.autograder.core.file.SourceInfo;
+import de.firemage.autograder.core.file.SourcePath;
 import net.sourceforge.pmd.cpd.Mark;
 import net.sourceforge.pmd.cpd.Match;
 
@@ -14,42 +15,37 @@ import java.util.Map;
 
 class CPDInCodeProblem extends ProblemImpl {
     private final Match match;
-    private final Path root;
+    private final SourceInfo sourceInfo;
 
-    public CPDInCodeProblem(Check check, Match match, Path root) {
+    public CPDInCodeProblem(Check check, Match match, SourceInfo sourceInfo) {
         super(
             check,
-            markToPosition(match.getFirstMark()),
-            formatMatch(match, root),
+            markToPosition(sourceInfo, match.getFirstMark()),
+            formatMatch(match, sourceInfo),
             ProblemType.DUPLICATE_CODE
         );
         this.match = match;
-        this.root = root;
+        this.sourceInfo = sourceInfo;
     }
 
-    private static LocalizedMessage formatMatch(Match match, Path root) {
+    private static LocalizedMessage formatMatch(Match match, SourceInfo root) {
+        SourcePath firstPath = root.getCompilationUnit(Path.of(match.getFirstMark().getFilename())).path();
+        SourcePath secondPath = root.getCompilationUnit(Path.of(match.getSecondMark().getFilename())).path();
+
         return new LocalizedMessage("duplicate-code", Map.of(
             "lines", String.valueOf(match.getLineCount()),
-            "first-path", PathUtil.getSanitizedPath(match.getFirstMark().getFilename(), root),
+            "first-path", firstPath,
             "first-start", String.valueOf(match.getFirstMark().getBeginLine()),
             "first-end", String.valueOf(match.getFirstMark().getEndLine()),
-            "second-path", PathUtil.getSanitizedPath(match.getSecondMark().getFilename(), root),
+            "second-path", secondPath,
             "second-start", String.valueOf(match.getSecondMark().getBeginLine()),
             "second-end", String.valueOf(match.getSecondMark().getEndLine())
         ));
     }
 
-    private static String formatLocation(Match match, Path root) {
-        return PathUtil.getSanitizedPath(match.getFirstMark().getFilename(), root) + ":"
-            + match.getFirstMark().getBeginLine() + "-" + match.getFirstMark().getEndLine()
-            + " and "
-            + PathUtil.getSanitizedPath(match.getSecondMark().getFilename(), root) + ":"
-            + match.getSecondMark().getBeginLine() + "-" + match.getSecondMark().getEndLine();
-    }
-
-    private static CodePosition markToPosition(Mark mark) {
+    private static CodePosition markToPosition(SourceInfo sourceInfo, Mark mark) {
         // TODO mark.getFilename() is most likely not correct
-        return new CodePosition(Path.of(mark.getFilename()), mark.getBeginLine(), mark.getEndLine(),
+        return new CodePosition(sourceInfo, SourcePath.of(mark.getFilename()), mark.getBeginLine(), mark.getEndLine(),
             mark.getBeginColumn(), mark.getEndColumn());
     }
 }

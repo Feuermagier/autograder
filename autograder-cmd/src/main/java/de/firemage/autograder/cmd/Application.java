@@ -14,6 +14,12 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
+import de.firemage.autograder.span.Formatter;
+import de.firemage.autograder.span.Highlight;
+import de.firemage.autograder.span.Position;
+import de.firemage.autograder.span.Span;
+import de.firemage.autograder.span.Style;
+import de.firemage.autograder.span.Text;
 import picocli.CommandLine;
 import picocli.CommandLine.Command;
 import picocli.CommandLine.Model.CommandSpec;
@@ -33,6 +39,7 @@ import java.nio.file.Path;
 import java.util.Collection;
 import java.util.List;
 import java.util.Locale;
+import java.util.Optional;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -74,6 +81,9 @@ public class Application implements Callable<Integer> {
             "--pass-config"}, description = "Interpret the first parameter not as the path to a config file, but as the contents of the config file")
     private boolean passConfig;
 
+    @Option(names = {"-p", "--output-pretty"}, description = "Pretty print the output", defaultValue = "false")
+    private boolean isPrettyOutput;
+
     @Spec
     private CommandSpec spec;
 
@@ -97,6 +107,17 @@ public class Application implements Callable<Integer> {
         } catch (IOException exception) {
             throw new IllegalArgumentException("Could not create temp location", exception);
         }
+    }
+
+    private static Highlight highlightFromCodePosition(CodePosition codePosition, String label) {
+        return new Highlight(
+            new Span(
+                new Position(codePosition.startLine() - 1, codePosition.startColumn() - 1),
+                new Position(codePosition.endLine() - 1, codePosition.endColumn() - 1)
+            ),
+            Optional.ofNullable(label),
+            Style.ERROR
+        );
     }
 
     @Override
@@ -162,6 +183,32 @@ public class Application implements Callable<Integer> {
                 List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
                 System.out.println(">> Problems <<");
                 printProblemsAsJson(problems, linter);
+            } else if (isPrettyOutput) {
+                CmdUtil.beginSection("Checks");
+                ProgressAnimation progress = new ProgressAnimation("Checking...");
+                progress.start();
+                List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+                progress.finish("Completed checks");
+
+                if (problems.isEmpty()) {
+                    CmdUtil.println("No problems found - good job!");
+                } else {
+                    CmdUtil.println("Found " + problems.size() + " problem(s):");
+                    problems.stream()
+                        .map(problem -> {
+                            CodePosition position = problem.getPosition();
+                            Text sourceText = Text.fromString(0, position.readString());
+                            Formatter formatter = new Formatter(
+                                System.lineSeparator(),
+                                highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
+                            );
+
+                            return formatter.render(sourceText);
+                        })
+                        .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
+                }
+
+                CmdUtil.endSection();
             } else {
                 CmdUtil.beginSection("Checks");
                 ProgressAnimation progress = new ProgressAnimation("Checking...");

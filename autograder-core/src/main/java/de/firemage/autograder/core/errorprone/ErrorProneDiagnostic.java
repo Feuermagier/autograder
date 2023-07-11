@@ -1,16 +1,17 @@
 package de.firemage.autograder.core.errorprone;
 
 import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.PathUtil;
+import de.firemage.autograder.core.file.SourceInfo;
+import de.firemage.autograder.core.file.SourcePath;
 
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;
 import java.io.Serializable;
-import java.nio.file.Path;
 import java.util.Locale;
 
-public record ErrorProneDiagnostic(String path, int line, int column, String message, ErrorProneLint lint) implements Serializable {
-    public static ErrorProneDiagnostic from(Diagnostic<? extends JavaFileObject> diagnostic, Path root) {
+public record ErrorProneDiagnostic(SourceInfo sourceInfo, SourcePath path, int line, int column, String message,
+                                   ErrorProneLint lint) implements Serializable {
+    public static ErrorProneDiagnostic from(Diagnostic<? extends JavaFileObject> diagnostic, SourceInfo sourceInfo) {
         if (!diagnostic.getCode().equals("compiler.warn.error.prone")) {
             throw new IllegalArgumentException(
                 "diagnostic is not emitted by error-prone, code '%s'".formatted(diagnostic.getCode())
@@ -28,7 +29,8 @@ public record ErrorProneDiagnostic(String path, int line, int column, String mes
         ErrorProneLint lint = ErrorProneLint.fromString(parts[0].substring(1));
 
         return new ErrorProneDiagnostic(
-            PathUtil.getSanitizedPath(diagnostic.getSource().toUri(), root),
+            sourceInfo,
+            sourceInfo.getCompilationUnit(diagnostic.getSource().toUri()).path(),
             (int) diagnostic.getLineNumber(),
             (int) diagnostic.getColumnNumber(),
             message,
@@ -37,6 +39,6 @@ public record ErrorProneDiagnostic(String path, int line, int column, String mes
     }
 
     public CodePosition position() {
-        return new CodePosition(Path.of(this.path), this.line, this.line, this.column, this.column);
+        return new CodePosition(this.sourceInfo, this.path, this.line, this.line, this.column, this.column);
     }
 }
