@@ -15,14 +15,18 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
+import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class TestInput {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInput.class);
 
-    private static final Pattern META_COMMENT_PATTER = Pattern.compile("/\\*#(?<tag>[^;^#]*);?(?<comment>[^#]*);?(?<problemType>[^;^#]*)#\\*/");
+    private static final Pattern META_COMMENT_PATTERN = Pattern.compile("/\\*#(?<tag>[^;^#]*);?(?<comment>[^;#]*);?(?<problemType>[^#]*)#\\*/");
+    private static final Pattern META_SINGLE_LINE_COMMENT_PATTERN = Pattern.compile("//#(?<tag>[^;]*);?(?<comment>[^;\\r\\n]*);?(?<problemType>\\w*)\\s*$");
     private final Path path;
     private final TestConfig config;
     private final SourceInfo sourceInfo;
@@ -82,45 +86,20 @@ public final class TestInput {
             StringBuilder newCode = new StringBuilder();
             for (int i = 0; i < lines.length; i++) {
                 String line = lines[i];
-                Matcher matcher = META_COMMENT_PATTER.matcher(line);
-                var matches = matcher.results().toList();
-                for (var match : matches) {
-                    // Named groups in matchers are not supported until Java 20
-                    String tag = match.group(1);
-                    String comment = match.group(2);
-                    String problemTypeString = match.group(3);
+                int lineNumber = i + 1;
 
-                    ProblemType problemType = null;
-                    if (problemTypeString != null && !problemTypeString.isBlank()) {
-                        problemType = ProblemType.valueOf(problemTypeString);
-                    }
-
-                    boolean valid = switch (tag.trim().toLowerCase()) {
-                        case "not ok" -> true;
-                        case "false positive" -> {
-                            LOGGER.warn("False positive annotation in {}@{}:{}; reason: {}", testName, fileName, i + 1, comment);
-                            yield true;
-                        }
-                        case "false negative" -> {
-                            LOGGER.warn("False negative annotation in {}@{}:{}; reason: {}", testName, fileName, i + 1, comment);
-                            yield false;
-                        }
-                        case "", "ok" -> false;
-                        default ->
-                                throw new RuntimeException("Unknown tag meta comment tag '%s' in test %s %s:%d".formatted(
-                                        tag,
-                                        testName,
-                                        fileName,
-                                        i + 1)
-                                );
-                    };
-
-                    if (valid) {
-                        expectedProblems.add(new ExpectedProblem(SourcePath.of(fileName), i + 1, problemType, comment));
-                    }
+                Matcher inlineMatcher = META_COMMENT_PATTERN.matcher(line);
+                for (var match : inlineMatcher.results().toList()) {
+                    handleMetaComment(match, testName, fileName, lineNumber).ifPresent(expectedProblems::add);
                 }
+                String newLine = inlineMatcher.replaceAll("");
 
-                String newLine = matcher.replaceAll("");
+                Matcher eolMatcher = META_SINGLE_LINE_COMMENT_PATTERN.matcher(newLine);
+                for (var match : eolMatcher.results().toList()) {
+                    handleMetaComment(match, testName, fileName, lineNumber).ifPresent(expectedProblems::add);
+                }
+                newLine = eolMatcher.replaceAll("");
+
                 newCode.append(newLine).append("\n");
             }
             // Using entry#setValue as it is the only safe way to replace the value of a map entry
@@ -129,6 +108,44 @@ public final class TestInput {
         }
 
         return expectedProblems;
+    }
+
+    private static Optional<ExpectedProblem> handleMetaComment(MatchResult match, String testName, String fileName, int line) {
+        // Named groups in matchers are not supported until Java 20
+        String tag = match.group(1);
+        String comment = match.group(2);
+        String problemTypeString = match.group(3);
+
+        ProblemType problemType = null;
+        if (problemTypeString != null && !problemTypeString.isBlank()) {
+            problemType = ProblemType.valueOf(problemTypeString);
+        }
+
+        boolean valid = switch (tag.trim().toLowerCase()) {
+            case "not ok" -> true;
+            case "false positive" -> {
+                LOGGER.warn("False positive annotation in {}@{}:{}; reason: {}", testName, fileName, line, comment);
+                yield true;
+            }
+            case "false negative" -> {
+                LOGGER.warn("False negative annotation in {}@{}:{}; reason: {}", testName, fileName, line, comment);
+                yield false;
+            }
+            case "", "ok" -> false;
+            default ->
+                    throw new RuntimeException("Unknown tag meta comment tag '%s' in test %s %s:%d".formatted(
+                            tag,
+                            testName,
+                            fileName,
+                            line)
+                    );
+        };
+
+        if (valid) {
+            return Optional.of(new ExpectedProblem(SourcePath.of(fileName), line, problemType, comment));
+        } else {
+            return Optional.empty();
+        }
     }
 
     public Path path() {
