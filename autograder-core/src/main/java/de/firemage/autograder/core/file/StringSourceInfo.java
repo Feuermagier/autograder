@@ -9,7 +9,6 @@ import spoon.support.compiler.VirtualFolder;
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;
 import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -99,9 +98,9 @@ public final class StringSourceInfo implements SourceInfo {
 
         private static URI virtualUri(ClassPath classPath) {
             return URI.create("string:///%s/%s%s".formatted(
-                VIRTUAL_FOLDER,
-                classPath.toString().replace('.', '/'),
-                JavaFileObject.Kind.SOURCE.extension
+                    VIRTUAL_FOLDER,
+                    classPath.toString().replace('.', '/'),
+                    JavaFileObject.Kind.SOURCE.extension
             ));
         }
 
@@ -116,17 +115,17 @@ public final class StringSourceInfo implements SourceInfo {
         }
 
         @Override
-        public InputStream openInputStream() throws IOException {
+        public InputStream openInputStream() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public OutputStream openOutputStream() throws IOException {
+        public OutputStream openOutputStream() {
             throw new UnsupportedOperationException();
         }
 
         @Override
-        public Reader openReader(boolean ignoreEncodingErrors) throws IOException {
+        public Reader openReader(boolean ignoreEncodingErrors) {
             return new StringReader(this.code);
         }
 
@@ -201,8 +200,8 @@ public final class StringSourceInfo implements SourceInfo {
             }
             List<String> parts = Arrays.asList(string.split("\\.", -1));
             return new ClassPath(
-                new ArrayList<>(parts.subList(0, parts.size() - 1)),
-                parts.get(parts.size() - 1)
+                    new ArrayList<>(parts.subList(0, parts.size() - 1)),
+                    parts.get(parts.size() - 1)
             );
         }
 
