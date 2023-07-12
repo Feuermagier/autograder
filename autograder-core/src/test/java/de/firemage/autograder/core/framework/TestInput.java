@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public final class TestInput {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInput.class);
 
-    private static final Pattern META_COMMENT_PATTER = Pattern.compile("/\\*@(?<tag>[^;^@]*);?(?<comment>[^@]*);?(?<problemType>[^;^@]*)@\\*/");
+    private static final Pattern META_COMMENT_PATTER = Pattern.compile("/\\*#(?<tag>[^;^#]*);?(?<comment>[^#]*);?(?<problemType>[^;^#]*)#\\*/");
     private final Path path;
     private final TestConfig config;
     private final SourceInfo sourceInfo;

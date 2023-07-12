@@ -14,7 +14,7 @@ public class Test {
     }
 
     public static void makeUnsafeTypeCast() {
-        Map<String, String> map = (Map<String, String>) getRawMap(); /*@ not ok @*/
+        Map<String, String> map = (Map<String, String>) getRawMap(); /*# not ok #*/
     }
 }
 
@@ -22,7 +22,7 @@ class Array<T> {
     private T[] array;
 
     Array(int size) {
-        this.array = (T[]) new Object[size]; /*@ not ok @*/
+        this.array = (T[]) new Object[size]; /*# not ok #*/
     }
 }
 
@@ -31,6 +31,6 @@ class ShouldIgnoreSuppressWarnings {
     private Map<String, String> map;
 
     ShouldIgnoreSuppressWarnings() {
-        this.map = (Map<String, String>) new HashMap(); /*@ not ok @*/
+        this.map = (Map<String, String>) new HashMap(); /*# not ok #*/
     }
 }

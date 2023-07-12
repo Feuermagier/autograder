@@ -3,12 +3,12 @@
 ## Syntax
 The `core` module contains a framework for testing in checks in `src/test/java/de/firemage/autograder/core/framework`.
 It allows you to create tests simply by writing valid Java code and inserting so-called *meta comments* that specify e.g. where the Autograder is expected to find problems.
-Meta comments are enclosed in `/*@` and `@*/`, i.e. they are valid Java block comments with additional `@` characters.
+Meta comments are enclosed in `/*#` and `#*/`, i.e. they are valid Java block comments with additional `@` characters.
 The framework will parse them and remove the comments before passing the code to the Autograder, so that they do no impact the actual source code to check.
 In particular, they can be also used within standard Java strings and comments.
 
 The content of a meta comment consists of up to three parts, separated by semicolons:
-`/*@ <tag> ; <optional comment> ;  <optional expected problem type> @*/`
+`/*# <tag> ; <optional comment> ;  <optional expected problem type> #*/`
 Whitespace around the parts is ignored.
 The first part must be a tag from the following table:
 
@@ -27,13 +27,13 @@ If specified, a problem of this type is expected at this line, as long as the ta
 
 ## Examples
 ```
-    /*@ not ok @*/
+    /*# not ok #*/
     
-    /*@not ok@*/
+    /*#not ok#*/
     
-    /*@ false positive; see github issue @*/
+    /*# false positive; see github issue #*/
     
-    /*@ ok; This is a comment*/
+    /*# ok; This is a comment*/
     
-    /*@ ;This is only a comment @*/
+    /*# ;This is only a comment #*/
 ```

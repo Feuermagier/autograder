@@ -5,7 +5,7 @@ public class Test {
     static class SubE extends TopE { }
 
     public static void main(String[] args) throws java.io.IOException {
-        try { /*@ not ok; this is essentially a GOTO to the IllegalStateException catch block @*/
+        try { /*# not ok; this is essentially a GOTO to the IllegalStateException catch block #*/
             try {
             } catch (Exception e) {
                 throw new IllegalStateException(e);
@@ -14,9 +14,9 @@ public class Test {
             // do some more stuff
         }
 
-        try {} catch (Exception e) {} /*@ ok @*/
+        try {} catch (Exception e) {} /*# ok #*/
         String foo = null;
-        try { /*@ ok @*/
+        try { /*# ok #*/
             java.nio.file.Files.size(java.nio.file.Path.of("foo"));
         } catch (java.io.IOException e) {
             if (foo != null)
@@ -25,19 +25,19 @@ public class Test {
                 throw e;
         }
 
-        try { /*@ ok @*/
+        try { /*# ok #*/
             throw new TopE();
         } catch (SubE e) {
         }
 
-        try { /*@ not ok @*/
+        try { /*# not ok #*/
             throw new SubE();
         } catch (TopE e) {
         }
     }
 
     void extra(String foo) {
-        switch(foo) { /*@ ok @*/
+        switch(foo) { /*# ok #*/
             default:
                 throw new IllegalArgumentException();
         }

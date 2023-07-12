@@ -11,13 +11,13 @@ import java.util.Vector;
 
 public class Test {
     public static void main(String[] args) {
-        new ArrayList<String>(); /*@ ok @*/
-        new LinkedList<String>(); /*@ ok @*/
-        new Vector<String>(); /*@ not ok @*/
-        new ArrayDeque<String>(); /*@ ok @*/
-        new Stack<String>(); /*@ not ok @*/
-        new HashMap<String, String>(); /*@ ok @*/
-        new TreeMap<String, String>(); /*@ ok @*/
-        new Hashtable<String, String>(); /*@ not ok @*/
+        new ArrayList<String>(); /*# ok #*/
+        new LinkedList<String>(); /*# ok #*/
+        new Vector<String>(); /*# not ok #*/
+        new ArrayDeque<String>(); /*# ok #*/
+        new Stack<String>(); /*# not ok #*/
+        new HashMap<String, String>(); /*# ok #*/
+        new TreeMap<String, String>(); /*# ok #*/
+        new Hashtable<String, String>(); /*# not ok #*/
     }
 }

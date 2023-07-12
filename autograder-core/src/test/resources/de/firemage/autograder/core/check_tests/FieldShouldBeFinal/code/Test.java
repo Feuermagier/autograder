@@ -5,9 +5,9 @@ public class Test {
 }
 
 class ShouldBeFinal {
-    private int value = 0; /*@ not ok @*/
-    private String value2; /*@ not ok @*/
-    private String value3; /*@ ok @*/
+    private int value = 0; /*# not ok #*/
+    private String value2; /*# not ok #*/
+    private String value3; /*# ok #*/
     public ShouldBeFinal() {
         this.value2 = "Hello World";
         this.value3 = "Hello World";
@@ -19,7 +19,7 @@ class ShouldBeFinal {
 }
 
 abstract class A {
-    private String value = null; /*@ ok @*/
+    private String value = null; /*# ok #*/
     protected A() {
     }
 

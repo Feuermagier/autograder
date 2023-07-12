@@ -17,15 +17,15 @@ public class Test {
     void run2(Timer timer) {
         if (timer.isEnabled() && timer.isValid()) {
             timer.run();
-        } else if (!timer.isEnabled()) { /*@ not ok @*/
+        } else if (!timer.isEnabled()) { /*# not ok #*/
             return;
-        } else if (!timer.isValid()) { /*@ not ok @*/
+        } else if (!timer.isValid()) { /*# not ok #*/
             throw new IllegalArgumentException();
         }
     }
 
     void example(boolean a) {
-        if (a) { /*@ ok @*/
+        if (a) { /*# ok #*/
             System.out.println("a");
             return; // early return
         } else {
@@ -50,7 +50,7 @@ public class Test {
         while (a) {
             if (b) {
                 System.out.println("hello");
-            } else { /*@ not ok @*/
+            } else { /*# not ok #*/
                 continue;
             }
         }
@@ -63,13 +63,13 @@ public class Test {
                     // do something
                 } else if (d) {
                     // do something
-                } else { /*@ not ok @*/
+                } else { /*# not ok #*/
                     throw new IllegalArgumentException();
                 }
-            } else { /*@ not ok @*/
+            } else { /*# not ok #*/
                 throw new IllegalArgumentException();
             }
-        } else { /*@ not ok @*/
+        } else { /*# not ok #*/
             throw new IllegalArgumentException();
         }
     }

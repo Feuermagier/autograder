@@ -7,16 +7,16 @@ public class Test {
         String c = "c";
 
         boolean r;
-        r = a == b; /*@ not ok @*/
-        r = a == "a"; /*@ not ok @*/
-        r = "a" == a; /*@ not ok @*/
-        r = "a" == "a"; /*@ not ok @*/
-        r = "a" == null; /*@ ok @*/
-        r = null == "a"; /*@ ok @*/
-        r = a == null; /*@ ok @*/
-        r = null == a; /*@ ok @*/
-        r = a != "c"; /*@ not ok @*/
-        r = "c" != a; /*@ not ok @*/
-        r = "c" != "c"; /*@ not ok @*/
+        r = a == b; /*# not ok #*/
+        r = a == "a"; /*# not ok #*/
+        r = "a" == a; /*# not ok #*/
+        r = "a" == "a"; /*# not ok #*/
+        r = "a" == null; /*# ok #*/
+        r = null == "a"; /*# ok #*/
+        r = a == null; /*# ok #*/
+        r = null == a; /*# ok #*/
+        r = a != "c"; /*# not ok #*/
+        r = "c" != a; /*# not ok #*/
+        r = "c" != "c"; /*# not ok #*/
     }
 }

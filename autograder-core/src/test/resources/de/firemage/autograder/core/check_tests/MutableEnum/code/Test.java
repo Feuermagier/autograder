@@ -7,7 +7,7 @@ public class Test {
 }
 
 // From: https://stackoverflow.com/q/41199553/7766117
-enum Friends { /*@ not ok @*/
+enum Friends { /*# not ok #*/
     BOB(14),
     ALICE(22);
 
@@ -26,7 +26,7 @@ enum Friends { /*@ not ok @*/
     }
 }
 
-enum MyEnum { /*@ ok; very difficult to decide that this is mutable @*/
+enum MyEnum { /*# ok; very difficult to decide that this is mutable #*/
     MY_VARIANT;
     private final List<String> strings = new ArrayList<>();
 

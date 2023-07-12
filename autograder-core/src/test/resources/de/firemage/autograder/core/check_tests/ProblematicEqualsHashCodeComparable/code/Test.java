@@ -8,7 +8,7 @@ public class Test {
     static <T> boolean isLessThan(Comparator<T> comparator, T a, T b) {
         // Fragile: it's not guaranteed that `comparator` returns -1 to mean
         // "less than".
-        return comparator.compare(a, b) == -1; /*@ not ok @*/
+        return comparator.compare(a, b) == -1; /*# not ok #*/
     }
 }
 
@@ -18,8 +18,8 @@ class MyClass {
     private String c;
 
     @Override
-    public boolean equals(Object o) { /*@ not ok @*/
-        return o.hashCode() == hashCode(); /*@ not ok @*/
+    public boolean equals(Object o) { /*# not ok #*/
+        return o.hashCode() == hashCode(); /*# not ok #*/
     }
 
     @Override
@@ -32,8 +32,8 @@ class EqualsUnsafeCast {
     private int a;
 
     @Override
-    public boolean equals(Object other) { /*@ not ok @*/
-        EqualsUnsafeCast that = (EqualsUnsafeCast) other; /*@ not ok; this may throw ClassCastException @*/
+    public boolean equals(Object other) { /*# not ok #*/
+        EqualsUnsafeCast that = (EqualsUnsafeCast) other; /*# not ok; this may throw ClassCastException #*/
         return a == that.a;
     }
 }

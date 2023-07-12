@@ -1,10 +1,10 @@
 package de.firemage.autograder.core.check_tests.FieldShouldBeLocal.code;
 
 public class Test {
-    public int a; /*@ ok; because public @*/
-    private int b; /*@ not ok; because always overwritten @*/
-    private Object c; /*@ not ok; because always overwritten @*/
-    private Object d = new Object(); /*@ ok; because not always overwritten before being read @*/
+    public int a; /*# ok; because public #*/
+    private int b; /*# not ok; because always overwritten #*/
+    private Object c; /*# not ok; because always overwritten #*/
+    private Object d = new Object(); /*# ok; because not always overwritten before being read #*/
     
     public static void main(String[] args) {
         Test test = new Test();
