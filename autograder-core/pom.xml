@@ -13,11 +13,11 @@
     <name>autograder-core</name>
 
     <properties>
-        <spoon.version>10.3.0</spoon.version>
+        <spoon.version>10.4.0</spoon.version>
         <pmd.version>7.0.0-rc3</pmd.version>
         <spotbugs.version>6.45.0</spotbugs.version>
 
-        <docker.version>3.3.1</docker.version>
+        <docker.version>3.3.2</docker.version>
         <jgraph.version>1.5.2</jgraph.version>
         <fluent.version>0.70</fluent.version>
     </properties>
