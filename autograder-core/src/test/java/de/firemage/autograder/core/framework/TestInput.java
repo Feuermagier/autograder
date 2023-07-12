@@ -1,9 +1,10 @@
 package de.firemage.autograder.core.framework;
 
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.SourceInfo;
-import de.firemage.autograder.core.StringSourceInfo;
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.file.SourceInfo;
+import de.firemage.autograder.core.file.SourcePath;
+import de.firemage.autograder.core.file.StringSourceInfo;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -115,7 +116,7 @@ public final class TestInput {
                     };
 
                     if (valid) {
-                        expectedProblems.add(new ExpectedProblem(entry.getKey(), i + 1, problemType, comment));
+                        expectedProblems.add(new ExpectedProblem(SourcePath.of(fileName), i + 1, problemType, comment));
                     }
                 }
 

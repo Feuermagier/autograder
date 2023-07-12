@@ -3,6 +3,7 @@ package de.firemage.autograder.core.framework;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.SourcePath;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -109,13 +110,12 @@ public class TestFramework {
     }
 
     private static boolean findAndDeleteProblem(ReportedProblem reportedProblem, List<ExpectedProblem> expectedProblems) {
-        // Spoon inserts '../' at the start of paths of virtual files
-        String problemPath = getCleanProblemPath(reportedProblem.problem().getPosition().file());
         int startLine = reportedProblem.problem().getPosition().startLine();
+        SourcePath path = reportedProblem.problem().getPosition().file();
 
         for (int i = 0; i < expectedProblems.size(); i++) {
             var expectedProblem = expectedProblems.get(i);
-            if (expectedProblem.file().equals(problemPath) && expectedProblem.line() == startLine) {
+            if (expectedProblem.file().equals(path) && expectedProblem.line() == startLine) {
                 if (expectedProblem.problemType() == null || expectedProblem.problemType() == reportedProblem.problem().getProblemType()) {
                     expectedProblems.remove(i);
                     return true;
@@ -124,12 +124,5 @@ public class TestFramework {
         }
 
         return false;
-    }
-
-    private static String getCleanProblemPath(Path path) {
-        return path.toString()
-                .replace("../", "")
-                .replace(".java", "")
-                .replaceFirst(".*/autograder-core/", "");
     }
 }

@@ -6,10 +6,17 @@ import spoon.compiler.SpoonResource;
 import spoon.support.compiler.VirtualFile;
 import spoon.support.compiler.VirtualFolder;
 
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.tools.JavaFileObject;
 import javax.tools.SimpleJavaFileObject;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
+import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -81,13 +88,11 @@ public final class StringSourceInfo implements SourceInfo {
         return this.version;
     }
 
-    // TODO: this class is not serializable...
-    private static final class VirtualFileObject extends SimpleJavaFileObject implements Serializable, CompilationUnit {
+    private static final class VirtualFileObject implements JavaFileObject, Serializable, CompilationUnit {
         private final ClassPath classPath;
         private final String code;
 
         private VirtualFileObject(ClassPath classPath, String code) {
-            super(virtualUri(classPath), Kind.SOURCE);
             this.classPath = classPath;
             this.code = code;
         }
@@ -101,13 +106,48 @@ public final class StringSourceInfo implements SourceInfo {
         }
 
         @Override
+        public URI toUri() {
+            return virtualUri(this.classPath);
+        }
+
+        @Override
         public String getName() {
             return this.path().toString();
         }
 
         @Override
+        public InputStream openInputStream() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public OutputStream openOutputStream() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Reader openReader(boolean ignoreEncodingErrors) throws IOException {
+            return new StringReader(this.code);
+        }
+
+        @Override
         public CharSequence getCharContent(boolean ignoreEncodingErrors) {
             return this.code;
+        }
+
+        @Override
+        public Writer openWriter() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long getLastModified() {
+            return 0;
+        }
+
+        @Override
+        public boolean delete() {
+            return false;
         }
 
         public String getCode() {
@@ -128,6 +168,29 @@ public final class StringSourceInfo implements SourceInfo {
         public Charset charset() {
             // virtual files are always UTF-8
             return StandardCharsets.UTF_8;
+        }
+
+        @Override
+        public Kind getKind() {
+            return Kind.SOURCE;
+        }
+
+        @Override
+        public boolean isNameCompatible(String simpleName, Kind kind) {
+            String baseName = simpleName + kind.extension;
+            return kind.equals(getKind())
+                    && (baseName.equals(toUri().getPath())
+                    || toUri().getPath().endsWith("/" + baseName));
+        }
+
+        @Override
+        public NestingKind getNestingKind() {
+            return null;
+        }
+
+        @Override
+        public Modifier getAccessLevel() {
+            return null;
         }
     }
 

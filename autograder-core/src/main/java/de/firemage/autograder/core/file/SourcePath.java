@@ -87,6 +87,10 @@ public final class SourcePath implements Comparable<SourcePath>, Serializable {
         return SourcePath.of(result);
     }
 
+    public Path toPath() {
+        return Path.of(this.toString());
+    }
+
     @Override
     public boolean equals(Object other) {
         if (!(other instanceof SourcePath otherPath)) {

@@ -52,7 +52,7 @@ public class PMDLinter {
             FileCollector collector = pmd.files();
             for (CompilationUnit compilationUnit : file.getSource().compilationUnits()) {
                 collector.addSourceFile(
-                    FileId.fromPathLikeString(compilationUnit.path().toString()),
+                    FileId.fromPathLikeString(file.getSource().path().resolve(compilationUnit.path().toPath()).toString()),
                     compilationUnit.readString()
                 );
             }
