@@ -3,7 +3,7 @@
 ## Syntax
 The `core` module contains a framework for testing in checks in `src/test/java/de/firemage/autograder/core/framework`.
 It allows you to create tests simply by writing valid Java code and inserting so-called *meta comments* that specify e.g. where the Autograder is expected to find problems.
-Meta comments are enclosed in `/*#` and `#*/`, i.e. they are valid Java block comments with additional `@` characters.
+Meta comments are enclosed in `/*#` and `#*/`, i.e. they are valid Java block comments with additional `#` characters.
 The framework will parse them and remove the comments before passing the code to the Autograder, so that they do no impact the actual source code to check.
 In particular, they can be also used within standard Java strings and comments.
 
