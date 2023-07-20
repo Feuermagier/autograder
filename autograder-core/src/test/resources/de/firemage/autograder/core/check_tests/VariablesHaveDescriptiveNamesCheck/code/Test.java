@@ -42,6 +42,7 @@ public class Test {
     private void test() {
         Test[] tests = new Test[5];
         for (Test test : tests) { } // Ok
+        for (char c: "abc".toCharArray()) { } // Ok
     }
 
     String datePattern; // Ok

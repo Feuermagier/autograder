@@ -23,3 +23,4 @@ logs/
 tmp/
 uni_config.yaml
 *.dot
+/.autograder-tmp/

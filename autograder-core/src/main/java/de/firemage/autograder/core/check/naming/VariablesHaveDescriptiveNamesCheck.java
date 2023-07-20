@@ -102,8 +102,18 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private static boolean isAllowedLoopCounter(CtVariable<?> variable) {
-        return (variable.getRoleInParent() == CtRole.FOR_INIT || variable.getRoleInParent() == CtRole.FOREACH_VARIABLE)
-            && SpoonUtil.isPrimitiveNumeric(variable.getType());
+        var role = variable.getRoleInParent();
+        if (role != CtRole.FOR_INIT && role != CtRole.FOREACH_VARIABLE) {
+            return false;
+        }
+
+        // for (char c : string.toCharArray())
+        if (variable.getType().getQualifiedName().equals("char") && variable.getSimpleName().equals("c")) {
+            return true;
+        }
+
+        // for (int i = 0; i < 10; i++)
+        return SpoonUtil.isPrimitiveNumeric(variable.getType());
     }
 
     private static boolean isAbbreviation(CtVariable<?> variable) {
