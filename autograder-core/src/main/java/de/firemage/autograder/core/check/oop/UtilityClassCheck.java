@@ -19,7 +19,7 @@ import spoon.reflect.declaration.CtModifiable;
     ProblemType.UTILITY_CLASS_ABSTRACT
 })
 public class UtilityClassCheck extends IntegratedCheck {
-    public static boolean isUtilityClass(StaticAnalysis staticAnalysis, CtClass<?> ctClass) {
+    public static boolean isUtilityClass(CtClass<?> ctClass) {
         return
             // it must obviously be a class
             ctClass.isClass()
@@ -31,7 +31,7 @@ public class UtilityClassCheck extends IntegratedCheck {
                 && ctClass.getMethods().stream().allMatch(CtMethod::isStatic)
                 // all fields should be static and effectively final (no assignments)
                 && ctClass.getFields().stream().allMatch(
-                    ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())
+                    ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(ctField.getReference())
                 )
                 // the class should not extend anything
                 && ctClass.getSuperclass() == null
@@ -72,7 +72,7 @@ public class UtilityClassCheck extends IntegratedCheck {
             @Override
             public void process(CtClass<?> ctClass) {
                 // ignore everything that is not a utility class
-                if (!isUtilityClass(staticAnalysis, ctClass)) {
+                if (!isUtilityClass(ctClass)) {
                     return;
                 }
 

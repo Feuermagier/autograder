@@ -43,12 +43,12 @@ public class CharRange extends IntegratedCheck {
             SpoonUtil.createStaticInvocation(
                 targetType,
                 "isAlphabetic",
-                SpoonUtil.castExpression(ctExpression, int.class)
+                SpoonUtil.castExpression(int.class, ctExpression)
             ),
             SpoonUtil.createStaticInvocation(
                 targetType,
                 "isLowerCase",
-                SpoonUtil.castExpression(ctExpression, char.class)
+                SpoonUtil.castExpression(char.class, ctExpression)
             ),
             BinaryOperatorKind.AND
         ),
@@ -56,19 +56,19 @@ public class CharRange extends IntegratedCheck {
             SpoonUtil.createStaticInvocation(
                 targetType,
                 "isAlphabetic",
-                SpoonUtil.castExpression(ctExpression, int.class)
+                SpoonUtil.castExpression(int.class, ctExpression)
             ),
             SpoonUtil.createStaticInvocation(
                 targetType,
                 "isUpperCase",
-                SpoonUtil.castExpression(ctExpression, char.class)
+                SpoonUtil.castExpression(char.class, ctExpression)
             ),
             BinaryOperatorKind.AND
         ),
         Range.between('0', '9'), (factory, ctExpression, targetType) -> SpoonUtil.createStaticInvocation(
             targetType,
             "isDigit",
-            SpoonUtil.castExpression(ctExpression, char.class)
+            SpoonUtil.castExpression(char.class, ctExpression)
         )
     );
 
@@ -76,7 +76,7 @@ public class CharRange extends IntegratedCheck {
         return Optional.ofNullable(MAPPING.get(range)).map(fn -> fn.suggest(
             ctExpression.getFactory(),
             ctExpression,
-            ctExpression.getFactory().Type().createReference(java.lang.Character.class)
+            ctExpression.getFactory().Type().CHARACTER
         ));
     }
 
