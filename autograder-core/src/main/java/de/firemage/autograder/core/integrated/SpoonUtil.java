@@ -6,6 +6,11 @@ import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalStatement;
+import de.firemage.autograder.core.integrated.evaluator.Evaluator;
+import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
+import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
+import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
+import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
 import org.apache.commons.compress.utils.FileNameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -24,7 +29,6 @@ import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
@@ -41,7 +45,6 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
-import spoon.reflect.visitor.CtVisitor;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.support.reflect.code.CtLiteralImpl;
 
@@ -81,17 +84,17 @@ public final class SpoonUtil {
         }
     }
 
+    public static boolean isStringLiteral(CtExpression<?> expression, String value) {
+        return expression instanceof CtLiteral<?> literal && literal.getValue() != null &&
+            literal.getValue().equals(value);
+    }
+
     public static boolean isNullLiteral(CtExpression<?> expression) {
-        return SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal && literal.getValue() == null;
+        return SpoonUtil.resolveConstant(expression) instanceof CtLiteral<?> literal && literal.getValue() == null;
     }
 
     public static boolean isIntegerLiteral(CtExpression<?> expression, int value) {
         return expression instanceof CtLiteral<?> literal && literal.getValue().equals(value);
-    }
-
-    public static boolean isStringLiteral(CtExpression<?> expression, String value) {
-        return expression instanceof CtLiteral<?> literal && literal.getValue() != null &&
-               literal.getValue().equals(value);
     }
 
     public static boolean isBoolean(CtTypedElement<?> ctTypedElement) {
@@ -104,7 +107,7 @@ public final class SpoonUtil {
     }
 
     public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
-        if (SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal
+        if (SpoonUtil.resolveConstant(expression) instanceof CtLiteral<?> literal
             && literal.getValue() != null
             && isBoolean(literal)) {
 
@@ -115,7 +118,7 @@ public final class SpoonUtil {
     }
 
     public static Optional<String> tryGetStringLiteral(CtExpression<?> expression) {
-        if (SpoonUtil.resolveCtExpression(expression) instanceof CtLiteral<?> literal
+        if (SpoonUtil.resolveConstant(expression) instanceof CtLiteral<?> literal
             && literal.getValue() != null
             && isTypeEqualTo(literal.getType(), java.lang.String.class)) {
 
@@ -163,20 +166,21 @@ public final class SpoonUtil {
         return valLeft.longValue() == valRight.longValue();
     }
 
-    /**
-     * Makes a new literal with the given value.
-     *
-     * @param value the value of the literal
-     * @param <T>   the type of the value
-     *
-     * @return a new literal with the given value, note that the base is not set
-     */
     public static <T> CtLiteral<T> makeLiteral(T value) {
         CtLiteral<T> literal = new CtLiteralImpl<>();
         literal.setValue(value);
         return literal;
     }
 
+    /**
+     * Makes a new literal with the given value and type.
+     *
+     * @param ctTypeReference a reference to the type of the literal
+     * @param value the value of the literal
+     * @param <T>   the type of the value
+     *
+     * @return a new literal with the given value, note that the base is not set
+     */
     public static <T> CtLiteral<T> makeLiteral(CtTypeReference<T> ctTypeReference, T value) {
         CtLiteral<T> literal = ctTypeReference.getFactory().createLiteral();
         literal.setType(ctTypeReference.clone());
@@ -319,47 +323,6 @@ public final class SpoonUtil {
     }
 
     /**
-     * Copy-pasted from {@link spoon.support.reflect.eval.VisitorPartialEvaluator}.
-     *
-     * @param type the type of the number
-     * @param number some number that should be converted to a value of the given type
-     * @return the converted number
-     */
-    private static Number convert(CtTypeReference<?> type, Number number) {
-        if ((type.getActualClass() == int.class) || (type.getActualClass() == Integer.class)) {
-            return number.intValue();
-        }
-        if ((type.getActualClass() == byte.class) || (type.getActualClass() == Byte.class)) {
-            return number.byteValue();
-        }
-        if ((type.getActualClass() == long.class) || (type.getActualClass() == Long.class)) {
-            return number.longValue();
-        }
-        if ((type.getActualClass() == float.class) || (type.getActualClass() == Float.class)) {
-            return number.floatValue();
-        }
-        if ((type.getActualClass() == short.class) || (type.getActualClass() == Short.class)) {
-            return number.shortValue();
-        }
-        if ((type.getActualClass() == double.class) || (type.getActualClass() == Double.class)) {
-            return number.doubleValue();
-        }
-        return number;
-    }
-
-    private static <T> CtExpression<?> partiallyEvaluate(CtExpression<T> ctExpression) {
-        // NOTE: this is a workaround for https://github.com/INRIA/spoon/issues/5273
-        PartialEvaluator evaluator = new VisitorEvaluator();
-        CtExpression<?> res = evaluator.evaluate(ctExpression).clone();
-
-        // ensure that all literals have a type (workaround for broken PartialEvaluator implementation)
-        CtVisitor ctVisitor = new VisitorCtLiteralTypeFixer(ctExpression.getFactory());
-        res.accept(ctVisitor);
-
-        return res;
-    }
-
-    /**
      * Converts a binary operator like 'a < b' to 'a <= b - 1' or 'a > b' to 'a >= b + 1'.
      *
      * @param ctBinaryOperator the operator to normalize, can be of any kind
@@ -393,11 +356,11 @@ public final class SpoonUtil {
         Predicate<CtTypeReference<?>> isCharacter = ty -> SpoonUtil.isTypeEqualTo(ty, char.class, java.lang.Character.class);
         if (isCharacter.test(ctBinaryOperator.getRightHandOperand().getType())) {
             // for character use an integer literal
-            step.setValue(1);
+            step.setValue((char) 1);
             step.setType(ctBinaryOperator.getFactory().Type().CHARACTER_PRIMITIVE);
         } else {
             // this assumes that < and > are only used with numbers
-            step.setValue(convert(ctBinaryOperator.getRightHandOperand().getType(), ((Number) 1).doubleValue()));
+            step.setValue(FoldUtils.convert(ctBinaryOperator.getRightHandOperand().getType(), ((Number) 1).doubleValue()));
             step.setType(ctBinaryOperator.getRightHandOperand().getType());
         }
 
@@ -405,7 +368,7 @@ public final class SpoonUtil {
         if (ctBinaryOperator.getKind() == BinaryOperatorKind.LT) {
             // <lhs> < <rhs> => <lhs> <= <rhs> - 1
             result.setKind(BinaryOperatorKind.LE);
-            result.setRightHandOperand(ctBinaryOperator.getFactory().createBinaryOperator(
+            result.setRightHandOperand(SpoonUtil.createBinaryOperator(
                 ctBinaryOperator.getRightHandOperand(),
                 step,
                 BinaryOperatorKind.MINUS
@@ -413,22 +376,69 @@ public final class SpoonUtil {
         } else if (ctBinaryOperator.getKind() == BinaryOperatorKind.GT) {
             // <lhs> > <rhs> => <lhs> >= <rhs> + 1
             result.setKind(BinaryOperatorKind.GE);
-            result.setRightHandOperand(ctBinaryOperator.getFactory().createBinaryOperator(
+            result.setRightHandOperand(SpoonUtil.createBinaryOperator(
                 ctBinaryOperator.getRightHandOperand(),
                 step,
                 BinaryOperatorKind.PLUS
             ));
         }
 
-        // TODO: this should call the SpoonUtil.partiallyEvaluate
-        PartialEvaluator evaluator = new VisitorEvaluator();
-        CtBinaryOperator<T> res = evaluator.evaluate(result);
+        // simplify the resulting operator
+        result.setLeftHandOperand(SpoonUtil.resolveCtExpression(result.getLeftHandOperand()));
+        // if the operand was a literal, it might have been promoted
+        if (result.getLeftHandOperand() instanceof CtLiteral<?> ctLiteral) {
+            result.setLeftHandOperand(SpoonUtil.castLiteral(
+                SpoonUtil.getExpressionType(ctBinaryOperator.getLeftHandOperand()),
+                ctLiteral
+            ));
+        }
 
-        // ensure that all literals have a type (workaround for broken PartialEvaluator implementation)
-        CtVisitor ctVisitor = new VisitorCtLiteralTypeFixer(ctBinaryOperator.getFactory());
-        res.accept(ctVisitor);
+        result.setRightHandOperand(SpoonUtil.resolveCtExpression(result.getRightHandOperand()));
+        if (result.getRightHandOperand() instanceof CtLiteral<?> ctLiteral) {
+            result.setRightHandOperand(SpoonUtil.castLiteral(
+                SpoonUtil.getExpressionType(ctBinaryOperator.getRightHandOperand()),
+                ctLiteral
+            ));
+        }
 
-        return res;
+        return result;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    public static <T> CtBinaryOperator<T> createBinaryOperator(
+        CtExpression<?> leftHandOperand,
+        CtExpression<?> rightHandOperand,
+        BinaryOperatorKind operatorKind
+    ) {
+        Factory factory = leftHandOperand.getFactory();
+        if (factory == null) {
+            factory = rightHandOperand.getFactory();
+        }
+
+        CtBinaryOperator ctBinaryOperator = factory.createBinaryOperator(
+            leftHandOperand,
+            rightHandOperand,
+            operatorKind
+        );
+
+        if (ctBinaryOperator.getType() == null) {
+            ctBinaryOperator.setType(FoldUtils.inferType(ctBinaryOperator));
+        }
+
+        return ctBinaryOperator;
+    }
+
+    @SuppressWarnings({"unchecked","rawtypes"})
+    private static <T> CtUnaryOperator<T> createCtUnaryOperator(UnaryOperatorKind operatorKind, CtExpression<?> ctExpression) {
+        CtUnaryOperator ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
+        ctUnaryOperator.setOperand(ctExpression);
+        ctUnaryOperator.setKind(operatorKind);
+
+        if (ctUnaryOperator.getType() == null) {
+            ctUnaryOperator.setType(FoldUtils.inferType(ctUnaryOperator));
+        }
+
+        return ctUnaryOperator;
     }
 
     /**
@@ -438,8 +448,12 @@ public final class SpoonUtil {
      * @return the cloned version with the operands swapped or the given operator if it is not supported
      * @param <T> the type the operator evaluates to
      */
+    @SuppressWarnings({"unchecked","rawtypes"})
     public static <T> CtBinaryOperator<T> swapCtBinaryOperator(CtBinaryOperator<T> ctBinaryOperator) {
         CtBinaryOperator result = ctBinaryOperator.clone();
+
+        CtExpression<?> left = result.getLeftHandOperand();
+        CtExpression<?> right = result.getRightHandOperand();
 
         // NOTE: this only implements a few cases, for other non-commutative operators, this will break code
         result.setKind(switch (ctBinaryOperator.getKind()) {
@@ -455,18 +469,38 @@ public final class SpoonUtil {
         });
 
         // swap the left and right
-        CtExpression<?> tmp = result.getLeftHandOperand();
-        result.setLeftHandOperand(result.getRightHandOperand());
-        result.setRightHandOperand(tmp);
+        result.setLeftHandOperand(right);
+        result.setRightHandOperand(left);
 
         return result;
     }
 
     /**
+     * Replaces {@link spoon.reflect.code.CtVariableRead} in the provided expression if they are effectively final
+     * and their value is known.
+     * <p>
+     * Additionally, it will fix broken operators that do not have a type.
+     *
+     * @param ctExpression the expression to resolve. If it is {@code null}, then {@code null} is returned
+     * @return the resolved expression. It will be cloned and detached from the {@link CtModel}
+     * @param <T> the type of the expression
+     */
+    public static <T> CtExpression<T> resolveConstant(CtExpression<T> ctExpression) {
+        if (ctExpression == null) return null;
+
+        PartialEvaluator evaluator = new Evaluator(
+            InferOperatorTypes.create(),
+            InlineVariableRead.create()
+        );
+
+        return evaluator.evaluate(ctExpression);
+    }
+
+    /**
      * Converts a binary operator like < to <= or > to >= and adjusts the operands accordingly
-     * to make finding patterns on them easier by not having to special-case them. Additionally
-     * one can specify a predicate to swap the operands if necessary. For example to ensure that
-     * a literal is always on the right hand side.
+     * to make finding patterns on them easier by not having to special-case them. Additionally,
+     * one can specify a predicate to swap the operands if necessary. For example, to ensure that
+     * a literal is always on the right-hand side.
      *
      * @param shouldSwap the left and right hands are passed to it, and it should return true if they should be swapped and false if nothing should be changed
      * @param ctBinaryOperator the operator to normalize, can be of any kind
@@ -477,8 +511,8 @@ public final class SpoonUtil {
         BiPredicate<? super CtExpression<?>, ? super CtExpression<?>> shouldSwap,
         CtBinaryOperator<T> ctBinaryOperator
     ) {
-        CtExpression<?> left = SpoonUtil.resolveCtExpression(ctBinaryOperator.getLeftHandOperand());
-        CtExpression<?> right = SpoonUtil.resolveCtExpression(ctBinaryOperator.getRightHandOperand());
+        CtExpression<?> left = SpoonUtil.resolveConstant(ctBinaryOperator.getLeftHandOperand());
+        CtExpression<?> right = SpoonUtil.resolveConstant(ctBinaryOperator.getRightHandOperand());
         BinaryOperatorKind operator = ctBinaryOperator.getKind();
 
         CtBinaryOperator<T> result = ctBinaryOperator.clone();
@@ -504,8 +538,12 @@ public final class SpoonUtil {
         return normalize(result);
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> CtExpression<T> negate(CtExpression<T> ctExpression) {
+        // !(!(a)) => a
+        if (ctExpression instanceof CtUnaryOperator<T> ctUnaryOperator && ctUnaryOperator.getKind() == UnaryOperatorKind.NOT) {
+            return ctUnaryOperator.getOperand();
+        }
+
         if (ctExpression instanceof CtBinaryOperator<T> ctBinaryOperator) {
             CtBinaryOperator<T> result = ctBinaryOperator.clone();
             switch (ctBinaryOperator.getKind()) {
@@ -526,7 +564,7 @@ public final class SpoonUtil {
                     result.setRightHandOperand(negate(result.getRightHandOperand()));
                     return result;
                 }
-                // !(a || b) -> !a && !bS
+                // !(a || b) -> !a && !b
                 case OR -> {
                     result.setKind(BinaryOperatorKind.AND);
                     result.setLeftHandOperand(negate(result.getLeftHandOperand()));
@@ -556,12 +594,7 @@ public final class SpoonUtil {
             }
         }
 
-        CtUnaryOperator ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
-
-        ctUnaryOperator.setKind(UnaryOperatorKind.NOT);
-        ctUnaryOperator.setOperand(ctExpression.clone());
-
-        return ctUnaryOperator;
+        return createCtUnaryOperator(UnaryOperatorKind.NOT, ctExpression.clone());
     }
 
     public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {
@@ -572,54 +605,14 @@ public final class SpoonUtil {
         return getEffectiveStatements(List.of(ctStatement));
     }
 
-    @SuppressWarnings("unchecked")
     public static <T> CtExpression<T> resolveCtExpression(CtExpression<T> ctExpression) {
         if (ctExpression == null) return null;
 
-        CtModel ctModel = ctExpression.getFactory().getModel();
+        // Spoon's partiallyEvaluate is broken, not configurable, and fixing it would be too much work.
+        // Therefore, we use our own implementation.
+        PartialEvaluator evaluator = new Evaluator();
 
-        // inline constants:
-        if (ctExpression instanceof CtVariableRead<?> ctVariableRead) {
-            CtVariableReference<?> ctVariableReference = ctVariableRead.getVariable();
-
-            Optional<CtExpression<?>> ctExpressionOptional = SpoonUtil.getEffectivelyFinalExpression(
-                ctModel,
-                ctVariableReference
-            );
-
-            // only inline literals:
-            if (ctExpressionOptional.isPresent() && ctExpressionOptional.get() instanceof CtLiteral<?> ctLiteral) {
-                return (CtLiteral<T>) ctLiteral;
-            }
-        }
-
-        if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator) {
-            CtExpression<?> left = resolveCtExpression(ctBinaryOperator.getLeftHandOperand());
-            CtExpression<?> right = resolveCtExpression(ctBinaryOperator.getRightHandOperand());
-
-            if (left instanceof CtLiteral<?> && right instanceof CtLiteral<?>) {
-                // TODO: this should be able to handle much more
-                return (CtExpression<T>) partiallyEvaluate(ctBinaryOperator.clone());
-            }
-
-            // a + 0 or a - 0
-            if (right instanceof CtLiteral<?> literal
-                && literal.getValue() instanceof Integer integer
-                && integer == 0
-                && Set.of(BinaryOperatorKind.MINUS, BinaryOperatorKind.PLUS).contains(ctBinaryOperator.getKind())) {
-                return (CtExpression<T>) left;
-            }
-
-            // 0 + a (0 - a != a)
-            if (left instanceof CtLiteral<?> literal
-                && literal.getValue() instanceof Integer integer
-                && integer == 0
-                && ctBinaryOperator.getKind() == BinaryOperatorKind.PLUS) {
-                return (CtExpression<T>) right;
-            }
-        }
-
-        return ctExpression;
+        return evaluator.evaluate(ctExpression);
     }
 
     public static CtStatement unwrapStatement(CtStatement statement) {
@@ -710,7 +703,7 @@ public final class SpoonUtil {
         Factory factory = targetType.getFactory();
         CtMethod<T> methodHandle = targetType.getTypeDeclaration().getMethod(
             methodName,
-            Arrays.stream(parameters).map(CtTypedElement::getType).toArray(CtTypeReference[]::new)
+            Arrays.stream(parameters).map(SpoonUtil::getExpressionType).toArray(CtTypeReference[]::new)
         );
 
         return factory.createInvocation(
@@ -720,67 +713,80 @@ public final class SpoonUtil {
         );
     }
 
-    private static boolean requiresCast(CtTypedElement<?> ctTypedElement, CtTypeReference<?> targetType) {
-        CtTypeReference<?> currentType = ctTypedElement.getType();
-        if (currentType.equals(targetType)) {
-            return false;
-        }
-
-        // implicit boxing/unboxing:
-        if (currentType.isPrimitive() && currentType.box().equals(targetType)) {
-            return false;
-        }
-
-        if (targetType.isPrimitive() && targetType.box().equals(currentType)) {
-            return false;
-        }
-
-        // NOTE: primitive widening is not implemented yet (e.g. int -> long)
-
-        return true;
+    public static <T> CtExpression<T> castExpression(Class<T> targetType, CtExpression<?> ctExpression) {
+        return SpoonUtil.castExpression(ctExpression.getFactory().Type().createReference(targetType), ctExpression);
     }
 
-    public static <T> CtExpression<T> castExpression(CtExpression<?> ctExpression, Class<?> targetType) {
-        return castExpression(ctExpression, ctExpression.getFactory().Type().createReference(targetType));
+    @SuppressWarnings({"rawtypes", "unchecked"})
+    public static <T, R> CtLiteral<R> castLiteral(CtTypeReference<R> type, CtLiteral<T> literal) {
+        CtLiteral result = literal.clone();
+        result.setType(type.clone());
+
+        // casting a primitive to a string:
+        if (SpoonUtil.isTypeEqualTo(type, String.class) && literal.getType().isPrimitive()) {
+            result.setValue(literal.getValue().toString());
+            return result;
+        }
+
+        // It is not possible to cast an Integer to a Double directly, which is a problem.
+        CtTypeReference<?> targetType = type.unbox();
+        if (targetType.isPrimitive()) {
+            // the FoldUtils.convert method only works for Number -> Number conversions
+            if (targetType.box().isSubtypeOf(type.getFactory().createCtTypeReference(Number.class))) {
+                // for instances of Number, one can use the convert method:
+                if (literal.getValue() instanceof Number number) {
+                    result.setValue(FoldUtils.convert(type, number));
+                } else {
+                    // primitive types that do not implement Number are:
+                    // boolean, char
+
+                    // NOTE: it does not make sense to cast a boolean to any other primitive type
+                    if (literal.getValue() instanceof Character character) {
+                        result.setValue(FoldUtils.convert(type, (int) character));
+                    }
+                }
+            }
+
+            if (SpoonUtil.isTypeEqualTo(targetType, char.class)) {
+                if (literal.getValue() instanceof Number number) {
+                    result.setValue((char) number.intValue());
+                } else {
+                    result.setValue((char) literal.getValue());
+                }
+            } else if (SpoonUtil.isTypeEqualTo(targetType, boolean.class)) {
+                result.setValue((boolean) literal.getValue());
+            }
+        } else {
+            result.setValue(type.getActualClass().cast(literal.getValue()));
+        }
+
+        return result;
     }
 
-    public static <T> CtExpression<T> castExpression(CtExpression<?> ctExpression, CtTypeReference<?> targetType) {
-        CtExpression result = ctExpression.clone();
+    // returns the type of the expression after applying the type casts
+    public static <T> CtTypeReference<?> getExpressionType(CtExpression<T> ctExpression) {
+        CtTypeReference<?> result = ctExpression.getType();
 
         List<CtTypeReference<?>> typeCasts = ctExpression.getTypeCasts();
-        if (!typeCasts.isEmpty() && typeCasts.get(typeCasts.size()-1).equals(targetType)) {
-            return result;
+        if (!typeCasts.isEmpty()) {
+            result = typeCasts.get(0);
         }
 
-        // only add a cast if it is necessary
-        if (ctExpression.getType().equals(targetType)) {
-            return result;
-        }
-
-        if (requiresCast(ctExpression, targetType)) {
-            result.addTypeCast(targetType.clone());
-        }
-
-        return ctExpression.setType(targetType.clone());
+        return result;
     }
 
-    public static boolean isEqualsMethod(CtMethod<?> method) {
-        return SpoonUtil.isSignatureEqualTo(
-            method.getReference(),
-            boolean.class,
-            "equals",
-            java.lang.Object.class
-        );
-    }
+    @SuppressWarnings("unchecked")
+    public static <T, E extends CtExpression<T>> E castExpression(CtTypeReference<T> type, CtExpression<?> ctExpression) {
+        // no need to cast if the type is the same
+        if (SpoonUtil.getExpressionType(ctExpression).equals(type)) {
+            return (E) ctExpression;
+        }
 
-    public static boolean isCompareToMethod(CtMethod<?> method) {
-        return method.isPublic()
-                && SpoonUtil.isSignatureEqualTo(
-                    method.getReference(),
-                    method.getFactory().Type().createReference(int.class),
-                    "compareTo",
-                    method.getDeclaringType().getReference()
-                );
+        List<CtTypeReference<?>> typeCasts = new ArrayList<>(ctExpression.getTypeCasts());
+        typeCasts.add(0, type.clone());
+        ctExpression.setTypeCasts(typeCasts);
+
+        return (E) RemoveRedundantCasts.removeRedundantCasts(ctExpression);
     }
 
     public static Optional<CtJavaDoc> getJavadoc(CtElement element) {
@@ -797,10 +803,6 @@ public final class SpoonUtil {
                && invocation.getTarget() instanceof CtTypeAccess<?> access
                && access.getAccessedType().getQualifiedName().equals(typeName)
                && invocation.getExecutable().getSimpleName().equals(methodName);
-    }
-
-    public static boolean isEffectivelyFinal(StaticAnalysis staticAnalysis, CtVariableReference<?> ctVariableReference) {
-        return isEffectivelyFinal(staticAnalysis.getModel(), ctVariableReference);
     }
 
     public static boolean isEffectivelyFinal(CtVariableReference<?> ctVariableReference) {
@@ -822,33 +824,13 @@ public final class SpoonUtil {
                 .first() == null;
     }
 
-    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
-        CtVariableReference<?> ctVariableReference
-    ) {
-        return getEffectivelyFinalExpression(ctVariableReference.getFactory().getModel(), ctVariableReference);
-    }
-
-    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
-            CtModel ctModel,
-            CtVariableReference<?> ctVariableReference
-    ) {
-        if (!isEffectivelyFinal(ctModel, ctVariableReference)) {
+    public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariableReference<T> ctVariableReference) {
+        if (!isEffectivelyFinal(ctVariableReference)) {
             return Optional.empty();
         }
 
         if (ctVariableReference.getDeclaration() == null) {
             // this pointer
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
-    }
-
-    public static Optional<CtExpression<?>> getEffectivelyFinalExpression(
-        StaticAnalysis staticAnalysis,
-        CtVariableReference<?> ctVariableReference
-    ) {
-        if (!isEffectivelyFinal(staticAnalysis, ctVariableReference)) {
             return Optional.empty();
         }
 

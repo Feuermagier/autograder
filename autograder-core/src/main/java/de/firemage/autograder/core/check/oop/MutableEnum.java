@@ -18,13 +18,12 @@ public class MutableEnum extends IntegratedCheck {
      * Tries to detect if the provided type is mutable. It is very difficult to detect every possible
      * case of mutability, therefore this method might return false negatives.
      *
-     * @param staticAnalysis the static analysis
      * @param ctType the type to check
      * @return true if it is mutable, false if mutability cannot be determined
      */
-    private static boolean isMutable(StaticAnalysis staticAnalysis, CtType<?> ctType) {
+    private static boolean isMutable(CtType<?> ctType) {
         for (CtField<?> ctField : ctType.getFields()) {
-            if (!SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())) {
+            if (!SpoonUtil.isEffectivelyFinal(ctField.getReference())) {
                 return true;
             }
         }
@@ -37,7 +36,7 @@ public class MutableEnum extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtEnum<?>>() {
             @Override
             public void process(CtEnum<?> ctEnum) {
-                if (isMutable(staticAnalysis, ctEnum)) {
+                if (isMutable(ctEnum)) {
                     addLocalProblem(
                         ctEnum,
                         new LocalizedMessage("mutable-enum"),

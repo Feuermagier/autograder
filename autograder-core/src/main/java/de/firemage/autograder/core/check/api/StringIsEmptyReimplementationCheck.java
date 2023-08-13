@@ -55,7 +55,7 @@ public class StringIsEmptyReimplementationCheck extends IntegratedCheck {
         CtExecutableReference<?> executable = invocation.getExecutable();
         return executable.getSignature().equals("equals(java.lang.Object)")
             && (SpoonUtil.isStringLiteral(invocation.getArguments().get(0), "")
-             // detect "".equals(s)
+            // detect "".equals(s)
             || SpoonUtil.isStringLiteral(invocation.getTarget(), ""));
     }
 

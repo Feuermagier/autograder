@@ -5,8 +5,8 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.PrintUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.evaluator.OperatorHelper;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAssignment;
@@ -83,12 +83,12 @@ public class UseOperatorAssignment extends IntegratedCheck {
                 String simplifiedExpr = null;
                 if (left.toString().equals(lhs.toString())) {
                     // left hand side is the same, so we can use an operator assignment
-                    simplifiedExpr = "%s %s= %s".formatted(lhs, PrintUtil.printOperator(operator), right);
+                    simplifiedExpr = "%s %s= %s".formatted(lhs, OperatorHelper.getOperatorText(operator), right);
                 } else if (isCommutative(operator) && isCommutativeType(ctBinaryOperator) && right.toString().equals(lhs.toString())) {
                     // operator is commutative so <lhs> = <left> <op> <right> is equivalent to
                     // <lhs> = <right> <op> <left>
 
-                    simplifiedExpr = "%s %s= %s".formatted(lhs, PrintUtil.printOperator(operator), left);
+                    simplifiedExpr = "%s %s= %s".formatted(lhs, OperatorHelper.getOperatorText(operator), left);
                 }
 
                 if (simplifiedExpr != null) {

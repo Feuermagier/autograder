@@ -221,7 +221,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
 
             @Override
             public <T> void visitCtField(CtField<T> ctField) {
-                if (!SpoonUtil.isEffectivelyFinal(staticAnalysis, ctField.getReference())) {
+                if (!SpoonUtil.isEffectivelyFinal(ctField.getReference())) {
                     return;
                 }
 
