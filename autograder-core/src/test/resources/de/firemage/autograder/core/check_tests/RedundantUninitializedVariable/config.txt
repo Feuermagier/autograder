@@ -1,6 +1,6 @@
 complexity.RedundantUninitializedVariable
 Declare variables where they are used and directly assign them a value.
 Test.java:9
-Test.java:25
-Test.java:37
-# Test.java:52
+Test.java:24
+Test.java:35
+# Test.java:48

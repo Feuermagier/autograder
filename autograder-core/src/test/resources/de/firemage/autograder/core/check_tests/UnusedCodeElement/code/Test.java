@@ -6,6 +6,7 @@ public class Test {
     }
 
     private static void foo() {} /*# not ok #*/
+
     public static void bar() {} /*# not ok #*/
 }
 
@@ -17,6 +18,7 @@ class SeeminglyUnusedMainMethod {
 class A {
     int a; /*# not ok #*/
     String[] b; /*# not ok #*/
+
     void doSomething() { /*# not ok #*/
         int a = 0; /*# not ok #*/
         String[] b = new String[10]; /*# not ok #*/
@@ -26,6 +28,7 @@ class A {
     public boolean equals(Object o) { /*# ok; overridden method #*/
         return super.equals(o);
     } /*# ok #*/
+
     void foo() { /*# not ok #*/
         foo();
     }

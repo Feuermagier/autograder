@@ -4,6 +4,7 @@ import java.util.Optional;
 
 public class Test {
     private Optional<String> opt1; /*# ok #*/
+
     public Test(Optional<String> opt1) { /*# not ok #*/
         this.opt1 = opt1;
     }

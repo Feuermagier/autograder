@@ -6,7 +6,7 @@ public class Test {
         while (args[0].isEmpty()) {} /*# not ok #*/
         try {
             throw new IllegalArgumentException();
-        } catch (Exception e) {  /*# not ok #*/
+        } catch (Exception e) /*# not ok #*/ {
         } finally {} /*# not ok #*/
     }
 
@@ -47,8 +47,8 @@ public class Test {
         {} /*# not ok #*/
         if (a == 5) {
             System.out.println("a is 5");
-        } else if (a == 3) { /*# not ok #*/
-        } else { /*# not ok #*/
+        } else if (a == 3) /*# not ok #*/ {
+        } else /*# not ok #*/ {
         }
 
         switch (a) { /*# not ok #*/

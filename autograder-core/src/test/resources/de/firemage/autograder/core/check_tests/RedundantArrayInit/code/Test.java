@@ -93,6 +93,7 @@ public class Test {
         arr[a] = 0; /*# not ok #*/
         arr[b] = 0; /*# not ok #*/
         arr[c] = 0; /*# not ok #*/
+
         arr[a] = a; /*# not ok #*/
         arr[b] = b; /*# not ok #*/
         arr[c] = c; /*# not ok #*/
@@ -108,6 +109,7 @@ public class Test {
         arr[a][b] = null; /*# not ok #*/
         arr[b][c] = null; /*# not ok #*/
         arr[c][c] = null; /*# not ok #*/
+
         String value = null;
         String value2 = value;
         String value3 = arr[a][b];
@@ -115,6 +117,7 @@ public class Test {
         arr[a][b] = value; /*# not ok #*/
         arr[b][c] = value2; /*# not ok #*/
         arr[c][c] = value3; /*# not ok #*/
+
         a = 1;
         b = 2;
         c = b;
@@ -122,6 +125,7 @@ public class Test {
         arr[a][b] = null; /*# not ok #*/
         arr[b][c] = null; /*# not ok #*/
         arr[c][c] = null; /*# not ok #*/
+
         arr[a][b] = value; /*# not ok #*/
         arr[b][c] = value2; /*# not ok #*/
         arr[c][c] = value3; /*# not ok #*/
@@ -144,6 +148,7 @@ public class Test {
         arr[1] = 1; /*# false negative #*/
         arr[2] = 2; /*# false negative #*/
         arr[3] = 3; /*# false negative #*/
+
         arr[0] = 1; /*# ok #*/
         arr[1] = 2; /*# ok #*/
         arr[2] = 3; /*# ok #*/
@@ -168,6 +173,7 @@ public class Test {
 
         arr[0] = 2; /*# ok #*/
         arr[9] = 2; /*# ok #*/
+
         // this might legitimately overwrite values other than 0
         for (int i = 0; i < c; i++) {
             arr[i] = 0; /*# ok #*/

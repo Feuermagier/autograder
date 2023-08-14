@@ -5,6 +5,7 @@ import java.util.Scanner;
 public class Test {
     public Test() {
         Scanner scanner = new Scanner(System.in); /*# ok #*/
+
         String input = scanner.nextLine(); /*# ok #*/
         System.out.println("Test!"); /*# ok #*/
     }
@@ -12,6 +13,7 @@ public class Test {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in); /*# ok #*/
         String input = scanner.nextLine(); /*# ok #*/
+
         System.out.println("Hello World!"); /*# ok #*/
         System.out.print("Hello World!"); /*# ok #*/
     }

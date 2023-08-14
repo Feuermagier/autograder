@@ -12,8 +12,10 @@ public class Test {
         Collection<Integer> list3 = new ArrayList<>(); /*# ok #*/
         List<HashSet<String>> list4 = new ArrayList<>(); /*# not ok #*/
         List<List<String>> list5 = new ArrayList<>(); /*# ok #*/
+
         HashSet<Integer> set = new HashSet<>(); /*# not ok #*/
         Set<Integer> set2 = new HashSet<>(); /*# ok #*/
+
         HashMap<String, ArrayList<String>> map = new HashMap<>(); /*# not ok #*/
         Map<String, ArrayList<String>> map2 = new HashMap<>(); /*# not ok #*/
         Map<String, List<String>> map3 = new HashMap<>(); /*# ok #*/
@@ -27,6 +29,7 @@ public class Test {
         }
 
         List[] array = new ArrayList[10]; /*# ok #*/
+
         ArrayList<String>[] array2; /*# not ok #*/
         array[0] = new ArrayList<>(); /*# ok #*/
         var someList = new ArrayList<>(); /*# ok #*/
@@ -35,6 +38,7 @@ public class Test {
 }
 
 class MyList extends ArrayList<String> {} /*# ok #*/
+
 abstract class A {
     abstract ArrayList<String> getList(); /*# not ok #*/
 }
@@ -55,8 +59,10 @@ record MyRecord(ArrayList<String> list) {} /*# not ok #*/
 @SuppressWarnings("rawtypes")
 class PmdTest {
     Set attr1 = new HashSet(); /*# ok #*/
+
     HashSet attr2 = new HashSet(); /*# not ok #*/
     HashMap attr3 = new HashMap(); /*# not ok #*/
+
     HashSet foo() { /*# not ok #*/
         return new HashSet();
     }
@@ -66,6 +72,7 @@ class PmdTest {
     }
 
     void foo2() {} /*# ok #*/
+
     Set foo4() { /*# ok #*/
         return new HashSet();
     }

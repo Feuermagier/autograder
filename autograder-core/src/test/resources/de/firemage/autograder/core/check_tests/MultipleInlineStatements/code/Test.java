@@ -11,6 +11,7 @@ public class Test {
         }
 
         for (int i = 0, j = 0; i < list.size(); i++, j++) {} /*# not ok #*/
+
         int a, b, c = 0; /*# not ok #*/
         a = b = c = 5; /*# not ok #*/
     }
