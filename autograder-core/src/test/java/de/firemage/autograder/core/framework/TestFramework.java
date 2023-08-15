@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 
 /**
- * For more documentation see the file Test_Framework.md in the root of the repository
+ * For more documentation, see the file Test_Framework.md in the root of the repository
  */
 public class TestFramework {
 
@@ -37,7 +37,7 @@ public class TestFramework {
     private static final boolean ENABLE_DYNAMIC = false;
 
     @TestFactory
-//    @Execution(ExecutionMode.CONCURRENT)
+    // @Execution(ExecutionMode.CONCURRENT)
     Stream<DynamicTest> createCheckTests() throws URISyntaxException, IOException {
         var testPath = Path.of(this.getClass().getResource("../check_tests/").toURI()).toAbsolutePath();
 
