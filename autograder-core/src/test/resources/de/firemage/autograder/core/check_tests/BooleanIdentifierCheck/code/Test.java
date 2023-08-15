@@ -3,15 +3,15 @@ package de.firemage.autograder.core.check_tests.BooleanIdentifierCheck.code;
 public class Test {
     public static void main(String[] args) {}
 
-    public boolean getValue() { // Not Ok
+    public boolean getValue() { /*# not ok #*/
         return true;
     }
 
-    public boolean value() { // Ok
+    public boolean value() { /*# ok #*/
         return true;
     }
 
-    public boolean isValue() { // Ok
+    public boolean isValue() { /*# ok #*/
         return true;
     }
 }

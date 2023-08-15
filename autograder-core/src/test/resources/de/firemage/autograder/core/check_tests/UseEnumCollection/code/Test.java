@@ -8,7 +8,7 @@ public class Test {
             RED, GREEN, BLUE;
         }
 
-        Map<Color, Integer> rgb = new HashMap<>(); // Not Ok
-        Set<Color> colors = new HashSet<>(); // Not Ok
+        Map<Color, Integer> rgb = new HashMap<>(); /*# not ok #*/
+        Set<Color> colors = new HashSet<>(); /*# not ok #*/
     }
 }

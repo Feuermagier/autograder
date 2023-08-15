@@ -63,6 +63,7 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
+
     private SpoonUtil() {
 
     }

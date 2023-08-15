@@ -6,10 +6,16 @@ import spoon.compiler.SpoonResource;
 import spoon.support.compiler.VirtualFile;
 import spoon.support.compiler.VirtualFolder;
 
+import javax.lang.model.element.Modifier;
+import javax.lang.model.element.NestingKind;
 import javax.tools.JavaFileObject;
-import javax.tools.SimpleJavaFileObject;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.Reader;
 import java.io.Serializable;
+import java.io.StringReader;
+import java.io.Writer;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
@@ -81,23 +87,26 @@ public final class StringSourceInfo implements SourceInfo {
         return this.version;
     }
 
-    // TODO: this class is not serializable...
-    private static final class VirtualFileObject extends SimpleJavaFileObject implements Serializable, CompilationUnit {
+    private static final class VirtualFileObject implements JavaFileObject, Serializable, CompilationUnit {
         private final ClassPath classPath;
         private final String code;
 
         private VirtualFileObject(ClassPath classPath, String code) {
-            super(virtualUri(classPath), Kind.SOURCE);
             this.classPath = classPath;
             this.code = code;
         }
 
         private static URI virtualUri(ClassPath classPath) {
             return URI.create("string:///%s/%s%s".formatted(
-                VIRTUAL_FOLDER,
-                classPath.toString().replace('.', '/'),
-                JavaFileObject.Kind.SOURCE.extension
+                    VIRTUAL_FOLDER,
+                    classPath.toString().replace('.', '/'),
+                    JavaFileObject.Kind.SOURCE.extension
             ));
+        }
+
+        @Override
+        public URI toUri() {
+            return virtualUri(this.classPath);
         }
 
         @Override
@@ -106,8 +115,38 @@ public final class StringSourceInfo implements SourceInfo {
         }
 
         @Override
+        public InputStream openInputStream() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public OutputStream openOutputStream() {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public Reader openReader(boolean ignoreEncodingErrors) {
+            return new StringReader(this.code);
+        }
+
+        @Override
         public CharSequence getCharContent(boolean ignoreEncodingErrors) {
             return this.code;
+        }
+
+        @Override
+        public Writer openWriter() throws IOException {
+            throw new UnsupportedOperationException();
+        }
+
+        @Override
+        public long getLastModified() {
+            return 0;
+        }
+
+        @Override
+        public boolean delete() {
+            return false;
         }
 
         public String getCode() {
@@ -129,6 +168,29 @@ public final class StringSourceInfo implements SourceInfo {
             // virtual files are always UTF-8
             return StandardCharsets.UTF_8;
         }
+
+        @Override
+        public Kind getKind() {
+            return Kind.SOURCE;
+        }
+
+        @Override
+        public boolean isNameCompatible(String simpleName, Kind kind) {
+            String baseName = simpleName + kind.extension;
+            return kind.equals(getKind())
+                    && (baseName.equals(toUri().getPath())
+                    || toUri().getPath().endsWith("/" + baseName));
+        }
+
+        @Override
+        public NestingKind getNestingKind() {
+            return null;
+        }
+
+        @Override
+        public Modifier getAccessLevel() {
+            return null;
+        }
     }
 
     private record ClassPath(List<String> path, String name) implements Serializable {
@@ -138,8 +200,8 @@ public final class StringSourceInfo implements SourceInfo {
             }
             List<String> parts = Arrays.asList(string.split("\\.", -1));
             return new ClassPath(
-                new ArrayList<>(parts.subList(0, parts.size() - 1)),
-                parts.get(parts.size() - 1)
+                    new ArrayList<>(parts.subList(0, parts.size() - 1)),
+                    parts.get(parts.size() - 1)
             );
         }
 

@@ -6,7 +6,7 @@ public class Test {
     private static final Scanner SCANNER = new Scanner(System.in);
 
     public static void main(String[] args) {
-        switch (SCANNER.nextLine()) { // Not Ok
+        switch (SCANNER.nextLine()) { /*# not ok #*/
             case "print":
                 System.out.println("a");
                 break;
@@ -20,7 +20,7 @@ public class Test {
                 System.out.println("default");
         }
 
-        switch (SCANNER.nextLine().toCharArray()[0]) { // Not Ok
+        switch (SCANNER.nextLine().toCharArray()[0]) { /*# not ok #*/
             case '0':
                 System.out.println("case 0");
                 break;
@@ -37,12 +37,12 @@ public class Test {
 }
 
 class TestFiniteListing {
-    private static final char[] VALID_ARRAY = {'R', 'x', 'X', '|', '\\', '/', '_', '*', ' '}; // Not Ok
-    private static final List<Character> VALID_LIST = List.of('R', 'x', 'X', '|', '\\', '/', '_', '*', ' '); // Not Ok
-    private static final Set<String> FINITE_SET = Set.of("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"); // Not Ok
-    private static final char[] NOT_ENOUGH_DISTINCT_VALUES_ARRAY = { 'a', 'b', 'b', 'a' }; // Ok (2 distinct values)
-    private static final List<Character> NOT_ENOUGH_DISTINCT_VALUES_LIST = List.of('a', 'b', 'b', 'a'); // Ok (2 distinct values)
-    private static final Set<String> NOT_ENOUGH_DISTINCT_VALUES_SET = Set.of("monday", "monday", "monday", "monday"); // Ok (1 distinct value)
+    private static final char[] VALID_ARRAY = {'R', 'x', 'X', '|', '\\', '/', '_', '*', ' '}; /*# not ok #*/
+    private static final List<Character> VALID_LIST = List.of('R', 'x', 'X', '|', '\\', '/', '_', '*', ' '); /*# not ok #*/
+    private static final Set<String> FINITE_SET = Set.of("monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"); /*# not ok #*/
+    private static final char[] NOT_ENOUGH_DISTINCT_VALUES_ARRAY = { 'a', 'b', 'b', 'a' }; /*# ok; 2 distinct values #*/
+    private static final List<Character> NOT_ENOUGH_DISTINCT_VALUES_LIST = List.of('a', 'b', 'b', 'a'); /*# ok; 2 distinct values #*/
+    private static final Set<String> NOT_ENOUGH_DISTINCT_VALUES_SET = Set.of("monday", "monday", "monday", "monday"); /*# ok; 1 distinct value #*/
 }
 
 enum Color {
@@ -52,7 +52,7 @@ enum Color {
     YELLOW;
 
     public static Color fromString(String value) {
-        switch (value) { // Ok
+        switch (value) { /*# ok #*/
             case "red":
                 return RED;
             case "green":
@@ -68,7 +68,7 @@ enum Color {
 }
 
 class ClosedSetMethods {
-    public String getDayOfWeek(int day) { // Not Ok
+    public String getDayOfWeek(int day) { /*# not ok #*/
         if (day == 1) {
             return "monday";
         }

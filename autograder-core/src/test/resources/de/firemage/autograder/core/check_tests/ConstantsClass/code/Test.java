@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.check_tests.InterfaceBadPractices.code;
 
-public class Test { // Not Ok
+public class Test { /*# not ok #*/
     public static final String A = "";
     public static final String B = "";
     public static final String C = "";
@@ -20,7 +20,7 @@ public class Test { // Not Ok
     public static void main(String[] args) {}
 }
 
-enum ConstantsEnum { // Not Ok
+enum ConstantsEnum { /*# not ok #*/
     A(""),
     B(""),
     C(""),
@@ -44,7 +44,7 @@ enum ConstantsEnum { // Not Ok
     }
 }
 
-class EverythingPrivate { // Ok
+class EverythingPrivate { /*# ok #*/
     private static final String ARGUMENT_NO_AI = "pvp";
     private static final String ARGUMENT_AI = "ki";
     private static final int MAX_ARGS_SIZE = 4;

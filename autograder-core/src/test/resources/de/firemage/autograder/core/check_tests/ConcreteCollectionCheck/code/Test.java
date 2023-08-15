@@ -7,51 +7,50 @@ import java.util.*;
 public class Test {
     @SuppressWarnings("rawtypes")
     public static void main(String[] args) {
-        ArrayList<String> list = new ArrayList<>(); // Not Ok
-        List<Integer> list2 = new ArrayList<>(); // Ok
-        Collection<Integer> list3 = new ArrayList<>(); // Ok
-        List<HashSet<String>> list4 = new ArrayList<>(); // Not Ok
-        List<List<String>> list5 = new ArrayList<>(); // Ok
+        ArrayList<String> list = new ArrayList<>(); /*# not ok #*/
+        List<Integer> list2 = new ArrayList<>(); /*# ok #*/
+        Collection<Integer> list3 = new ArrayList<>(); /*# ok #*/
+        List<HashSet<String>> list4 = new ArrayList<>(); /*# not ok #*/
+        List<List<String>> list5 = new ArrayList<>(); /*# ok #*/
 
-        HashSet<Integer> set = new HashSet<>(); // Not Ok
-        Set<Integer> set2 = new HashSet<>(); // Ok
+        HashSet<Integer> set = new HashSet<>(); /*# not ok #*/
+        Set<Integer> set2 = new HashSet<>(); /*# ok #*/
 
-        HashMap<String, ArrayList<String>> map = new HashMap<>(); // Not Ok
-        Map<String, ArrayList<String>> map2 = new HashMap<>(); // Not Ok
-        Map<String, List<String>> map3 = new HashMap<>(); // Ok
-
-        if (list2 instanceof ArrayList<Integer>) { // Ok
-            var list2c = (ArrayList<Integer>) list2; // Ok
+        HashMap<String, ArrayList<String>> map = new HashMap<>(); /*# not ok #*/
+        Map<String, ArrayList<String>> map2 = new HashMap<>(); /*# not ok #*/
+        Map<String, List<String>> map3 = new HashMap<>(); /*# ok #*/
+        if (list2 instanceof ArrayList<Integer>) { /*# ok #*/
+            var list2c = (ArrayList<Integer>) list2; /*# ok #*/
             System.out.println("Ok");
         }
 
-        if (list2.getClass().equals(ArrayList.class)) { // Ok
+        if (list2.getClass().equals(ArrayList.class)) { /*# ok #*/
             System.out.println("Ok");
         }
 
-        List[] array = new ArrayList[10]; // Ok
-        ArrayList<String>[] array2; // Not Ok
-        array[0] = new ArrayList<>(); // Ok
-        var someList = new ArrayList<>(); // Ok
-        AbstractMap.SimpleEntry<String, String> entry = null; // Ok
+        List[] array = new ArrayList[10]; /*# ok #*/
+
+        ArrayList<String>[] array2; /*# not ok #*/
+        array[0] = new ArrayList<>(); /*# ok #*/
+        var someList = new ArrayList<>(); /*# ok #*/
+        AbstractMap.SimpleEntry<String, String> entry = null; /*# ok #*/
     }
 }
 
-class MyList extends ArrayList<String> {} // Ok
+class MyList extends ArrayList<String> {} /*# ok #*/
 
 abstract class A {
-    abstract ArrayList<String> getList(); // Not Ok
+    abstract ArrayList<String> getList(); /*# not ok #*/
 }
 
 class B extends A {
     @Override
-    ArrayList<String> getList() { // Ok
+    ArrayList<String> getList() { /*# ok #*/
         return new ArrayList<>();
     }
 }
 
-record MyRecord(ArrayList<String> list) {} // Not Ok
-
+record MyRecord(ArrayList<String> list) {} /*# not ok #*/
 // The following tests are from pmd
 // https://github.com/pmd/pmd/blob/eb653967abaa4db387ecae0a4b29cd131fa7e4d5/pmd-java/src/test/resources/net/sourceforge
 // /pmd/lang/java/rule/bestpractices/xml/LooseCoupling.xml
@@ -59,69 +58,66 @@ record MyRecord(ArrayList<String> list) {} // Not Ok
 
 @SuppressWarnings("rawtypes")
 class PmdTest {
-    Set attr1 = new HashSet(); // Ok
-    HashSet attr2 = new HashSet(); // Not Ok
-    HashMap attr3 = new HashMap(); // Not Ok
+    Set attr1 = new HashSet(); /*# ok #*/
 
-    HashSet foo() { // Not Ok
+    HashSet attr2 = new HashSet(); /*# not ok #*/
+    HashMap attr3 = new HashMap(); /*# not ok #*/
+
+    HashSet foo() { /*# not ok #*/
         return new HashSet();
     }
 
-    Map getFoo() { // Ok
+    Map getFoo() { /*# ok #*/
         return new HashMap();
     }
 
-    void foo2() {} // Ok
+    void foo2() {} /*# ok #*/
 
-    Set foo4() { // Ok
+    Set foo4() { /*# ok #*/
         return new HashSet();
     }
 
-    void foo5(HashMap bar) {} // Not Ok
-    void foo6(Vector bar) {} // Not Ok
-    void foo7(ArrayList bar) {} // Not Ok
-
+    void foo5(HashMap bar) {} /*# not ok #*/
+    void foo6(Vector bar) {} /*# not ok #*/
+    void foo7(ArrayList bar) {} /*# not ok #*/
     // false positive with method reference:
     private static final ThreadLocal TREE_CACHE =
-        ThreadLocal.withInitial(HashMap::new); // Ok
-
+        ThreadLocal.withInitial(HashMap::new); /*# ok #*/
     // with instanceof and cast
     boolean m(Map m) {
-        if (m instanceof HashMap) { // Ok
-            return ((HashMap) m).isEmpty(); // Ok
+        if (m instanceof HashMap) { /*# ok #*/
+            return ((HashMap) m).isEmpty(); /*# ok #*/
         }
         return false;
     }
 
-    static class MyMap extends HashMap implements Map { // Ok
+    static class MyMap extends HashMap implements Map { /*# ok #*/
         static Map create() { return null; }
     }
 
     static class FooInner {
         final Map map1 =
-            MyMap.create(); // Ok
-
-        final Map[] map2 = new MyMap[5]; // Ok
-        final Properties map3 = new Properties(); // Ok
+            MyMap.create(); /*# ok #*/
+        final Map[] map2 = new MyMap[5]; /*# ok #*/
+        final Properties map3 = new Properties(); /*# ok #*/
     }
 
     static class O extends ArrayList implements List {
-        final O map = new O(); // Not Ok
+        final O map = new O(); /*# not ok #*/
     }
 
-    final Object o = ArrayList.class; // Ok
+    final Object o = ArrayList.class; /*# ok #*/
     final Object o2 =
-        new AbstractMap.SimpleEntry<>("", ""); // Ok
-
+        new AbstractMap.SimpleEntry<>("", ""); /*# ok #*/
     static class O3 extends ArrayList {
         {
-            O3.super.clear(); // Ok
+            O3.super.clear(); /*# ok #*/
         }
 
         class Inner {
             {
-                O3.this.clear(); // Ok
-                O3.super.clear(); // Ok
+                O3.this.clear(); /*# ok #*/
+                O3.super.clear(); /*# ok #*/
             }
         }
     }
@@ -132,41 +128,38 @@ class Foo2 {
     void firstMethod() {}
     void myMethod() {
         class Inner {
-            HashSet foo() { // Not Ok
+            HashSet foo() { /*# not ok #*/
                 return new HashSet();
             }
         }
         Object o = new Object() {
-            HashSet foo() { return new HashSet(); } // Not Ok
+            HashSet foo() { return new HashSet(); } /*# not ok #*/
         };
     }
     class Nested {
-        HashSet foo() { // Not Ok
+        HashSet foo() { /*# not ok #*/
             return new HashSet();
         }
     }
 }
 
-final class Foo3<A, B extends Collection<A>> { // Ok
-    private Set<? super B> things; // Ok
-
+final class Foo3<A, B extends Collection<A>> { /*# ok #*/
+    private Set<? super B> things; /*# ok #*/
     class Vector { Vector(String a, String b, int c) {} }
 
-    private Vector vec = new Vector("a", "b", 1); // Ok
+    private Vector vec = new Vector("a", "b", 1); /*# ok #*/
 }
 
 class Street {
-    private final TreeMap<Integer, String> carsOnStreet; // Not Ok
-
+    private final TreeMap<Integer, String> carsOnStreet; /*# not ok #*/
     public Street() {
-        this.carsOnStreet = null; // Ok
+        this.carsOnStreet = null; /*# ok #*/
     }
 }
 
 ////////////////// The check previously crashed on the following tests
 class ABC {
-    private Stack<Object>[][] foo;
-
+    private Stack<Object>[][] foo; /*# not ok #*/
     void bar() {
         int x = foo[0][0].size();
     }

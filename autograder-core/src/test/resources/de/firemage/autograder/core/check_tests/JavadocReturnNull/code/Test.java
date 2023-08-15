@@ -1,11 +1,6 @@
 package de.firemage.autograder.core.check_tests.JavadocReturnNull.code;
 
 public class Test {
-    public int a; // Ok, because public
-    private int b; // Not ok, because always overwritten
-    private Object c; // Not ok, because always overwritten
-    private Object d = new Object(); // Ok, because not always overwritten before being read
-    
     public static void main(String[] args) {
         Test test = new Test();
         test.returnAlwaysNullMentioned();

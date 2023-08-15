@@ -2,27 +2,27 @@ package de.firemage.autograder.core.check_tests.ExceptionMessage.code;
 
 public class Test {
     void a() {
-        throw new IllegalArgumentException("foo"); // ok
+        throw new IllegalArgumentException("foo"); /*# ok #*/
     }
 
     void b() {
-        throw new IllegalArgumentException(); // Not ok
+        throw new IllegalArgumentException(); /*# not ok #*/
     }
 
     void c() {
-        throw new IllegalArgumentException(""); // Not ok
+        throw new IllegalArgumentException(""); /*# not ok #*/
     }
 
     void d() {
-        throw new IllegalArgumentException(" "); // Not ok
+        throw new IllegalArgumentException(" "); /*# not ok #*/
     }
 
     void e() throws Bar {
-        throw new Bar(); // Ok
+        throw new Bar(); /*# ok #*/
     }
 
     void f() {
-        throw new IllegalArgumentException("", new Exception()); // Not ok
+        throw new IllegalArgumentException("", new Exception()); /*# not ok #*/
     }
 }
 
@@ -37,7 +37,7 @@ class TestInSwitchDefault {
         switch (string) {
             case "a" -> {}
             case "b" -> {}
-            default -> throw new IllegalStateException(); // Ok
+            default -> throw new IllegalStateException(); /*# ok #*/
         }
     }
 }
@@ -49,7 +49,7 @@ class TestExceptionCatchAndThrow {
         try (java.io.BufferedReader reader = new java.io.BufferedReader(new java.io.FileReader(this.file))) {
             return reader.lines().toArray(String[]::new);
         } catch (final java.io.IOException e) {
-            throw new RuntimeException(e); // Ok
+            throw new RuntimeException(e); /*# ok #*/
         }
     }
 }

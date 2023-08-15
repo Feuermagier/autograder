@@ -6,9 +6,9 @@ public class Test {
         String b = "b";
         String c = "c";
 
-        a = a; // Not ok
-        b = a; // Ok
-        c = b; // Ok
+        a = a; /*# not ok #*/
+        b = a; /*# ok #*/
+        c = b; /*# ok #*/
     }
 }
 
@@ -17,13 +17,13 @@ class TestCopyConstructor {
     private final String b;
 
     public TestCopyConstructor(String a, String b) {
-        this.a = a; // Ok
-        this.b = b; // Ok
+        this.a = a; /*# ok #*/
+        this.b = b; /*# ok #*/
     }
 
     public TestCopyConstructor(TestCopyConstructor other) {
-        this.a = other.a; // Ok
-        this.b = other.b; // Ok
+        this.a = other.a; /*# ok #*/
+        this.b = other.b; /*# ok #*/
     }
 }
 
@@ -31,14 +31,14 @@ class TestAttributeReassignment {
     private boolean isOk;
 
     public void foo() {
-        this.isOk = isOk; // Not Ok
-        this.isOk = this.isOk; // Not Ok
-        isOk = this.isOk; // Not Ok
-        isOk = isOk; // Not Ok
+        this.isOk = isOk; /*# not ok #*/
+        this.isOk = this.isOk; /*# not ok #*/
+        isOk = this.isOk; /*# not ok #*/
+        isOk = isOk; /*# not ok #*/
     }
 
     public void foo2(boolean isOk) {
-        this.isOk = isOk; // Ok
+        this.isOk = isOk; /*# ok #*/
     }
 }
 
@@ -51,22 +51,22 @@ class TestParentReassignment extends Parent {
     private int b = 2;
 
     public void foo() {
-        super.a = a; // Not Ok
-        super.a = super.a; // Not Ok
-        a = super.a; // Not Ok
-        a = a; // Not Ok
+        super.a = a; /*# not ok #*/
+        super.a = super.a; /*# not ok #*/
+        a = super.a; /*# not ok #*/
+        a = a; /*# not ok #*/
     }
 
     public void foo2() {
-        super.b = b; // Ok
-        super.b = super.b; // Not Ok
-        b = super.b; // Ok
-        b = b; // Not Ok
+        super.b = b; /*# ok #*/
+        super.b = super.b; /*# not ok #*/
+        b = super.b; /*# ok #*/
+        b = b; /*# not ok #*/
     }
 
     public void foo3(int b) {
-        super.b = b; // Ok
-        b = super.b; // Ok
-        b = b; // Not Ok
+        super.b = b; /*# ok #*/
+        b = super.b; /*# ok #*/
+        b = b; /*# not ok #*/
     }
 }

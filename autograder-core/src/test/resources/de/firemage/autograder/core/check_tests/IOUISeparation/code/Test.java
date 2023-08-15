@@ -4,60 +4,60 @@ import java.util.Scanner;
 
 public class Test {
     public Test() {
-        Scanner scanner = new Scanner(System.in); // Ok
-        String input = scanner.nextLine(); // Ok
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
 
-        System.out.println("Test!"); // Ok
+        String input = scanner.nextLine(); /*# ok #*/
+        System.out.println("Test!"); /*# ok #*/
     }
 
     public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in); // Ok
-        String input = scanner.nextLine(); // Ok
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
+        String input = scanner.nextLine(); /*# ok #*/
 
-        System.out.println("Hello World!"); // Ok
-        System.out.print("Hello World!"); // Ok
+        System.out.println("Hello World!"); /*# ok #*/
+        System.out.print("Hello World!"); /*# ok #*/
     }
 
     public static void eprint() {
-        System.err.println(); // Ok
-        Scanner scanner = new Scanner(System.in); // Ok
-        int input = scanner.nextInt(); // Ok
+        System.err.println(); /*# ok #*/
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
+        int input = scanner.nextInt(); /*# ok #*/
     }
 }
 
 class SecondClass {
     public SecondClass() {
-        System.out.println("Second Class!"); // Not Ok
-        Scanner scanner = new Scanner(System.in); // Ok
-        String string = scanner.nextLine(); // Not Ok
+        System.out.println("Second Class!"); /*# not ok #*/
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
+        String string = scanner.nextLine(); /*# not ok #*/
     }
 
     public void print(String string) {
         System.err.print(string); // error only reported once per class
-        Scanner scanner = new Scanner(System.in); // Ok
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
         String s2 = scanner.nextLine(); // error only reported once per class
     }
 
 
     static class ThirdClass {
         public static void printf(String string) {
-            System.out.printf(string); // Not Ok
-            Scanner scanner = new Scanner(System.in); // Ok
-            String s2 = scanner.nextLine(); // Not Ok
+            System.out.printf(string); /*# not ok #*/
+            Scanner scanner = new Scanner(System.in); /*# ok #*/
+            String s2 = scanner.nextLine(); /*# not ok #*/
         }
     }
 }
 
 record MyRecord(String string) {
     public MyRecord {
-        System.out.println("Record!"); // Not Ok
-        Scanner scanner = new Scanner(System.in); // Ok
-        String s = scanner.nextLine(); // Not Ok
+        System.out.println("Record!"); /*# not ok #*/
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
+        String s = scanner.nextLine(); /*# not ok #*/
     }
 
     public void print(String string) {
         System.err.print(string); // error only reported once per class
-        Scanner scanner = new Scanner(System.in); // Ok
+        Scanner scanner = new Scanner(System.in); /*# ok #*/
         String s2 = scanner.nextLine(); // error only reported once per class
     }
 }
@@ -66,7 +66,7 @@ enum MyEnum {
     A, B, C;
 
     public void print(String string) {
-        System.err.print(string); // Not Ok
+        System.err.print(string); /*# not ok #*/
     }
 
     public static void printf(String string) {

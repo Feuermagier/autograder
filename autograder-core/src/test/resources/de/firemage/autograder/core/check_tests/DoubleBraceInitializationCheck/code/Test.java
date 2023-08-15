@@ -4,7 +4,7 @@ import java.util.*;
 
 public class Test {
     public static void main(String[] args) {
-        Set<String> countries = new HashSet<String>() { // Not Ok
+        Set<String> countries = new HashSet<String>() { /*# not ok #*/
             {
                 add("Germany");
             }

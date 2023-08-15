@@ -8,23 +8,23 @@ public class Test {
         Object b = new Object();
         Foo c = new Foo();
         
-        if (a.equals(b)) { // Ok
+        if (a.equals(b)) { /*# ok #*/
             System.out.println("Hi");
         }
 
-        if (a.equals(b.toString())) { // Ok...
+        if (a.equals(b.toString())) { /*# ok #*/
             System.out.println("Hi");
         }
 
-        if (a.toString().equals(b)) { // Ok...
+        if (a.toString().equals(b)) { /*# ok #*/
             System.out.println("Hi");
         }
 
-        if (a.toString().equals(b.toString())) { // Not ok
+        if (a.toString().equals(b.toString())) { /*# not ok #*/
             System.out.println("Hi");
         }
 
-        if (a.toString().equals(c.toString())) { // Ok, because the types are different
+        if (a.toString().equals(c.toString())) { /*# ok; because the types are different #*/
             System.out.println("Hi");
         }
     }

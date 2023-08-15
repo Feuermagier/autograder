@@ -6,13 +6,12 @@ public class Test {
     public static void main(String[] args) {}
 
     private static void motivation() {
-        int i; // Not Ok
-
+        int i; /*# not ok #*/
         i = 1;
     }
 
     private static void conditional01(boolean isTrue) {
-        int i; // Ok (for now)
+        int i; /*# ok; for now #*/
 
         if (isTrue) {
             i = 3;
@@ -22,8 +21,7 @@ public class Test {
     }
 
     private static void assignmentInSubBlock(boolean isTrue) {
-        int i; // Not Ok
-
+        int i; /*# not ok #*/
         {
             i = 3;
         }
@@ -34,8 +32,7 @@ record MyRecord(String string) {
     public MyRecord(String string, String value2) {
         this(value2);
 
-        String string2; // Not Ok
-
+        String string2; /*# not ok #*/
         string2 = "string2";
     }
 
@@ -47,9 +44,8 @@ record MyRecord(String string) {
 
 class MoreTests {
     void e() {
-        int i; // Ok
-
-        int j; // Not Ok (but dont want to bother detecting this)
+        int i; /*# ok #*/
+        int j; /*# false negative; dont want to bother detecting this #*/
         for (j = 0; j < 5; j++) {
             System.out.println(j);
         }

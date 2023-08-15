@@ -4,12 +4,8 @@ public class Test {
     public static void main(String[] args) {}
 }
 
-class MyClass {} // Not Ok
-
-enum MyEnum {} // Not Ok
-
-class SomethingWentWrongException extends Exception {} // Ok
-
-class SomethingWentWrong extends Exception {} // Not Ok
-
-class WorldObject {} // Not Ok
+class MyClass {} /*# not ok #*/
+enum MyEnum {} /*# not ok #*/
+class SomethingWentWrongException extends Exception {} /*# ok #*/
+class SomethingWentWrong extends Exception {} /*# not ok #*/
+class WorldObject {} /*# not ok #*/

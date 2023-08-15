@@ -5,28 +5,28 @@ public class Test {
     }
 }
 
-class OnlyEquals { // Not Ok
+class OnlyEquals { /*# not ok #*/
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);
     }
 }
 
-class OnlyHashCode { // Not Ok
+class OnlyHashCode { /*# not ok #*/
     @Override
     public int hashCode() {
         return super.hashCode();
     }
 }
 
-class OnlyComparable implements Comparable<OnlyComparable> { // Not Ok
+class OnlyComparable implements Comparable<OnlyComparable> { /*# not ok #*/
     @Override
     public int compareTo(OnlyComparable o) {
         return 0;
     }
 }
 
-class ShouldBeOkay implements Comparable<ShouldBeOkay> { // Ok
+class ShouldBeOkay implements Comparable<ShouldBeOkay> { /*# ok #*/
     @Override
     public int compareTo(ShouldBeOkay o) {
         return 0;
@@ -43,7 +43,7 @@ class ShouldBeOkay implements Comparable<ShouldBeOkay> { // Ok
     }
 }
 
-class ShouldBeOkayAsWell { // Ok
+class ShouldBeOkayAsWell { /*# ok #*/
     @Override
     public boolean equals(Object obj) {
         return super.equals(obj);

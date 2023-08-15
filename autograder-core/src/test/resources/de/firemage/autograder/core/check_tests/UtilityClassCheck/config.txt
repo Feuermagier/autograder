@@ -1,9 +1,9 @@
 oop.UtilityClassCheck
 Check that utility classes have a private constructor.
-Test.java:16
-Test.java:20
+Test.java:15
+Test.java:19
+Test.java:25
 Test.java:26
-Test.java:27
-Test.java:58-60
-Test.java:67-69
-Test.java:76-78
+Test.java:56-58
+Test.java:65-67
+Test.java:74-76

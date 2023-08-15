@@ -5,6 +5,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
+import de.firemage.autograder.core.file.CompilationUnit;
+import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -14,13 +16,15 @@ import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.SourcePositionHolder;
 import spoon.reflect.cu.position.DeclarationSourcePosition;
+import spoon.reflect.declaration.CtCompilationUnit;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.ParentNotInitializedException;
 import spoon.reflect.reference.CtArrayTypeReference;
-import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 
+import java.io.IOException;
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Function;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +53,23 @@ public class ImportTypes extends IntegratedCheck {
             return ctElement.getOriginalSourceFragment().getSourceCode();
         } catch (SpoonException e) {
             // Invalid start/end interval. It overlaps multiple fragments.
-            SourcePosition position = ctElement.getPosition();
+            SourcePosition sourcePosition = ctElement.getPosition();
+            Position position = Position.of(sourcePosition);
+
+            return position.substring(sourcePosition.getCompilationUnit().getOriginalSourceCode());
+        }
+    }
+
+    private record Position(int start, int end) {
+        private Position {
+            if (start > end) {
+                throw new IllegalArgumentException(
+                    "start %d of code position must be smaller than the end %d".formatted(start, end)
+                );
+            }
+        }
+
+        public static Position of(SourcePosition position) {
             int start = position.getSourceStart();
             int end = position.getSourceEnd();
             if (position instanceof DeclarationSourcePosition declarationSourcePosition) {
@@ -57,11 +77,33 @@ public class ImportTypes extends IntegratedCheck {
                 end = declarationSourcePosition.getDeclarationEnd();
             }
 
-            return position.getCompilationUnit().getOriginalSourceCode().substring(start, end + 1);
+            return new Position(start, end + 1);
+        }
+
+        public String substring(String string) {
+            return string.substring(this.start, this.end);
         }
     }
 
-    private static SourcePosition resolveArraySourcePosition(CtArrayTypeReference<?> ctArrayTypeReference) {
+    private static Optional<String> getCodeSnippetFromSourceInfo(SourcePosition sourcePosition, SourceInfo sourceInfo) {
+        CtCompilationUnit ctCompilationUnit = sourcePosition.getCompilationUnit();
+
+        if (ctCompilationUnit.getFile() == null) {
+            return Optional.empty();
+        }
+
+        CompilationUnit compilationUnit = sourceInfo.getCompilationUnit(ctCompilationUnit.getFile().toPath());
+
+        Position position = Position.of(sourcePosition);
+
+        try {
+            return Optional.of(position.substring(compilationUnit.readString()));
+        } catch (IOException e) {
+            throw new IllegalArgumentException("Could not read compilation unit", e);
+        }
+    }
+
+    private SourcePosition resolveArraySourcePosition(CtArrayTypeReference<?> ctArrayTypeReference) {
         CtElement ctElement = ctArrayTypeReference;
 
         while (ctElement.isParentInitialized() && !ctElement.getPosition().isValidPosition()) {
@@ -86,6 +128,11 @@ public class ImportTypes extends IntegratedCheck {
         }
 
         String code = getCodeSnippet(ctElement);
+
+        // only happens when the ctElement is from a virtual file
+        if (code == null) {
+            code = getCodeSnippetFromSourceInfo(position, this.getRoot()).orElseThrow();
+        }
 
         // NOTE: this only matches the "normal" array syntax: String[] value and not String value[]
         // the latter example is especially bad when it comes to things like methods, where you can do:
