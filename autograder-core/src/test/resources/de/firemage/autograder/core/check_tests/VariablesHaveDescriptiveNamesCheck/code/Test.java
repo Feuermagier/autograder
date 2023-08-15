@@ -8,6 +8,7 @@ public class Test {
     private static int[] intArray; /*# not ok #*/
     private static String s; /*# not ok #*/
     private static String string; /*# ok #*/
+
     int trafficLight1;
     int trafficLight2; /*# not ok; similar to trafficLight1 #*/
     int trafficLight3; /*# not ok; similar to trafficLight1 #*/
@@ -18,6 +19,7 @@ public class Test {
     int min; /*# not ok #*/
     int interpret; /*# ok #*/
     String interpreters; /*# ok #*/
+
     List<String> validStrings; /*# not ok #*/
     Set<Integer> integerSet; /*# not ok #*/
     int pointer; /*# ok #*/

@@ -39,7 +39,9 @@ public class RegexCheck extends IntegratedCheck {
     private static final int MIN_REGEX_HINTS = 2;
 
     private static boolean hasComment(CtElement ctElement) {
-        return !ctElement.getComments().isEmpty()
+        return (!ctElement.getComments().isEmpty()
+            // test-framework comments start with //#, which should be ignored
+            && ctElement.getComments().stream().anyMatch(ctComment -> !ctComment.getContent().startsWith("#")))
             || ctElement.getParent() instanceof CtVariable<?> ctVariable && hasComment(ctVariable);
     }
 

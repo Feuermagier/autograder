@@ -12,20 +12,24 @@ public class Test {
         a = a * b; /*# not ok #*/
         a = a / b; /*# not ok #*/
         a = a % b; /*# not ok #*/
+
         a = b + a; /*# not ok #*/
         a = b - a; /*# ok #*/
         a = b * a; /*# not ok #*/
         a = b / a; /*# ok #*/
         a = b % a; /*# ok #*/
+
         int[] arr = new int[10];
         arr[0] = arr[0] + 1; /*# not ok #*/
         arr[0] = arr[1] + 1; /*# ok #*/
+
         a = a - b + c; /*# ok #*/
         a = b - c + a; /*# not ok #*/
         a = (b + c) * a; /*# not ok #*/
         a = b + c * a; /*# ok #*/
         a = b - a + c; /*# ok #*/
         a = a - b + c - d; /*# ok #*/
+
         String s = "a";
         s = s + " "; /*# not ok #*/
         s = " " + s; /*# ok #*/

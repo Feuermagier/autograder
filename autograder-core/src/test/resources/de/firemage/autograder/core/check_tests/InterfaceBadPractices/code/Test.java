@@ -14,6 +14,7 @@ interface MyConstantsInterface { /*# not ok #*/
 interface MyConstantsInterfaceWithMethods {
     int MY_CONSTANT = 42; /*# not ok #*/
     String ANOTHER_CONSTANT = "Hello World"; /*# not ok #*/
+
     void doSomething();
 
     default void doSomethingElse() {}
