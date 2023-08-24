@@ -141,6 +141,9 @@ multiple-inline-statements = There should not be multiple statements in a single
 
 unnecessary-boxing = Instead of the boxed-type one should use '{$suggestion}'.
 
+multi-threading = Multithreading is out of scope for this lecture. The code is only executed on a single thread. Writing it thread-safe makes the code unnecessarily complex.
+
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.

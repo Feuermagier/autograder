@@ -138,6 +138,8 @@ multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile st
 
 unnecessary-boxing = Statt dem boxed-type sollte man '{$suggestion}' verwenden.
 
+multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,
