@@ -65,6 +65,11 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         if (value.isEmpty()) {
             options = List.of("empty", "blank");
         } else {
+            // ignore small values like PLAYER_SUFFIX = "P"
+            if (value.length() < 2) {
+                return false;
+            }
+
             for (char c : value.toCharArray()) {
                 var charOptions = listCharOptions(c);
                 if (charOptions == null) {
