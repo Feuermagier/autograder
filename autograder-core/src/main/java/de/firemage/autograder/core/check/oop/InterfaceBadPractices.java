@@ -17,7 +17,7 @@ import java.util.List;
 import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONSTANT_IN_INTERFACE, ProblemType.DO_NOT_HAVE_CONSTANTS_CLASS,
-                                      ProblemType.STATIC_INTERFACE, ProblemType.STATIC_METHOD_IN_INTERFACE,
+                                      ProblemType.REDUNDANT_MODIFIER, ProblemType.STATIC_METHOD_IN_INTERFACE,
                                       ProblemType.EMPTY_INTERFACE })
 public class InterfaceBadPractices extends IntegratedCheck {
     @Override
@@ -76,7 +76,7 @@ public class InterfaceBadPractices extends IntegratedCheck {
                         addLocalProblem(
                             ctInterface,
                             new LocalizedMessage("interface-static-exp"),
-                            ProblemType.STATIC_INTERFACE
+                            ProblemType.REDUNDANT_MODIFIER
                         );
                     }
                 }
