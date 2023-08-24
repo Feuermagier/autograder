@@ -153,7 +153,8 @@ custom-exception-inheritance-exp-error = Selbstdefinierte Exceptions sollten nic
 
 empty-catch-block = Leerer catch-Block
 
-exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block sofort wieder gefangen
+exception-controlflow-caught = {$exception} wird geworfen und im umgebenden Block sofort wieder gefangen
+exception-controlflow-should-not-be-caught = {$exception} sollte man niemals fangen
 
 runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
 

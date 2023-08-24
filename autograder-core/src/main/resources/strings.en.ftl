@@ -155,7 +155,8 @@ custom-exception-inheritance-exp-error = Custom exceptions should not extend Err
 
 empty-catch-block = Empty catch block
 
-exception-controlflow-exp-caught = {$exp} thrown and immediately caught in a surrounding block
+exception-controlflow-caught = {$exception} thrown and immediately caught in a surrounding block
+exception-controlflow-should-not-be-caught = {$exception} should never be caught
 
 runtime-ex-caught-exp = Runtime exception of type {$exp} caught
 

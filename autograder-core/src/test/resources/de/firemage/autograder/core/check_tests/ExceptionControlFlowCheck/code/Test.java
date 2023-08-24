@@ -42,4 +42,17 @@ public class Test {
                 throw new IllegalArgumentException();
         }
     }
+
+    void forbiddenToCatch(boolean a) {
+        try {
+            String value = null;
+            if (a) {
+                System.out.println(value.length());
+            } else {
+                assert value != null;
+            }
+        } catch (NullPointerException /*# not ok #*/ | AssertionError /*# not ok #*/ e) {
+            // ...
+        }
+    }
 }
