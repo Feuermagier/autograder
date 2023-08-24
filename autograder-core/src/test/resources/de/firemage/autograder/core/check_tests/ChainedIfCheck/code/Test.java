@@ -96,3 +96,9 @@ class PmdTests {
         }
     }
 }
+
+class CrashChainedIf {
+    void isTrue(boolean a) {
+        if (a); /*# ok #*/
+    }
+}
