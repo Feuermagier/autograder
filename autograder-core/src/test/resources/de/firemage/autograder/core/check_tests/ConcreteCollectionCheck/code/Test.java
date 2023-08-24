@@ -164,3 +164,15 @@ class ABC {
         int x = foo[0][0].size();
     }
 }
+
+
+class CursedCode {
+    private static void doB(Map<Integer, String>[] map) {
+    }
+
+    private static void doA() {
+        HashMap<Integer, String>[] /*# not ok #*/ map = new HashMap[] {};
+
+        doB(map);
+    }
+}
