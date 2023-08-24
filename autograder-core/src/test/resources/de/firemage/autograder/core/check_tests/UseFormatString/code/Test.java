@@ -36,3 +36,8 @@ class TestStringBuilder {
         stringBuilder.append(a).append(" ").append(1).append(" ").append(b); /*# not ok #*/
     }
 }
+
+// see https://github.com/Feuermagier/autograder/issues/216
+class TestStringFormatWithOnlyNewLine {
+    String pattern = "^(?!.*[;" + System.lineSeparator() + "]).*$"; /*# ok #*/
+}

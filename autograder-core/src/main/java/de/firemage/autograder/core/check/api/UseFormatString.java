@@ -67,12 +67,15 @@ public class UseFormatString extends IntegratedCheck {
         StringBuilder formatString = new StringBuilder();
         Collection<String> args = new ArrayList<>();
 
+        // true if the formatString has a %n placeholder
+        boolean hasInlineNewline = false;
         for (CtExpression<?> ctExpression : ctExpressions) {
             if (ctExpression instanceof CtLiteral<?> ctLiteral) {
                 CtTypeInformation ctTypeInformation = ctLiteral.getType();
                 if (ctLiteral.getValue() instanceof String value) {
                     // replace a system-dependant newline with %n
                     if (value.equals("\n")) {
+                        hasInlineNewline = true;
                         formatString.append("%n");
                     } else {
                         formatString.append(value);
@@ -89,8 +92,12 @@ public class UseFormatString extends IntegratedCheck {
             args.add(ctExpression.prettyprint());
         }
 
-        if (args.isEmpty()) {
+        if (args.isEmpty() && !hasInlineNewline) {
             return "\"%s\"".formatted(formatString.toString());
+        }
+
+        if (hasInlineNewline && args.isEmpty()) {
+            return null;
         }
 
         return "\"%s\".formatted(%s)".formatted(formatString.toString(), String.join(", ", args));
@@ -127,6 +134,7 @@ public class UseFormatString extends IntegratedCheck {
         }
 
         String formattedString = this.buildFormattedString(args);
+        if (formattedString == null) return;
 
         this.addLocalProblem(
                 ctElement,
