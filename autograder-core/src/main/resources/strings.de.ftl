@@ -40,8 +40,6 @@ equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusam
 
 use-format-string = `{$formatted}` ist schöner zu lesen.
 
-math-floor-division = Bei integer division wird immer abgerundet, daher ist das `Math.floor` unnötig.
-
 use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
 
 compare-to-zero = Das Ergebnis von compareTo oder compare sollte nur mit 0 verglichen werden.
