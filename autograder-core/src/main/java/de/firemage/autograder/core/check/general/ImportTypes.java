@@ -41,6 +41,7 @@ public class ImportTypes extends IntegratedCheck {
         return !ctTypeReference.isSimplyQualified()
             && !ctTypeReference.isPrimitive()
             && !ctTypeReference.isGenerics()
+            && (!(ctTypeReference.getParent() instanceof CtTypeReference<?> parent) || !SpoonUtil.isInnerClass(parent))
             // to ignore String[]::new
             && ctTypeReference.getParent(CtExecutableReferenceExpression.class) == null
             && !SpoonUtil.isInnerClass(ctTypeReference);

@@ -5,9 +5,12 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtVariable;
 
@@ -21,7 +24,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group", "constant", "value_of");
 
-    private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol", "constant", "const", "compare");
+    private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol", "constant", "const", "compare", "linebreak");
     private static final Map<String, List<String>> SPECIAL_VALUE_MAPPING = Map.ofEntries(
             Map.entry("->", List.of("arrow")),
             Map.entry("-->", List.of("arrow"))
@@ -53,11 +56,10 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private static boolean isNonDescriptiveStringName(String name, String value) {
-        if (NON_DESCRIPTIVE_NAMES.contains(name.toLowerCase())) {
+        String cleanedName = name.toLowerCase().replace("_", "");
+        if (NON_DESCRIPTIVE_NAMES.contains(cleanedName)) {
             return true;
         }
-
-        String cleanedName = name.toLowerCase().replace("_", "");
 
         List<String> options = new ArrayList<>();
         options.add(""); // Empty string is prefix of everything
@@ -65,6 +67,11 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         if (value.isEmpty()) {
             options = List.of("empty", "blank");
         } else {
+            // ignore small values like PLAYER_SUFFIX = "P"
+            if (value.length() < 2) {
+                return false;
+            }
+
             for (char c : value.toCharArray()) {
                 var charOptions = listCharOptions(c);
                 if (charOptions == null) {
@@ -156,9 +163,20 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (!field.isFinal()
-                    || field.getDefaultExpression() == null
-                    || !(field.getDefaultExpression() instanceof CtLiteral<?> literal)) {
+                if (!field.isFinal() || field.getDefaultExpression() == null) {
+                    return;
+                }
+
+                CtLiteral<?> literal;
+                if (field.getDefaultExpression() instanceof CtLiteral<?> ctLiteral) {
+                    literal = ctLiteral;
+                } else if (field.getDefaultExpression() instanceof CtInvocation<?> ctInvocation
+                    // check if the value is System.lineSeparator()
+                    && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
+                    && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
+                    && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "lineSeparator")) {
+                    literal = SpoonUtil.makeLiteral(field.getFactory().Type().STRING, "\n");
+                } else {
                     return;
                 }
 

@@ -8,28 +8,28 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
-import spoon.reflect.reference.CtReference;
 import spoon.reflect.visitor.CtScanner;
-import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
 import java.util.Map;
+import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
 public class UnusedCodeElementCheck extends IntegratedCheck {
-    private void checkUnused(CtNamedElement ctElement, CtReference ctReference) {
+    private void checkUnused(StaticAnalysis staticAnalysis, CtNamedElement ctElement) {
         if (ctElement.isImplicit() || !ctElement.getPosition().isValidPosition()) {
             return;
         }
 
-        var references = ctElement.getFactory()
-            .getModel()
-            .getElements(new DirectReferenceFilter<>(ctReference));
+        Set<CtElement> references = SpoonUtil.findUses(ctElement);
 
         boolean isUnused;
         if (ctElement instanceof CtMethod<?> method) {
@@ -46,9 +46,28 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         }
 
         if (isUnused) {
+            // do not report unused elements if there is no main method in the model and the element is accessible
+            // (i.e. not private)
+            if (ctElement instanceof CtModifiable ctModifiable
+                && !ctModifiable.isPrivate()
+                && ctModifiable instanceof CtTypeMember ctTypeMember
+                && !ctTypeMember.getDeclaringType().isPrivate()
+                // check if there is no main method in the model
+                && !staticAnalysis.getCodeModel().hasMainMethod()
+            ) {
+                return;
+            }
+
+            String name = ctElement.getSimpleName();
+
+            // in spoon constructors are called <init>, which is not helpful
+            if (ctElement instanceof CtConstructor<?> ctConstructor) {
+                name = "%s()".formatted(ctConstructor.getDeclaringType().getSimpleName());
+            }
+
             addLocalProblem(
                 ctElement,
-                new LocalizedMessage("unused-element", Map.of("name", ctElement.getSimpleName())),
+                new LocalizedMessage("unused-element", Map.of("name", name)),
                 problemType
             );
         }
@@ -59,7 +78,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtLocalVariable(CtLocalVariable<T> ctLocalVariable) {
-                checkUnused(ctLocalVariable, ctLocalVariable.getReference());
+                checkUnused(staticAnalysis, ctLocalVariable);
                 super.visitCtLocalVariable(ctLocalVariable);
             }
 
@@ -70,8 +89,19 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                     return;
                 }
 
-                checkUnused(ctMethod, ctMethod.getReference());
+                checkUnused(staticAnalysis, ctMethod);
                 super.visitCtMethod(ctMethod);
+            }
+
+            @Override
+            public <T> void visitCtConstructor(CtConstructor<T> ctConstructor) {
+                if (ctConstructor.isPrivate()) {
+                    super.visitCtConstructor(ctConstructor);
+                    return;
+                }
+
+                checkUnused(staticAnalysis, ctConstructor);
+                super.visitCtConstructor(ctConstructor);
             }
 
             @Override
@@ -81,22 +111,41 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                     return;
                 }
 
-                checkUnused(ctParameter, ctParameter.getReference());
+                checkUnused(staticAnalysis, ctParameter);
 
                 super.visitCtParameter(ctParameter);
             }
 
             @Override
             public void visitCtTypeParameter(CtTypeParameter ctTypeParameter) {
-                checkUnused(ctTypeParameter, ctTypeParameter.getReference());
+                checkUnused(staticAnalysis, ctTypeParameter);
                 super.visitCtTypeParameter(ctTypeParameter);
             }
 
             @Override
             public <T> void visitCtField(CtField<T> ctField) {
-                checkUnused(ctField, ctField.getReference());
+                checkUnused(staticAnalysis, ctField);
                 super.visitCtField(ctField);
             }
+
+            // do not want to deal with false-positives for now
+            /*
+            @Override
+            public <T> void visitCtClass(CtClass<T> ctType) {
+                if (ctType.isAnonymous() || ctType.getMethods().stream().anyMatch(SpoonUtil::isMainMethod)) {
+                    super.visitCtClass(ctType);
+                    return;
+                }
+
+                checkUnused(staticAnalysis, ctType);
+                super.visitCtClass(ctType);
+            }
+
+            @Override
+            public <T extends Enum<?>> void visitCtEnum(CtEnum<T> ctEnum) {
+                checkUnused(staticAnalysis, ctEnum);
+                super.visitCtEnum(ctEnum);
+            }*/
         });
     }
 }

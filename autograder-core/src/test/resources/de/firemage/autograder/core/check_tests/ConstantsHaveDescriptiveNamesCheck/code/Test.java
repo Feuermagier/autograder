@@ -31,4 +31,6 @@ public class Test {
     private static final int FIRST_PARAMETER = 0; /*# not ok #*/
     private static final String DATE_TIME_SEPARATOR = "T"; /*# ok #*/
     private static final String T_VALUE = "T"; /*# not ok #*/
+    private static final String PLAYER_SUFFIX = "P"; /*# ok #*/
+    private static final String LINE_BREAK = System.lineSeparator(); /*# not ok #*/
 }

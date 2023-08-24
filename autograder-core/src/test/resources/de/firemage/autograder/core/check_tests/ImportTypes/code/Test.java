@@ -18,7 +18,7 @@ class TestInnerClass {
 
     void testForeign() {
         Map.Entry<String, String> entry = null; /*# ok #*/
-        java.util.Map.Entry<String, String> entry2 = null; /*# not ok; import java.util.Map #*/
+        java.util.Map.Entry<String, String> entry2 = null; /*# ok; dont know how to detect this #*/
     }
 }
 
@@ -52,5 +52,12 @@ class VisualRepresentation {
 class FalsePositiveToArray {
     public static  <T> String[] takesList(List<T> list) {
         return list.stream().map(Object::toString).toArray(String[]::new); /*# ok #*/
+    }
+}
+
+class FalsePositiveHashMapEntry {
+    public static void execute(HashMap<String, String> map) {
+        for (HashMap.Entry<String, String> entry /*# ok #*/ : map.entrySet()) {
+        }
     }
 }

@@ -4,6 +4,7 @@ import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import spoon.Launcher;
+import spoon.compiler.Environment;
 import spoon.compiler.ModelBuildingException;
 import spoon.processing.AbstractProcessor;
 import spoon.processing.Processor;
@@ -13,6 +14,11 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
+import spoon.reflect.visitor.DefaultImportComparator;
+import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
+import spoon.reflect.visitor.ForceImportProcessor;
+import spoon.reflect.visitor.ImportCleaner;
+import spoon.reflect.visitor.ImportConflictDetector;
 import spoon.reflect.visitor.filter.NamedElementFilter;
 
 import java.io.IOException;
@@ -20,6 +26,8 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.List;
+import java.util.Optional;
 
 /**
  * The model is build lazily to work better with the multithreaded core architecture.
@@ -32,6 +40,7 @@ public final class CodeModel implements AutoCloseable {
     private Factory factory;
     private CtModel model;
     private CtPackage basePackage;
+    private Optional<CtMethod<Void>> mainMethod;
 
     private CodeModel(SourceInfo file, Path jar, ClassLoader classLoader) {
         this.file = file;
@@ -78,11 +87,27 @@ public final class CodeModel implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public CtMethod<Void> findMain() {
         this.buildModelMaybe();
-        return this.getModel()
-            .getElements(new NamedElementFilter<>(CtMethod.class, "main"))
-            .stream()
-            .filter(SpoonUtil::isMainMethod)
-            .findFirst().orElse(null);
+
+        // NOTE: this is intentional, so that the main method is only searched once
+        if (this.mainMethod == null) {
+            this.mainMethod = this.getModel()
+                .getElements(new NamedElementFilter<>(CtMethod.class, "main"))
+                .stream()
+                .filter(SpoonUtil::isMainMethod)
+                .findFirst()
+                .map(ctMethod -> (CtMethod<Void>) ctMethod);
+        }
+
+        return this.mainMethod.orElse(null);
+    }
+
+    /**
+     * Checks if the code has a main method.
+     *
+     * @return true if it has, false otherwise
+     */
+    public boolean hasMainMethod() {
+        return this.findMain() != null;
     }
 
     public CtPackage getBasePackage() {
@@ -97,6 +122,7 @@ public final class CodeModel implements AutoCloseable {
         }
     }
 
+    @SuppressWarnings({"java:S3599", "java:S1171"}) // ignore some sonarlint warnings
     private void buildModelMaybe() {
         // First check without synchronization
         if (this.model != null) {
@@ -120,6 +146,27 @@ public final class CodeModel implements AutoCloseable {
             launcher.getEnvironment().setEncodingProvider(
                 (spoonFile, fileBytes) -> this.file.getCompilationUnit(Path.of(spoonFile.getPath())).charset()
             );
+            Environment environment = launcher.getEnvironment();
+
+            // types should not be qualified and parentheses should be removed if possible
+            environment.setPrettyPrinterCreator(() -> new DefaultJavaPrettyPrinter(environment) {
+                {
+                    // copy-pasted from StandardEnvironment#createPrettyPrinterAutoImport
+                    List<Processor<CtElement>> preprocessors = List.of(
+                        // try to import as many types as possible
+                        new ForceImportProcessor(),
+                        // remove unused imports first. Do not add new imports at a time when conflicts are not resolved
+                        new ImportCleaner().setCanAddImports(false),
+                        // solve conflicts, the current imports are relevant too
+                        new ImportConflictDetector(),
+                        // compute final imports
+                        new ImportCleaner().setImportComparator(new DefaultImportComparator())
+                    );
+                    this.setIgnoreImplicit(false);
+                    this.setPreprocessors(preprocessors);
+                    this.setMinimizeRoundBrackets(true);
+                }
+            });
 
             if (this.userClassLoader != null) {
                 launcher.getEnvironment().setInputClassLoader(this.userClassLoader);

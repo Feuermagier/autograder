@@ -1,12 +1,12 @@
 package de.firemage.autograder.core.check;
 
 import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.MultiInCodeProblem;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 public interface Check {
 
@@ -24,5 +24,9 @@ public interface Check {
         result.add(new MultiInCodeProblem(toMerge.get(0), toMerge.subList(1, toMerge.size())));
 
         return result;
+    }
+
+    default Optional<Integer> maximumProblems() {
+        return Optional.empty();
     }
 }

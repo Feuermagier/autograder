@@ -40,8 +40,6 @@ equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusam
 
 use-format-string = `{$formatted}` ist schöner zu lesen.
 
-math-floor-division = Bei integer division wird immer abgerundet, daher ist das `Math.floor` unnötig.
-
 use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
 
 compare-to-zero = Das Ergebnis von compareTo oder compare sollte nur mit 0 verglichen werden.
@@ -92,6 +90,8 @@ javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
 
 javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im Javadoc-Kommentar erwähnt.
 
+todo-comment = TODOs sollten nicht in der finalen Abgabe vorhanden sein.
+
 # Complexity
 use-diamond-operator = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
@@ -140,6 +140,8 @@ multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile st
 
 unnecessary-boxing = Statt dem boxed-type sollte man '{$suggestion}' verwenden.
 
+multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,
@@ -155,9 +157,10 @@ custom-exception-inheritance-exp-error = Selbstdefinierte Exceptions sollten nic
 
 empty-catch-block = Leerer catch-Block
 
-exception-controlflow-exp-caught = {$exp} wird geworfen und im umgebenden Block sofort wieder gefangen
+exception-controlflow-caught = {$exception} wird geworfen und im umgebenden Block sofort wieder gefangen
+exception-controlflow-should-not-be-caught = {$exception} sollte man niemals fangen
 
-runtime-ex-caught-exp = RuntimeException vom Typ {$exp} gefangen
+runtime-exception-caught = RuntimeExceptions '{$exception}' sollten nicht gefangen werden
 
 exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
 
@@ -210,6 +213,8 @@ use-different-visibility = Die Sichtbarkeit von '{$name}' sollte '{$suggestion}'
 avoid-recompiling-regex = Die Konstante wird nur mit 'Pattern.compile' oder 'Pattern.matches' verwendet. Konvertiere die Konstante zu einem Pattern mit dem Wert '{$suggestion}'.
 
 merge-nested-if = Die Verschachtelte if kann mit der äußeren if kombiniert werden. Die Bedingung der äußeren if sollte '{$suggestion}' sein.
+
+binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwenden.
 
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.

@@ -16,18 +16,15 @@ import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
-import spoon.reflect.reference.CtReference;
-import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
-import java.util.List;
-import java.util.ArrayList;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
-    ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC
+    ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC,
+    ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD
 })
 public class UseDifferentVisibility extends IntegratedCheck {
     private enum Visibility implements Comparable<Visibility> {
@@ -59,23 +56,10 @@ public class UseDifferentVisibility extends IntegratedCheck {
         }
     }
 
-    private static Visibility getVisibility(CtTypeMember ctTypeMember, CtReference ctReference) {
-        CtModel ctModel = ctReference.getFactory().getModel();
+    private static Visibility getVisibility(CtTypeMember ctTypeMember) {
+        CtModel ctModel = ctTypeMember.getFactory().getModel();
 
-        List<CtReference> references = ctModel.getElements(new DirectReferenceFilter<>(ctReference))
-            .stream()
-            .filter(ctElement -> !ctElement.isImplicit())
-            .collect(Collectors.toCollection(ArrayList::new));
-
-        // implementing an abstract method is not considered a reference to the method
-        // therefore those are added manually here:
-        if (ctTypeMember instanceof CtMethod<?> ctMethod) {
-            for (CtMethod<?> overridingMethod : SpoonUtil.getOverridingMethods(ctMethod)) {
-                if (!overridingMethod.isImplicit()) {
-                    references.add(overridingMethod.getReference());
-                }
-            }
-        }
+        Set<CtElement> references = SpoonUtil.findUses(ctTypeMember);
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
@@ -124,9 +108,9 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 // only check methods and fields
                 Visibility visibility;
                 if (ctTypeMember instanceof CtMethod<?> ctMethod) {
-                    visibility = getVisibility(ctMethod, ctMethod.getReference());
+                    visibility = getVisibility(ctMethod);
                 } else if (ctTypeMember instanceof CtField<?> ctField) {
-                    visibility = getVisibility(ctField, ctField.getReference());
+                    visibility = getVisibility(ctField);
 
                     // special case for fields that are referenced by other fields in the same class
                     // For more details see the test case TestUseDifferentVisibility#testBackwardReference
@@ -134,9 +118,8 @@ public class UseDifferentVisibility extends IntegratedCheck {
                         .getFields()
                         .stream()
                         // filter out the field itself and those that do not reference the field
-                        .filter(field -> field != ctField
-                            && !field.getElements(new DirectReferenceFilter<>(ctField.getReference())).isEmpty())
-                        .map(field -> getVisibility(field, field.getReference()))
+                        .filter(field -> field != ctField && !SpoonUtil.findUsesIn(ctField, field).isEmpty())
+                        .map(UseDifferentVisibility::getVisibility)
                         .max(Visibility::compareTo);
 
                     if (referencingVisibility.isPresent() && visibility.isMoreRestrictiveThan(referencingVisibility.get())) {
@@ -154,6 +137,11 @@ public class UseDifferentVisibility extends IntegratedCheck {
                         problemType = ProblemType.USE_DIFFERENT_VISIBILITY;
                     }
 
+                    // do not suggest to change the visibility of public methods if there is no main method in the model
+                    if (!staticAnalysis.getCodeModel().hasMainMethod() && !ctTypeMember.getDeclaringType().isPrivate()) {
+                        return;
+                    }
+
                     addLocalProblem(
                         ctTypeMember,
                         new LocalizedMessage(
@@ -164,6 +152,20 @@ public class UseDifferentVisibility extends IntegratedCheck {
                             )
                         ),
                         problemType
+                    );
+                } else if (ctTypeMember instanceof CtField<?> ctField
+                    && (currentVisibility == Visibility.PUBLIC || currentVisibility == Visibility.DEFAULT)
+                    && (!ctField.isStatic() || !ctField.isFinal())) {
+                    addLocalProblem(
+                        ctField,
+                        new LocalizedMessage(
+                            "use-different-visibility",
+                            Map.of(
+                                "name", ctField.getSimpleName(),
+                                "suggestion", Visibility.PRIVATE.toString()
+                            )
+                        ),
+                        ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD
                     );
                 }
             }

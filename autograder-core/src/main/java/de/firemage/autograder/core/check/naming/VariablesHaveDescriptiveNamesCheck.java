@@ -39,10 +39,20 @@ import java.util.stream.Stream;
     ProblemType.IDENTIFIER_REDUNDANT_NUMBER_SUFFIX
 })
 public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
-    private static final Set<String> ALLOWED_ABBREVIATIONS = Set.of("ui");
+    private static final Set<String> ALLOWED_IDENTIFIER = Set.of(
+        "x1", "x2", "x3",
+        "y1", "y2", "y3",
+        "z1", "z2", "z3",
+        "ui" // allowed abbreviation
+    );
 
     private static final List<String> TYPE_NAMES = List.of(
         "string", "list", "array", "map", "set", "int", "long", "float"
+    );
+
+    private static final Set<String> ALLOWED_NAMES_WITH_TYPES = Set.of(
+        "subList",
+        "subString"
     );
 
     private static final Set<String> KNOWN_ABBREVIATIONS = Set.of(
@@ -75,6 +85,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private static boolean hasTypeInName(CtNamedElement ctVariable) {
+        if (ALLOWED_NAMES_WITH_TYPES.contains(ctVariable.getSimpleName())) {
+            return false;
+        }
+
         List<String> referencedTypeNames = ctVariable.getReferencedTypes()
             .stream()
             .map(CtTypeReference::getSimpleName)
@@ -122,10 +136,6 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         }
 
         if (variable.getType().isPrimitive()) {
-            return false;
-        }
-
-        if (ALLOWED_ABBREVIATIONS.contains(variable.getSimpleName().toLowerCase())) {
             return false;
         }
 
@@ -274,6 +284,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     // The parameter of the equals and compareTo methods may be named "o", "obj", ...
                     //
                     // skip all overridden methods for consistency
+                    return;
+                }
+
+                if (ALLOWED_IDENTIFIER.contains(ctVariable.getSimpleName())) {
                     return;
                 }
 

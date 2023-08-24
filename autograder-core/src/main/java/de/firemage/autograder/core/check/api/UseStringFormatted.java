@@ -14,6 +14,7 @@ import spoon.reflect.code.CtTypeAccess;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_STRING_FORMATTED })
 public class UseStringFormatted extends IntegratedCheck {
@@ -54,5 +55,10 @@ public class UseStringFormatted extends IntegratedCheck {
                 checkCtInvocation(ctInvocation);
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(4);
     }
 }

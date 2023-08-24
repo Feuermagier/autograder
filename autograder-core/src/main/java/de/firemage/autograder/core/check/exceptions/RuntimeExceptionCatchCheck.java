@@ -4,16 +4,19 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
-import de.firemage.autograder.core.integrated.ExceptionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatch;
+import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtThrow;
+import spoon.reflect.reference.CtTypeReference;
 
 import java.util.List;
 import java.util.Map;
 
-@ExecutableCheck(reportedProblems = {ProblemType.RUNTIME_EXCEPTION_OR_ERROR_CAUGHT})
+@ExecutableCheck(reportedProblems = {ProblemType.RUNTIME_EXCEPTION_CAUGHT})
 public class RuntimeExceptionCatchCheck extends IntegratedCheck {
     private static final List<String> ALLOWED_EXCEPTIONS = List.of("java.lang.NumberFormatException");
 
@@ -21,13 +24,26 @@ public class RuntimeExceptionCatchCheck extends IntegratedCheck {
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtCatch>() {
             @Override
-            public void process(CtCatch catchBlock) {
-                var varType = catchBlock.getParameter().getType();
-                if ((ExceptionUtil.isRuntimeException(varType) || ExceptionUtil.isError(varType)) &&
-                    !ALLOWED_EXCEPTIONS.contains(varType.getQualifiedName())) {
-                    addLocalProblem(catchBlock, new LocalizedMessage("runtime-ex-caught-exp",
-                            Map.of("exp", catchBlock.getParameter().getType().getSimpleName())),
-                        ProblemType.RUNTIME_EXCEPTION_OR_ERROR_CAUGHT);
+            public void process(CtCatch ctCatch) {
+                CtTypeReference<?> runtimeException = ctCatch.getFactory().createCtTypeReference(java.lang.RuntimeException.class);
+                CtTypeReference<?> varType = ctCatch.getParameter().getType();
+
+
+                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctCatch.getBody());
+                // catching an exception to throw another is okay
+                if (statements.size() == 1 && statements.get(0) instanceof CtThrow) {
+                    return;
+                }
+
+                if (varType.isSubtypeOf(runtimeException) && !ALLOWED_EXCEPTIONS.contains(varType.getQualifiedName())) {
+                    addLocalProblem(
+                        ctCatch,
+                        new LocalizedMessage(
+                            "runtime-exception-caught",
+                            Map.of("exception", ctCatch.getParameter().getType().getSimpleName())
+                        ),
+                        ProblemType.RUNTIME_EXCEPTION_CAUGHT
+                    );
                 }
             }
         });

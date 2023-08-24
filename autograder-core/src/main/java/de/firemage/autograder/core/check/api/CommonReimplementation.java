@@ -28,7 +28,7 @@ import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
-import spoon.reflect.visitor.filter.DirectReferenceFilter;
+import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -61,12 +61,12 @@ public class CommonReimplementation extends IntegratedCheck {
 
             CtExpression<?> rhs = SpoonUtil.resolveCtExpression(ctAssignment.getAssignment());
             // return if the for loop uses the loop variable (would not be a simple repetition)
-            if (!ctAssignment.getElements(new DirectReferenceFilter<>(forLoopRange.loopVariable())).isEmpty()) {
+            if (!ctAssignment.getElements(new VariableAccessFilter<>(forLoopRange.loopVariable())).isEmpty()) {
                 return;
             }
 
             // return if the rhs uses the lhs: lhs += rhs + lhs
-            if (lhs instanceof CtVariableAccess<?> ctVariableAccess && !rhs.getElements(new DirectReferenceFilter<>(ctVariableAccess.getVariable())).isEmpty()) {
+            if (lhs instanceof CtVariableAccess<?> ctVariableAccess && !rhs.getElements(new VariableAccessFilter<>(ctVariableAccess.getVariable())).isEmpty()) {
                 return;
             }
 
@@ -288,7 +288,12 @@ public class CommonReimplementation extends IntegratedCheck {
         }
 
         // return if the for loop uses the loop variable (would not be a simple repetition)
-        if (!ctAssignment.getAssignment().getElements(new DirectReferenceFilter<>(forLoopRange.loopVariable())).isEmpty()) {
+        if (!ctAssignment.getAssignment().getElements(new VariableAccessFilter<>(forLoopRange.loopVariable())).isEmpty()) {
+            return;
+        }
+
+        CtExpression<?> rhs = ctAssignment.getAssignment();
+        if (!SpoonUtil.isImmutable(rhs.getType())) {
             return;
         }
 

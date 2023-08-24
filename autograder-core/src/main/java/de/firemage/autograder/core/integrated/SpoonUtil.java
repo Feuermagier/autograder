@@ -34,18 +34,30 @@ import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
+import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.Filter;
+import spoon.reflect.visitor.filter.CompositeFilter;
+import spoon.reflect.visitor.filter.DirectReferenceFilter;
+import spoon.reflect.visitor.filter.FilteringOperator;
+import spoon.reflect.visitor.filter.InvocationFilter;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
+import spoon.reflect.visitor.filter.SameFilter;
+import spoon.reflect.visitor.filter.VariableAccessFilter;
 import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
@@ -60,6 +72,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
@@ -811,14 +824,6 @@ public final class SpoonUtil {
     }
 
     public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
-        if (ctVariableReference instanceof CtFieldReference<?> field) {
-            if (field.getDeclaringType().isArray() || field.getDeclaringType().isPrimitive()) {
-                // calling getModifiers() on (new int[1]).length throws a Spoon exception: "The field int#length not found"
-                // Probably a bug in Spoon
-                return false;
-            }
-        }
-
         return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || ctModel
                 .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
                         write.getVariable().equals(ctVariableReference))
@@ -836,6 +841,25 @@ public final class SpoonUtil {
         }
 
         return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
+    }
+
+    public static <T> boolean isImmutable(CtTypeReference<T> ctTypeReference) {
+        CtType<T> ctType = ctTypeReference.getTypeDeclaration();
+        if (ctType == null) {
+            return false;
+        }
+
+        if (ctTypeReference.unbox().isPrimitive() || SpoonUtil.isTypeEqualTo(ctTypeReference, java.lang.String.class)) {
+            return true;
+        }
+
+        if (ctType.isShadow()) {
+            return false;
+        }
+
+        return ctType.getAllFields().stream()
+            .allMatch(ctFieldReference -> SpoonUtil.isEffectivelyFinal(ctFieldReference)
+                && SpoonUtil.isImmutable(ctFieldReference.getType()));
     }
 
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
@@ -948,10 +972,6 @@ public final class SpoonUtil {
         return isOverriddenMethod(ctMethod);
     }
 
-    public static List<CtMethod<?>> getOverridingMethods(CtMethod<?> ctMethod) {
-        return ctMethod.getFactory().getModel().getElements(new OverridingMethodFilter(ctMethod).includingSelf(false));
-    }
-
     public static boolean isInMainMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
@@ -959,6 +979,108 @@ public final class SpoonUtil {
         }
 
         return isMainMethod(ctMethod);
+    }
+
+    /**
+     * Finds all uses of {@code ctElement} in {@code in}.
+     *
+     * @param ctElement the element to search for
+     * @param in the element to search in
+     * @return all uses of {@code ctElement} in {@code in}
+     */
+    public static Set<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
+        return findUses(ctElement).stream()
+            .filter(element -> !in.getElements(new SameFilter(element)).isEmpty())
+            .collect(Collectors.toCollection(LinkedHashSet::new));
+    }
+
+    public record FilterAdapter<T extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<CtElement> {
+        @Override
+        public boolean matches(CtElement element) {
+            if (this.type.isInstance(element)) {
+                return this.filter.matches(this.type.cast(element));
+            }
+
+            return false;
+        }
+    }
+
+    private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
+
+    /**
+     * This class is like {@link VariableAccessFilter}, but does work with generics.
+     *
+     * @param ctVariable the variable to find accesses to
+     * @param <T> the type of accesses to find
+     * @see <a href="https://github.com/INRIA/spoon/issues/5391">INRIA/spoon/issues/5391</a>
+     */
+    private record BetterVariableAccessFilter<T extends CtVariableAccess<?>>(CtVariable<?> ctVariable) implements Filter<T> {
+        @Override
+        public boolean matches(T element) {
+            return element.getVariable().equals(this.ctVariable.getReference())
+                || (element.getVariable().getDeclaration() != null && element.getVariable().getDeclaration().equals(this.ctVariable));
+        }
+    }
+
+    public static class UsesFilter implements Filter<CtElement> {
+        private final Filter<CtElement> filter;
+
+        @SuppressWarnings("unchecked")
+        public UsesFilter(CtElement ctElement) {
+            Filter<CtElement> filter;
+
+            if (ctElement instanceof CtVariable<?> ctVariable) {
+                filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
+            } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
+                filter = buildExecutableFilter(ctExecutable);
+            } else if (ctElement instanceof CtTypeMember ctTypeMember) {
+                // CtTypeMember that are not executable or variables are:
+                // - CtType (CtClass, CtEnum, CtInterface, CtRecord)
+                // - CtFormalTypeDeclarer (CtTypeParameter)
+                filter = new FilterAdapter<>(
+                    new DirectReferenceFilter<>(ctTypeMember.getReference()),
+                    CtReference.class
+                );
+            } else {
+                throw new IllegalArgumentException("Unsupported element: " + ctElement.getClass().getName());
+            }
+
+            // only consider explicit elements
+            this.filter = new CompositeFilter<>(FilteringOperator.INTERSECTION, EXPLICIT_ELEMENT_FILTER, filter);
+        }
+
+        @Override
+        public boolean matches(CtElement element) {
+            return this.filter.matches(element);
+        }
+
+        @SuppressWarnings("unchecked")
+        private static Filter<CtElement> buildExecutableFilter(CtExecutable<?> ctExecutable) {
+            Filter<CtElement> filter = new FilterAdapter<>(
+                new InvocationFilter(ctExecutable.getReference()),
+                // CtInvocation.class => Class<CtInvocation>, but Class<CtInvocation<?>> is needed
+                (Class<CtInvocation<?>>) (Object) CtInvocation.class
+            );
+
+            if (ctExecutable instanceof CtMethod<?> ctMethod) {
+                // implementing an abstract method is considered a use:
+                filter = new CompositeFilter<>(
+                    FilteringOperator.UNION,
+                    filter,
+                    new FilterAdapter<>(
+                        // this filter finds all methods that override the given method
+                        new OverridingMethodFilter(ctMethod),
+                        (Class<CtMethod<?>>) (Object) CtMethod.class
+                    )
+                );
+            }
+
+            return filter;
+        }
+    }
+
+    public static Set<CtElement> findUses(CtElement ctElement) {
+        return new LinkedHashSet<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }
 
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {

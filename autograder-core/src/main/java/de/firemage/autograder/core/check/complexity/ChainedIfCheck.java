@@ -22,6 +22,11 @@ public class ChainedIfCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtIf>() {
             @Override
             public void process(CtIf ctIf) {
+                // skip `if (a);` (no block)
+                if (ctIf.getThenStatement() == null) {
+                    return;
+                }
+
                 // check if the if-statement has a nested if:
                 List<CtStatement> thenStatements = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
                 if (thenStatements.size() == 1

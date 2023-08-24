@@ -40,8 +40,6 @@ equals-hashcode-comparable-contract = Equals and hashCode must always be overrid
 
 use-format-string = `{$formatted}` is easier to read.
 
-math-floor-division = Integer division is always floored, therefore the `Math.floor` is redundant.
-
 use-enum-collection = For maps where an enum is used as a key and for sets as a value, one should use EnumMap/EnumSet.
 
 compare-to-zero = The result of #compareTo or #compare should only be compared to 0.
@@ -93,6 +91,8 @@ javadoc-stub-exp-throws = Stub description for exception {$exp}
 
 javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned in the javadoc comment.
 
+todo-comment = TODOs should not be in the final submission.
+
 # Complexity
 use-diamond-operator = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
@@ -143,6 +143,9 @@ multiple-inline-statements = There should not be multiple statements in a single
 
 unnecessary-boxing = Instead of the boxed-type one should use '{$suggestion}'.
 
+multi-threading = Multithreading is out of scope for this lecture. The code is only executed on a single thread. Writing it thread-safe makes the code unnecessarily complex.
+
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
@@ -157,9 +160,10 @@ custom-exception-inheritance-exp-error = Custom exceptions should not extend Err
 
 empty-catch-block = Empty catch block
 
-exception-controlflow-exp-caught = {$exp} thrown and immediately caught in a surrounding block
+exception-controlflow-caught = {$exception} thrown and immediately caught in a surrounding block
+exception-controlflow-should-not-be-caught = {$exception} should never be caught
 
-runtime-ex-caught-exp = Runtime exception of type {$exp} caught
+runtime-exception-caught = RuntimeExceptions '{$exception}' should not be caught
 
 exception-message = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
@@ -210,6 +214,8 @@ import-types = Instead of qualifying the type, '{$type}' should be imported. Typ
 use-different-visibility = The visibility of '{$name}' should be '{$suggestion}'.
 
 avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'Pattern.matches'. Convert the constant to a pattern with the value '{$suggestion}'.
+
+binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'.
 
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.

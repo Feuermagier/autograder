@@ -24,10 +24,14 @@ import de.firemage.autograder.treeg.ast.Quantifier;
 import de.firemage.autograder.treeg.ast.RegExCharacter;
 import de.firemage.autograder.treeg.ast.RegExNode;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -49,13 +53,43 @@ public class RegexCheck extends IntegratedCheck {
         return REGEX_HINTS.stream().filter(value::contains).count() >= MIN_REGEX_HINTS;
     }
 
+    private static boolean isRegexInvocation(CtInvocation<?> ctInvocation) {
+        CtExecutableReference<?> ctExecutable = ctInvocation.getExecutable();
+
+        return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
+            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
+            && List.of("matches", "compile").contains(ctExecutable.getSimpleName())
+            || SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), java.lang.String.class)
+            && (
+                SpoonUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
+                || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceAll", String.class, String.class)
+                || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceFirst", String.class, String.class)
+                || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class)
+                || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class, int.class)
+            );
+    }
+
+    private static boolean isInAllowedContext(CtLiteral<?> ctLiteral) {
+        CtElement parent = ctLiteral.getParent();
+        if (parent instanceof CtVariable<?> ctVariable
+            && SpoonUtil.isEffectivelyFinal(ctVariable.getReference())) {
+            List<CtVariableAccess<?>> invocations = parent.getFactory().getModel().getElements(new VariableAccessFilter<>(ctVariable.getReference()));
+
+            return !invocations.isEmpty() &&
+                invocations
+                    .stream()
+                    .allMatch(ctVariableAccess -> ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation && isRegexInvocation(ctInvocation));
+        }
+
+        return parent instanceof CtInvocation<?> ctInvocation && isRegexInvocation(ctInvocation);
+    }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtLiteral<String>>() {
             @Override
             public void process(CtLiteral<String> literal) {
-                if (!SpoonUtil.isString(literal.getType())) {
+                if (!SpoonUtil.isString(literal.getType()) || !isInAllowedContext(literal)) {
                     return;
                 }
 

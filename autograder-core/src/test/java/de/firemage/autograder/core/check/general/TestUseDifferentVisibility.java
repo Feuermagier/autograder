@@ -32,6 +32,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                         public class Example {
                             String exampleVariable;
+
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -52,6 +54,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                         public class Example {
                             String exampleVariable;
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -84,6 +88,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         package com;
                         public class Example {
                             public String exampleVariable;
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -128,6 +134,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                                     example.exampleVariable = "bar";
                                 }
                             }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -138,7 +146,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         assertEquals(1, problems.size());
         assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
         assertEquals(
-            super.linter.translateMessage(
+            this.linter.translateMessage(
                 new LocalizedMessage(
                     LOCALIZED_MESSAGE_KEY,
                     Map.of(
@@ -146,7 +154,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         "suggestion", "private"
                     )
                 )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
+            this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
 
@@ -168,6 +176,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                             static class Inner {
                                 public String exampleVariable;
                             }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -178,7 +188,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         assertEquals(1, problems.size());
         assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
         assertEquals(
-            super.linter.translateMessage(
+            this.linter.translateMessage(
                 new LocalizedMessage(
                     LOCALIZED_MESSAGE_KEY,
                     Map.of(
@@ -186,7 +196,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         "suggestion", "private"
                     )
                 )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
+            this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
 
@@ -244,7 +254,9 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                                 b();
                                 c();
                                 d();
-                            } 
+                            }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -300,6 +312,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                             public boolean equals(Object other) {
                                 return true;
                             }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -334,6 +348,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         public class Main {
                             static final String DATE_FORMAT = "yyyy-MM-dd";
                             static final String DATE_FORMAT2 = DATE_FORMAT + " HH:mm:ss";
+
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -364,6 +380,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         public class Main {
                             static final String DATE_FORMAT = "yyyy-MM-dd";
                             private static final String DATE_FORMAT2 = DATE_FORMAT + " HH:mm:ss";
+
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -458,5 +476,29 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         assertEquals(0, problems.size());
+    }
+
+    @Test
+    void testOnlyPublicFields() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public final String a = ""; //# not ok
+                            String b = ""; //# not ok
+                            public static final String C = ""; //# ok
+                            public String d = ""; //# not ok
+                            
+                            public static void main(String[] args) {}
+                        }
+                        """
+                )
+            )
+        ), List.of(ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD));
+
+        assertEquals(3, problems.size());
     }
 }
