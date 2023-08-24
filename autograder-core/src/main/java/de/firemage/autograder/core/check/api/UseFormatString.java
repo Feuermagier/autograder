@@ -23,6 +23,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_FORMAT_STRING })
 public class UseFormatString extends IntegratedCheck {
@@ -229,5 +230,10 @@ public class UseFormatString extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(5);
     }
 }

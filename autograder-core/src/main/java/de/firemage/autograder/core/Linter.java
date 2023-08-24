@@ -271,7 +271,7 @@ public final class Linter {
             Check check = entry.getKey();
             List<Problem> problemsForCheck = entry.getValue();
             // then go through each check and merge the problems if they exceed the maxProblemsPerCheck
-            if (problemsForCheck.size() > this.maxProblemsPerCheck) {
+            if (problemsForCheck.size() > Math.min(this.maxProblemsPerCheck, entry.getKey().maximumProblems().orElse(this.maxProblemsPerCheck))) {
                 // further partition the problems by their ProblemType
                 // (one does not want to merge different types of problems):
                 Map<ProblemType, List<Problem>> problemsByType = problemsForCheck.stream()
