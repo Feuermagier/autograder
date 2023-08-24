@@ -46,6 +46,14 @@ public class Test {
 
     String subString; /*# ok #*/
     List<String> subList; /*# ok #*/
+
+    int x1; /*# ok #*/
+    int x2; /*# ok #*/
+    int x3; /*# ok #*/
+
+    int y1; /*# ok #*/
+    int y2; /*# ok #*/
+    int y3; /*# ok #*/
 }
 
 enum Month {
