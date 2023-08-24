@@ -822,14 +822,6 @@ public final class SpoonUtil {
     }
 
     public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
-        if (ctVariableReference instanceof CtFieldReference<?> field) {
-            if (field.getDeclaringType().isArray() || field.getDeclaringType().isPrimitive()) {
-                // calling getModifiers() on (new int[1]).length throws a Spoon exception: "The field int#length not found"
-                // Probably a bug in Spoon
-                return false;
-            }
-        }
-
         return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || ctModel
                 .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
                         write.getVariable().equals(ctVariableReference))
