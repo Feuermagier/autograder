@@ -91,6 +91,8 @@ javadoc-stub-exp-throws = Stub description for exception {$exp}
 
 javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned in the javadoc comment.
 
+todo-comment = TODOs should not be in the final submission.
+
 # Complexity
 use-diamond-operator = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
