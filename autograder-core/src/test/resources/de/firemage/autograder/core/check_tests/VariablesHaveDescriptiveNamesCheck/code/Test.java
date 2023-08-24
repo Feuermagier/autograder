@@ -43,6 +43,9 @@ public class Test {
     String datePattern; /*# ok #*/
     String namePattern; /*# ok #*/
     String timePattern; /*# ok #*/
+
+    String subString; /*# ok #*/
+    List<String> subList; /*# ok #*/
 }
 
 enum Month {

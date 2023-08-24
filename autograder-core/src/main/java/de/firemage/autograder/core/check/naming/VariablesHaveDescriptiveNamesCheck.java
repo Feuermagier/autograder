@@ -45,6 +45,11 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         "string", "list", "array", "map", "set", "int", "long", "float"
     );
 
+    private static final Set<String> ALLOWED_NAMES_WITH_TYPES = Set.of(
+        "subList",
+        "subString"
+    );
+
     private static final Set<String> KNOWN_ABBREVIATIONS = Set.of(
         "sec", "min"
     );
@@ -75,6 +80,10 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     private static boolean hasTypeInName(CtNamedElement ctVariable) {
+        if (ALLOWED_NAMES_WITH_TYPES.contains(ctVariable.getSimpleName())) {
+            return false;
+        }
+
         List<String> referencedTypeNames = ctVariable.getReferencedTypes()
             .stream()
             .map(CtTypeReference::getSimpleName)
