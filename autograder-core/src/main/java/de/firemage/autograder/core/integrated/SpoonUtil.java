@@ -35,7 +35,9 @@ import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
@@ -839,6 +841,25 @@ public final class SpoonUtil {
         }
 
         return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
+    }
+
+    public static <T> boolean isImmutable(CtTypeReference<T> ctTypeReference) {
+        CtType<T> ctType = ctTypeReference.getTypeDeclaration();
+        if (ctType == null) {
+            return false;
+        }
+
+        if (ctTypeReference.unbox().isPrimitive() || SpoonUtil.isTypeEqualTo(ctTypeReference, java.lang.String.class)) {
+            return true;
+        }
+
+        if (ctType.isShadow()) {
+            return false;
+        }
+
+        return ctType.getAllFields().stream()
+            .allMatch(ctFieldReference -> SpoonUtil.isEffectivelyFinal(ctFieldReference)
+                && SpoonUtil.isImmutable(ctFieldReference.getType()));
     }
 
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {

@@ -583,4 +583,39 @@ class TestCommonReimplementation extends AbstractCheckTest {
             );
         }
     }
+
+    // See https://github.com/Feuermagier/autograder/issues/245
+    @Test
+    void testArraysFillMutableClass() throws LinterException, IOException {
+        List<Problem> problems = this.check(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.ArrayList;
+                import java.util.List;
+
+                public class Test {
+                    public record Cell(List<String> list) {
+                        public Cell() {
+                            this(new ArrayList<>());
+                        }
+
+                        public void add(String string) { this.list.add(string); }
+                    }
+
+                    public static Cell[] createCells(int n) {
+                        Cell[] result = new Cell[n];
+
+                        for (int i = 0; i < result.length; i++) {
+                            result[i] = new Cell();
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
+
+        assertEquals(0, problems.size());
+    }
 }
