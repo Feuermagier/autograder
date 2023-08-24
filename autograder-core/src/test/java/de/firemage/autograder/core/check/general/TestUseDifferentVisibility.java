@@ -138,7 +138,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         assertEquals(1, problems.size());
         assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
         assertEquals(
-            super.linter.translateMessage(
+            this.linter.translateMessage(
                 new LocalizedMessage(
                     LOCALIZED_MESSAGE_KEY,
                     Map.of(
@@ -146,7 +146,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         "suggestion", "private"
                     )
                 )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
+            this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
 
@@ -178,7 +178,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         assertEquals(1, problems.size());
         assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
         assertEquals(
-            super.linter.translateMessage(
+            this.linter.translateMessage(
                 new LocalizedMessage(
                     LOCALIZED_MESSAGE_KEY,
                     Map.of(
@@ -186,7 +186,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         "suggestion", "private"
                     )
                 )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
+            this.linter.translateMessage(problems.get(0).getExplanation())
         );
     }
 
