@@ -23,7 +23,8 @@ import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
-    ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC
+    ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC,
+    ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD
 })
 public class UseDifferentVisibility extends IntegratedCheck {
     private enum Visibility implements Comparable<Visibility> {
@@ -151,6 +152,20 @@ public class UseDifferentVisibility extends IntegratedCheck {
                             )
                         ),
                         problemType
+                    );
+                } else if (ctTypeMember instanceof CtField<?> ctField
+                    && (currentVisibility == Visibility.PUBLIC || currentVisibility == Visibility.DEFAULT)
+                    && (!ctField.isStatic() || !ctField.isFinal())) {
+                    addLocalProblem(
+                        ctField,
+                        new LocalizedMessage(
+                            "use-different-visibility",
+                            Map.of(
+                                "name", ctField.getSimpleName(),
+                                "suggestion", Visibility.PRIVATE.toString()
+                            )
+                        ),
+                        ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD
                     );
                 }
             }

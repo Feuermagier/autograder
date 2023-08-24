@@ -477,4 +477,28 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
 
         assertEquals(0, problems.size());
     }
+
+    @Test
+    void testOnlyPublicFields() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public final String a = ""; //# not ok
+                            String b = ""; //# not ok
+                            public static final String C = ""; //# ok
+                            public String d = ""; //# not ok
+                            
+                            public static void main(String[] args) {}
+                        }
+                        """
+                )
+            )
+        ), List.of(ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD));
+
+        assertEquals(3, problems.size());
+    }
 }
