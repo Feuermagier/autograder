@@ -136,6 +136,11 @@ public class UseDifferentVisibility extends IntegratedCheck {
                         problemType = ProblemType.USE_DIFFERENT_VISIBILITY;
                     }
 
+                    // do not suggest to change the visibility of public methods if there is no main method in the model
+                    if (!staticAnalysis.getCodeModel().hasMainMethod() && !ctTypeMember.getDeclaringType().isPrivate()) {
+                        return;
+                    }
+
                     addLocalProblem(
                         ctTypeMember,
                         new LocalizedMessage(

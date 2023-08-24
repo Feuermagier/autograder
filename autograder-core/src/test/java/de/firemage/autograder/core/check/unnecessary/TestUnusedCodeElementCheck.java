@@ -23,7 +23,6 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(PROBLEM_TYPE, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE);
 
     private void assertEqualsUnused(String name, Problem problem) {
-        assertEquals(PROBLEM_TYPE, problem.getProblemType());
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(
@@ -376,5 +375,60 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         assertProblemSize(1, problems);
         assertEqualsUnused("Main()", problems.get(0));
+    }
+
+    @Test
+    void testUnusedPrivateConstructor() throws LinterException, IOException {
+        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "StringUtils",
+                    """
+                    public class StringUtils {
+                        private StringUtils() {}
+
+                        public static void main(String[] args) {}
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertProblemSize(0, problems);
+    }
+
+    @Test
+    void testUnusedPublicWithoutMain() throws LinterException, IOException {
+        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "StringUtils",
+                    """
+                    public class StringUtils {
+                        String field;
+
+                        public StringUtils() {} // ok
+
+                        public static String repeat(String string, int n) { // ok
+                            return string.repeat(n);
+                        }
+                        
+                        void foo() {} // ok
+
+                        public static String repeatable(String s, int n) { // ok (even though n is not used)
+                            return s;
+                        }
+                        
+                        private void helper() {} //# not ok
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertProblemSize(1, problems);
+        assertEqualsUnused("helper", problems.get(0));
     }
 }

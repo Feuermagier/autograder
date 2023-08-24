@@ -32,6 +32,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                         public class Example {
                             String exampleVariable;
+
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -52,6 +54,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                         public class Example {
                             String exampleVariable;
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -84,6 +88,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         package com;
                         public class Example {
                             public String exampleVariable;
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -128,6 +134,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                                     example.exampleVariable = "bar";
                                 }
                             }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -168,6 +176,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                             static class Inner {
                                 public String exampleVariable;
                             }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -244,7 +254,9 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                                 b();
                                 c();
                                 d();
-                            } 
+                            }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -300,6 +312,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                             public boolean equals(Object other) {
                                 return true;
                             }
+                            
+                            public static void main(String[] args) {}
                         }
                         """
                 )
@@ -334,6 +348,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         public class Main {
                             static final String DATE_FORMAT = "yyyy-MM-dd";
                             static final String DATE_FORMAT2 = DATE_FORMAT + " HH:mm:ss";
+
+                            public static void main(String[] args) {}
                         }
                         """
                 ),
@@ -364,6 +380,8 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         public class Main {
                             static final String DATE_FORMAT = "yyyy-MM-dd";
                             private static final String DATE_FORMAT2 = DATE_FORMAT + " HH:mm:ss";
+
+                            public static void main(String[] args) {}
                         }
                         """
                 )

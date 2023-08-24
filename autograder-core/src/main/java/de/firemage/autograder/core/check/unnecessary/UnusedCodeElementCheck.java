@@ -15,6 +15,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.visitor.CtScanner;
 
@@ -23,7 +24,7 @@ import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
 public class UnusedCodeElementCheck extends IntegratedCheck {
-    private void checkUnused(CtNamedElement ctElement) {
+    private void checkUnused(StaticAnalysis staticAnalysis, CtNamedElement ctElement) {
         if (ctElement.isImplicit() || !ctElement.getPosition().isValidPosition()) {
             return;
         }
@@ -45,6 +46,18 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         }
 
         if (isUnused) {
+            // do not report unused elements if there is no main method in the model and the element is accessible
+            // (i.e. not private)
+            if (ctElement instanceof CtModifiable ctModifiable
+                && !ctModifiable.isPrivate()
+                && ctModifiable instanceof CtTypeMember ctTypeMember
+                && !ctTypeMember.getDeclaringType().isPrivate()
+                // check if there is no main method in the model
+                && !staticAnalysis.getCodeModel().hasMainMethod()
+            ) {
+                return;
+            }
+
             String name = ctElement.getSimpleName();
 
             // in spoon constructors are called <init>, which is not helpful
@@ -65,7 +78,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtLocalVariable(CtLocalVariable<T> ctLocalVariable) {
-                checkUnused(ctLocalVariable);
+                checkUnused(staticAnalysis, ctLocalVariable);
                 super.visitCtLocalVariable(ctLocalVariable);
             }
 
@@ -76,13 +89,18 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                     return;
                 }
 
-                checkUnused(ctMethod);
+                checkUnused(staticAnalysis, ctMethod);
                 super.visitCtMethod(ctMethod);
             }
 
             @Override
             public <T> void visitCtConstructor(CtConstructor<T> ctConstructor) {
-                checkUnused(ctConstructor);
+                if (ctConstructor.isPrivate()) {
+                    super.visitCtConstructor(ctConstructor);
+                    return;
+                }
+
+                checkUnused(staticAnalysis, ctConstructor);
                 super.visitCtConstructor(ctConstructor);
             }
 
@@ -93,20 +111,20 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                     return;
                 }
 
-                checkUnused(ctParameter);
+                checkUnused(staticAnalysis, ctParameter);
 
                 super.visitCtParameter(ctParameter);
             }
 
             @Override
             public void visitCtTypeParameter(CtTypeParameter ctTypeParameter) {
-                checkUnused(ctTypeParameter);
+                checkUnused(staticAnalysis, ctTypeParameter);
                 super.visitCtTypeParameter(ctTypeParameter);
             }
 
             @Override
             public <T> void visitCtField(CtField<T> ctField) {
-                checkUnused(ctField);
+                checkUnused(staticAnalysis, ctField);
                 super.visitCtField(ctField);
             }
 
@@ -119,13 +137,13 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                     return;
                 }
 
-                checkUnused(ctType);
+                checkUnused(staticAnalysis, ctType);
                 super.visitCtClass(ctType);
             }
 
             @Override
             public <T extends Enum<?>> void visitCtEnum(CtEnum<T> ctEnum) {
-                checkUnused(ctEnum);
+                checkUnused(staticAnalysis, ctEnum);
                 super.visitCtEnum(ctEnum);
             }*/
         });

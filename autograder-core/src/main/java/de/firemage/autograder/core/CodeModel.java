@@ -20,6 +20,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
+import java.util.Optional;
 
 /**
  * The model is build lazily to work better with the multithreaded core architecture.
@@ -32,6 +33,7 @@ public final class CodeModel implements AutoCloseable {
     private Factory factory;
     private CtModel model;
     private CtPackage basePackage;
+    private Optional<CtMethod<Void>> mainMethod;
 
     private CodeModel(SourceInfo file, Path jar, ClassLoader classLoader) {
         this.file = file;
@@ -78,11 +80,27 @@ public final class CodeModel implements AutoCloseable {
     @SuppressWarnings("unchecked")
     public CtMethod<Void> findMain() {
         this.buildModelMaybe();
-        return this.getModel()
-            .getElements(new NamedElementFilter<>(CtMethod.class, "main"))
-            .stream()
-            .filter(SpoonUtil::isMainMethod)
-            .findFirst().orElse(null);
+
+        // NOTE: this is intentional, so that the main method is only searched once
+        if (this.mainMethod == null) {
+            this.mainMethod = this.getModel()
+                .getElements(new NamedElementFilter<>(CtMethod.class, "main"))
+                .stream()
+                .filter(SpoonUtil::isMainMethod)
+                .findFirst()
+                .map(ctMethod -> (CtMethod<Void>) ctMethod);
+        }
+
+        return this.mainMethod.orElse(null);
+    }
+
+    /**
+     * Checks if the code has a main method.
+     *
+     * @return true if it has, false otherwise
+     */
+    public boolean hasMainMethod() {
+        return this.findMain() != null;
     }
 
     public CtPackage getBasePackage() {
