@@ -1,0 +1,3 @@
+general.BinaryOperator
+Binary operators should not be used for boolean expressions
+Test.java:7

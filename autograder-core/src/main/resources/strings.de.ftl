@@ -212,6 +212,8 @@ avoid-recompiling-regex = Die Konstante wird nur mit 'Pattern.compile' oder 'Pat
 
 merge-nested-if = Die Verschachtelte if kann mit der äußeren if kombiniert werden. Die Bedingung der äußeren if sollte '{$suggestion}' sein.
 
+binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwenden.
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 

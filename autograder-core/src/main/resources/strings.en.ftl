@@ -213,6 +213,8 @@ use-different-visibility = The visibility of '{$name}' should be '{$suggestion}'
 
 avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'Pattern.matches'. Convert the constant to a pattern with the value '{$suggestion}'.
 
+binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'.
+
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.
 
