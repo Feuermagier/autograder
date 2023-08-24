@@ -161,7 +161,7 @@ empty-catch-block = Empty catch block
 exception-controlflow-caught = {$exception} thrown and immediately caught in a surrounding block
 exception-controlflow-should-not-be-caught = {$exception} should never be caught
 
-runtime-ex-caught-exp = Runtime exception of type {$exp} caught
+runtime-exception-caught = RuntimeExceptions '{$exception}' should not be caught
 
 exception-message = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
