@@ -10,9 +10,13 @@ import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.NoSuchElementException;
+
+import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class AbstractCheckTest {
     protected final TempLocation tempLocation;
@@ -47,6 +51,50 @@ public abstract class AbstractCheckTest {
             status -> {
             }
         );
+    }
+
+    protected ProblemIterator checkIterator(
+        SourceInfo sourceInfo,
+        List<ProblemType> problemTypes
+    ) throws LinterException, IOException {
+        return new ProblemIterator(this.check(sourceInfo, problemTypes));
+    }
+
+    public static final class ProblemIterator implements Iterator<Problem> {
+        private final List<? extends Problem> problems;
+        private int index;
+
+        private ProblemIterator(List<? extends Problem> problems) {
+            this.problems = problems;
+            this.index = 0;
+        }
+
+        @Override
+        public boolean hasNext() {
+            return this.index < this.problems.size();
+        }
+
+        @Override
+        public Problem next() throws NoSuchElementException {
+            if (!this.hasNext()) {
+                throw new NoSuchElementException(
+                    "Expected at least %d problems, but got %d. Problems: %s".formatted(
+                        this.index + 1, this.problems.size(), this.problems
+                    )
+                );
+            }
+
+            this.index += 1;
+            return this.problems.get(this.index - 1);
+        }
+
+        public void assertExhausted() {
+            if (this.hasNext()) {
+                fail("Expected exactly %d problems, but got %d. Extra problem(s): %s".formatted(
+                    this.index, this.problems.size(), this.problems.subList(this.index, this.problems.size())
+                ));
+            }
+        }
     }
 
     protected Map.Entry<String, String> dummySourceEntry(String packageName, String className) {

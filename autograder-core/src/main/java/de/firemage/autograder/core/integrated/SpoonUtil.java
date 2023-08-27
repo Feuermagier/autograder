@@ -228,6 +228,31 @@ public final class SpoonUtil {
         }
     }
 
+    public static List<CtExpression<?>> getElementsOfExpression(CtExpression<?> ctExpression) {
+        var supportedCollections = Stream.of(
+            java.util.List.class,
+            java.util.Set.class,
+            java.util.Collection.class
+        ).map((Class<?> e) -> ctExpression.getFactory().Type().createReference(e));
+
+        List<CtExpression<?>> result = new ArrayList<>();
+
+        CtTypeReference<?> expressionType = ctExpression.getType();
+        if (supportedCollections.noneMatch(ty -> ty.equals(expressionType) || expressionType.isSubtypeOf(ty))) {
+            return result;
+        }
+
+        if (ctExpression instanceof CtInvocation<?> ctInvocation
+            && ctInvocation.getTarget() instanceof CtTypeAccess<?>) {
+            CtExecutableReference<?> ctExecutableReference = ctInvocation.getExecutable();
+            if (ctExecutableReference.getSimpleName().equals("of")) {
+                result.addAll(ctInvocation.getArguments());
+            }
+        }
+
+        return result;
+    }
+
     /**
      * Returns the variable from the array access. For example array[0][1] will return array.
      *

@@ -18,9 +18,22 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestCommonReimplementation extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "common-reimplementation";
 
+    private void assertEqualsReimplementation(Problem problem, String suggestion) {
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "suggestion", suggestion
+                    )
+                )),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
+
     @Test
     void testSimpleArrayCopy() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -38,24 +51,13 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY));
 
-
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "System.arraycopy(toCopy, 0, result, 0, toCopy.length)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "System.arraycopy(toCopy, 0, result, 0, toCopy.length)");
+        problems.assertExhausted();
     }
 
     @Test
     void testOperatorAssignment() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -73,13 +75,12 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY));
 
-
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testArrayCopyWithCustomStart() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -97,24 +98,16 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY));
 
-
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "System.arraycopy(toCopy, start, result, start, toCopy.length - start)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
+        assertEqualsReimplementation(
+            problems.next(),
+            "System.arraycopy(toCopy, start, result, start, toCopy.length - start)"
         );
+        problems.assertExhausted();
     }
 
     @Test
     void testSimpleStringRepeat() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -132,23 +125,13 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT));
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "result += s.repeat(n)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "result += s.repeat(n)");
+        problems.assertExhausted();
     }
 
     @Test
     void testStringRepeatWithCustomStart() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -166,23 +149,13 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT));
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "result += s.repeat((n + 1) - start)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "result += s.repeat((n + 1) - start)");
+        problems.assertExhausted();
     }
 
     @Test
     void testDoubleArrayCopy() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "MatrixUtils",
             """
@@ -204,24 +177,13 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY));
 
-
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "System.arraycopy(matrix[i], 0, result[i], 0, m)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "System.arraycopy(matrix[i], 0, result[i], 0, m)");
+        problems.assertExhausted();
     }
 
     @Test
     void testMax() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -268,27 +230,16 @@ class TestCommonReimplementation extends AbstractCheckTest {
             "left = Math.max(left, 1)"
         );
 
-        assertEquals(expectedProblems.size(), problems.size());
-        for (int i = 0; i < problems.size(); i++) {
-            Problem problem = problems.get(i);
-
-            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN, problem.getProblemType());
-            assertEquals(
-                this.linter.translateMessage(
-                    new LocalizedMessage(
-                        LOCALIZED_MESSAGE_KEY,
-                        Map.of(
-                            "suggestion", expectedProblems.get(i)
-                        )
-                    )),
-                this.linter.translateMessage(problem.getExplanation())
-            );
+        for (String expectedProblem : expectedProblems) {
+            assertEqualsReimplementation(problems.next(), expectedProblem);
         }
+
+        problems.assertExhausted();
     }
 
     @Test
     void testMin() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -335,28 +286,17 @@ class TestCommonReimplementation extends AbstractCheckTest {
             "left = Math.min(left, 1)"
         );
 
-        assertEquals(expectedProblems.size(), problems.size());
-        for (int i = 0; i < problems.size(); i++) {
-            Problem problem = problems.get(i);
-
-            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN, problem.getProblemType());
-            assertEquals(
-                this.linter.translateMessage(
-                    new LocalizedMessage(
-                        LOCALIZED_MESSAGE_KEY,
-                        Map.of(
-                            "suggestion", expectedProblems.get(i)
-                        )
-                    )),
-                this.linter.translateMessage(problem.getExplanation())
-            );
+        for (String expectedProblem : expectedProblems) {
+            assertEqualsReimplementation(problems.next(), expectedProblem);
         }
+
+        problems.assertExhausted();
     }
 
 
     @Test
     void testMinMaxWithElse() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -400,28 +340,17 @@ class TestCommonReimplementation extends AbstractCheckTest {
             "result = Math.max(a, b)"
         );
 
-        assertEquals(expectedProblems.size(), problems.size());
-        for (int i = 0; i < problems.size(); i++) {
-            Problem problem = problems.get(i);
-
-            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN, problem.getProblemType());
-            assertEquals(
-                this.linter.translateMessage(
-                    new LocalizedMessage(
-                        LOCALIZED_MESSAGE_KEY,
-                        Map.of(
-                            "suggestion", expectedProblems.get(i)
-                        )
-                    )),
-                this.linter.translateMessage(problem.getExplanation())
-            );
+        for (String expectedProblem : expectedProblems) {
+            assertEqualsReimplementation(problems.next(), expectedProblem);
         }
+
+        problems.assertExhausted();
     }
 
 
     @Test
     void testAddAllArray() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -442,23 +371,13 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL));
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "result.addAll(Arrays.asList(array))"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "result.addAll(Arrays.asList(array))");
+        problems.assertExhausted();
     }
 
     @Test
-    void testAddAll() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+    void testAddAllCollection() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -479,24 +398,14 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL));
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "result.addAll(input)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "result.addAll(input)");
+        problems.assertExhausted();
     }
 
 
     @Test
     void testArraysFill() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -516,23 +425,13 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "suggestion", "Arrays.fill(array, 0, array.length, INITIAL_VALUE)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, 0, array.length, INITIAL_VALUE)");
+        problems.assertExhausted();
     }
 
     @Test
     void testModulo() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Main",
             """
@@ -566,28 +465,19 @@ class TestCommonReimplementation extends AbstractCheckTest {
             "result %= limit"
         );
 
-        assertEquals(expectedSuggestions.size(), problems.size());
-        for (int i = 0; i < expectedSuggestions.size(); i++) {
-            Problem problem = problems.get(i);
+        for (String expectedSuggestion : expectedSuggestions) {
+            Problem problem = problems.next();
 
             assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MODULO, problem.getProblemType());
-            assertEquals(
-                this.linter.translateMessage(
-                    new LocalizedMessage(
-                        LOCALIZED_MESSAGE_KEY,
-                        Map.of(
-                            "suggestion", expectedSuggestions.get(i)
-                        )
-                    )),
-                this.linter.translateMessage(problem.getExplanation())
-            );
+            assertEqualsReimplementation(problem, expectedSuggestion);
         }
+        problems.assertExhausted();
     }
 
     // See https://github.com/Feuermagier/autograder/issues/245
     @Test
     void testArraysFillMutableClass() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -616,6 +506,158 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testEnumValuesAddAllUnorderedSet() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.HashSet;
+                import java.util.Set;
+
+                enum Fruit {
+                    APPLE, BANANA, CHERRY;
+                }
+
+                public class Test {
+                    public static void main(String[] args) {
+                        Set<Fruit> fruits = new HashSet<>();
+                        
+                        fruits.add(Fruit.APPLE);
+                        fruits.add(Fruit.BANANA);
+                        fruits.add(Fruit.CHERRY);
+
+                        System.out.println(fruits);
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES));
+
+        assertEqualsReimplementation(problems.next(), "fruits.addAll(Arrays.asList(Fruit.values()))");
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testEnumValuesAddAllOrderedList() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.ArrayList;
+                import java.util.List;
+
+                enum GodCard {
+                    APOLLO,
+                    ARTEMIS,
+                    ATHENA,
+                    ATLAS,
+                    DEMETER,
+                    HERMES;
+                }
+
+                public class Test {
+                    private static List<GodCard> getAvailableCards() {
+                        List<GodCard> availableCards = new ArrayList<>();
+
+                        availableCards.add(GodCard.APOLLO);
+                        availableCards.add(GodCard.ARTEMIS);
+                        availableCards.add(GodCard.ATHENA);
+                        availableCards.add(GodCard.ATLAS);
+                        availableCards.add(GodCard.DEMETER);
+                        availableCards.add(GodCard.HERMES);
+
+                        return availableCards;
+                    }
+
+                    // NOTE: Enum.values() returns the variants in the order they are declared
+                    //       For Sets this is not a problem, but for Lists the order in which add
+                    //       is called is important
+                    private static List<GodCard> getReversedAvailableGodCards() {
+                        List<GodCard> availableCards = new ArrayList<>();
+
+                        availableCards.add(GodCard.HERMES);
+                        availableCards.add(GodCard.DEMETER);
+                        availableCards.add(GodCard.ATLAS);
+                        availableCards.add(GodCard.APOLLO);
+                        availableCards.add(GodCard.ATHENA);
+                        availableCards.add(GodCard.ARTEMIS);
+
+                        return availableCards;
+                    }
+                    
+                    private static List<GodCard> getAvailableCardsDuplicateMiddle() {
+                        List<GodCard> availableCards = new ArrayList<>();
+
+                        availableCards.add(GodCard.APOLLO);
+                        availableCards.add(GodCard.ARTEMIS);
+                        availableCards.add(GodCard.ATHENA);
+                        availableCards.add(GodCard.ATLAS);
+                        availableCards.add(GodCard.ATLAS);
+                        availableCards.add(GodCard.DEMETER);
+                        availableCards.add(GodCard.HERMES);
+
+                        return availableCards;
+                    }
+
+                    private static List<GodCard> getAvailableCardsDuplicateEnd() {
+                        List<GodCard> availableCards = new ArrayList<>();
+
+                        availableCards.add(GodCard.APOLLO);
+                        availableCards.add(GodCard.ARTEMIS);
+                        availableCards.add(GodCard.ATHENA);
+                        availableCards.add(GodCard.ATLAS);
+                        availableCards.add(GodCard.DEMETER);
+                        availableCards.add(GodCard.HERMES);
+                        availableCards.add(GodCard.HERMES);
+
+                        return availableCards;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES));
+
+        assertEqualsReimplementation(problems.next(), "availableCards.addAll(Arrays.asList(GodCard.values()))");
+        assertEqualsReimplementation(problems.next(), "availableCards.addAll(Arrays.asList(GodCard.values()))");
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testEnumValuesListing() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.HashSet;
+                import java.util.Set;
+                import java.util.ArrayList;
+                import java.util.List;
+
+                enum Fruit {
+                    APPLE, BANANA, CHERRY;
+                }
+
+                public class Test {
+                    private static final List<Fruit> ORDERED_LIST_FRUITS = List.of(Fruit.APPLE, Fruit.BANANA, Fruit.CHERRY);
+                    private static final List<Fruit> UNORDERED_LIST_FRUITS = List.of(Fruit.BANANA, Fruit.APPLE, Fruit.CHERRY);
+                    private static final Set<Fruit> UNORDERED_SET_FRUITS = Set.of(Fruit.BANANA, Fruit.APPLE, Fruit.CHERRY);
+                    private static final Set<Fruit> ORDERED_SET_FRUITS = Set.of(Fruit.APPLE, Fruit.BANANA, Fruit.CHERRY);
+                    
+                    private static final Fruit[] ORDERED_ARRAY_FRUITS = new Fruit[] {Fruit.APPLE, Fruit.BANANA, Fruit.CHERRY};
+                    private static final Fruit[] UNORDERED_ARRAY_FRUITS = {Fruit.BANANA, Fruit.APPLE, Fruit.CHERRY};
+                    
+                    private static final Fruit[] DUPLICATE_ARRAY = {Fruit.APPLE, Fruit.BANANA, Fruit.CHERRY, Fruit.CHERRY};
+                    private static final List<Fruit> DUPLICATE_LIST = List.of(Fruit.APPLE, Fruit.BANANA, Fruit.CHERRY, Fruit.CHERRY);
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES));
+
+        assertEqualsReimplementation(problems.next(), "List.of(Fruit.values())");
+        assertEqualsReimplementation(problems.next(), "Set.of(Fruit.values())");
+        assertEqualsReimplementation(problems.next(), "Set.of(Fruit.values())");
+        assertEqualsReimplementation(problems.next(), "Arrays.copyOf(Fruit.values(), Fruit.values().length)");
+        problems.assertExhausted();
     }
 }

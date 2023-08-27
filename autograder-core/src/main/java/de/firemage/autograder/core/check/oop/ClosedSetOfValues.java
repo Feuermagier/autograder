@@ -11,16 +11,13 @@ import de.firemage.autograder.core.integrated.effects.Effect;
 import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtSwitch;
 import spoon.reflect.code.CtSwitchExpression;
-import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -33,7 +30,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.CLOSED_SET_OF_VALUES})
 public class ClosedSetOfValues extends IntegratedCheck {
@@ -50,31 +46,6 @@ public class ClosedSetOfValues extends IntegratedCheck {
             .stream()
             .map((Class<?> e) -> ctTypeReference.getFactory().Type().createReference(e))
             .anyMatch(ctTypeReference::equals);
-    }
-
-    private static List<CtExpression<?>> parseOfExpression(CtExpression<?> ctExpression) {
-        var supportedCollections = Stream.of(
-            java.util.List.class,
-            java.util.Set.class,
-            java.util.Collection.class
-        ).map((Class<?> e) -> ctExpression.getFactory().Type().createReference(e));
-
-        List<CtExpression<?>> result = new ArrayList<>();
-
-        CtTypeReference<?> expressionType = ctExpression.getType();
-        if (supportedCollections.noneMatch(ty -> ty.equals(expressionType) || expressionType.isSubtypeOf(ty))) {
-            return result;
-        }
-
-        if (ctExpression instanceof CtInvocation<?> ctInvocation
-            && ctInvocation.getTarget() instanceof CtTypeAccess<?>) {
-            CtExecutableReference<?> ctExecutableReference = ctInvocation.getExecutable();
-            if (ctExecutableReference.getSimpleName().equals("of")) {
-                result.addAll(ctInvocation.getArguments());
-            }
-        }
-
-        return result;
     }
 
     private boolean isEnumMapping(CtAbstractSwitch<?> ctSwitch) {
@@ -237,7 +208,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
                 if (ctField.getType().isArray() && ctExpression instanceof CtNewArray<?> ctNewArray) {
                     checkFiniteListing(ctExpression, ctNewArray.getElements());
                 } else {
-                    checkFiniteListing(ctExpression, parseOfExpression(ctExpression));
+                    checkFiniteListing(ctExpression, SpoonUtil.getElementsOfExpression(ctExpression));
                 }
 
                 super.visitCtField(ctField);
