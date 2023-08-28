@@ -63,3 +63,14 @@ class RegexContext {
         System.out.println(NOT_USED_AS_REGEX);
     }
 }
+
+
+class B {
+    B(String string) {}
+}
+
+class A extends B {
+    A() {
+        super("abc123"); // did result in crash
+    }
+}
