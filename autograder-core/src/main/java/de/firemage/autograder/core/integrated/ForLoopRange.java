@@ -80,7 +80,7 @@ public record ForLoopRange(
         CtExpression<Integer> length = this.end;
         // special case init with 0, because end - 0 = end
         if (!SpoonUtil.isIntegerLiteral(this.start, 0)) {
-            length = this.loopVariable.getFactory().createBinaryOperator(
+            length = SpoonUtil.createBinaryOperator(
                 this.end,
                 this.start,
                 BinaryOperatorKind.MINUS

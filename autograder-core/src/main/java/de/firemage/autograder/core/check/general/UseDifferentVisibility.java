@@ -17,9 +17,9 @@ import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
@@ -59,7 +59,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
     private static Visibility getVisibility(CtTypeMember ctTypeMember) {
         CtModel ctModel = ctTypeMember.getFactory().getModel();
 
-        Set<CtElement> references = SpoonUtil.findUses(ctTypeMember);
+        List<CtElement> references = SpoonUtil.findUses(ctTypeMember);
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();

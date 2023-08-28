@@ -35,7 +35,6 @@ import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
-import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
@@ -46,7 +45,6 @@ import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
@@ -1013,10 +1011,10 @@ public final class SpoonUtil {
      * @param in the element to search in
      * @return all uses of {@code ctElement} in {@code in}
      */
-    public static Set<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
+    public static List<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
         return findUses(ctElement).stream()
             .filter(element -> !in.getElements(new SameFilter(element)).isEmpty())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public record FilterAdapter<T extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<CtElement> {
@@ -1104,8 +1102,8 @@ public final class SpoonUtil {
         }
     }
 
-    public static Set<CtElement> findUses(CtElement ctElement) {
-        return new LinkedHashSet<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
+    public static List<CtElement> findUses(CtElement ctElement) {
+        return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }
 
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {

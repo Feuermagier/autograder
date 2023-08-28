@@ -33,6 +33,7 @@ import spoon.reflect.declaration.CtEnum;
 import spoon.reflect.declaration.CtEnumValue;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -55,7 +56,8 @@ import java.util.stream.Stream;
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL,
     ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL,
     ProblemType.COMMON_REIMPLEMENTATION_MODULO,
-    ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES
+    ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES,
+    ProblemType.COMMON_REIMPLEMENTATION_SUBLIST
 })
 public class CommonReimplementation extends IntegratedCheck {
     private void checkStringRepeat(CtFor ctFor) {
@@ -560,6 +562,58 @@ public class CommonReimplementation extends IntegratedCheck {
         }
     }
 
+    private void checkSubList(CtFor ctFor) {
+        ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
+
+        if (forLoopRange == null) {
+            return;
+        }
+
+        // ensure that the variable is only used to access the list elements via get
+        CtVariable<?> ctListVariable = null;
+        CtTypeReference<?> listType = ctFor.getFactory().Type().get(java.util.List.class).getReference();
+        for (CtElement use : SpoonUtil.findUsesIn(forLoopRange.loopVariable().getDeclaration(), ctFor.getBody())) {
+            if (!(use instanceof CtVariableAccess<?> variableAccess)
+                || !(variableAccess.getParent() instanceof CtInvocation<?> ctInvocation)
+                || !(SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), Object.class, "get", int.class))
+                || !(ctInvocation.getTarget() instanceof CtVariableAccess<?> ctVariableAccess)
+                || !ctVariableAccess.getType().isSubtypeOf(listType)
+                || (ctListVariable != null && !ctListVariable.getReference().equals(ctVariableAccess.getVariable()))) {
+                return;
+            }
+
+            if (ctListVariable == null) {
+                ctListVariable = ctVariableAccess.getVariable().getDeclaration();
+            }
+        }
+
+        if (ctListVariable == null) {
+            return;
+        }
+
+        CtTypeReference<?> listElementType = ctFor.getFactory().createCtTypeReference(java.lang.Object.class);
+        // size != 1, if the list is a raw type: List list = new ArrayList();
+        if (ctListVariable.getType().getActualTypeArguments().size() == 1) {
+            listElementType = ctListVariable.getType().getActualTypeArguments().get(0);
+        }
+
+        this.addLocalProblem(
+            ctFor,
+            new LocalizedMessage(
+                "common-reimplementation",
+                Map.of(
+                    "suggestion", "for (%s value : %s.subList(%s, %s)) { ... }".formatted(
+                        listElementType.prettyprint(),
+                        ctListVariable.getSimpleName(),
+                        forLoopRange.start().prettyprint(),
+                        forLoopRange.end().prettyprint()
+                    )
+                )
+            ),
+            ProblemType.COMMON_REIMPLEMENTATION_SUBLIST
+        );
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
@@ -573,6 +627,7 @@ public class CommonReimplementation extends IntegratedCheck {
                 checkArrayCopy(ctFor);
                 checkStringRepeat(ctFor);
                 checkArraysFill(ctFor);
+                checkSubList(ctFor);
                 super.visitCtFor(ctFor);
             }
 

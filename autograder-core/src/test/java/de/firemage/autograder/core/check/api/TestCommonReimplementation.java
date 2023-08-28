@@ -660,4 +660,34 @@ class TestCommonReimplementation extends AbstractCheckTest {
         assertEqualsReimplementation(problems.next(), "Arrays.copyOf(Fruit.values(), Fruit.values().length)");
         problems.assertExhausted();
     }
+
+    @Test
+    void testSubList() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.ArrayList;
+                import java.util.List;
+
+                public class Test {
+                    public static <T> void printList(List<T> list, int start, int end) {
+                        for (int i = start; i < end; i++) {
+                            System.out.println(list.get(i));
+                        }
+                    }
+                    
+                    public static void printRawList(List list, int start, int end) {
+                        for (int i = start; i < end; i++) {
+                            System.out.println(list.get(i));
+                        }
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_SUBLIST));
+
+        assertEqualsReimplementation(problems.next(), "for (T value : list.subList(start, end)) { ... }");
+        assertEqualsReimplementation(problems.next(), "for (Object value : list.subList(start, end)) { ... }");
+        problems.assertExhausted();
+    }
 }
