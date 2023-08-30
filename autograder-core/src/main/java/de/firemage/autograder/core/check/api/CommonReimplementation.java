@@ -462,6 +462,11 @@ public class CommonReimplementation extends IntegratedCheck {
 
     public record CtEnumFieldRead(CtEnum<?> ctEnum, CtEnumValue<?> ctEnumValue) {
         public static Optional<CtEnumFieldRead> of(CtExpression<?> ctExpression) {
+            // this is a workaround for https://github.com/INRIA/spoon/issues/5412
+            if (ctExpression.getType().equals(ctExpression.getFactory().Type().nullType())) {
+                return Optional.empty();
+            }
+
             // check if the expression is an enum type
             if (!ctExpression.getType().isEnum()
                 // that it accesses a variant of the enum

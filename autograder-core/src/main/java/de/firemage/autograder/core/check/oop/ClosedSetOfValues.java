@@ -60,12 +60,17 @@ public class ClosedSetOfValues extends IntegratedCheck {
                 return false;
             }
 
-            Optional<CtExpression<?>> ctExpression = effect.value();
-            if (ctExpression.isEmpty()) {
+            CtExpression<?> ctExpression = effect.value().orElse(null);
+            if (ctExpression == null) {
                 return false;
             }
 
-            if (!(ctExpression.get().getType().isEnum())) {
+            // this is a workaround for https://github.com/INRIA/spoon/issues/5412
+            if (ctExpression.getType().equals(ctExpression.getFactory().Type().nullType())) {
+                return false;
+            }
+
+            if (!ctExpression.getType().isEnum()) {
                 return false;
             }
         }

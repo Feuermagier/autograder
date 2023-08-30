@@ -690,4 +690,23 @@ class TestCommonReimplementation extends AbstractCheckTest {
         assertEqualsReimplementation(problems.next(), "for (Object value : list.subList(start, end)) { ... }");
         problems.assertExhausted();
     }
+
+    @Test
+    void testEnumValuesListingWithNull() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                enum Fruit {
+                    APPLE, BANANA, CHERRY;
+                }
+
+                public class Test {
+                    private static final Fruit[] FRUITS = { Fruit.APPLE, Fruit.BANANA, Fruit.CHERRY, null };
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES));
+
+        problems.assertExhausted();
+    }
 }

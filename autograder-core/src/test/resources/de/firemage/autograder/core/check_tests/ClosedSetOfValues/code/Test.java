@@ -132,3 +132,15 @@ class ClosedSetMethods {
         return null;
     }
 }
+
+class EnumMappingCrash {
+    public static Color mapColor(String string) {
+        return switch (string) { /*# not ok #*/
+            case "red" -> Color.RED;
+            case "green" -> Color.GREEN;
+            case "blue" -> Color.BLUE;
+            case "yellow" -> null; // this triggers the crash
+            default -> null;
+        };
+    }
+}
