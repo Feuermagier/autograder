@@ -14,6 +14,7 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.span.Formatter;
 import de.firemage.autograder.span.Highlight;
 import de.firemage.autograder.span.Position;
@@ -159,7 +160,10 @@ public class Application implements Callable<Integer> {
                             highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
                         );
 
-                        return formatter.render(sourceText);
+                        String result = "[%s]: Found problem in '%s'%n".formatted(problem.getProblemType(), position.toString());
+                        result += formatter.render(sourceText);
+
+                        return result;
                     })
                     .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
             }
