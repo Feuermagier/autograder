@@ -46,6 +46,7 @@ import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtReference;
+import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.Filter;
@@ -900,7 +901,9 @@ public final class SpoonUtil {
     }
 
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
-        return ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().createReference(expected));
+        // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
+        return !(ctTypeReference instanceof CtTypeParameterReference)
+            && ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().createReference(expected));
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
