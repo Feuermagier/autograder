@@ -15,3 +15,22 @@ public class Test {
         }
     }
 }
+
+
+class Command<T> {
+    protected final T value;
+
+    protected Command(T value) {
+        this.value = value;
+    }
+}
+
+class ResultsInCrash extends Command<Integer> {
+    ResultsInCrash(Integer value) {
+        super(value);
+    }
+
+    public String execute() {
+        return value.toString();
+    }
+}

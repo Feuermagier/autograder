@@ -149,7 +149,7 @@ assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie fa
     Teil der finalen Lösung sein. Wenn du eine Invariante dokumentieren willst, verwende
     einen Kommentar.
 
-print-stack-trace-exp = Stack Traces sollten in der Abgabe nicht ausgegeben werden
+print-stack-trace = Stack Traces sollten in der Abgabe nicht ausgegeben werden
 
 # Exceptions
 custom-exception-inheritance-exp-runtime = Selbstdefinierte Exceptions sollten immer Checked Exceptions sein

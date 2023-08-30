@@ -152,7 +152,7 @@ assert-used-exp = Assertions crash the entire program if they evaluate to false.
               They are great for testing purposes, but should not be part of your final solution.
               If you want to document an invariant, consider a comment.
 
-print-stack-trace-exp = Don't print stack traces in your final solution
+print-stack-trace = Don't print stack traces in your final solution
 
 # Exceptions
 custom-exception-inheritance-exp-runtime = Custom exceptions should be checked exceptions
