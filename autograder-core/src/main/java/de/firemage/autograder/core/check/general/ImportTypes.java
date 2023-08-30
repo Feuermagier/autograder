@@ -21,6 +21,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.ParentNotInitializedException;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtWildcardReference;
 
 import java.io.IOException;
 import java.util.Map;
@@ -41,6 +42,7 @@ public class ImportTypes extends IntegratedCheck {
         return !ctTypeReference.isSimplyQualified()
             && !ctTypeReference.isPrimitive()
             && !ctTypeReference.isGenerics()
+            && !(ctTypeReference instanceof CtWildcardReference)
             && (!(ctTypeReference.getParent() instanceof CtTypeReference<?> parent) || !SpoonUtil.isInnerClass(parent))
             // to ignore String[]::new
             && ctTypeReference.getParent(CtExecutableReferenceExpression.class) == null
