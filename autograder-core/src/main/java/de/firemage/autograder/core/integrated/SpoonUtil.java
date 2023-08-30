@@ -14,6 +14,7 @@ import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCast
 import org.apache.commons.compress.utils.FileNameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
+import spoon.reflect.code.CtAbstractInvocation;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
@@ -1048,6 +1049,17 @@ public final class SpoonUtil {
         }
     }
 
+    private record BetterInvocationFilter(CtExecutable<?> executable) implements Filter<CtAbstractInvocation<?>> {
+        @Override
+        public boolean matches(CtAbstractInvocation<?> invocation) {
+            CtExecutableReference<?> invocationExecutable = invocation.getExecutable();
+            return invocationExecutable.equals(this.executable.getReference())
+                || this.executable.equals(invocationExecutable.getExecutableDeclaration())
+                // TODO: consider removing this?
+                || invocationExecutable.isOverriding(this.executable.getReference());
+        }
+    }
+
     public static class UsesFilter implements Filter<CtElement> {
         private final Filter<CtElement> filter;
 
@@ -1083,9 +1095,9 @@ public final class SpoonUtil {
         @SuppressWarnings("unchecked")
         private static Filter<CtElement> buildExecutableFilter(CtExecutable<?> ctExecutable) {
             Filter<CtElement> filter = new FilterAdapter<>(
-                new InvocationFilter(ctExecutable.getReference()),
-                // CtInvocation.class => Class<CtInvocation>, but Class<CtInvocation<?>> is needed
-                (Class<CtInvocation<?>>) (Object) CtInvocation.class
+                new BetterInvocationFilter(ctExecutable),
+                // CtAbstractInvocation.class => Class<CtAbstractInvocation>, but Class<CtAbstractInvocation<?>> is needed
+                (Class<CtAbstractInvocation<?>>) (Object) CtAbstractInvocation.class
             );
 
             if (ctExecutable instanceof CtMethod<?> ctMethod) {
