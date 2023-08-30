@@ -111,6 +111,6 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
     @Override
     public void close() throws IOException {
         // delete the temporary directory, will not crash if it fails to delete it
-        FileUtils.deleteQuietly(this.toPath().toFile());
+        FileUtils.forceDeleteOnExit(this.toPath().toFile());
     }
 }
