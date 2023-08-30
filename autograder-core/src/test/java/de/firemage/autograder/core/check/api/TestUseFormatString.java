@@ -17,10 +17,25 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestUseFormatString extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "use-format-string";
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.USE_FORMAT_STRING);
+
+    void assertUseFormatString(String expected, Problem problem) {
+        assertEquals(ProblemType.USE_FORMAT_STRING, problem.getProblemType());
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    LOCALIZED_MESSAGE_KEY,
+                    Map.of(
+                        "formatted", expected
+                    )
+                )),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
 
     @Test
     void testSimpleArrayCopy() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -35,20 +50,34 @@ class TestUseFormatString extends AbstractCheckTest {
                     }
                 }
                 """
-        ), List.of(ProblemType.USE_FORMAT_STRING));
+        ), PROBLEM_TYPES);
 
-
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.USE_FORMAT_STRING, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "formatted", "\"Board must be an odd number between %d and %d\".formatted(MIN_NUMBER, MAX_NUMBER)"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
+        assertUseFormatString(
+            "\"Board must be an odd number between %d and %d\".formatted(MIN_NUMBER, MAX_NUMBER)",
+            problems.next()
         );
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testFormatStringBuilder() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public static void main(String[] args) {
+                        StringBuilder stringBuilder = new StringBuilder();
+                        
+                        stringBuilder.append("[").append(args[0]).append("]");
+                        
+                        System.out.println(stringBuilder.toString());
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertUseFormatString("stringBuilder.append(\"[%s]\".formatted(args[0]))", problems.next());
+        problems.assertExhausted();
     }
 }

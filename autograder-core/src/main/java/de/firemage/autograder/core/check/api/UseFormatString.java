@@ -24,6 +24,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_FORMAT_STRING })
 public class UseFormatString extends IntegratedCheck {
@@ -123,7 +124,7 @@ public class UseFormatString extends IntegratedCheck {
         return ctExpression;
     }
 
-    private void checkArgs(CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs) {
+    private void checkArgs(CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs, UnaryOperator<String> suggestion) {
         Collection<CtExpression<?>> args = new ArrayList<>();
         for (var expression : formatArgs) {
             args.add(this.resolveExpression(expression));
@@ -138,9 +139,9 @@ public class UseFormatString extends IntegratedCheck {
         if (formattedString == null) return;
 
         this.addLocalProblem(
-                ctElement,
-                new LocalizedMessage("use-format-string", Map.of("formatted", formattedString)),
-                ProblemType.USE_FORMAT_STRING
+            ctElement,
+            new LocalizedMessage("use-format-string", Map.of("formatted", suggestion.apply(formattedString))),
+            ProblemType.USE_FORMAT_STRING
         );
     }
 
@@ -168,7 +169,7 @@ public class UseFormatString extends IntegratedCheck {
             return;
         }
 
-        this.checkArgs(ctBinaryOperator, this.getFormatArgs(ctBinaryOperator));
+        this.checkArgs(ctBinaryOperator, this.getFormatArgs(ctBinaryOperator), suggestion -> suggestion);
     }
 
     private void checkCtInvocation(CtInvocation<?> ctInvocation) {
@@ -187,6 +188,7 @@ public class UseFormatString extends IntegratedCheck {
         if (ctInvocation.getParent(CtInvocation.class) != null) return;
 
         List<CtExpression<?>> formatArgs = new ArrayList<>();
+        CtExpression<?> invocationExpression = ctInvocation.getTarget();
         CtInvocation<?> currentInvocation = ctInvocation;
         // traverse the chain of append calls
         while (currentInvocation != null) {
@@ -209,13 +211,15 @@ public class UseFormatString extends IntegratedCheck {
             } else if (!stringBuilderType.equals(currentInvocation.getTarget().getType())) {
                 return;
             } else {
+                invocationExpression = currentInvocation.getTarget();
                 currentInvocation = null;
             }
         }
 
         Collections.reverse(formatArgs);
 
-        this.checkArgs(ctInvocation, formatArgs);
+        String target = invocationExpression.prettyprint();
+        this.checkArgs(ctInvocation, formatArgs, suggestion -> "%s.append(%s)".formatted(target, suggestion));
     }
 
     @Override
