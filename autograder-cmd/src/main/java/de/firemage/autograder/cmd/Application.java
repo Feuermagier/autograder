@@ -14,7 +14,6 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.span.Formatter;
 import de.firemage.autograder.span.Highlight;
 import de.firemage.autograder.span.Position;
@@ -29,7 +28,6 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
-import java.io.Console;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
@@ -86,6 +84,9 @@ public class Application implements Callable<Integer> {
 
     @Option(names = {"-p", "--output-pretty"}, description = "Pretty print the output", defaultValue = "false")
     private boolean isPrettyOutput;
+
+    @Option(names = { "--max-problems" }, description = "The maximum number of problems to report per check", defaultValue = "10")
+    private int maxProblemsPerCheck;
 
     @Spec
     private CommandSpec spec;
@@ -160,7 +161,11 @@ public class Application implements Callable<Integer> {
                             highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
                         );
 
-                        String result = "[%s]: Found problem in '%s'%n".formatted(problem.getProblemType(), position.toString());
+                        String result = "[%s]: %s - Found problem in '%s'%n".formatted(
+                            problem.getProblemType(),
+                            problem.getCheck().getClass().getSimpleName(),
+                            position.toString()
+                        );
                         result += formatter.render(sourceText);
 
                         return result;
@@ -229,7 +234,7 @@ public class Application implements Callable<Integer> {
             .threads(0)
             .tempLocation(this.tempLocation)
             .enableDynamicAnalysis(isDynamicAnalysisEnabled)
-            .maxProblemsPerCheck(10)
+            .maxProblemsPerCheck(this.maxProblemsPerCheck)
             .build();
 
         Consumer<LinterStatus> statusConsumer = status ->
