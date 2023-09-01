@@ -59,7 +59,6 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
         return target.getFactory().createInvocation(
             target,
             target.getType()
-                // TODO: this might break
                 .getTypeDeclaration()
                 .getMethod("isEmpty")
                 .getReference()
@@ -120,8 +119,6 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
             ctBinaryOperator
         );
 
-        // TODO: it should be able to inline constants like MY_VALUE = 1?
-
         if (!(result.getRightHandOperand() instanceof CtLiteral<?> ctLiteral) || !(ctLiteral.getValue() instanceof Number number)) {
             return;
         }
@@ -156,12 +153,12 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
 
     private void checkEqualsCall(CtExpression<?> target, CtInvocation<?> ctInvocation, ProblemType problemType) {
         CtExpression<?> argument = ctInvocation.getArguments().get(0);
-        if (SpoonUtil.isStringLiteral(argument, "")) {
+        if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(argument), "")) {
             this.reportProblem(ctInvocation, ctInvocation.prettyprint(), buildIsEmptySuggestion(target).prettyprint(), problemType);
         }
 
         // detect "".equals(s)
-        if (SpoonUtil.isStringLiteral(target, "")) {
+        if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(target), "")) {
             this.reportProblem(ctInvocation, ctInvocation.prettyprint(), buildIsEmptySuggestion(argument).prettyprint(), problemType);
         }
     }

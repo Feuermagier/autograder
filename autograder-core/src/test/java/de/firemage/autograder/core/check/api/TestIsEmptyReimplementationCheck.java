@@ -137,4 +137,34 @@ class TestIsEmptyReimplementationCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testInlining() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    private static final String EMPTY_STRING = "";
+                    private static final int ONE = 1;
+                    private static final int ZERO = 0;
+
+                    public static void main(String[] args) {
+                        String foo = "";
+
+                        //# not ok
+                        var a = foo.equals(EMPTY_STRING);
+                        var b = foo.length() > ZERO;
+                        var c = foo.length() < ONE;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsIsEmpty("foo.equals(EMPTY_STRING)", "foo.isEmpty()", problems.next());
+        assertEqualsIsEmpty("foo.length() > ZERO", "!foo.isEmpty()", problems.next());
+        assertEqualsIsEmpty("foo.length() < ONE", "foo.isEmpty()", problems.next());
+
+        problems.assertExhausted();
+    }
 }
