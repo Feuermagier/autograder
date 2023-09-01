@@ -11,6 +11,7 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.reference.CtVariableReference;
 
@@ -23,6 +24,8 @@ import java.util.stream.Stream;
 public class RepeatedMathOperationCheck extends IntegratedCheck {
     private static final Map<BinaryOperatorKind, Integer> OCCURRENCE_THRESHOLDS =
         Map.of(BinaryOperatorKind.PLUS, 2, BinaryOperatorKind.MUL, 3);
+
+    private record Variable(CtVariableReference<?> ctVariableReference, CtExpression<?> target) {}
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
@@ -41,12 +44,20 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
 
                 var occurrences = countOccurrences(operator, operator.getKind());
 
-                var variable = occurrences.entrySet().stream()
+                var optionalVariable = occurrences.entrySet().stream()
                     .filter(e -> e.getValue() >= OCCURRENCE_THRESHOLDS.get(operator.getKind()))
                     .max(Comparator.comparingInt(Map.Entry::getValue));
 
-                variable.ifPresent(ctVariableReferenceIntegerEntry -> {
-                    String variableName = ctVariableReferenceIntegerEntry.getKey().getSimpleName();
+                optionalVariable.ifPresent(ctVariableReferenceIntegerEntry -> {
+                    Variable variable = ctVariableReferenceIntegerEntry.getKey();
+                    String variableName = "%s".formatted(variable.ctVariableReference().getSimpleName());
+                    if (variable.target() != null) {
+                        variableName = "%s.%s".formatted(
+                            variable.target().prettyprint(),
+                            variable.ctVariableReference().getSimpleName()
+                        );
+                    }
+
                     int count = ctVariableReferenceIntegerEntry.getValue();
                     String suggestion = "%s * %d".formatted(variableName, count);
                     if (operator.getKind() == BinaryOperatorKind.MUL) {
@@ -66,9 +77,11 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
         });
     }
 
-    private Map<CtVariableReference<?>, Integer> countOccurrences(CtExpression<?> expression, BinaryOperatorKind kind) {
-        if (expression instanceof CtVariableRead<?> read) {
-            return Map.of(read.getVariable(), 1);
+    private Map<Variable, Integer> countOccurrences(CtExpression<?> expression, BinaryOperatorKind kind) {
+        if (expression instanceof CtFieldRead<?> read) {
+            return Map.of(new Variable(read.getVariable(), read.getTarget()), 1);
+        } else if (expression instanceof CtVariableRead<?> read) {
+            return Map.of(new Variable(read.getVariable(), null), 1);
         }
 
         if (expression instanceof CtBinaryOperator<?> operator && operator.getKind() == kind) {
