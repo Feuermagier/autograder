@@ -79,7 +79,7 @@ public class UnnecessaryBoxing extends IntegratedCheck {
                         new LocalizedMessage(
                             "unnecessary-boxing",
                             Map.of(
-                                "suggestion", ctVariable.getType().getSimpleName().toLowerCase()
+                                "suggestion", ctVariable.getType().unbox().getSimpleName()
                             )
                         ),
                         ProblemType.UNNECESSARY_BOXING
