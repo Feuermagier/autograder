@@ -34,9 +34,11 @@ import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
+import spoon.reflect.cu.position.CompoundSourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
@@ -54,7 +56,6 @@ import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
-import spoon.reflect.visitor.filter.InvocationFilter;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
@@ -113,11 +114,7 @@ public final class SpoonUtil {
 
     public static boolean isBoolean(CtTypedElement<?> ctTypedElement) {
         CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
-        return ctTypeReference != null
-            && (SpoonUtil.isTypeEqualTo(ctTypeReference, boolean.class) || SpoonUtil.isTypeEqualTo(
-            ctTypeReference,
-            Boolean.class
-        ));
+        return ctTypeReference != null && SpoonUtil.isTypeEqualTo(ctTypeReference, boolean.class, Boolean.class);
     }
 
     public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
@@ -985,6 +982,14 @@ public final class SpoonUtil {
         return ctTypeReference.getDeclaringType() != null;
     }
 
+    /**
+     * Checks if the given method is overriding another method.
+     * <p>
+     * This implies that there is another method in a super class or interface that has the same signature.
+     *
+     * @param ctMethod the method to check, must not be null
+     * @return true if the given method is overriding another method, false otherwise
+     */
     public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
         // if the method is defined for the first time, this should return an empty collection
         return !ctMethod.getTopDefinitions().isEmpty();
@@ -1167,5 +1172,20 @@ public final class SpoonUtil {
      */
     public static String formatSourcePosition(SourcePosition sourcePosition) {
         return String.format("%s:L%d", FileNameUtils.getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
+    }
+
+    public static SourcePosition getNamePosition(CtNamedElement ctNamedElement) {
+        SourcePosition position = ctNamedElement.getPosition();
+
+        if (position instanceof CompoundSourcePosition compoundSourcePosition) {
+            return ctNamedElement.getFactory().createSourcePosition(
+                position.getCompilationUnit(),
+                compoundSourcePosition.getNameStart(),
+                compoundSourcePosition.getNameEnd(),
+                position.getCompilationUnit().getLineSeparatorPositions()
+            );
+        }
+
+        return position;
     }
 }

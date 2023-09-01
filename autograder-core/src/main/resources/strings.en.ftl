@@ -223,7 +223,9 @@ bool-getter-name = For boolean getters it is recommended to use a verb as a pref
 constants-name-exp = The name '{$name}' is non-descriptive for the value '{$value}'
 constants-name-exp-value = The value '{$value}' of the constant '{$name}' should not be in the name
 
-linguistic-desc = The code element has a confusing name. See https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
+linguistic-naming-boolean = The name of '{$name}' indicates that it is/returns a boolean instead of '{$type}'.
+linguistic-naming-getter = The name of '{$name}' indicates that it returns a value, which is not the case.
+linguistic-naming-setter = The name of '{$name}' indicates that it is a setter, which should not return a value.
 
 variable-name-single-letter = Single letter names such as '{$name}' are usually non-descriptive
 variable-is-abbreviation = Don't use unnecessary abbreviations such as '{$name}'
