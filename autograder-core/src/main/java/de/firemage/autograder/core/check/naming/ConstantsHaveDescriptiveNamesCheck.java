@@ -115,6 +115,11 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             valueString = value.getValue().toString().toLowerCase();
         }
 
+        // ignore empty strings, which are always contained in every string
+        if (valueString.isEmpty()) {
+            return false;
+        }
+
         if (valueString.length() == 1 && Character.isAlphabetic(valueString.charAt(0))) {
             String c = String.valueOf(valueString.charAt(0));
             return lowerCaseName.startsWith(c + "_") || lowerCaseName.endsWith("_" + c) || lowerCaseName.contains("_" + c + "_");
