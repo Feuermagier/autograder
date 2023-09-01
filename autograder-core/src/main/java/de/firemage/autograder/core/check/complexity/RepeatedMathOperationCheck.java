@@ -45,11 +45,23 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
                     .filter(e -> e.getValue() >= OCCURRENCE_THRESHOLDS.get(operator.getKind()))
                     .max(Comparator.comparingInt(Map.Entry::getValue));
 
-                variable.ifPresent(ctVariableReferenceIntegerEntry -> addLocalProblem(operator,
-                    new LocalizedMessage("repeated-math-operation-" + operator.getKind().toString().toLowerCase(),
-                        Map.of("var", ctVariableReferenceIntegerEntry.getKey().getSimpleName(), "count",
-                            ctVariableReferenceIntegerEntry.getValue())),
-                    ProblemType.REPEATED_MATH_OPERATION));
+                variable.ifPresent(ctVariableReferenceIntegerEntry -> {
+                    String variableName = ctVariableReferenceIntegerEntry.getKey().getSimpleName();
+                    int count = ctVariableReferenceIntegerEntry.getValue();
+                    String suggestion = "%s * %d".formatted(variableName, count);
+                    if (operator.getKind() == BinaryOperatorKind.MUL) {
+                        suggestion = "Math.pow(%s, %d)".formatted(variableName, count);
+                    }
+
+                    addLocalProblem(
+                        operator,
+                        new LocalizedMessage(
+                            "common-reimplementation",
+                            Map.of("suggestion", suggestion)
+                        ),
+                        ProblemType.REPEATED_MATH_OPERATION
+                    );
+                });
             }
         });
     }
@@ -57,23 +69,28 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
     private Map<CtVariableReference<?>, Integer> countOccurrences(CtExpression<?> expression, BinaryOperatorKind kind) {
         if (expression instanceof CtVariableRead<?> read) {
             return Map.of(read.getVariable(), 1);
-        } else if (expression instanceof CtBinaryOperator<?> operator && operator.getKind() == kind) {
+        }
+
+        if (expression instanceof CtBinaryOperator<?> operator && operator.getKind() == kind) {
             // '+' can also be used on Strings, but String operations are not associative
             if (SpoonUtil.isString(operator.getLeftHandOperand().getType()) ||
                 SpoonUtil.isString(operator.getRightHandOperand().getType())) {
                 return Map.of();
-            } else {
-                return mergeOccurrenceMaps(countOccurrences(operator.getLeftHandOperand(), kind),
-                    countOccurrences(operator.getRightHandOperand(), kind));
             }
-        } else {
-            return Map.of();
+
+            return mergeMaps(
+                countOccurrences(operator.getLeftHandOperand(), kind),
+                countOccurrences(operator.getRightHandOperand(), kind)
+            );
         }
+
+        return Map.of();
     }
 
-    private Map<CtVariableReference<?>, Integer> mergeOccurrenceMaps(Map<CtVariableReference<?>, Integer> map1,
-                                                                     Map<CtVariableReference<?>, Integer> map2) {
-        return Stream.concat(map1.entrySet().stream(), map2.entrySet().stream())
-            .collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
+    private <K> Map<K, Integer> mergeMaps(Map<? extends K, Integer> left, Map<? extends K, Integer> right) {
+        return Stream.concat(
+            left.entrySet().stream(),
+            right.entrySet().stream()
+        ).collect(Collectors.toMap(Map.Entry::getKey, Map.Entry::getValue, Integer::sum));
     }
 }

@@ -22,23 +22,17 @@ merged-problems = {$message} Weitere Probleme in {$locations}.
 duplicate-code = Duplizierter Code ({$lines}): {$first-path}:{$first-start}-{$first-end} und {$second-path}:{$second-start}-{$second-end}
 
 # API
-is-empty-reimplemented-exp = Verwende isEmpty()
 
-old-collection-exp-vector = Verwende ArrayList statt Vector
-old-collection-exp-hashtable = Verwende HashMap statt Hashtable
-old-collection-exp-stack = Verwende Dequeue statt Stack
-
-string-is-empty-exp-emptiness = Benutze 'isEmpty()' statt '{$exp}' um auf Leerheit zu prüfen
-string-is-empty-exp-non-emptiness = Benutze '!<...>isEmpty()' statt '{$exp}' um auf mindestens ein Element zu prüfen
+suggest-replacement = Verwende '{$suggestion}' statt '{$original}'.
+common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 
 use-string-formatted = `{$formatted}` ist schöner zu lesen.
+use-format-string = `{$formatted}` ist schöner zu lesen.
 
 optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
 
 equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.
-
-use-format-string = `{$formatted}` ist schöner zu lesen.
 
 use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
 
@@ -58,12 +52,6 @@ array-hash-code = hashCode auf arrays, hasht nicht den Inhalt des Arrays
 equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich selbst zu prüfen, sonst entsteht eine Endlosschleife.
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
-
-common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
-
-use-entry-set = Verwende hier 'entrySet' statt 'keySet'.
-
-char-range = Der Code kann vereinfacht werden zu '{$suggestion}'.
 
 # Comment
 commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
@@ -119,14 +107,9 @@ unused-import-exp = Unbenutzter Import
 
 wrapper-instantiation-exp = Wrapper-Klassen sollten nicht direkt instanziiert werden
 
-repeated-math-operation-mul = Hier sollte Math.pow verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu multiplizieren.
-repeated-math-operation-plus = Hier sollte eine Multiplikation mit {$count} verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu addieren.
-
 redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
 
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
-
-merge-else-if = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
 
@@ -137,8 +120,6 @@ redundant-array-init = Die Zuweisung zu dem array ist unnötig und kann entfernt
 redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, aber der Wert '{$value}' wird nicht direkt zugewiesen. Schreibe stattdessen '{$suggestion}'.
 
 multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen. Also keine Deklarationen von mehreren Variablen oder Zuweisungen in einer Zeile.
-
-unnecessary-boxing = Statt dem boxed-type sollte man '{$suggestion}' verwenden.
 
 multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
 

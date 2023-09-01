@@ -139,7 +139,7 @@ public class CharRange extends IntegratedCheck {
                     addLocalProblem(
                         ctBinaryOperator,
                         new LocalizedMessage(
-                            "char-range",
+                            "common-reimplementation",
                             Map.of("suggestion", suggestion.prettyprint())
                         ),
                         ProblemType.CHAR_RANGE

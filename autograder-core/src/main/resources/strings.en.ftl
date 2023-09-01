@@ -22,23 +22,17 @@ merged-problems = {$message} Other problems in {$locations}.
 duplicate-code = Duplicated code ({$lines}): {$first-path}:{$first-start}-{$first-end} and {$second-path}:{$second-start}-{$second-end}
 
 # API
-is-empty-reimplemented-exp = Use isEmpty()
 
-old-collection-exp-vector = Use ArrayList instead of Vector
-old-collection-exp-hashtable = Use HashMap instead of Hashtable
-old-collection-exp-stack = Use Dequeue instead of Stack
-
-string-is-empty-exp-emptiness = Use 'isEmpty()' instead of '{$exp}' to check for emptiness
-string-is-empty-exp-non-emptiness = Use '!<...>isEmpty()' instead of '{$exp}' to check for non-emptiness
+suggest-replacement = Use '{$suggestion}' instead of '{$original}'.
+common-reimplementation = The code can be simplified to '{$suggestion}'.
 
 use-string-formatted = `{$formatted}` is easier to read.
+use-format-string = `{$formatted}` is easier to read.
 
 optional-argument = Optional should not be used as an argument, because it has 3 states: null, Optional.empty() and Optional.of(..). See https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Instead of an Optional boolean, one should use an enum.
 
 equals-hashcode-comparable-contract = Equals and hashCode must always be overridden together. Similarly for Comparable, both equals and hashCode must be overwritten.
-
-use-format-string = `{$formatted}` is easier to read.
 
 use-enum-collection = For maps where an enum is used as a key and for sets as a value, one should use EnumMap/EnumSet.
 
@@ -59,12 +53,6 @@ equals-reference = == must be used in equals method to check equality to itself 
 array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so comparisons will be done on reference
                             equality only. If neither deduplication nor lookup are needed, consider using a List
                             instead.
-
-common-reimplementation = The code can be simplified to '{$suggestion}'.
-
-use-entry-set = Use 'entrySet' here instead of 'keySet'.
-
-char-range = The code can be simplified to '{$suggestion}'.
 
 # Comment
 commented-out-code-exp = This commented out code should be removed
@@ -118,16 +106,11 @@ unused-import-exp = Unused import
 
 wrapper-instantiation-exp = Don't instantiate primitive wrappers
 
-repeated-math-operation-mul = Use Math.pow instead of multiplying '{$var}' {count} times with itself.
-repeated-math-operation-plus = Use a multiplication with {$count} instead of adding '{$var}' {$count} times to itself.
-
 redundant-neg-exp = '{$original}' should be written as '{$fixed}'
 
 redundant-boolean-equal = It is redundant to explicitly check if a condition equals true or false. Write instead '{$suggestion}'.
 
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
-
-merge-else-if = Use 'else if (...) {"{"} ... {"}"}' instead of 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
 complex-regex = Nontrivial regex need an explanation (score is {$score}, max allowed score is {$max})
 
@@ -140,8 +123,6 @@ redundant-uninitialized-variable = The variable '{$variable}' has been declared,
 merge-nested-if = The nested if can be combined with the outer if. The condition for the outer if should then be '{$suggestion}'.
 
 multiple-inline-statements = There should not be multiple statements in a single line. So no declarations of multiple variables or assignments in the same line.
-
-unnecessary-boxing = Instead of the boxed-type one should use '{$suggestion}'.
 
 multi-threading = Multithreading is out of scope for this lecture. The code is only executed on a single thread. Writing it thread-safe makes the code unnecessarily complex.
 

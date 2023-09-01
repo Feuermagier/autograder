@@ -77,8 +77,9 @@ public class UnnecessaryBoxing extends IntegratedCheck {
                     addLocalProblem(
                         ctVariable,
                         new LocalizedMessage(
-                            "unnecessary-boxing",
+                            "suggest-replacement",
                             Map.of(
+                                "original", ctVariable.getType().getSimpleName(),
                                 "suggestion", ctVariable.getType().unbox().getSimpleName()
                             )
                         ),

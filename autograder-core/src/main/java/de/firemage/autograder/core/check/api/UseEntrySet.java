@@ -16,6 +16,7 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.visitor.filter.InvocationFilter;
 
 import java.util.List;
+import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.USE_ENTRY_SET})
 public class UseEntrySet extends IntegratedCheck {
@@ -60,7 +61,7 @@ public class UseEntrySet extends IntegratedCheck {
                 if (!invocations.isEmpty()) {
                     addLocalProblem(
                         ctForEach.getExpression(),
-                        new LocalizedMessage("use-entry-set"),
+                        new LocalizedMessage("suggest-replacement", Map.of("original", "keySet()", "suggestion", "entrySet()")),
                         ProblemType.USE_ENTRY_SET
                     );
                 }
