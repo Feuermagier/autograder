@@ -55,9 +55,9 @@ class FalsePositiveToArray {
     }
 }
 
-class FalsePositiveHashMapEntry {
-    public static void execute(HashMap<String, String> map) {
-        for (HashMap.Entry<String, String> entry /*# ok #*/ : map.entrySet()) {
-        }
+class FalsePositiveArrayClassLiteral {
+    public static String[] makeCopy(String[] array) {
+        System.out.println(Integer.class); /*# ok #*/
+        return Arrays.copyOf(array, array.length, String[].class); /*# ok #*/
     }
 }

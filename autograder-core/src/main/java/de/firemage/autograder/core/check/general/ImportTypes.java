@@ -5,161 +5,42 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
-import de.firemage.autograder.core.file.CompilationUnit;
-import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import spoon.SpoonException;
-import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtExecutableReferenceExpression;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.cu.SourcePosition;
-import spoon.reflect.cu.SourcePositionHolder;
-import spoon.reflect.cu.position.DeclarationSourcePosition;
-import spoon.reflect.declaration.CtCompilationUnit;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.ParentNotInitializedException;
 import spoon.reflect.reference.CtArrayTypeReference;
+import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtWildcardReference;
+import spoon.reflect.visitor.CtScanner;
 
-import java.io.IOException;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Function;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+
 
 @ExecutableCheck(reportedProblems = { ProblemType.IMPORT_TYPES })
 public class ImportTypes extends IntegratedCheck {
-    private static final Function<String, Pattern> ARRAY_TYPE_REGEX =
-        (String ty) -> Pattern.compile("%s\\s*(?:\\[\\s*\\]|\\.\\.\\.)".formatted(Pattern.quote(ty)));
-    private static final int MAX_SOURCE_LINES = 10;
+    private static Optional<CtElement> findParentSourcePosition(CtElement ctElement) {
+        CtElement currentElement = ctElement;
 
-    private static boolean isFullyQualifiedType(CtTypeReference<?> ctTypeReference) {
-        // if this code breaks in the future, one might do this instead:
-        // ctTypeReference.getOriginalSourceFragment().getSourceCode().startsWith(ctTypeReference.getQualifiedName())
-        return !ctTypeReference.isSimplyQualified()
-            && !ctTypeReference.isPrimitive()
-            && !ctTypeReference.isGenerics()
-            && !(ctTypeReference instanceof CtWildcardReference)
-            && (!(ctTypeReference.getParent() instanceof CtTypeReference<?> parent) || !SpoonUtil.isInnerClass(parent))
-            // to ignore String[]::new
-            && ctTypeReference.getParent(CtExecutableReferenceExpression.class) == null
-            && !SpoonUtil.isInnerClass(ctTypeReference);
-    }
-
-    // NOTE: this is cursed code, working around problems in spoon that have been ignored
-    //       It might break at any time, maybe do ignore all arrays if that happens?
-    private static String getCodeSnippet(SourcePositionHolder ctElement) {
-        try {
-            return ctElement.getOriginalSourceFragment().getSourceCode();
-        } catch (SpoonException e) {
-            // Invalid start/end interval. It overlaps multiple fragments.
-            SourcePosition sourcePosition = ctElement.getPosition();
-            Position position = Position.of(sourcePosition);
-
-            return position.substring(sourcePosition.getCompilationUnit().getOriginalSourceCode());
-        }
-    }
-
-    private record Position(int start, int end) {
-        private Position {
-            if (start > end) {
-                throw new IllegalArgumentException(
-                    "start %d of code position must be smaller than the end %d".formatted(start, end)
-                );
+        while (currentElement.isParentInitialized() && !currentElement.getPosition().isValidPosition()) {
+            try {
+                currentElement = currentElement.getParent();
+            } catch (ParentNotInitializedException e) {
+                return Optional.empty();
             }
         }
 
-        public static Position of(SourcePosition position) {
-            int start = position.getSourceStart();
-            int end = position.getSourceEnd();
-            if (position instanceof DeclarationSourcePosition declarationSourcePosition) {
-                start = declarationSourcePosition.getDeclarationStart();
-                end = declarationSourcePosition.getDeclarationEnd();
-            }
-
-            return new Position(start, end + 1);
-        }
-
-        public String substring(String string) {
-            return string.substring(this.start, this.end);
-        }
-    }
-
-    private static Optional<String> getCodeSnippetFromSourceInfo(SourcePosition sourcePosition, SourceInfo sourceInfo) {
-        CtCompilationUnit ctCompilationUnit = sourcePosition.getCompilationUnit();
-
-        if (ctCompilationUnit.getFile() == null) {
+        if (!currentElement.isParentInitialized() || !currentElement.getPosition().isValidPosition()) {
             return Optional.empty();
         }
 
-        CompilationUnit compilationUnit = sourceInfo.getCompilationUnit(ctCompilationUnit.getFile().toPath());
-
-        Position position = Position.of(sourcePosition);
-
-        try {
-            return Optional.of(position.substring(compilationUnit.readString()));
-        } catch (IOException e) {
-            throw new IllegalArgumentException("Could not read compilation unit", e);
-        }
-    }
-
-    private SourcePosition resolveArraySourcePosition(CtArrayTypeReference<?> ctArrayTypeReference) {
-        CtElement ctElement = ctArrayTypeReference;
-
-        while (ctElement.isParentInitialized() && !ctElement.getPosition().isValidPosition()) {
-            try {
-                ctElement = ctElement.getParent();
-            } catch (ParentNotInitializedException e) {
-                return null;
-            }
-        }
-
-        if (!ctElement.isParentInitialized() || !ctElement.getPosition().isValidPosition()) {
-            return null;
-        }
-
-        SourcePosition position = ctElement.getPosition();
-
-        // the number of lines the closest span covers:
-        int lines = position.getEndLine() - position.getLine();
-
-        if (lines > MAX_SOURCE_LINES) {
-            return null;
-        }
-
-        String code = getCodeSnippet(ctElement);
-
-        // only happens when the ctElement is from a virtual file
-        if (code == null) {
-            code = getCodeSnippetFromSourceInfo(position, this.getRoot()).orElseThrow();
-        }
-
-        // NOTE: this only matches the "normal" array syntax: String[] value and not String value[]
-        // the latter example is especially bad when it comes to things like methods, where you can do:
-        // String myMethod()[]
-        Matcher matcher = ARRAY_TYPE_REGEX.apply(ctArrayTypeReference.getArrayType().getSimpleName())
-            .matcher(code);
-
-        if (matcher.find()) {
-            int start = matcher.start();
-            int length = matcher.end() - start;
-
-            return ctElement.getFactory().createSourcePosition(
-                position.getCompilationUnit(),
-                position.getSourceStart() + start,
-                position.getSourceStart() + start + length,
-                position.getCompilationUnit().getLineSeparatorPositions()
-            );
-        }
-
-        return null;
-    }
-
-    private void reportProblem(CtTypeReference<?> ctTypeReference) {
-        reportProblem(ctTypeReference.getPosition(), ctTypeReference);
+        return Optional.of(currentElement);
     }
 
     private void reportProblem(SourcePosition sourcePosition, CtTypeReference<?> ctTypeReference) {
@@ -175,35 +56,70 @@ public class ImportTypes extends IntegratedCheck {
         );
     }
 
+    private static boolean isSimplyQualified(CtTypeReference<?> ctTypeReference) {
+        return ctTypeReference.isImplicit()
+            || ctTypeReference.isSimplyQualified()
+            || ctTypeReference.isPrimitive()
+            || ctTypeReference instanceof CtTypeParameterReference;
+    }
+
+    private static boolean isQualified(CtTypeReference<?> ctTypeReference) {
+        if (ctTypeReference instanceof CtArrayTypeReference<?> ctArrayTypeReference) {
+            return isQualified(ctArrayTypeReference.getArrayType());
+        }
+
+        CtTypeReference<?> type = ctTypeReference;
+        while (type.getDeclaringType() != null) {
+            type = type.getDeclaringType();
+        }
+
+        return !isSimplyQualified(type) && (type.getPosition().isValidPosition() || type.getParent(CtArrayTypeReference.class) != null);
+    }
+
+    private void checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
+        boolean isQualified = isQualified(ctTypeReference);
+        if (!isQualified) {
+            for (CtTypeReference<?> typeReference : ctTypeReference.getActualTypeArguments()) {
+                if (isQualified(typeReference)) {
+                    isQualified = true;
+                    break;
+                }
+            }
+        }
+
+        if (isQualified) {
+            this.reportProblem(findParentSourcePosition(ctTypeReference).orElseThrow().getPosition(), ctTypeReference);
+        }
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtTypeReference<?>>() {
+        staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
-            public void process(CtTypeReference<?> ctTypeReference) {
-                // Special case arrays, because they do not have a valid source position.
-                //
-                // The source position is not valid, because one can write String a[] and String[] a and spoon
-                // does not support multi-spans
-                if (ctTypeReference instanceof CtArrayTypeReference<?> ctArrayTypeReference
-                    // skip nested arrays (they are already covered, because the code is executed on the parent as well)
-                    && ctTypeReference.getParent(CtArrayTypeReference.class) == null) {
-                    CtTypeReference<?> arrayType = ctArrayTypeReference.getArrayType();
-
-                    SourcePosition position = resolveArraySourcePosition(ctArrayTypeReference);
-                    if (isFullyQualifiedType(arrayType) && position != null) {
-                        reportProblem(position, arrayType);
-                    }
-
-                    return;
+            public <T> void visitCtField(CtField<T> ctVariable) {
+                if (!ctVariable.isImplicit()) {
+                    checkCtTypeReference(ctVariable.getType());
                 }
 
-                if (ctTypeReference.isImplicit() || !ctTypeReference.getPosition().isValidPosition()) {
-                    return;
+                super.visitCtField(ctVariable);
+            }
+
+            @Override
+            public <T> void visitCtLocalVariable(CtLocalVariable<T> ctVariable) {
+                if (!ctVariable.isImplicit() && !ctVariable.isInferred()) {
+                    checkCtTypeReference(ctVariable.getType());
                 }
 
-                if (isFullyQualifiedType(ctTypeReference)) {
-                    reportProblem(ctTypeReference);
+                super.visitCtLocalVariable(ctVariable);
+            }
+
+            @Override
+            public <T> void visitCtParameter(CtParameter<T> ctVariable) {
+                if (!ctVariable.isImplicit()) {
+                    checkCtTypeReference(ctVariable.getType());
                 }
+
+                super.visitCtParameter(ctVariable);
             }
         });
     }
