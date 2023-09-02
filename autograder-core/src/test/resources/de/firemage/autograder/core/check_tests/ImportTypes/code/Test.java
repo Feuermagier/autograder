@@ -18,7 +18,7 @@ class TestInnerClass {
 
     void testForeign() {
         Map.Entry<String, String> entry = null; /*# ok #*/
-        java.util.Map.Entry<String, String> entry2 = null; /*# ok; dont know how to detect this #*/
+        java.util.Map.Entry<String, String> entry2 = null; /*# not ok #*/
     }
 }
 
