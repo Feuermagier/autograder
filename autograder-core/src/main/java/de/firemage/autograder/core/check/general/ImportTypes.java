@@ -47,9 +47,7 @@ public class ImportTypes extends IntegratedCheck {
             CodePosition.fromSourcePosition(sourcePosition, ctTypeReference, this.getRoot()),
             new LocalizedMessage(
                 "import-types",
-                Map.of(
-                    "type", ctTypeReference.getQualifiedName()
-                )
+                Map.of("type", ctTypeReference.prettyprint())
             ),
             ProblemType.IMPORT_TYPES
         );
