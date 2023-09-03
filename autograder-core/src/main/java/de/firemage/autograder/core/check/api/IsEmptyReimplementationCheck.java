@@ -37,6 +37,7 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
     private static boolean isSizeCall(CtInvocation<?> ctInvocation) {
         CtExpression<?> target = ctInvocation.getTarget();
         return target != null
+            && target.getType().getTypeDeclaration() != null
             // the type with the size method must have an isEmpty method
             && target.getType().getTypeDeclaration().getMethod(
                 ctInvocation.getFactory().Type().BOOLEAN_PRIMITIVE,
