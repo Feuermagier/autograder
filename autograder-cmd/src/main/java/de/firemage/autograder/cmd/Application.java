@@ -240,6 +240,11 @@ public class Application implements Callable<Integer> {
         Consumer<LinterStatus> statusConsumer = status ->
                 System.out.println(linter.translateMessage(status.getMessage()));
 
+        if (!Files.exists(file)) {
+            CmdUtil.printlnErr("The path '%s' does not exist".formatted(file));
+            return COMPILATION_EXIT_CODE;
+        }
+
         try (UploadedFile uploadedFile = UploadedFile.build(
                 file,
                 JavaVersion.fromString(this.javaVersion),
