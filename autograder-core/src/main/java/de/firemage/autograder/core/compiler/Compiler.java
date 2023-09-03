@@ -130,6 +130,7 @@ public record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
             output.close();
 
             diagnostics.addAll(diagnosticCollector.getDiagnostics().stream()
+                .filter(diagnostic -> diagnostic.getSource() != null)
                 .map(diagnostic -> new CompilationDiagnostic(diagnostic, input))
                 .toList());
 
