@@ -36,6 +36,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
@@ -398,6 +399,7 @@ public class CommonReimplementation extends IntegratedCheck {
             CtType<?> collectionType = ctStatement.getFactory().Type().get(java.util.Collection.class);
             if (!(ctStatement instanceof CtInvocation<?> ctInvocation)
                 || !(ctInvocation.getTarget() instanceof CtVariableAccess<?> ctVariableAccess)
+                || ctVariableAccess.getVariable().getType() instanceof CtTypeParameterReference
                 || !ctVariableAccess.getVariable().getType().isSubtypeOf(collectionType.getReference())) {
                 return Optional.empty();
             }
