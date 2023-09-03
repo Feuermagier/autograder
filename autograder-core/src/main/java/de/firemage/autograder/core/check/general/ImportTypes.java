@@ -8,7 +8,6 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtParameter;
@@ -18,6 +17,8 @@ import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -42,17 +43,6 @@ public class ImportTypes extends IntegratedCheck {
         return Optional.of(currentElement);
     }
 
-    private void reportProblem(SourcePosition sourcePosition, CtTypeReference<?> ctTypeReference) {
-        addLocalProblem(
-            CodePosition.fromSourcePosition(sourcePosition, ctTypeReference, this.getRoot()),
-            new LocalizedMessage(
-                "import-types",
-                Map.of("type", ctTypeReference.prettyprint())
-            ),
-            ProblemType.IMPORT_TYPES
-        );
-    }
-
     private static boolean isSimplyQualified(CtTypeReference<?> ctTypeReference) {
         return ctTypeReference.isImplicit()
             || ctTypeReference.isSimplyQualified()
@@ -60,32 +50,46 @@ public class ImportTypes extends IntegratedCheck {
             || ctTypeReference instanceof CtTypeParameterReference;
     }
 
-    private static boolean isQualified(CtTypeReference<?> ctTypeReference) {
+    private static List<CtTypeReference<?>> findQualifiedTypes(CtTypeReference<?> ctTypeReference) {
         if (ctTypeReference instanceof CtArrayTypeReference<?> ctArrayTypeReference) {
-            return isQualified(ctArrayTypeReference.getArrayType());
+            return findQualifiedTypes(ctArrayTypeReference.getArrayType());
         }
 
+        // for nested types, we only want to check the outermost type
         CtTypeReference<?> type = ctTypeReference;
         while (type.getDeclaringType() != null) {
             type = type.getDeclaringType();
         }
 
-        return !isSimplyQualified(type) && (type.getPosition().isValidPosition() || type.getParent(CtArrayTypeReference.class) != null);
+        List<CtTypeReference<?>> result = new ArrayList<>();
+        // the right condition is a workaround for https://github.com/INRIA/spoon/issues/5428
+        if (!isSimplyQualified(type) && (type.getPosition().isValidPosition() || type.getParent(CtArrayTypeReference.class) != null)) {
+            result.add(type);
+        }
+
+        for (CtTypeReference<?> typeArgument : type.getActualTypeArguments()) {
+            result.addAll(findQualifiedTypes(typeArgument));
+        }
+
+        return result;
     }
 
     private void checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
-        boolean isQualified = isQualified(ctTypeReference);
-        if (!isQualified) {
-            for (CtTypeReference<?> typeReference : ctTypeReference.getActualTypeArguments()) {
-                if (isQualified(typeReference)) {
-                    isQualified = true;
-                    break;
-                }
-            }
-        }
+        CodePosition codePosition = CodePosition.fromSourcePosition(
+            findParentSourcePosition(ctTypeReference).orElseThrow().getPosition(),
+            ctTypeReference,
+            this.getRoot()
+        );
 
-        if (isQualified) {
-            this.reportProblem(findParentSourcePosition(ctTypeReference).orElseThrow().getPosition(), ctTypeReference);
+        for (CtTypeReference<?> typeReference : findQualifiedTypes(ctTypeReference)) {
+            this.addLocalProblem(
+                codePosition,
+                new LocalizedMessage(
+                    "import-types",
+                    Map.of("type", typeReference.getQualifiedName())
+                ),
+                ProblemType.IMPORT_TYPES
+            );
         }
     }
 
@@ -103,6 +107,7 @@ public class ImportTypes extends IntegratedCheck {
 
             @Override
             public <T> void visitCtLocalVariable(CtLocalVariable<T> ctVariable) {
+                // !isInferred to skip `var`
                 if (!ctVariable.isImplicit() && !ctVariable.isInferred()) {
                     checkCtTypeReference(ctVariable.getType());
                 }
