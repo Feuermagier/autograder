@@ -152,6 +152,11 @@ public class CommonReimplementation extends IntegratedCheck {
         Set<BinaryOperatorKind> maxOperators = Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE);
         Set<BinaryOperatorKind> minOperators = Set.of(BinaryOperatorKind.GT, BinaryOperatorKind.GE);
 
+        // happens for if (a);
+        if (ctIf.getThenStatement() == null) {
+            return;
+        }
+
         // ensure that in the if block there is only one assignment to a variable
         // and the condition is a binary operator with <, <=, > or >=
         List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
