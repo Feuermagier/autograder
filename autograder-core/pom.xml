@@ -13,7 +13,7 @@
     <name>autograder-core</name>
 
     <properties>
-        <spoon.version>10.4.0</spoon.version>
+        <spoon.version>10.4.1</spoon.version>
         <pmd.version>7.0.0-rc3</pmd.version>
         <spotbugs.version>6.45.0</spotbugs.version>
 

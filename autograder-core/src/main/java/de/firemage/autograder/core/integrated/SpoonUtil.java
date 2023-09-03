@@ -574,10 +574,11 @@ public final class SpoonUtil {
         return normalize(result);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> CtExpression<T> negate(CtExpression<T> ctExpression) {
         // !(!(a)) => a
         if (ctExpression instanceof CtUnaryOperator<T> ctUnaryOperator && ctUnaryOperator.getKind() == UnaryOperatorKind.NOT) {
-            return ctUnaryOperator.getOperand();
+            return (CtExpression<T>) ctUnaryOperator.getOperand();
         }
 
         if (ctExpression instanceof CtBinaryOperator<T> ctBinaryOperator) {

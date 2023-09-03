@@ -25,16 +25,17 @@ public final class DeduplicateOperatorApplication implements Fold {
     }
 
     @Override
+    @SuppressWarnings("unchecked")
     public <T> CtExpression<T> foldCtUnaryOperator(CtUnaryOperator<T> ctUnaryOperator) {
         // the promoted result is only used if the operator can be optimized
         CtUnaryOperator<T> promotedResult = this.evaluator.evaluate(ctUnaryOperator);
-        CtExpression<T> operand = promotedResult.getOperand();
+        CtExpression<T> operand = (CtExpression<T>) promotedResult.getOperand();
 
         return switch (ctUnaryOperator.getKind()) {
             // -(-x) -> x
             case NEG -> {
                 if (operand instanceof CtUnaryOperator<T> unaryOperand && (unaryOperand.getKind() == UnaryOperatorKind.NEG)) {
-                    yield unaryOperand.getOperand();
+                    yield (CtExpression<T>) unaryOperand.getOperand();
                 }
 
                 yield ctUnaryOperator;
@@ -42,7 +43,7 @@ public final class DeduplicateOperatorApplication implements Fold {
             // !(!x) -> x
             case NOT -> {
                 if (operand instanceof CtUnaryOperator<T> unaryOperand && (unaryOperand.getKind() == UnaryOperatorKind.NOT)) {
-                    yield unaryOperand.getOperand();
+                    yield (CtExpression<T>) unaryOperand.getOperand();
                 }
 
                 yield ctUnaryOperator;
