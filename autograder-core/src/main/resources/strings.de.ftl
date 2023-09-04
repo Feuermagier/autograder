@@ -115,8 +115,6 @@ complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score
 
 redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
 
-redundant-array-init = Die Zuweisung zu dem array ist unnötig und kann entfernt werden.
-
 redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, aber der Wert '{$value}' wird nicht direkt zugewiesen. Schreibe stattdessen '{$suggestion}'.
 
 multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen. Also keine Deklarationen von mehreren Variablen oder Zuweisungen in einer Zeile.

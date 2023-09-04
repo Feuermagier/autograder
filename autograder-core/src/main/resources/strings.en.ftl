@@ -116,8 +116,6 @@ complex-regex = Nontrivial regex need an explanation (score is {$score}, max all
 
 redundant-catch = An exception should not be caught and then rethrown immediately.
 
-redundant-array-init = The assignment to the array is unnecessary and can be removed.
-
 redundant-uninitialized-variable = The variable '{$variable}' has been declared, but the value '{$value}' is not directly assigned. Instead you should write '{$suggestion}'.
 
 merge-nested-if = The nested if can be combined with the outer if. The condition for the outer if should then be '{$suggestion}'.
