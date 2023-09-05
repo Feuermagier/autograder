@@ -106,8 +106,6 @@ unused-import-exp = Unbenutzter Import
 
 wrapper-instantiation-exp = Wrapper-Klassen sollten nicht direkt instanziiert werden
 
-redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
-
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})

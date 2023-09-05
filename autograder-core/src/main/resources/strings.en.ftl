@@ -105,8 +105,6 @@ unused-import-exp = Unused import
 
 wrapper-instantiation-exp = Don't instantiate primitive wrappers
 
-redundant-neg-exp = '{$original}' should be written as '{$fixed}'
-
 redundant-boolean-equal = It is redundant to explicitly check if a condition equals true or false. Write instead '{$suggestion}'.
 
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'
