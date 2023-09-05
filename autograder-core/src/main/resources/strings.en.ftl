@@ -165,7 +165,7 @@ for-foreach = for-loop should be a for-each-loop
 
 missing-override-exp = Missing @Override
 
-system-dependent-linebreak-exp = Always use system-independent line breaks such as the value obtained from System.lineSeparator() or %n in format strings
+system-specific-linebreak = Always use system-independent line breaks such as the value obtained from System.lineSeparator() or %n in format strings
 
 field-final-exp = The attribute '{$name}' should be final
 

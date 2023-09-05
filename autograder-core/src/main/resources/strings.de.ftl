@@ -162,7 +162,7 @@ for-foreach = for-Schleife sollte eine for-each-Schleife sein
 
 missing-override-exp = Fehlendes @Override
 
-system-dependent-linebreak-exp = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
+system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
 
 field-final-exp = Das Attribut '{$name}' sollte final sein
 

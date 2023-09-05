@@ -1,0 +1,7 @@
+general.SystemSpecificLineBreak
+Do not hard code system dependent line breaks
+Test.java:4
+Test.java:5
+Test.java:6
+Test.java:7
+Test.java:8
