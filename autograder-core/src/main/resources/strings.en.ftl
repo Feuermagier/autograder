@@ -133,8 +133,8 @@ assert-used-exp = Assertions crash the entire program if they evaluate to false.
 print-stack-trace = Don't print stack traces in your final solution
 
 # Exceptions
-custom-exception-inheritance-exp-runtime = Custom exceptions should be checked exceptions
-custom-exception-inheritance-exp-error = Custom exceptions should not extend Error
+custom-exception-inheritance-error = The custom exception '{$name}' should not extend 'Error'.
+custom-exception-inheritance-runtime = The custom exception '{$name}' should extend 'Exception' and not 'RuntimeException'.
 
 empty-catch-block = Empty catch block
 

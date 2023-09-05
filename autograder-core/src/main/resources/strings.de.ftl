@@ -130,8 +130,8 @@ assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie fa
 print-stack-trace = Stack Traces sollten in der Abgabe nicht ausgegeben werden
 
 # Exceptions
-custom-exception-inheritance-exp-runtime = Selbstdefinierte Exceptions sollten immer Checked Exceptions sein
-custom-exception-inheritance-exp-error = Selbstdefinierte Exceptions sollten nicht von Error erben
+custom-exception-inheritance-error = Die selbstdefinierte Exception '{$name}' sollte nicht von 'Error' erben.
+custom-exception-inheritance-runtime = Die selbstdefinierte Exception '{$name}' sollte von 'Exception' erben und nicht 'RuntimeException'.
 
 empty-catch-block = Leerer catch-Block
 
