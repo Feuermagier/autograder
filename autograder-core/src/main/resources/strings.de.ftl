@@ -92,8 +92,7 @@ implicit-constructor-exp = Unnötiger Standard-Konstruktor
 redundant-if-for-bool-exp-return = {$exp} kann direkt zurückgegeben werden
 redundant-if-for-bool-exp-assign = '{$exp}' kann direkt zu '{$target}' zugewiesen werden
 
-redundant-modifier-desc = Einige Modifizierer sind implizit
-redundant-modifier-exp = Unnötiger Modifizierer
+redundant-modifier = Die folgenden Modifier sind redundant und sollten deswegen entfernt werden: {$modifier}.
 
 redundant-return-exp = Unnötiges return
 
@@ -235,7 +234,6 @@ static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut s
 constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
 
 interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
-interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 

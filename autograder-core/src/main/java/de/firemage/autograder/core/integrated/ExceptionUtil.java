@@ -23,7 +23,7 @@ public final class ExceptionUtil {
         "java.lang.IndexOutOfBoundsException",
         "java.lang.StringIndexOutOfBoundsException"
     );
-    
+
     private static final Set<String> ERRORS = Set.of(
         "java.lang.Error",
         "java.lang.AssertionError",
@@ -38,7 +38,7 @@ public final class ExceptionUtil {
     public static boolean isRuntimeException(CtTypeReference<?> type) {
         return RUNTIME_EXCEPTIONS.contains(type.getQualifiedName());
     }
-    
+
     public static boolean isError(CtTypeReference<?> type) {
         return ERRORS.contains(type.getQualifiedName());
     }

@@ -93,8 +93,7 @@ implicit-constructor-exp = Unnecessary default constructor
 redundant-if-for-bool-exp-return = Directly return {$exp} instead of wrapping it in an if
 redundant-if-for-bool-exp-assign = Directly assign {$exp} to {$target} instead of wrapping it in an if
 
-redundant-modifier-desc = Some modifiers are implicit
-redundant-modifier-exp = Unnecessary modifier
+redundant-modifier = The following modifiers are redundant and should be removed: {$modifier}.
 
 redundant-return-exp = Unnecessary return
 
@@ -235,7 +234,6 @@ static-field-exp = The static field '{$name}' must not be static
 constants-class-exp = Constants should be saved in the class they are used in and not in a separate class. See https://stackoverflow.com/a/15056462/7766117
 
 interface-static-method-exp = Interfaces should not have static methods, because they can not be overwritten.
-interface-static-exp = Interfaces must not be static. The keyword 'static' is redundant and should be removed.
 
 empty-interface-exp = Interfaces should not be empty.
 

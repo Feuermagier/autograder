@@ -10,15 +10,12 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.ModifierKind;
-import spoon.support.reflect.CtExtendedModifier;
 
 import java.util.List;
 import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONSTANT_IN_INTERFACE, ProblemType.DO_NOT_HAVE_CONSTANTS_CLASS,
-                                      ProblemType.REDUNDANT_MODIFIER, ProblemType.STATIC_METHOD_IN_INTERFACE,
-                                      ProblemType.EMPTY_INTERFACE })
+                                      ProblemType.STATIC_METHOD_IN_INTERFACE, ProblemType.EMPTY_INTERFACE })
 public class InterfaceBadPractices extends IntegratedCheck {
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
@@ -65,18 +62,6 @@ public class InterfaceBadPractices extends IntegratedCheck {
                             method,
                             new LocalizedMessage("interface-static-method-exp"),
                             ProblemType.STATIC_METHOD_IN_INTERFACE
-                        );
-                    }
-                }
-
-                // static modifier can be added to interfaces inside classes,
-                // but is redundant and should be avoided
-                for (CtExtendedModifier ctExtendedModifier : ctInterface.getExtendedModifiers()) {
-                    if (!ctExtendedModifier.isImplicit() && ctExtendedModifier.getKind() == ModifierKind.STATIC) {
-                        addLocalProblem(
-                            ctInterface,
-                            new LocalizedMessage("interface-static-exp"),
-                            ProblemType.REDUNDANT_MODIFIER
                         );
                     }
                 }
