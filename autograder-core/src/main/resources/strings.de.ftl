@@ -152,8 +152,6 @@ param-reassign-exp = Parameter sollten nicht neu zugewiesen werden
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
 
-equals-handle-null-argument-exp = Die equals-Methode sollte null-Werte behandeln
-
 field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale Variable sein, da sie in jeder Methode vor dem ersten Lesen überschrieben wird
 
 for-foreach = for-Schleife sollte eine for-each-Schleife sein

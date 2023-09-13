@@ -155,8 +155,6 @@ param-reassign-exp = Don't reassign method/constructor parameters
 
 double-brace-init = Don't use the obscure 'double brace initialization' syntax
 
-equals-handle-null-argument-exp = equals should handle null arguments
-
 field-local-exp = Field '{$field}' of class {$class} should be converted to a local variable as every method overwrites it before reading it
 
 for-foreach = for-loop should be a for-each-loop
