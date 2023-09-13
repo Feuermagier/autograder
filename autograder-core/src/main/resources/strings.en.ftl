@@ -159,7 +159,7 @@ field-local-exp = Field '{$field}' of class {$class} should be converted to a lo
 
 for-foreach = for-loop should be a for-each-loop
 
-missing-override-exp = Missing @Override
+missing-override = '{$name}' should have an '@Override'-annotation, see https://stackoverflow.com/a/94411/7766117.
 
 system-specific-linebreak = Always use system-independent line breaks such as the value obtained from System.lineSeparator() or %n in format strings
 

@@ -156,7 +156,7 @@ field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale
 
 for-foreach = for-Schleife sollte eine for-each-Schleife sein
 
-missing-override-exp = Fehlendes @Override
+missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe https://stackoverflow.com/a/94411/7766117.
 
 system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
 

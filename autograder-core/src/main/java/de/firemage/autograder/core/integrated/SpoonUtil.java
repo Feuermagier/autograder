@@ -60,6 +60,7 @@ import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 import spoon.support.reflect.code.CtLiteralImpl;
+import spoon.support.reflect.declaration.CtMethodImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -992,8 +993,10 @@ public final class SpoonUtil {
      * @return true if the given method is overriding another method, false otherwise
      */
     public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
+        Collection<CtMethod<?>> topDefinitions = ctMethod.getTopDefinitions();
         // if the method is defined for the first time, this should return an empty collection
-        return !ctMethod.getTopDefinitions().isEmpty();
+        return !topDefinitions.isEmpty();
+        // TODO: this method is kinda whack
     }
 
     public static boolean isInOverriddenMethod(CtElement ctElement) {
