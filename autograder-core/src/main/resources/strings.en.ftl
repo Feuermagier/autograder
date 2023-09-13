@@ -26,8 +26,8 @@ duplicate-code = Duplicated code ({$lines}): {$first-path}:{$first-start}-{$firs
 suggest-replacement = Use '{$suggestion}' instead of '{$original}'.
 common-reimplementation = The code can be simplified to '{$suggestion}'.
 
-use-string-formatted = `{$formatted}` is easier to read.
-use-format-string = `{$formatted}` is easier to read.
+use-string-formatted = '{$formatted}' is easier to read.
+use-format-string = '{$formatted}' is easier to read.
 
 optional-argument = Optional should not be used as an argument, because it has 3 states: null, Optional.empty() and Optional.of(..). See https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Instead of an Optional boolean, one should use an enum.
@@ -82,7 +82,7 @@ javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned 
 todo-comment = TODOs should not be in the final submission.
 
 # Complexity
-use-diamond-operator = You can remove the types specified in the `< A, B, ... >` and just use `<>` instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
+use-diamond-operator = You can remove the types specified in the '< A, B, ... >' and just use '<>' instead, see https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html and https://stackoverflow.com/a/16352848/7766117
 
 extends-object = Explicitly extending Object is unnecessary
 
@@ -227,7 +227,7 @@ method-abstract-exp = {$type}::{$method} should be abstract and not provide a de
 utility-exp-final = Utility class is not final
 utility-exp-constructor = Utility classes must have a single private no-arg constructor
 
-static-field-exp = The static field '{$name}' must not be static
+static-field-should-be-instance = The static field '{$name}' must not be static.
 
 constants-class-exp = Constants should be saved in the class they are used in and not in a separate class. See https://stackoverflow.com/a/15056462/7766117
 

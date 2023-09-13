@@ -12,21 +12,28 @@ import spoon.reflect.declaration.CtField;
 
 import java.util.Map;
 
-@ExecutableCheck(reportedProblems = {ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE})
+@ExecutableCheck(reportedProblems = { ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE })
 public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
-            public void process(CtField<?> field) {
-                if (!field.isStatic() || field.isFinal()) {
+            public void process(CtField<?> ctField) {
+                if (ctField.isImplicit() || !ctField.getPosition().isValidPosition() || !ctField.isStatic() || ctField.isFinal()) {
                     return;
                 }
 
-                if (!SpoonUtil.isEffectivelyFinal(field.getReference())) {
-                    addLocalProblem(field,
-                        new LocalizedMessage("static-field-exp", Map.of("name", field.getSimpleName())),
-                        ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE);
+                // the field is not marked as final, so values can be assigned to it.
+                // if the field is assigned multiple times, it should not be static
+                if (!SpoonUtil.isEffectivelyFinal(ctField.getReference())) {
+                    addLocalProblem(
+                        ctField,
+                        new LocalizedMessage(
+                            "static-field-should-be-instance",
+                            Map.of("name", ctField.getSimpleName())
+                        ),
+                        ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE
+                    );
                 }
             }
         });

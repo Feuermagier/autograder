@@ -26,8 +26,8 @@ duplicate-code = Duplizierter Code ({$lines}): {$first-path}:{$first-start}-{$fi
 suggest-replacement = Verwende '{$suggestion}' statt '{$original}'.
 common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 
-use-string-formatted = `{$formatted}` ist schöner zu lesen.
-use-format-string = `{$formatted}` ist schöner zu lesen.
+use-string-formatted = '{$formatted}' ist schöner zu lesen.
+use-format-string = '{$formatted}' ist schöner zu lesen.
 
 optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
@@ -81,7 +81,7 @@ javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im 
 todo-comment = TODOs sollten nicht in der finalen Abgabe vorhanden sein.
 
 # Complexity
-use-diamond-operator = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
+use-diamond-operator = Du kannst die Typen in '< A, B, ... >' entfernen und stattdessen '<>' verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
 extends-object = Explizit von Object zu erben ist unnötig
 
@@ -227,7 +227,7 @@ method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Plat
 utility-exp-final = Utility-Klasse ist nicht final
 utility-exp-constructor = Utility-Klassen müssen genau einen privaten und parameterlosen Konstruktor haben
 
-static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut sein
+static-field-should-be-instance = Das statische Attribut '{$name}' sollte ein Instanzattribut sein.
 
 constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
 
