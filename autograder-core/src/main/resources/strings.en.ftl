@@ -151,7 +151,7 @@ variable-should-be = The variable '{$variable}' should be '{$suggestion}'.
 
 constants-interfaces-exp = Interfaces must not have fields
 
-param-reassign-exp = Don't reassign method/constructor parameters
+reassigned-parameter = The parameter '{$name}' should not be assigned a new value.
 
 double-brace-init = Don't use the obscure 'double brace initialization' syntax
 
