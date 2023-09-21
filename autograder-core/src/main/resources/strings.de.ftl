@@ -97,6 +97,8 @@ redundant-boolean-equal = Es ist unnötig explizit zu überprüfen, ob eine Bedi
 
 self-assignment-exp = Nutzlose Zuweisung von '{$rhs}' zu '{$lhs}'
 
+too-many-exceptions = Das Projekt definiert {$count} Exceptions. Das sind zu viele.
+
 redundant-local-return-exp = Der Wert kann direkt zurückgegeben werden
 
 unused-import-exp = Unbenutzter Import
