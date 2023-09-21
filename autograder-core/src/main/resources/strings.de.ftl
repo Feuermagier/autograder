@@ -89,9 +89,6 @@ for-loop-var = for-Schleifen sollten genau eine lokal deklarierte Kontrollvariab
 
 implicit-constructor-exp = Unnötiger Standard-Konstruktor
 
-redundant-if-for-bool-exp-return = {$exp} kann direkt zurückgegeben werden
-redundant-if-for-bool-exp-assign = '{$exp}' kann direkt zu '{$target}' zugewiesen werden
-
 redundant-modifier = Die folgenden Modifier sind redundant und sollten deswegen entfernt werden: {$modifier}.
 
 redundant-return-exp = Unnötiges return

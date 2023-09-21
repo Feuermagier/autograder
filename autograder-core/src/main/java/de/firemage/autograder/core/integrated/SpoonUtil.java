@@ -60,7 +60,6 @@ import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 import spoon.support.reflect.code.CtLiteralImpl;
-import spoon.support.reflect.declaration.CtMethodImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -653,6 +652,15 @@ public final class SpoonUtil {
         return evaluator.evaluate(ctExpression);
     }
 
+    /**
+     * Extracts a nested statement from a block if possible.
+     * <p>
+     * A statement might be in a block {@code { statement }}.
+     * This method will extract the statement from the block and return it.
+     *
+     * @param statement the statement to unwrap
+     * @return the given statement or an unwrapped version if possible
+     */
     public static CtStatement unwrapStatement(CtStatement statement) {
         if (statement instanceof CtBlock<?> block) {
             List<CtStatement> statements = SpoonUtil.getEffectiveStatements(block);

@@ -90,9 +90,6 @@ for-loop-var = Each for-loop should have exactly one control variable
 
 implicit-constructor-exp = Unnecessary default constructor
 
-redundant-if-for-bool-exp-return = Directly return {$exp} instead of wrapping it in an if
-redundant-if-for-bool-exp-assign = Directly assign {$exp} to {$target} instead of wrapping it in an if
-
 redundant-modifier = The following modifiers are redundant and should be removed: {$modifier}.
 
 redundant-return-exp = Unnecessary return
