@@ -239,12 +239,21 @@ class TestConcreteCollectionCheck extends AbstractCheckTest {
                         this.treeMap = null; /*# ok #*/
                     }
                 }
+
+                class TestThisAssignment {
+                    private ArrayList<String>[] /*# not ok #*/ list;
+
+                    public void init(int count) {
+                        this.list = new ArrayList[count] /*# ok #*/;
+                    }
+                }
                 """
         ), PROBLEM_TYPES);
 
         assertEqualsConcrete(problems.next(), "ArrayList<String>");
         assertEqualsConcrete(problems.next(), "ArrayList<String>");
         assertEqualsConcrete(problems.next(), "TreeMap<Integer, String>");
+        assertEqualsConcrete(problems.next(), "ArrayList<String>");
 
         problems.assertExhausted();
     }
