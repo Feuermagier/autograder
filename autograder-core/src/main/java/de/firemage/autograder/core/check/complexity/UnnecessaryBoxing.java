@@ -51,7 +51,7 @@ public class UnnecessaryBoxing extends IntegratedCheck {
                 }
 
                 CtVariable<?> ctVariable = ctTypeReference.getParent(CtVariable.class);
-                if (ctVariable != null && isBoxedType(ctVariable.getType())) {
+                if (ctVariable != null && isBoxedType(ctVariable.getType()) && ctVariable.getReference().getDeclaration() != null) {
                     List<CtExpression<?>> assignedValues = staticAnalysis.getModel()
                         .getElements(new VariableAccessFilter<>(ctVariable.getReference()))
                         .stream()
