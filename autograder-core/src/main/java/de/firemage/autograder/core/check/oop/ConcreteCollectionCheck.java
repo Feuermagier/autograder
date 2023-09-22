@@ -10,6 +10,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
+import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExecutableReferenceExpression;
@@ -36,6 +37,7 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE })
@@ -142,28 +144,31 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
     }
 
     private boolean checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
-        if (this.isConcreteCollectionType(ctTypeReference)
-            && !SpoonUtil.isInOverriddenMethod(ctTypeReference)
-            && !this.isInAllowedContext(ctTypeReference)
-            && !this.isAllowedType(ctTypeReference)
-        ) {
-            // A record has both a getter and an attribute -> visited twice and both are implicit...
-            CtElement element = ctTypeReference;
-            while (!element.getPosition().isValidPosition()
-                && (element.getParent(CtArrayTypeReference.class) != null)) {
-                    element = element.getParent(CtArrayTypeReference.class);
-            }
-
-            this.addLocalProblem(
-                element,
-                new LocalizedMessage("concrete-collection-exp"),
-                ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE
-            );
-
-            return true;
+        if (!this.isConcreteCollectionType(ctTypeReference)
+            || SpoonUtil.isInOverriddenMethod(ctTypeReference)
+            || this.isInAllowedContext(ctTypeReference)
+            || this.isAllowedType(ctTypeReference)) {
+            return false;
         }
 
-        return false;
+        CtElement element = ctTypeReference;
+        while (!element.getPosition().isValidPosition()
+            && (element.getParent(CtArrayTypeReference.class) != null)) {
+            element = element.getParent(CtArrayTypeReference.class);
+        }
+
+        this.addLocalProblem(
+            element,
+            new LocalizedMessage(
+                "concrete-collection",
+                Map.of(
+                    "type", ctTypeReference.prettyprint()
+                )
+            ),
+            ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE
+        );
+
+        return true;
     }
 
     @Override

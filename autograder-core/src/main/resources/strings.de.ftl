@@ -215,7 +215,7 @@ package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein
 variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redundante Zahl am Ende.
 
 # OOP
-concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
+concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
 
 list-getter-exp = Kopiere diese veränderbare Collection bevor du sie zurückgibst, um unbeabsichtigte Veränderungen durch andere Klassen zu verhindern
 

@@ -215,7 +215,7 @@ package-naming-convention = The name of a package should be a single word and al
 variable-redundant-number-suffix = The identifier '{$name}' has a redundant number at the end.
 
 # OOP
-concrete-collection-exp = Use the parent interface instead of a concrete collection class (e.g. List instead of ArrayList)
+concrete-collection = The type '{$type}' should be replaced by an interface like 'List' or 'Set'.
 
 list-getter-exp = Copy this mutable collection before returning it to avoid unwanted mutations by other classes
 
