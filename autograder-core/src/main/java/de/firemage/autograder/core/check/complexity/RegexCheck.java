@@ -77,7 +77,7 @@ public class RegexCheck extends IntegratedCheck {
     private static boolean isInAllowedContext(CtLiteral<?> ctLiteral) {
         CtElement parent = ctLiteral.getParent();
         if (parent instanceof CtVariable<?> ctVariable
-            && SpoonUtil.isEffectivelyFinal(ctVariable.getReference())) {
+            && SpoonUtil.isEffectivelyFinal(ctVariable)) {
             List<CtVariableAccess<?>> invocations = parent.getFactory().getModel().getElements(new VariableAccessFilter<>(ctVariable.getReference()));
 
             return !invocations.isEmpty() &&

@@ -59,7 +59,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                 // skip non-constant variables (and those that should be ignored)
                 if (ctVariable.isImplicit()
                     || !ctVariable.getPosition().isValidPosition()
-                    || !SpoonUtil.isEffectivelyFinal(ctVariable.getReference())
+                    || !SpoonUtil.isEffectivelyFinal(ctVariable)
                     || ctVariable.getDefaultExpression() == null
                     || IGNORE_FIELDS.contains(ctVariable.getSimpleName())) {
                     return;

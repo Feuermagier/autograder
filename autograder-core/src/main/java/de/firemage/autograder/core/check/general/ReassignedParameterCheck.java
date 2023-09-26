@@ -23,7 +23,7 @@ public class ReassignedParameterCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (!SpoonUtil.isEffectivelyFinal(ctParameter.getReference())) {
+                if (!SpoonUtil.isEffectivelyFinal(ctParameter)) {
                     addLocalProblem(
                         ctParameter,
                         new LocalizedMessage(

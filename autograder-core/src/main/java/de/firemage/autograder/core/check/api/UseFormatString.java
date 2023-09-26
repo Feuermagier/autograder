@@ -16,6 +16,7 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtTypeInformation;
+import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayList;
@@ -106,19 +107,24 @@ public class UseFormatString extends IntegratedCheck {
     }
 
     private CtExpression<?> resolveExpression(CtExpression<?> ctExpression) {
+        TypeFactory typeFactory = ctExpression.getFactory().Type();
+
         // convert System.lineSeparator() to "\n" which will later be converted to %n
         if (ctExpression instanceof CtInvocation<?> ctInvocation
             && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
             // ensure the method is called on java.lang.System
-            && ctInvocation.getFactory().Type().createReference(java.lang.System.class)
-                .equals(ctTypeAccess.getAccessedType())
-            && ctInvocation.getExecutable().getSimpleName().equals("lineSeparator")) {
-            return SpoonUtil.makeLiteral("\n");
+            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
+            && SpoonUtil.isSignatureEqualTo(
+                ctInvocation.getExecutable(),
+                typeFactory.STRING,
+                "lineSeparator"
+            )) {
+            return SpoonUtil.makeLiteral(typeFactory.STRING, "\n");
         }
 
         if (ctExpression instanceof CtLiteral<?> ctLiteral
-            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral('\n'))) {
-            return SpoonUtil.makeLiteral("\n");
+            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral(typeFactory.CHARACTER_PRIMITIVE, '\n'))) {
+            return SpoonUtil.makeLiteral(typeFactory.STRING, "\n");
         }
 
         return ctExpression;

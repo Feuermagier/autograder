@@ -59,7 +59,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
     private static Visibility getVisibility(CtTypeMember ctTypeMember) {
         CtModel ctModel = ctTypeMember.getFactory().getModel();
 
-        List<CtElement> references = SpoonUtil.findUses(ctTypeMember);
+        List<CtElement> references = SpoonUtil.findUsesOf(ctTypeMember);
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();

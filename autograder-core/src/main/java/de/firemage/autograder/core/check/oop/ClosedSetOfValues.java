@@ -197,7 +197,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
 
             @Override
             public <T> void visitCtField(CtField<T> ctField) {
-                if (!SpoonUtil.isEffectivelyFinal(ctField.getReference())) {
+                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
                     return;
                 }
 

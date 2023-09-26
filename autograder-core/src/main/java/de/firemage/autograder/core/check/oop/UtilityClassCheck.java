@@ -31,7 +31,7 @@ public class UtilityClassCheck extends IntegratedCheck {
                 && ctClass.getMethods().stream().allMatch(CtMethod::isStatic)
                 // all fields should be static and effectively final (no assignments)
                 && ctClass.getFields().stream().allMatch(
-                    ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(ctField.getReference())
+                    ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(ctField)
                 )
                 // the class should not extend anything
                 && ctClass.getSuperclass() == null

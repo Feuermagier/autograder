@@ -25,7 +25,7 @@ public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
 
                 // the field is not marked as final, so values can be assigned to it.
                 // if the field is assigned multiple times, it should not be static
-                if (!SpoonUtil.isEffectivelyFinal(ctField.getReference())) {
+                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
                     addLocalProblem(
                         ctField,
                         new LocalizedMessage(
