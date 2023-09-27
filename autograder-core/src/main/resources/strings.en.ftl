@@ -102,8 +102,6 @@ redundant-variable = The variable '{$name}' is redundant, the value can be retur
 
 unused-import-exp = Unused import
 
-wrapper-instantiation-exp = Don't instantiate primitive wrappers
-
 redundant-boolean-equal = It is redundant to explicitly check if a condition equals true or false. Write instead '{$suggestion}'.
 
 use-operator-assignment-exp = Assignment can be simplified to '{$simplified}'

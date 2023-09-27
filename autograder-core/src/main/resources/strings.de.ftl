@@ -103,8 +103,6 @@ redundant-variable = Die Variable '{$name}' ist unnötig, returne stattdessen de
 
 unused-import-exp = Unbenutzter Import
 
-wrapper-instantiation-exp = Wrapper-Klassen sollten nicht direkt instanziiert werden
-
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
