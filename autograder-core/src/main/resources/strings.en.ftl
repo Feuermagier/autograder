@@ -98,7 +98,7 @@ self-assignment-exp = Useless assignment of {$rhs} to {$lhs}
 
 too-many-exceptions = The project defines {$count} exceptions. Those are too many.
 
-redundant-local-return-exp = Directly return this value
+redundant-variable = The variable '{$name}' is redundant, the value can be returned directly: 'return {$value}'.
 
 unused-import-exp = Unused import
 
