@@ -54,7 +54,7 @@ array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. D
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
 # Comment
-commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
+commented-out-code = Dieser auskommentierte Code sollte entfernt werden
 
 comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf Englisch, sondern scheint {$lang} zu sein
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}

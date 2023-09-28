@@ -55,7 +55,7 @@ array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so compa
                             instead.
 
 # Comment
-commented-out-code-exp = This commented out code should be removed
+commented-out-code = This commented out code should be removed
 
 comment-language-exp-invalid = The language of this comment is neither English nor German but seems to be {$lang}
 comment-language-exp-english = The code contains comments in German and in English. This comment is in English. A German comment can be found at {$path}:{$line}
