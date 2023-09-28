@@ -46,9 +46,14 @@ public class FieldJavadocCheck extends IntegratedCheck {
     private void checkValidTags(CtJavaDoc javadoc) {
         for (CtJavaDocTag tag : javadoc.getTags()) {
             if (!VALID_TAGS.contains(tag.getType())) {
-                addLocalProblem(javadoc,
-                    new LocalizedMessage("javadoc-field-exp-unexpected-tag", Map.of("tag", tag.getType().getName())),
-                    ProblemType.JAVADOC_UNEXPECTED_TAG);
+                addLocalProblem(
+                    javadoc,
+                    new LocalizedMessage(
+                        "javadoc-unexpected-tag",
+                        Map.of("tag", tag.getType().getName())
+                    ),
+                    ProblemType.JAVADOC_UNEXPECTED_TAG
+                );
             }
         }
     }

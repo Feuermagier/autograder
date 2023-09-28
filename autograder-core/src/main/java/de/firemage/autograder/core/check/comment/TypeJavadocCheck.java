@@ -71,7 +71,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
                 }
 
                 addLocalProblem(javadoc,
-                    new LocalizedMessage("javadoc-type-exp-unexpected-tag", Map.of("tag", tag.getType().getName())),
+                    new LocalizedMessage("javadoc-unexpected-tag", Map.of("tag", tag.getType().getName())),
                     ProblemType.JAVADOC_UNEXPECTED_TAG);
             }
         }

@@ -49,7 +49,7 @@ class TestMethodJavadocCheck extends AbstractCheckTest {
     void assertEqualsUnknownTag(Problem problem, String tag) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
-                "javadoc-method-exp-unexpected-tag",
+                "javadoc-unexpected-tag",
                 Map.of("tag", tag)
             )),
             this.linter.translateMessage(problem.getExplanation())

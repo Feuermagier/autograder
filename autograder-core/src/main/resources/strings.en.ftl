@@ -63,12 +63,10 @@ comment-language-exp-german = The code contains comments in German and in Englis
 
 javadoc-method-exp-param-missing = The parameter '{$param}' is not mentioned in the JavaDoc comment
 javadoc-method-exp-param-unknown = The JavaDoc comment mentions the parameter '{$param}', but the parameter doesn't exist
-javadoc-method-exp-unexpected-tag = JavaDoc comments of methods must not have '@{$tag}' tags
 
-javadoc-type-exp-unexpected-tag = JavaDoc comments of types must not have '@{$tag}' tags
+javadoc-unexpected-tag = The JavaDoc comment should not have an '@{$tag}' tag.
+
 javadoc-type-exp-invalid-author = The @author tag should contain your u-shorthand: {$authors}
-
-javadoc-field-exp-unexpected-tag = JavaDoc comments of fields must not have '@{$tag}' tags
 
 javadoc-return-null-exp = The method {$method} may return null but the @return tag doesn't mention it
 

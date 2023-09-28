@@ -104,7 +104,7 @@ public class MethodJavadocCheck extends IntegratedCheck {
                 addLocalProblem(
                     javadoc,
                     new LocalizedMessage(
-                        "javadoc-method-exp-unexpected-tag",
+                        "javadoc-unexpected-tag",
                         Map.of("tag", tag.getType().getName())
                     ),
                     ProblemType.JAVADOC_UNEXPECTED_TAG
