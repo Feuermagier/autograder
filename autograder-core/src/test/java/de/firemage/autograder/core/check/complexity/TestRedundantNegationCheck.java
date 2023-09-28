@@ -45,6 +45,7 @@ class TestRedundantNegationCheck extends AbstractCheckTest {
             " !(a > b)            ; int a, int b          ; a <= b       ",
             " !(a <= b)           ; int a, int b          ; a > b        ",
             " !(a < b)            ; int a, int b          ; a >= b       ",
+            " !(a ^ b)            ; boolean a, boolean b  ; a == b       ",
         }
     )
     void testRedundantNegation(String expression, String arguments, String expected) throws IOException, LinterException {

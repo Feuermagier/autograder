@@ -538,7 +538,14 @@ public final class SpoonUtil {
                     return result;
                 }
                 // !(a != b) -> a == b
-                case NE -> {
+                //
+                // a | b | a ^ b
+                // 0 | 0 |   0
+                // 0 | 1 |   1
+                // 1 | 0 |   1
+                // 1 | 1 |   0
+                // => !(a ^ b) -> a == b
+                case NE, BITXOR -> {
                     result.setKind(BinaryOperatorKind.EQ);
                     return result;
                 }
