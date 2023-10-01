@@ -56,23 +56,28 @@ public class RegexCheck extends IntegratedCheck {
     private static boolean isRegexInvocation(CtInvocation<?> ctInvocation) {
         CtExecutableReference<?> ctExecutable = ctInvocation.getExecutable();
 
+        // for super invocations the target is null
+        if (ctInvocation.getTarget() == null) {
+            return false;
+        }
+
         return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
             && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
             && List.of("matches", "compile").contains(ctExecutable.getSimpleName())
             || SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), java.lang.String.class)
             && (
-                SpoonUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
+            SpoonUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
                 || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceAll", String.class, String.class)
                 || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceFirst", String.class, String.class)
                 || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class)
                 || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class, int.class)
-            );
+        );
     }
 
     private static boolean isInAllowedContext(CtLiteral<?> ctLiteral) {
         CtElement parent = ctLiteral.getParent();
         if (parent instanceof CtVariable<?> ctVariable
-            && SpoonUtil.isEffectivelyFinal(ctVariable.getReference())) {
+            && SpoonUtil.isEffectivelyFinal(ctVariable)) {
             List<CtVariableAccess<?>> invocations = parent.getFactory().getModel().getElements(new VariableAccessFilter<>(ctVariable.getReference()));
 
             return !invocations.isEmpty() &&

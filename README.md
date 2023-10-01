@@ -1,6 +1,6 @@
 ## Automatically run static & dynamic analysis on student code to aid grading.
 
-### All currently implemented checks can be found [here](checks.md)
+### An incomplete list of currently implemented checks can be found [here](checks.md)
 
 ### Usage
 
@@ -16,12 +16,18 @@ The command line parameters are
 * `-s` / `--static`: Disable dynamic analysis.
 
 The check config file must be a valid YAML file that configures the tests to run.
-Autograder can also eb used as a library by just using the module `autograder-core`.
+Autograder can be used as a library by just using the module `autograder-core`.
+
+```
+java -jar autograder-cmd.jar C:\path\to\config.yml -s C:\path\to\submission\programming-submission-uxxxx\src
+```
 
 ### Additional information
 
-The code is analyzed using PMD, SpotBugs and the PMD CPD with custom configurations as well as custom static and dynamic checks ("integrated" checks).
-You can find an exemplary config file [here](sample_config.yaml).
+The code is mostly analyzed through spoon, but PMD, CPD, SpotBugs and error-prone are supported as well.
+Implemented checks can be found in the [checks directory](autograder-core/src/main/java/de/firemage/autograder/core/check).
+
+The [sample_config.yaml](sample_config.yaml) contains all available checks.
 If you have an idea for another check open an issue, contact me or implement the check yourself and open a pull request.
 
 The dynamic analysis executes the student's code in secured Docker containers.
@@ -40,7 +46,6 @@ This makes sure that all possible code paths are executed.
 ### Development
 As of now, the following tools can be used in checks:
 * PMD XPath expressions to query the source code. 
-When reasonably possible, those should be used to keep the code clean.
 * A model of the source code built with [Spoon](https://github.com/INRIA/spoon). Most non-trivial checks use this model.
 * An (unstructured) list of events generated during the test runs.
 * A dependency graph between classes of the source code, built with [JGraphT](https://jgrapht.org/).

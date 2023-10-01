@@ -15,6 +15,8 @@ import spoon.reflect.code.CtVariableRead;
 public class PrintStackTraceCheck extends IntegratedCheck {
     private static boolean hasInvokedPrintStackTrace(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() instanceof CtVariableRead<?> ctVariableRead
+            // workaround for https://github.com/INRIA/spoon/issues/5414
+            && ctVariableRead.getType().getTypeDeclaration() != null
             // ensure the method is called on the correct type
             && SpoonUtil.isSubtypeOf(ctVariableRead.getType(), java.lang.Throwable.class)
             && ctInvocation.getExecutable().getSimpleName().equals("printStackTrace");
@@ -28,7 +30,7 @@ public class PrintStackTraceCheck extends IntegratedCheck {
                 if (hasInvokedPrintStackTrace(ctInvocation)) {
                     addLocalProblem(
                         ctInvocation,
-                        new LocalizedMessage("print-stack-trace-exp"),
+                        new LocalizedMessage("print-stack-trace"),
                         ProblemType.EXCEPTION_PRINT_STACK_TRACE
                     );
                 }

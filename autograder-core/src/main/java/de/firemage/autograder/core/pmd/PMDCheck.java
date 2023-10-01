@@ -16,7 +16,7 @@ public abstract class PMDCheck implements Check {
     private static final Language JAVA_LANGUAGE = LanguageRegistry.PMD.getLanguageById("java");
     private final List<Rule> rules;
 
-    private Function<RuleViolation, Translatable> explanation;
+    private final Function<RuleViolation, Translatable> explanation;
 
     private final ProblemType problemType;
 

@@ -2,6 +2,7 @@ package de.firemage.autograder.core.integrated.evaluator.fold;
 
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayList;
@@ -54,6 +55,11 @@ public final class RemoveRedundantCasts implements Fold {
             int indexTo = HIERARCHY.indexOf(to.getActualClass());
 
             return indexFrom != -1 && indexTo != -1 && indexFrom <= indexTo;
+        }
+
+        // T.isSubtypeOf crashes if T is a type parameter
+        if (to instanceof CtTypeParameterReference) {
+            return false;
         }
 
         // String -> Object works (Subclass -> Superclass)

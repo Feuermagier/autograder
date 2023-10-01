@@ -22,23 +22,17 @@ merged-problems = {$message} Weitere Probleme in {$locations}.
 duplicate-code = Duplizierter Code ({$lines}): {$first-path}:{$first-start}-{$first-end} und {$second-path}:{$second-start}-{$second-end}
 
 # API
-is-empty-reimplemented-exp = Verwende isEmpty()
 
-old-collection-exp-vector = Verwende ArrayList statt Vector
-old-collection-exp-hashtable = Verwende HashMap statt Hashtable
-old-collection-exp-stack = Verwende Dequeue statt Stack
+suggest-replacement = Verwende '{$suggestion}' statt '{$original}'.
+common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 
-string-is-empty-exp-emptiness = Benutze 'isEmpty()' statt '{$exp}' um auf Leerheit zu prüfen
-string-is-empty-exp-non-emptiness = Benutze '!<...>isEmpty()' statt '{$exp}' um auf mindestens ein Element zu prüfen
-
-use-string-formatted = `{$formatted}` ist schöner zu lesen.
+use-string-formatted = '{$formatted}' ist schöner zu lesen.
+use-format-string = '{$formatted}' ist schöner zu lesen.
 
 optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
 
 equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.
-
-use-format-string = `{$formatted}` ist schöner zu lesen.
 
 use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
 
@@ -59,14 +53,8 @@ equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich s
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
-common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
-
-use-entry-set = Verwende hier 'entrySet' statt 'keySet'.
-
-char-range = Der Code kann vereinfacht werden zu '{$suggestion}'.
-
 # Comment
-commented-out-code-exp = Dieser auskommentierte Code sollte entfernt werden
+commented-out-code = Dieser auskommentierte Code sollte entfernt werden
 
 comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf Englisch, sondern scheint {$lang} zu sein
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}
@@ -74,12 +62,10 @@ comment-language-exp-german = Der Code enthält deutsche und englische Kommentar
 
 javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
 javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
-javadoc-method-exp-unexpected-tag = JavaDoc-Kommentare von Methoden sollten keinen '@{$tag}'-Tag haben
 
-javadoc-type-exp-unexpected-tag = JavaDoc-Kommentare von Typen sollten keinen '@{$tag}'-Tag haben
+javadoc-unexpected-tag = Der JavaDoc-Kommentar sollte keinen '@{$tag}'-Tag haben.
+
 javadoc-type-exp-invalid-author = Im @author-Tag sollte dein u-Kürzel stehen: {$authors}
-
-javadoc-field-exp-unexpected-tag = JavaDoc-Kommentare von Attributen sollten keinen '@{$tag}'-Tag haben
 
 javadoc-return-null-exp = Die Methode {$method} kann null zurückgeben, der @return-Tag erwähnt das aber nicht
 
@@ -93,7 +79,7 @@ javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im 
 todo-comment = TODOs sollten nicht in der finalen Abgabe vorhanden sein.
 
 # Complexity
-use-diamond-operator = Du kannst die Typen in `< A, B, ... >` entfernen und stattdessen `<>` verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
+use-diamond-operator = Du kannst die Typen in '< A, B, ... >' entfernen und stattdessen '<>' verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
 
 extends-object = Explizit von Object zu erben ist unnötig
 
@@ -101,11 +87,7 @@ for-loop-var = for-Schleifen sollten genau eine lokal deklarierte Kontrollvariab
 
 implicit-constructor-exp = Unnötiger Standard-Konstruktor
 
-redundant-if-for-bool-exp-return = {$exp} kann direkt zurückgegeben werden
-redundant-if-for-bool-exp-assign = '{$exp}' kann direkt zu '{$target}' zugewiesen werden
-
-redundant-modifier-desc = Einige Modifizierer sind implizit
-redundant-modifier-exp = Unnötiger Modifizierer
+redundant-modifier = Die folgenden Modifier sind redundant und sollten deswegen entfernt werden: {$modifier}.
 
 redundant-return-exp = Unnötiges return
 
@@ -113,32 +95,21 @@ redundant-boolean-equal = Es ist unnötig explizit zu überprüfen, ob eine Bedi
 
 self-assignment-exp = Nutzlose Zuweisung von '{$rhs}' zu '{$lhs}'
 
-redundant-local-return-exp = Der Wert kann direkt zurückgegeben werden
+too-many-exceptions = Das Projekt definiert {$count} Exceptions. Das sind zu viele.
+
+redundant-variable = Die Variable '{$name}' ist unnötig, returne stattdessen den Wert: 'return {$value}'.
 
 unused-import-exp = Unbenutzter Import
 
-wrapper-instantiation-exp = Wrapper-Klassen sollten nicht direkt instanziiert werden
-
-repeated-math-operation-mul = Hier sollte Math.pow verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu multiplizieren.
-repeated-math-operation-plus = Hier sollte eine Multiplikation mit {$count} verwendet werden, anstatt '{$var}' {$count}-mal mit sich selbst zu addieren.
-
-redundant-neg-exp = '{$original}' kann zu '{$fixed}' vereinfacht werden
-
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
-
-merge-else-if = Verwende 'else if (...) {"{"} ... {"}"}' statt 'else {"{"} if (...) {"{"} ... {"}"} {"}"}'
 
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
 
 redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
 
-redundant-array-init = Die Zuweisung zu dem array ist unnötig und kann entfernt werden.
-
 redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, aber der Wert '{$value}' wird nicht direkt zugewiesen. Schreibe stattdessen '{$suggestion}'.
 
 multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen. Also keine Deklarationen von mehreren Variablen oder Zuweisungen in einer Zeile.
-
-unnecessary-boxing = Statt dem boxed-type sollte man '{$suggestion}' verwenden.
 
 multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
 
@@ -149,11 +120,11 @@ assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie fa
     Teil der finalen Lösung sein. Wenn du eine Invariante dokumentieren willst, verwende
     einen Kommentar.
 
-print-stack-trace-exp = Stack Traces sollten in der Abgabe nicht ausgegeben werden
+print-stack-trace = Stack Traces sollten in der Abgabe nicht ausgegeben werden
 
 # Exceptions
-custom-exception-inheritance-exp-runtime = Selbstdefinierte Exceptions sollten immer Checked Exceptions sein
-custom-exception-inheritance-exp-error = Selbstdefinierte Exceptions sollten nicht von Error erben
+custom-exception-inheritance-error = Die selbstdefinierte Exception '{$name}' sollte nicht von 'Error' erben.
+custom-exception-inheritance-runtime = Die selbstdefinierte Exception '{$name}' sollte von 'Exception' erben und nicht 'RuntimeException'.
 
 empty-catch-block = Leerer catch-Block
 
@@ -172,19 +143,17 @@ variable-should-be = Die Variable '{$variable}' sollte '{$suggestion}' sein.
 
 constants-interfaces-exp = Interfaces sollten keine Attribute haben
 
-param-reassign-exp = Parameter sollten nicht neu zugewiesen werden
+reassigned-parameter = Dem Parameter '{$name}' sollte kein neuer Wert zugewiesen werden.
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
-
-equals-handle-null-argument-exp = Die equals-Methode sollte null-Werte behandeln
 
 field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale Variable sein, da sie in jeder Methode vor dem ersten Lesen überschrieben wird
 
 for-foreach = for-Schleife sollte eine for-each-Schleife sein
 
-missing-override-exp = Fehlendes @Override
+missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe https://stackoverflow.com/a/94411/7766117.
 
-system-dependent-linebreak-exp = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
+system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
 
 field-final-exp = Das Attribut '{$name}' sollte final sein
 
@@ -222,7 +191,10 @@ bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu
 constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
 constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
 
-linguistic-desc = Das Code-Element hat einen verwirrenden Namen. Siehe https://pmd.github.io/latest/pmd_rules_java_codestyle.html#linguisticnaming
+linguistic-naming-boolean = Der Name von '{$name}' deutet an, dass es vom Typ boolean ist oder diesen zurückgibt, stattdessen ist der Typ '{$type}'.
+linguistic-naming-getter = Der Name von '{$name}' deutet an, dass es einen Wert zurückgibt, was aber nicht der Fall ist.
+linguistic-naming-setter = Der Name von '{$name}' deutet an, dass es ein setter ist, welcher kein Wert zurückgeben sollte.
+
 
 variable-name-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-is-abbreviation = Unnötige Abkürzung '{$name}'
@@ -239,7 +211,7 @@ package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein
 variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redundante Zahl am Ende.
 
 # OOP
-concrete-collection-exp = Statt konkreten Collections sollten immer allgemeine Interfaces verwendet werden (z.B. List statt ArrayList)
+concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
 
 list-getter-exp = Kopiere diese veränderbare Collection bevor du sie zurückgibst, um unbeabsichtigte Veränderungen durch andere Klassen zu verhindern
 
@@ -248,12 +220,11 @@ method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Plat
 utility-exp-final = Utility-Klasse ist nicht final
 utility-exp-constructor = Utility-Klassen müssen genau einen privaten und parameterlosen Konstruktor haben
 
-static-field-exp = Das statische Attribut '{$name}' sollte ein Instanzattribut sein
+static-field-should-be-instance = Das statische Attribut '{$name}' sollte ein Instanzattribut sein.
 
 constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
 
 interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
-interface-static-exp = Interfaces müssen nicht static sein. Das Schlüsselwort 'static' ist redundant und sollte entfernt werden.
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 

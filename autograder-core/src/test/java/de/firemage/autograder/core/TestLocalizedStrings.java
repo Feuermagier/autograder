@@ -34,10 +34,6 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 class TestLocalizedStrings {
     private static final Map<Class<?>, List<String>> MANUAL_MAPPING = Map.of(
-        de.firemage.autograder.core.check.complexity.RepeatedMathOperationCheck.class, List.of(
-            "repeated-math-operation-mul",
-            "repeated-math-operation-plus"
-        ),
         de.firemage.autograder.core.check.naming.ConstantsHaveDescriptiveNamesCheck.class, List.of(
             "constants-name-exp",
             "constants-name-exp-value"
@@ -48,6 +44,17 @@ class TestLocalizedStrings {
             "variable-name-type-in-name",
             "similar-identifier",
             "variable-redundant-number-suffix"
+        ),
+        de.firemage.autograder.core.check.api.IsEmptyReimplementationCheck.class, List.of(
+            "suggest-replacement"
+        ),
+        de.firemage.autograder.core.check.api.OldCollectionCheck.class, List.of(
+            "suggest-replacement"
+        ),
+        de.firemage.autograder.core.check.naming.LinguisticNamingCheck.class, List.of(
+            "linguistic-naming-getter",
+            "linguistic-naming-setter",
+            "linguistic-naming-boolean"
         )
     );
 

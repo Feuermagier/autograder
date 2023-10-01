@@ -23,7 +23,7 @@ public class MutableEnum extends IntegratedCheck {
      */
     private static boolean isMutable(CtType<?> ctType) {
         for (CtField<?> ctField : ctType.getFields()) {
-            if (!SpoonUtil.isEffectivelyFinal(ctField.getReference())) {
+            if (!SpoonUtil.isEffectivelyFinal(ctField)) {
                 return true;
             }
         }

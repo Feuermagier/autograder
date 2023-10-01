@@ -4,32 +4,44 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
-import de.firemage.autograder.core.integrated.ExceptionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
+import spoon.reflect.reference.CtTypeReference;
 
-@ExecutableCheck(reportedProblems = {ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION,
-    ProblemType.CUSTOM_EXCEPTION_INHERITS_ERROR})
+import java.util.Map;
+
+@ExecutableCheck(reportedProblems = {
+    ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION,
+    ProblemType.CUSTOM_EXCEPTION_INHERITS_ERROR
+})
 public class CustomExceptionInheritanceCheck extends IntegratedCheck {
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
-            public void process(CtClass<?> clazz) {
-                if (clazz.getSuperclass() == null) {
+            public void process(CtClass<?> ctClass) {
+                if (ctClass.isImplicit() || !ctClass.getPosition().isValidPosition()) {
                     return;
                 }
 
-                if (ExceptionUtil.isRuntimeException(clazz.getSuperclass())) {
-                    addLocalProblem(clazz, new LocalizedMessage("custom-exception-inheritance-exp-runtime"),
-                        ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION);
+                CtTypeReference<?> runtimeException = ctClass.getFactory().Type().createReference(RuntimeException.class);
+                if (ctClass.isSubtypeOf(runtimeException)) {
+                    addLocalProblem(
+                        ctClass,
+                        new LocalizedMessage("custom-exception-inheritance-runtime", Map.of("name", ctClass.getSimpleName())),
+                        ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION
+                    );
                 }
 
-                if (ExceptionUtil.isError(clazz.getSuperclass())) {
-                    addLocalProblem(clazz, new LocalizedMessage("custom-exception-inheritance-exp-error"),
-                        ProblemType.CUSTOM_EXCEPTION_INHERITS_ERROR);
+                CtTypeReference<?> error = ctClass.getFactory().Type().createReference(Error.class);
+                if (ctClass.isSubtypeOf(error)) {
+                    addLocalProblem(
+                        ctClass,
+                        new LocalizedMessage("custom-exception-inheritance-error", Map.of("name", ctClass.getSimpleName())),
+                        ProblemType.CUSTOM_EXCEPTION_INHERITS_ERROR
+                    );
                 }
             }
         });

@@ -56,4 +56,9 @@ public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine
             throw new IllegalStateException("Could not read source file", exception);
         }
     }
+
+    @Override
+    public String toString() {
+        return "%s:L%d:%d".formatted(this.file, this.startLine, this.startColumn);
+    }
 }

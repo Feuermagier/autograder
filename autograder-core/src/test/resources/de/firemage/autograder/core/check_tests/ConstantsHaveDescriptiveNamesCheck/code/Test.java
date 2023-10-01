@@ -33,4 +33,6 @@ public class Test {
     private static final String T_VALUE = "T"; /*# not ok #*/
     private static final String PLAYER_SUFFIX = "P"; /*# ok #*/
     private static final String LINE_BREAK = System.lineSeparator(); /*# not ok #*/
+
+    private static final String NO_TASKS = ""; /*# ok #*/
 }

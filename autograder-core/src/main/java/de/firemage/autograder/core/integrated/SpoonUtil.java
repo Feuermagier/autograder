@@ -14,7 +14,7 @@ import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCast
 import org.apache.commons.compress.utils.FileNameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtArrayAccess;
+import spoon.reflect.code.CtAbstractInvocation;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtBreak;
@@ -33,10 +33,11 @@ import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
+import spoon.reflect.cu.position.CompoundSourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
-import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
@@ -46,19 +47,17 @@ import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtReference;
+import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
-import spoon.reflect.visitor.filter.InvocationFilter;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
-import spoon.support.reflect.code.CtLiteralImpl;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -91,7 +90,7 @@ public final class SpoonUtil {
         }
 
         if (expression instanceof CtInvocation<?> invocation &&
-            invocation.getExecutable().getSignature().equals("toString()")) {
+            SpoonUtil.isSignatureEqualTo(invocation.getExecutable(), java.lang.String.class, "toString")) {
             return Optional.of(invocation.getTarget().getType());
         } else {
             return Optional.empty();
@@ -113,11 +112,7 @@ public final class SpoonUtil {
 
     public static boolean isBoolean(CtTypedElement<?> ctTypedElement) {
         CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
-        return ctTypeReference != null
-            && (SpoonUtil.isTypeEqualTo(ctTypeReference, boolean.class) || SpoonUtil.isTypeEqualTo(
-            ctTypeReference,
-            Boolean.class
-        ));
+        return ctTypeReference != null && SpoonUtil.isTypeEqualTo(ctTypeReference, boolean.class, Boolean.class);
     }
 
     public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
@@ -180,12 +175,6 @@ public final class SpoonUtil {
         return valLeft.longValue() == valRight.longValue();
     }
 
-    public static <T> CtLiteral<T> makeLiteral(T value) {
-        CtLiteral<T> literal = new CtLiteralImpl<>();
-        literal.setValue(value);
-        return literal;
-    }
-
     /**
      * Makes a new literal with the given value and type.
      *
@@ -202,48 +191,29 @@ public final class SpoonUtil {
         return literal;
     }
 
-    /**
-     * Returns the default value of the given type.
-     *
-     * @param ty  a reference to the type
-     * @param <T> the type of the value
-     *
-     * @return the default value of the given type
-     */
-    @SuppressWarnings("unchecked")
-    public static <T> CtLiteral<T> getDefaultValue(CtTypeReference<T> ty) {
-        if (ty.isPrimitive()) {
-            return (CtLiteral<T>) Map.ofEntries(
-                Map.entry("int", makeLiteral(0)),
-                Map.entry("double", makeLiteral(0.0d)),
-                Map.entry("float", makeLiteral(0.0f)),
-                Map.entry("long", makeLiteral(0L)),
-                Map.entry("short", makeLiteral((short) 0)),
-                Map.entry("byte", makeLiteral((byte) 0)),
-                Map.entry("char", makeLiteral((char) 0)),
-                Map.entry("boolean", makeLiteral(false))
-            ).get(ty.getSimpleName());
-        } else {
-            return makeLiteral(null);
-        }
-    }
+    public static List<CtExpression<?>> getElementsOfExpression(CtExpression<?> ctExpression) {
+        var supportedCollections = Stream.of(
+            java.util.List.class,
+            java.util.Set.class,
+            java.util.Collection.class
+        ).map((Class<?> e) -> ctExpression.getFactory().Type().createReference(e));
 
-    /**
-     * Returns the variable from the array access. For example array[0][1] will return array.
-     *
-     * @param ctArrayAccess the array access
-     * @return the variable
-     */
-    public static CtVariableAccess<?> getVariableFromArray(CtArrayAccess<?, ?> ctArrayAccess) {
-        CtExpression<?> array = ctArrayAccess.getTarget();
+        List<CtExpression<?>> result = new ArrayList<>();
 
-        if (array instanceof CtVariableAccess<?>) {
-            return (CtVariableAccess<?>) array;
-        } else if (array instanceof CtArrayAccess<?, ?> access) {
-            return getVariableFromArray(access);
-        } else {
-            throw new IllegalArgumentException("Unable to obtain variable from array access: " + ctArrayAccess);
+        CtTypeReference<?> expressionType = ctExpression.getType();
+        if (supportedCollections.noneMatch(ty -> ty.equals(expressionType) || expressionType.isSubtypeOf(ty))) {
+            return result;
         }
+
+        if (ctExpression instanceof CtInvocation<?> ctInvocation
+            && ctInvocation.getTarget() instanceof CtTypeAccess<?>) {
+            CtExecutableReference<?> ctExecutableReference = ctInvocation.getExecutable();
+            if (ctExecutableReference.getSimpleName().equals("of")) {
+                result.addAll(ctInvocation.getArguments());
+            }
+        }
+
+        return result;
     }
 
     private static List<CtStatement> getEffectiveStatements(Collection<? extends CtStatement> statements) {
@@ -552,10 +522,11 @@ public final class SpoonUtil {
         return normalize(result);
     }
 
+    @SuppressWarnings("unchecked")
     public static <T> CtExpression<T> negate(CtExpression<T> ctExpression) {
         // !(!(a)) => a
         if (ctExpression instanceof CtUnaryOperator<T> ctUnaryOperator && ctUnaryOperator.getKind() == UnaryOperatorKind.NOT) {
-            return ctUnaryOperator.getOperand();
+            return (CtExpression<T>) ctUnaryOperator.getOperand();
         }
 
         if (ctExpression instanceof CtBinaryOperator<T> ctBinaryOperator) {
@@ -567,7 +538,14 @@ public final class SpoonUtil {
                     return result;
                 }
                 // !(a != b) -> a == b
-                case NE -> {
+                //
+                // a | b | a ^ b
+                // 0 | 0 |   0
+                // 0 | 1 |   1
+                // 1 | 0 |   1
+                // 1 | 1 |   0
+                // => !(a ^ b) -> a == b
+                case NE, BITXOR -> {
                     result.setKind(BinaryOperatorKind.EQ);
                     return result;
                 }
@@ -629,6 +607,15 @@ public final class SpoonUtil {
         return evaluator.evaluate(ctExpression);
     }
 
+    /**
+     * Extracts a nested statement from a block if possible.
+     * <p>
+     * A statement might be in a block {@code { statement }}.
+     * This method will extract the statement from the block and return it.
+     *
+     * @param statement the statement to unwrap
+     * @return the given statement or an unwrapped version if possible
+     */
     public static CtStatement unwrapStatement(CtStatement statement) {
         if (statement instanceof CtBlock<?> block) {
             List<CtStatement> statements = SpoonUtil.getEffectiveStatements(block);
@@ -657,10 +644,6 @@ public final class SpoonUtil {
         return type.isPrimitive()
                && !type.getQualifiedName().equals("boolean")
                && !type.getQualifiedName().equals("char");
-    }
-
-    public static boolean isVoidMethod(CtMethod<?> method) {
-        return method.getType().getQualifiedName().equals("void");
     }
 
     public static boolean isSignatureEqualTo(
@@ -819,28 +802,25 @@ public final class SpoonUtil {
                && invocation.getExecutable().getSimpleName().equals(methodName);
     }
 
-    public static boolean isEffectivelyFinal(CtVariableReference<?> ctVariableReference) {
-        return isEffectivelyFinal(ctVariableReference.getFactory().getModel(), ctVariableReference);
+    public static boolean isEffectivelyFinal(CtVariable<?> ctVariable) {
+        CtModel ctModel = ctVariable.getFactory().getModel();
+
+        if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
+            return true;
+        }
+
+        List<CtVariableAccess<?>> variableUses = ctModel
+            .getElements(new BetterVariableAccessFilter<>(ctVariable));
+
+        return variableUses.isEmpty() || variableUses.stream().noneMatch(variableAccess -> variableAccess instanceof CtVariableWrite<?>);
     }
 
-    public static boolean isEffectivelyFinal(CtModel ctModel, CtVariableReference<?> ctVariableReference) {
-        return ctVariableReference.getModifiers().contains(ModifierKind.FINAL) || ctModel
-                .filterChildren(e -> e instanceof CtVariableWrite<?> write &&
-                        write.getVariable().equals(ctVariableReference))
-                .first() == null;
-    }
-
-    public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariableReference<T> ctVariableReference) {
-        if (!isEffectivelyFinal(ctVariableReference)) {
+    public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariable<T> ctVariable) {
+        if (!isEffectivelyFinal(ctVariable)) {
             return Optional.empty();
         }
 
-        if (ctVariableReference.getDeclaration() == null) {
-            // this pointer
-            return Optional.empty();
-        }
-
-        return Optional.ofNullable(ctVariableReference.getDeclaration().getDefaultExpression());
+        return Optional.ofNullable(ctVariable.getDefaultExpression());
     }
 
     public static <T> boolean isImmutable(CtTypeReference<T> ctTypeReference) {
@@ -858,7 +838,7 @@ public final class SpoonUtil {
         }
 
         return ctType.getAllFields().stream()
-            .allMatch(ctFieldReference -> SpoonUtil.isEffectivelyFinal(ctFieldReference)
+            .allMatch(ctFieldReference -> SpoonUtil.isEffectivelyFinal(ctFieldReference.getFieldDeclaration())
                 && SpoonUtil.isImmutable(ctFieldReference.getType()));
     }
 
@@ -877,7 +857,9 @@ public final class SpoonUtil {
     }
 
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
-        return ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().createReference(expected));
+        // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
+        return !(ctTypeReference instanceof CtTypeParameterReference)
+            && ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().createReference(expected));
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
@@ -958,9 +940,18 @@ public final class SpoonUtil {
         return ctTypeReference.getDeclaringType() != null;
     }
 
+    /**
+     * Checks if the given method is overriding another method.
+     * <p>
+     * This implies that there is another method in a super class or interface that has the same signature.
+     *
+     * @param ctMethod the method to check, must not be null
+     * @return true if the given method is overriding another method, false otherwise
+     */
     public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
+        Collection<CtMethod<?>> topDefinitions = ctMethod.getTopDefinitions();
         // if the method is defined for the first time, this should return an empty collection
-        return !ctMethod.getTopDefinitions().isEmpty();
+        return !topDefinitions.isEmpty();
     }
 
     public static boolean isInOverriddenMethod(CtElement ctElement) {
@@ -988,10 +979,10 @@ public final class SpoonUtil {
      * @param in the element to search in
      * @return all uses of {@code ctElement} in {@code in}
      */
-    public static Set<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
+    public static List<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
         return findUses(ctElement).stream()
             .filter(element -> !in.getElements(new SameFilter(element)).isEmpty())
-            .collect(Collectors.toCollection(LinkedHashSet::new));
+            .collect(Collectors.toCollection(ArrayList::new));
     }
 
     public record FilterAdapter<T extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<CtElement> {
@@ -1019,6 +1010,17 @@ public final class SpoonUtil {
         public boolean matches(T element) {
             return element.getVariable().equals(this.ctVariable.getReference())
                 || (element.getVariable().getDeclaration() != null && element.getVariable().getDeclaration().equals(this.ctVariable));
+        }
+    }
+
+    private record BetterInvocationFilter(CtExecutable<?> executable) implements Filter<CtAbstractInvocation<?>> {
+        @Override
+        public boolean matches(CtAbstractInvocation<?> invocation) {
+            CtExecutableReference<?> invocationExecutable = invocation.getExecutable();
+            return invocationExecutable.equals(this.executable.getReference())
+                || this.executable.equals(invocationExecutable.getExecutableDeclaration())
+                // TODO: consider removing this?
+                || invocationExecutable.isOverriding(this.executable.getReference());
         }
     }
 
@@ -1057,9 +1059,9 @@ public final class SpoonUtil {
         @SuppressWarnings("unchecked")
         private static Filter<CtElement> buildExecutableFilter(CtExecutable<?> ctExecutable) {
             Filter<CtElement> filter = new FilterAdapter<>(
-                new InvocationFilter(ctExecutable.getReference()),
-                // CtInvocation.class => Class<CtInvocation>, but Class<CtInvocation<?>> is needed
-                (Class<CtInvocation<?>>) (Object) CtInvocation.class
+                new BetterInvocationFilter(ctExecutable),
+                // CtAbstractInvocation.class => Class<CtAbstractInvocation>, but Class<CtAbstractInvocation<?>> is needed
+                (Class<CtAbstractInvocation<?>>) (Object) CtAbstractInvocation.class
             );
 
             if (ctExecutable instanceof CtMethod<?> ctMethod) {
@@ -1079,8 +1081,45 @@ public final class SpoonUtil {
         }
     }
 
-    public static Set<CtElement> findUses(CtElement ctElement) {
-        return new LinkedHashSet<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
+    // Supported CtElement subtypes:
+    // - CtVariable<?>
+    // - CtExecutable<?>
+    // - CtTypeMember
+
+    public static <T> List<CtElement> findUsesOf(CtVariable<T> ctVariable) {
+        return SpoonUtil.findUses(ctVariable);
+    }
+
+    public static List<CtElement> findUsesOf(CtTypeMember ctTypeMember) {
+        return SpoonUtil.findUses(ctTypeMember);
+    }
+
+    public static <T> List<CtElement> findUsesOf(CtExecutable<T> ctExecutable) {
+        return SpoonUtil.findUses(ctExecutable);
+    }
+
+
+    public static List<CtElement> findUses(CtElement ctElement) {
+        return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
+    }
+
+    /**
+     * Finds the statement that is before the given statement if possible.
+     *
+     * @param ctStatement the statement to find the previous statement of, must not be null
+     * @return the previous statement or an empty optional if there is no previous statement
+     */
+    public static Optional<CtStatement> getPreviousStatement(CtStatement ctStatement) {
+        if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
+            List<CtStatement> statements = ctStatementList.getStatements();
+            int index = statements.indexOf(ctStatement);
+
+            if (index > 0) {
+                return Optional.of(statements.get(index - 1));
+            }
+        }
+
+        return Optional.empty();
     }
 
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
@@ -1129,5 +1168,20 @@ public final class SpoonUtil {
      */
     public static String formatSourcePosition(SourcePosition sourcePosition) {
         return String.format("%s:L%d", FileNameUtils.getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
+    }
+
+    public static SourcePosition getNamePosition(CtNamedElement ctNamedElement) {
+        SourcePosition position = ctNamedElement.getPosition();
+
+        if (position instanceof CompoundSourcePosition compoundSourcePosition) {
+            return ctNamedElement.getFactory().createSourcePosition(
+                position.getCompilationUnit(),
+                compoundSourcePosition.getNameStart(),
+                compoundSourcePosition.getNameEnd(),
+                position.getCompilationUnit().getLineSeparatorPositions()
+            );
+        }
+
+        return position;
     }
 }

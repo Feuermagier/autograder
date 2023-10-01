@@ -1,9 +1,0 @@
-api.StringIsEmptyReimplementationCheck
-Use String#isEmpty
-Test.java:17
-Test.java:20
-Test.java:23
-Test.java:25
-Test.java:27
-Test.java:29
-Test.java:30

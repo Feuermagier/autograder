@@ -51,7 +51,7 @@ public class UnnecessaryBoxing extends IntegratedCheck {
                 }
 
                 CtVariable<?> ctVariable = ctTypeReference.getParent(CtVariable.class);
-                if (ctVariable != null && isBoxedType(ctVariable.getType())) {
+                if (ctVariable != null && isBoxedType(ctVariable.getType()) && ctVariable.getReference().getDeclaration() != null) {
                     List<CtExpression<?>> assignedValues = staticAnalysis.getModel()
                         .getElements(new VariableAccessFilter<>(ctVariable.getReference()))
                         .stream()
@@ -77,9 +77,10 @@ public class UnnecessaryBoxing extends IntegratedCheck {
                     addLocalProblem(
                         ctVariable,
                         new LocalizedMessage(
-                            "unnecessary-boxing",
+                            "suggest-replacement",
                             Map.of(
-                                "suggestion", ctVariable.getType().getSimpleName().toLowerCase()
+                                "original", ctVariable.getType().getSimpleName(),
+                                "suggestion", ctVariable.getType().unbox().getSimpleName()
                             )
                         ),
                         ProblemType.UNNECESSARY_BOXING

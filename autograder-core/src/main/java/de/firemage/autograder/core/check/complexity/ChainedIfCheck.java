@@ -62,7 +62,10 @@ public class ChainedIfCheck extends IntegratedCheck {
                 if (statements.get(0) instanceof CtIf ctElseIf && !elseStatement.isImplicit()) {
                     addLocalProblem(
                         ctElseIf.getCondition(),
-                        new LocalizedMessage("merge-else-if"),
+                        new LocalizedMessage("suggest-replacement", Map.of(
+                            "original", "else {\"{\"} if (...) {\"{\"} ... {\"}\"} {\"}\"}",
+                            "suggestion", "else if (...) {\"{\"} ... {\"}\"}"
+                        )),
                         ProblemType.UNMERGED_ELSE_IF
                     );
                 }

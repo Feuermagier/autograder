@@ -8,12 +8,28 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
-import spoon.reflect.code.*;
+import spoon.reflect.code.BinaryOperatorKind;
+import spoon.reflect.code.CtArrayAccess;
+import spoon.reflect.code.CtAssignment;
+import spoon.reflect.code.CtBinaryOperator;
+import spoon.reflect.code.CtConstructorCall;
+import spoon.reflect.code.CtExecutableReferenceExpression;
+import spoon.reflect.code.CtFieldAccess;
+import spoon.reflect.code.CtFieldRead;
+import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtNewArray;
+import spoon.reflect.code.CtSuperAccess;
+import spoon.reflect.code.CtThisAccess;
+import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtRecord;
-import spoon.reflect.declaration.CtRecordComponent;
 import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
@@ -24,6 +40,7 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE })
@@ -31,6 +48,11 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
     private static final List<Class<?>> ALLOWED_TYPES = List.of(java.util.Properties.class);
 
     private <T extends CtTypeInformation & FactoryAccessor> boolean isConcreteCollectionType(T ctType) {
+        // NOTE: workaround for https://github.com/INRIA/spoon/issues/5462
+        if (ctType instanceof CtArrayTypeReference<?>) {
+            return false;
+        }
+
         return Stream.of(java.util.Collection.class, java.util.Map.class)
                      .map(ty -> ctType.getFactory().Type().createReference(ty, false))
                      .anyMatch(ctType::isSubtypeOf) && !ctType.isInterface();
@@ -130,28 +152,52 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
     }
 
     private boolean checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
-        if (this.isConcreteCollectionType(ctTypeReference)
-            && !SpoonUtil.isInOverriddenMethod(ctTypeReference)
-            && !this.isInAllowedContext(ctTypeReference)
-            && !this.isAllowedType(ctTypeReference)
-        ) {
-            // A record has both a getter and an attribute -> visited twice and both are implicit...
-            CtElement element = ctTypeReference;
-            while (!element.getPosition().isValidPosition()
-                && (element.getParent(CtArrayTypeReference.class) != null)) {
-                    element = element.getParent(CtArrayTypeReference.class);
-            }
-
-            this.addLocalProblem(
-                element,
-                new LocalizedMessage("concrete-collection-exp"),
-                ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE
-            );
-
+        if (!ctTypeReference.getPosition().isValidPosition()
+            // arrays are special, they will be handled by the code
+            && (ctTypeReference.getParent(CtArrayTypeReference.class) == null)) {
             return true;
         }
 
-        return false;
+        if (SpoonUtil.isInOverriddenMethod(ctTypeReference)
+            || this.isInAllowedContext(ctTypeReference)
+            || this.isAllowedType(ctTypeReference)) {
+            return false;
+        }
+
+        if (!this.isConcreteCollectionType(ctTypeReference)) {
+            if (ctTypeReference instanceof CtArrayTypeReference<?> ctArrayTypeReference
+                && this.checkCtTypeReference(ctArrayTypeReference.getArrayType())) {
+                return true;
+            }
+
+            // check nested types:
+            for (CtTypeReference<?> typeArgument : ctTypeReference.getActualTypeArguments()) {
+                if (this.checkCtTypeReference(typeArgument)) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        CtElement element = ctTypeReference;
+        while (!element.getPosition().isValidPosition()
+            && (element.getParent(CtArrayTypeReference.class) != null)) {
+            element = element.getParent(CtArrayTypeReference.class);
+        }
+
+        this.addLocalProblem(
+            element,
+            new LocalizedMessage(
+                "concrete-collection",
+                Map.of(
+                    "type", ctTypeReference.prettyprint()
+                )
+            ),
+            ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE
+        );
+
+        return true;
     }
 
     @Override
@@ -159,23 +205,63 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         // Checks for fields, parameters and return types
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
-            public <T> void visitCtTypeReference(CtTypeReference<T> ctTypeReference) {
-                // check for var
-                CtLocalVariable<?> ctLocalVariable = ctTypeReference.getParent(CtLocalVariable.class);
-                if (ctLocalVariable != null && ctLocalVariable.isInferred()) {
+            public <T> void visitCtMethod(CtMethod<T> ctMethod) {
+                if (ctMethod.isImplicit() || !ctMethod.getPosition().isValidPosition()) {
+                    super.visitCtMethod(ctMethod);
                     return;
                 }
 
-                if (!ctTypeReference.getPosition().isValidPosition()
-                    // arrays are special, they will be handled by the code
-                    && (ctTypeReference.getParent(CtArrayTypeReference.class) == null)) {
+                boolean hasError = checkCtTypeReference(ctMethod.getType());
+
+                if (hasError) {
+                    // skip scanning the TYPE to avoid duplicate errors
+                    this.enter(ctMethod);
+                    this.scan(CtRole.ANNOTATION, ctMethod.getAnnotations());
+                    this.scan(CtRole.TYPE_PARAMETER, ctMethod.getFormalCtTypeParameters());
+                    // scan(CtRole.TYPE, ctMethod.getType());
+                    this.scan(CtRole.PARAMETER, ctMethod.getParameters());
+                    this.scan(CtRole.THROWN, ctMethod.getThrownTypes());
+                    this.scan(CtRole.BODY, ctMethod.getBody());
+                    this.scan(CtRole.COMMENT, ctMethod.getComments());
+                    this.exit(ctMethod);
+
                     return;
                 }
 
-                boolean hasError = checkCtTypeReference(ctTypeReference);
+                super.visitCtMethod(ctMethod);
+            }
 
+            @Override
+            public <T> void visitCtField(CtField<T> ctVariable) {
+                boolean hasError = checkCtTypeReference(ctVariable.getType());
                 if (!hasError) {
-                    super.visitCtTypeReference(ctTypeReference);
+                    super.visitCtField(ctVariable);
+                }
+            }
+
+            @Override
+            public <T> void visitCtLocalVariable(CtLocalVariable<T> ctVariable) {
+                if (ctVariable.isInferred()) {
+                    super.visitCtLocalVariable(ctVariable);
+                    return;
+                }
+
+                boolean hasError = checkCtTypeReference(ctVariable.getType());
+                if (!hasError) {
+                    super.visitCtLocalVariable(ctVariable);
+                }
+            }
+
+            @Override
+            public <T> void visitCtParameter(CtParameter<T> ctVariable) {
+                if (ctVariable.isImplicit() || !ctVariable.getPosition().isValidPosition()) {
+                    super.visitCtParameter(ctVariable);
+                    return;
+                }
+
+                boolean hasError = checkCtTypeReference(ctVariable.getType());
+                if (!hasError) {
+                    super.visitCtParameter(ctVariable);
                 }
             }
 

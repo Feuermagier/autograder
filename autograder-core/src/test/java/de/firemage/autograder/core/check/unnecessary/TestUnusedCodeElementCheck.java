@@ -400,7 +400,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedPublicWithoutMain() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -428,7 +428,75 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(1, problems);
-        assertEqualsUnused("helper", problems.get(0));
+        assertEqualsUnused("helper", problems.next());
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testUsedPrivateStaticOverload() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Tasks",
+                    """
+                    public class Tasks {
+                        public static String invoke(String task) {
+                            return invoke(task, task.length());
+                        }
+                        
+                        private static String invoke(String task, int len) {
+                            return task.repeat(len);
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            System.out.println(Tasks.invoke(args[0]));
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testUsedGenericConstructor() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "And",
+                    """
+                    public class And<T, U> {
+                        public And(T t, U u) {
+                            System.out.println(t);
+                            System.out.println(u);
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            And<String, String> and = new And<>("Hello", "World");
+                            System.out.println(and);
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
     }
 }

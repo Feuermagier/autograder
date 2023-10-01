@@ -16,7 +16,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 public class TestCharRange extends AbstractCheckTest {
-    private static final String LOCALIZED_MESSAGE_KEY = "char-range";
+    private static final String LOCALIZED_MESSAGE_KEY = "common-reimplementation";
 
     @Test
     void testIsDigit() throws LinterException, IOException {

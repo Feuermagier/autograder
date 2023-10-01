@@ -16,6 +16,7 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtTypeInformation;
+import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayList;
@@ -24,6 +25,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.UnaryOperator;
 
 @ExecutableCheck(reportedProblems = { ProblemType.USE_FORMAT_STRING })
 public class UseFormatString extends IntegratedCheck {
@@ -105,25 +107,30 @@ public class UseFormatString extends IntegratedCheck {
     }
 
     private CtExpression<?> resolveExpression(CtExpression<?> ctExpression) {
+        TypeFactory typeFactory = ctExpression.getFactory().Type();
+
         // convert System.lineSeparator() to "\n" which will later be converted to %n
         if (ctExpression instanceof CtInvocation<?> ctInvocation
             && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
             // ensure the method is called on java.lang.System
-            && ctInvocation.getFactory().Type().createReference(java.lang.System.class)
-                .equals(ctTypeAccess.getAccessedType())
-            && ctInvocation.getExecutable().getSimpleName().equals("lineSeparator")) {
-            return SpoonUtil.makeLiteral("\n");
+            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
+            && SpoonUtil.isSignatureEqualTo(
+                ctInvocation.getExecutable(),
+                typeFactory.STRING,
+                "lineSeparator"
+            )) {
+            return SpoonUtil.makeLiteral(typeFactory.STRING, "\n");
         }
 
         if (ctExpression instanceof CtLiteral<?> ctLiteral
-            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral('\n'))) {
-            return SpoonUtil.makeLiteral("\n");
+            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral(typeFactory.CHARACTER_PRIMITIVE, '\n'))) {
+            return SpoonUtil.makeLiteral(typeFactory.STRING, "\n");
         }
 
         return ctExpression;
     }
 
-    private void checkArgs(CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs) {
+    private void checkArgs(CtElement ctElement, Iterable<? extends CtExpression<?>> formatArgs, UnaryOperator<String> suggestion) {
         Collection<CtExpression<?>> args = new ArrayList<>();
         for (var expression : formatArgs) {
             args.add(this.resolveExpression(expression));
@@ -138,9 +145,9 @@ public class UseFormatString extends IntegratedCheck {
         if (formattedString == null) return;
 
         this.addLocalProblem(
-                ctElement,
-                new LocalizedMessage("use-format-string", Map.of("formatted", formattedString)),
-                ProblemType.USE_FORMAT_STRING
+            ctElement,
+            new LocalizedMessage("use-format-string", Map.of("formatted", suggestion.apply(formattedString))),
+            ProblemType.USE_FORMAT_STRING
         );
     }
 
@@ -168,7 +175,7 @@ public class UseFormatString extends IntegratedCheck {
             return;
         }
 
-        this.checkArgs(ctBinaryOperator, this.getFormatArgs(ctBinaryOperator));
+        this.checkArgs(ctBinaryOperator, this.getFormatArgs(ctBinaryOperator), suggestion -> suggestion);
     }
 
     private void checkCtInvocation(CtInvocation<?> ctInvocation) {
@@ -187,6 +194,7 @@ public class UseFormatString extends IntegratedCheck {
         if (ctInvocation.getParent(CtInvocation.class) != null) return;
 
         List<CtExpression<?>> formatArgs = new ArrayList<>();
+        CtExpression<?> invocationExpression = ctInvocation.getTarget();
         CtInvocation<?> currentInvocation = ctInvocation;
         // traverse the chain of append calls
         while (currentInvocation != null) {
@@ -209,13 +217,15 @@ public class UseFormatString extends IntegratedCheck {
             } else if (!stringBuilderType.equals(currentInvocation.getTarget().getType())) {
                 return;
             } else {
+                invocationExpression = currentInvocation.getTarget();
                 currentInvocation = null;
             }
         }
 
         Collections.reverse(formatArgs);
 
-        this.checkArgs(ctInvocation, formatArgs);
+        String target = invocationExpression.prettyprint();
+        this.checkArgs(ctInvocation, formatArgs, suggestion -> "%s.append(%s)".formatted(target, suggestion));
     }
 
     @Override

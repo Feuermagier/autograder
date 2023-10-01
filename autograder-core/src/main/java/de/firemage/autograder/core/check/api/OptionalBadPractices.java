@@ -17,7 +17,7 @@ import spoon.reflect.reference.CtTypeReference;
 public class OptionalBadPractices extends IntegratedCheck {
     private void checkCtVariable(CtTypedElement<?> ctTypedElement) {
         CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
-        if (ctTypeReference == null) {
+        if (ctTypeReference == null || ctTypeReference.isImplicit() || !ctTypeReference.getPosition().isValidPosition()) {
             return;
         }
 
@@ -53,6 +53,10 @@ public class OptionalBadPractices extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtTypedElement<?>>() {
             @Override
             public void process(CtTypedElement<?> ctTypedElement) {
+                if (ctTypedElement.isImplicit() || !ctTypedElement.getPosition().isValidPosition()) {
+                    return;
+                }
+
                 if (ctTypedElement instanceof CtVariable<?> || ctTypedElement instanceof CtMethod<?>) {
                     checkCtVariable(ctTypedElement);
                 }

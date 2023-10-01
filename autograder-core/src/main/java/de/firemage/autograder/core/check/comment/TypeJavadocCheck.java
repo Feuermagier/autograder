@@ -18,6 +18,7 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.regex.Pattern;
 
 @ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_UNEXPECTED_TAG, ProblemType.INVALID_AUTHOR_TAG})
@@ -32,6 +33,8 @@ public class TypeJavadocCheck extends IntegratedCheck {
         // used for documenting generic types @param <T> description of T
         CtJavaDocTag.TagType.PARAM
     );
+
+    private static final Set<String> ALLOWED_AUTHORS = Set.of("Programmieren-Team");
 
     private final Pattern pattern;
 
@@ -68,7 +71,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
                 }
 
                 addLocalProblem(javadoc,
-                    new LocalizedMessage("javadoc-type-exp-unexpected-tag", Map.of("tag", tag.getType().getName())),
+                    new LocalizedMessage("javadoc-unexpected-tag", Map.of("tag", tag.getType().getName())),
                     ProblemType.JAVADOC_UNEXPECTED_TAG);
             }
         }
@@ -90,7 +93,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
         for (CtJavaDocTag authorTag : authorTags) {
             String author = authorTag.getContent().trim();
 
-            if (this.pattern.matcher(author).matches()) {
+            if (this.pattern.matcher(author).matches() || ALLOWED_AUTHORS.contains(author)) {
                 hasValidAuthor = true;
             } else {
                 invalidAuthors.add(author);
