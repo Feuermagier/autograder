@@ -10,6 +10,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtEnumValue;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
@@ -102,6 +103,11 @@ public class UseDifferentVisibility extends IntegratedCheck {
 
                 Visibility currentVisibility = Visibility.of(ctTypeMember);
                 if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || SpoonUtil.isOverriddenMethod(ctMethod))) {
+                    return;
+                }
+
+                // skip enum values for which one cannot change the visibility
+                if (ctTypeMember instanceof CtEnumValue<?>) {
                     return;
                 }
 

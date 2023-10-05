@@ -501,4 +501,41 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
 
         assertEquals(3, problems.size());
     }
+
+    @Test
+    void testEnum() throws LinterException, IOException {
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "model.Fruit",
+                    """
+                        package model;
+                        
+                        public enum Fruit {
+                            STRAWBERRY;
+
+                            public static String getString() {
+                                return STRAWBERRY.toString();
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        import model.Fruit;
+
+                        public class Main {
+                            public static void main(String[] args) {
+                                System.out.println(Fruit.getString());
+                            }
+                        }
+                        """
+                )
+            )
+        ), List.of(ProblemType.USE_DIFFERENT_VISIBILITY));
+
+        assertEquals(0, problems.size());
+    }
 }
