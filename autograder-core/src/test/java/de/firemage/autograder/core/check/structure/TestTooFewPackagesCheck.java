@@ -17,9 +17,21 @@ import static org.junit.jupiter.api.Assertions.*;
 
 class TestTooFewPackagesCheck extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "too-few-packages";
+
+
+    void assertEqualsTooFewPackages(Problem problem) {
+        assertEquals(ProblemType.TOO_FEW_PACKAGES, problem.getProblemType());
+        assertEquals(
+                this.linter.translateMessage(new LocalizedMessage(
+                        LOCALIZED_MESSAGE_KEY,
+                        Map.of("max", TooFewPackagesCheck.MAX_CLASSES_PER_PACKAGE))),
+                this.linter.translateMessage(problem.getExplanation())
+        );
+        assertEquals(ProblemType.TOO_FEW_PACKAGES, problem.getProblemType(), "Wrong problem type");
+    }
     @Test
     void test() throws IOException, LinterException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
                 JavaVersion.JAVA_17,
                 Map.ofEntries(
                         dummySourceEntry("edu.kit", "First"),
@@ -34,16 +46,16 @@ class TestTooFewPackagesCheck extends AbstractCheckTest {
                         )
         ), List.of(ProblemType.TOO_FEW_PACKAGES));
 
-        assertEquals(1, problems.size(), "Wrong number of problems");
-        assertEquals(ProblemType.TOO_FEW_PACKAGES, problems.get(0).getProblemType(), "Wrong problem type");
-        assertEquals(this.linter.translateMessage(new LocalizedMessage(LOCALIZED_MESSAGE_KEY)),
-        this.linter.translateMessage(problems.get(0).getExplanation()), "Wrong explanation");
+        assertTrue(problems.hasNext(), "At least one problem should be reported");
+        assertEqualsTooFewPackages(problems.next());
+        problems.assertExhausted();
+
     }
 
     // if there are multiple packages, the check should not be triggered
     @Test
     void testWithMultiplePackages() throws IOException, LinterException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
                 JavaVersion.JAVA_17,
                 Map.ofEntries(
                         dummySourceEntry("edu.kit", "First"),
@@ -58,12 +70,11 @@ class TestTooFewPackagesCheck extends AbstractCheckTest {
                         dummySourceEntry("test", "Test")
                         )
         ), List.of(ProblemType.TOO_FEW_PACKAGES));
-
-        assertEquals(0, problems.size(), "Wrong number of problems");
+        problems.assertExhausted();
     }
     @Test
     void testWithAllowedNumberOfClasses() throws IOException, LinterException {
-         List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
                 JavaVersion.JAVA_17,
                 Map.ofEntries(
                         dummySourceEntry("edu.kit", "First"),
@@ -76,8 +87,9 @@ class TestTooFewPackagesCheck extends AbstractCheckTest {
                         dummySourceEntry("edu.kit", "Eighth")
                         )
         ), List.of(ProblemType.TOO_FEW_PACKAGES));
+        problems.assertExhausted();
 
-        assertEquals(0, problems.size(), "Wrong number of problems");
+
     }
 }
 

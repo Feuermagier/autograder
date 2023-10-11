@@ -253,7 +253,7 @@ should-be-interface = The parent class has only methods without fields. Instead 
 # Structure
 
 default-package = The default-package should not be used. The following classes are in the default-package: {$positions}
-too-few-packages = The project has more than 8 packages, but only one package is used. You should think about a better classification for the different classes to distribute the classes over multiple packages (e.g. commands, logic, ui, ...).
+too-few-packages = The project has more than {$max} classes, but only one package is used. You should think about a better classification for the different classes to distribute the classes over multiple packages (e.g. commands, logic, ui, ...).
 
 # Unnecessary
 empty-block = Empty blocks should be removed or have a comment explaining why they are empty.

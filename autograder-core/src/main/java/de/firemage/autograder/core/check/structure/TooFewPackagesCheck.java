@@ -10,6 +10,7 @@ import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = {ProblemType.TOO_FEW_PACKAGES})
@@ -31,7 +32,7 @@ public class TooFewPackagesCheck extends IntegratedCheck {
             ctType.ifPresent(type ->
                 this.addLocalProblem(
                         type,
-                        new LocalizedMessage(LOCALIZED_MESSAGE_KEY),
+                        new LocalizedMessage(LOCALIZED_MESSAGE_KEY, Map.of("max", MAX_CLASSES_PER_PACKAGE)),
                         ProblemType.TOO_FEW_PACKAGES
                 ));
         }
