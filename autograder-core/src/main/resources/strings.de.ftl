@@ -253,6 +253,7 @@ should-be-interface = Die Klasse hat nur Methoden und keine Felder. Statt Vererb
 # Structure
 
 default-package = Das default-Paket sollte nicht verwendet werden. Die folgenden Klassen sind im default-Paket: {$positions}
+too-few-packages = Das Projekt hat mehr als {$max} Klassen, aber nur ein Paket. Du solltest dir eine sinnvolle Einteilung der Klassen in mehrere Pakete überlegen (bspw. nach den Kriterien commands, logic, ui, ...).
 
 # Unnecessary
 
