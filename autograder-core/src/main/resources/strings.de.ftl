@@ -251,7 +251,7 @@ do-not-use-instanceof-emulation = instanceof sollte nicht verwendet werden und a
 abstract-class-without-abstract-method = Abstrakte Klassen sollten mindestens eine abstrakte Methode haben.
 composition-over-inheritance = Die Oberklasse hat nur Felder. Statt Vererbung sollte hier Komposition verwendet werden. Zum Beispiel ein interface mit dem getter: '{$suggestion}'.
 should-be-interface = Die Klasse hat nur Methoden und keine Felder. Statt Vererbung sollte hier ein Interface mit Standard-Implementierungen verwendet werden.
-
+avoid-static-blocks = Statische Blöcke sollten vermieden werden. Statische Blöcke sollten durch eine objektorientierte Lösung ersetzt werden (bspw. Konstruktoren).
 # Structure
 
 default-package = Das default-Paket sollte nicht verwendet werden. Die folgenden Klassen sind im default-Paket: {$positions}
