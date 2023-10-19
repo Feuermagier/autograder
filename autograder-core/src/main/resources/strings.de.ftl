@@ -113,6 +113,8 @@ multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile st
 
 multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
 
+try-catch-complexity = Die Komplexität von try-catch-Blöcken sollte möglichst gering gehalten werden. Es sollten weniger als {$max} Statements vorhanden sein. Versuche den Code in mehrere Methoden aufzuteilen bzw. nicht dringend benötigte Statements aus dem try-Block zu entfernen.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,

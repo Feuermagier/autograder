@@ -116,6 +116,7 @@ multiple-inline-statements = There should not be multiple statements in a single
 
 multi-threading = Multithreading is out of scope for this lecture. The code is only executed on a single thread. Writing it thread-safe makes the code unnecessarily complex.
 
+try-catch-complexity = The complexity of try-catch-blocks should be kept low. There should be less than {$max} statements in the try-block. You should refactor the code into multiple methods or extract unnecessary statements out of the try-block.
 
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
