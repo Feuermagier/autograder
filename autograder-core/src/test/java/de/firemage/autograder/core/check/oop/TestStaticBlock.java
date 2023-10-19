@@ -17,9 +17,9 @@ import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestStaticBlock extends AbstractCheckTest {
     private void assertEqualsStaticBlock(Problem problem) {
-        assertEquals(ProblemType.STATIC_BLOCKS, problem.getProblemType());
+        assertEquals(ProblemType.AVOID_STATIC_BLOCKS, problem.getProblemType());
         assertEquals(
-                this.linter.translateMessage(new LocalizedMessage(AvoidStaticBlocks.LOCALIZED_MESSAGE_KEY)),
+                this.linter.translateMessage(new LocalizedMessage(CheckStaticBlocks.LOCALIZED_MESSAGE_KEY)),
                 this.linter.translateMessage(problem.getExplanation()));
     }
     @Test
@@ -38,7 +38,7 @@ class TestStaticBlock extends AbstractCheckTest {
                         }
                     }
                     """
-        ), List.of(ProblemType.STATIC_BLOCKS));
+        ), List.of(ProblemType.AVOID_STATIC_BLOCKS));
         assertTrue(problems.hasNext(), "At least one problem expected");
         assertEqualsStaticBlock(problems.next());
         problems.assertExhausted();
@@ -57,7 +57,7 @@ class TestStaticBlock extends AbstractCheckTest {
                         } 
                     }
                     """
-        ), List.of(ProblemType.STATIC_BLOCKS));
+        ), List.of(ProblemType.AVOID_STATIC_BLOCKS));
         problems.assertExhausted();
     }
     @Test
@@ -73,7 +73,7 @@ class TestStaticBlock extends AbstractCheckTest {
                  
                     }
                     """
-        ), List.of(ProblemType.STATIC_BLOCKS));
+        ), List.of(ProblemType.AVOID_STATIC_BLOCKS));
         problems.assertExhausted();
     }
 
@@ -94,7 +94,7 @@ class TestStaticBlock extends AbstractCheckTest {
                         }
                     }
                     """
-        ), List.of(ProblemType.STATIC_BLOCKS));
+        ), List.of(ProblemType.AVOID_STATIC_BLOCKS));
         problems.assertExhausted();
     }
 

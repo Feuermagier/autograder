@@ -8,26 +8,23 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.declaration.CtAnonymousExecutable;
-import spoon.reflect.visitor.CtScanner;
+import spoon.reflect.visitor.filter.TypeFilter;
 
-@ExecutableCheck(reportedProblems = { ProblemType.STATIC_BLOCKS })
-public class AvoidStaticBlocks extends IntegratedCheck {
+
+@ExecutableCheck(reportedProblems = {ProblemType.AVOID_STATIC_BLOCKS})
+public class CheckStaticBlocks extends IntegratedCheck {
     public static final String LOCALIZED_MESSAGE_KEY = "avoid-static-blocks";
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
-            @Override
-            public <R> void visitCtBlock(CtBlock<R> block) {
-                if (block.getParent() instanceof CtAnonymousExecutable executable && executable.isStatic()) {
-                    addLocalProblem(
+        staticAnalysis.getModel().getRootPackage().getElements(new TypeFilter<>(CtBlock.class)).forEach(block -> {
+            if (block.getParent() instanceof CtAnonymousExecutable executable && executable.isStatic()) {
+                this.addLocalProblem(
                         block,
                         new LocalizedMessage(LOCALIZED_MESSAGE_KEY),
-                        ProblemType.STATIC_BLOCKS
-                    );
-                }
-
+                        ProblemType.AVOID_STATIC_BLOCKS
+                );
             }
         });
-
     }
+
 }
