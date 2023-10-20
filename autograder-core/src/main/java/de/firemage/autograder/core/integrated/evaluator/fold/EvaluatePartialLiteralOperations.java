@@ -35,7 +35,6 @@ public final class EvaluatePartialLiteralOperations implements Fold {
 
         // ignore if both operands are not literals
         if (!(promotedOperator.getLeftHandOperand() instanceof CtLiteral<?> ctLiteral)) {
-            System.out.println(promotedOperator);
             return ctBinaryOperator;
         }
 

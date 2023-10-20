@@ -14,7 +14,6 @@ import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtStatement;
-import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.UnaryOperatorKind;
 
 import java.util.List;
@@ -28,16 +27,6 @@ public class UseGuardClauses extends IntegratedCheck {
             new LocalizedMessage("use-guard-clauses"),
             ProblemType.USE_GUARD_CLAUSES
         );
-    }
-
-    private static <T> CtUnaryOperator<T> makeCtUnaryOperator(CtExpression<T> ctExpression, UnaryOperatorKind kind) {
-        CtUnaryOperator<T> ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
-
-        ctUnaryOperator.setKind(kind);
-        // the clone is necessary, so the original expression from the CtModel does not get a new parent
-        ctUnaryOperator.setOperand(ctExpression.clone());
-
-        return ctUnaryOperator;
     }
 
     private boolean isTerminal(CtStatement ctStatement) {
@@ -54,7 +43,7 @@ public class UseGuardClauses extends IntegratedCheck {
     private void checkCtIf(CtIf ctIf, CtExpression<?> condition) {
         // if the condition != null, then the ctIf is an else if
         if (condition != null) {
-            CtExpression<?> ifCondition = ctIf.getFactory().createBinaryOperator(
+            CtExpression<?> ifCondition = SpoonUtil.createBinaryOperator(
                 condition,
                 ctIf.getCondition(),
                 BinaryOperatorKind.AND
@@ -66,9 +55,9 @@ public class UseGuardClauses extends IntegratedCheck {
         }
 
         // the condition to reach the else statement
-        CtExpression<?> elseCondition = makeCtUnaryOperator(
-            ctIf.getCondition(),
-            UnaryOperatorKind.NOT
+        CtExpression<?> elseCondition = SpoonUtil.createUnaryOperator(
+            UnaryOperatorKind.NOT,
+            ctIf.getCondition()
         );
 
         // check the else statement
@@ -79,7 +68,7 @@ public class UseGuardClauses extends IntegratedCheck {
         List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(ctStatement);
 
         if (condition != null) {
-            elseCondition = ctIf.getFactory().createBinaryOperator(
+            elseCondition = SpoonUtil.createBinaryOperator(
                 condition,
                 elseCondition,
                 BinaryOperatorKind.AND
@@ -87,7 +76,7 @@ public class UseGuardClauses extends IntegratedCheck {
         }
 
         if (ctStatements.size() == 1 && ctStatements.get(0) instanceof CtIf ctElseIf) {
-            CtExpression<?> elseIfCondition = ctIf.getFactory().createBinaryOperator(
+            CtExpression<?> elseIfCondition = SpoonUtil.createBinaryOperator(
                 elseCondition,
                 ctElseIf.getCondition(),
                 BinaryOperatorKind.AND

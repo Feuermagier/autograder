@@ -38,7 +38,7 @@ public class ChainedIfCheck extends IntegratedCheck {
                         new LocalizedMessage(
                             "merge-nested-if",
                             Map.of(
-                                "suggestion", ctIf.getFactory().createBinaryOperator(
+                                "suggestion", SpoonUtil.createBinaryOperator(
                                     ctIf.getCondition(),
                                     nestedIf.getCondition(),
                                     spoon.reflect.code.BinaryOperatorKind.AND
