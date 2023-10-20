@@ -251,6 +251,8 @@ abstract-class-without-abstract-method = Abstract classes should have at least o
 composition-over-inheritance = The parent class has only fields. Instead of inheritance, composition should be used. For example through an interface with the getter: '{$suggestion}'.
 should-be-interface = The parent class has only methods without fields. Instead of inheritance an interface with default-implementations should be used.
 
+avoid-static-blocks = Static blocks should be avoided because they are not expandable and object-oriented. Static blocks should be replaced by an object-oriented solution (e.g. constructor).
+
 # Structure
 
 default-package = The default-package should not be used. The following classes are in the default-package: {$positions}

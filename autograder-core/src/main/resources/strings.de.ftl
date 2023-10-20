@@ -252,6 +252,8 @@ abstract-class-without-abstract-method = Abstrakte Klassen sollten mindestens ei
 composition-over-inheritance = Die Oberklasse hat nur Felder. Statt Vererbung sollte hier Komposition verwendet werden. Zum Beispiel ein interface mit dem getter: '{$suggestion}'.
 should-be-interface = Die Klasse hat nur Methoden und keine Felder. Statt Vererbung sollte hier ein Interface mit Standard-Implementierungen verwendet werden.
 
+avoid-static-blocks = Statische Blöcke sollten vermieden werden, da sie keine objekt-orientierte Lösung darstellen und schlecht erweiterbar sind. Statische Blöcke sollten durch eine objektorientierte Lösung ersetzt werden (bspw. Konstruktoren).
+
 # Structure
 
 default-package = Das default-Paket sollte nicht verwendet werden. Die folgenden Klassen sind im default-Paket: {$positions}
