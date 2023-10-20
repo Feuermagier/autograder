@@ -30,7 +30,7 @@ public class OldCollectionCheck extends IntegratedCheck {
                 switch (ctConstructorCall.getType().getQualifiedName()) {
                     case "java.util.Vector" -> reportProblem(ctConstructorCall, "Vector", "ArrayList");
                     case "java.util.Hashtable" -> reportProblem(ctConstructorCall, "Hashtable", "HashMap");
-                    case "java.util.Stack" -> reportProblem(ctConstructorCall, "Stack", "Dequeue");
+                    case "java.util.Stack" -> reportProblem(ctConstructorCall, "Stack", "Deque");
                 }
             }
         });

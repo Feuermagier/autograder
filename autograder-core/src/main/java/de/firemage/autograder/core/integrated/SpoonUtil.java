@@ -20,9 +20,11 @@ import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
+import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
+import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
@@ -50,7 +52,6 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
@@ -963,6 +964,16 @@ public final class SpoonUtil {
         return isOverriddenMethod(ctMethod);
     }
 
+    /**
+     * Checks if the given method is overriding another method.
+     * @param statement which is checked
+     * @return true if the statement is an invocation (instance of CtInvocation, CtConstructorCall or CtLambda),
+     * false otherwise
+     */
+    public static boolean isInvocation(CtStatement statement) {
+        return statement instanceof CtInvocation<?> || statement instanceof CtConstructorCall<?> ||
+                statement instanceof CtLambda<?>;
+    }
     public static boolean isInMainMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
@@ -995,6 +1006,7 @@ public final class SpoonUtil {
             return false;
         }
     }
+
 
     private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
 

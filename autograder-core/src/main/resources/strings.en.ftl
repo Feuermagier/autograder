@@ -116,6 +116,7 @@ multiple-inline-statements = There should not be multiple statements in a single
 
 multi-threading = Multithreading is out of scope for this lecture. The code is only executed on a single thread. Writing it thread-safe makes the code unnecessarily complex.
 
+try-catch-complexity = The complexity of try-catch-blocks should be kept low. There should be less than {$max} statements in the try-block. You should refactor the code into multiple methods or extract unnecessary statements out of the try-block.
 
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
@@ -253,6 +254,7 @@ should-be-interface = The parent class has only methods without fields. Instead 
 # Structure
 
 default-package = The default-package should not be used. The following classes are in the default-package: {$positions}
+too-few-packages = The project has more than {$max} classes, but only one package is used. You should think about a better classification for the different classes to distribute the classes over multiple packages (e.g. commands, logic, ui, ...).
 
 # Unnecessary
 empty-block = Empty blocks should be removed or have a comment explaining why they are empty.
