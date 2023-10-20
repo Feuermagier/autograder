@@ -76,9 +76,13 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
-
     private SpoonUtil() {
 
+    }
+
+    public static boolean isInJunitTest() {
+        return Arrays.stream(Thread.currentThread().getStackTrace())
+            .anyMatch(element -> element.getClassName().startsWith("org.junit."));
     }
 
     public static boolean isString(CtTypeReference<?> type) {
@@ -401,8 +405,8 @@ public final class SpoonUtil {
         }
 
         CtBinaryOperator ctBinaryOperator = factory.createBinaryOperator(
-            leftHandOperand,
-            rightHandOperand,
+            leftHandOperand.clone(),
+            rightHandOperand.clone(),
             operatorKind
         );
 
@@ -414,9 +418,9 @@ public final class SpoonUtil {
     }
 
     @SuppressWarnings({"unchecked","rawtypes"})
-    private static <T> CtUnaryOperator<T> createCtUnaryOperator(UnaryOperatorKind operatorKind, CtExpression<?> ctExpression) {
+    public static <T> CtUnaryOperator<T> createUnaryOperator(UnaryOperatorKind operatorKind, CtExpression<?> ctExpression) {
         CtUnaryOperator ctUnaryOperator = ctExpression.getFactory().createUnaryOperator();
-        ctUnaryOperator.setOperand(ctExpression);
+        ctUnaryOperator.setOperand(ctExpression.clone());
         ctUnaryOperator.setKind(operatorKind);
 
         if (ctUnaryOperator.getType() == null) {
@@ -587,7 +591,7 @@ public final class SpoonUtil {
             }
         }
 
-        return createCtUnaryOperator(UnaryOperatorKind.NOT, ctExpression.clone());
+        return createUnaryOperator(UnaryOperatorKind.NOT, ctExpression.clone());
     }
 
     public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {

@@ -58,11 +58,12 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
 
     private static CtExpression<?> buildIsEmptySuggestion(CtExpression<?> target) {
         return target.getFactory().createInvocation(
-            target,
+            target.clone(),
             target.getType()
                 .getTypeDeclaration()
                 .getMethod("isEmpty")
                 .getReference()
+                .clone()
         );
     }
 

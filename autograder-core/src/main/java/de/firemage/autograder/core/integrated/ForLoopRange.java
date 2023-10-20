@@ -61,7 +61,7 @@ public record ForLoopRange(
                 && SpoonUtil.isIntegerLiteral(SpoonUtil.resolveCtExpression(ctBinaryOperator.getRightHandOperand()), 1)) {
                 end = (CtExpression<Integer>) ctBinaryOperator.getLeftHandOperand();
             } else {
-                end = end.getFactory().createBinaryOperator(
+                end = SpoonUtil.createBinaryOperator(
                     end,
                     SpoonUtil.makeLiteral(end.getType(), 1),
                     BinaryOperatorKind.PLUS

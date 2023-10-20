@@ -97,11 +97,12 @@ public class CommonReimplementation extends IntegratedCheck {
                         "suggestion", "%s += %s".formatted(
                             lhs.prettyprint(),
                             rhs.getFactory().createInvocation(
-                                rhs,
+                                rhs.clone(),
                                 rhs.getFactory().Type().get(java.lang.String.class)
                                     .getMethod("repeat", rhs.getFactory().createCtTypeReference(int.class))
-                                    .getReference(),
-                                forLoopRange.length()
+                                    .getReference()
+                                    .clone(),
+                                forLoopRange.length().clone()
                             ).prettyprint())
                     )
                 ),
@@ -169,7 +170,7 @@ public class CommonReimplementation extends IntegratedCheck {
         // this is the value that is assigned if the then-block is not executed
         // The variable is not changed without an else-Block (this would be equivalent to an else { variable = variable; })
         CtExpression<?> elseValue = ctIf.getFactory().createVariableRead(
-            assignedVariable,
+            assignedVariable.clone(),
             assignedVariable.getModifiers().contains(ModifierKind.STATIC)
         );
         if (ctIf.getElseStatement() != null) {
