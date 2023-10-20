@@ -26,4 +26,5 @@ public class CheckStaticBlocks extends IntegratedCheck {
             }
         });
     }
+
 }
