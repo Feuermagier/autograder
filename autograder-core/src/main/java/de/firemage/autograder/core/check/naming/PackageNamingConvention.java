@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = {ProblemType.PACKAGE_NAMING_CONVENTION})
 public class PackageNamingConvention extends IntegratedCheck {
-    private static final Pattern PACKAGE_NAME_PATTERN = Pattern.compile("[a-z][a-z0-9]*");
+    private static final Pattern PACKAGE_NAME_PATTERN = Pattern.compile("[a-z][a-z0-9_]*");
 
     private static <T> Set<T> intersection(Set<? extends T> left, Collection<T> right) {
         Set<T> result = new HashSet<>(left);

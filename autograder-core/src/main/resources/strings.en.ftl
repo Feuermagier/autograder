@@ -206,7 +206,7 @@ type-has-descriptive-name-pre-suffix = The name contains redundant prefixes or s
 type-has-descriptive-name-exception = A class that inherits from Exception should have 'Exception' at the end of its name
 
 package-naming-convention = The name of a package should be a single word and all letters should be lowercase by convention.
-                            Additionally, no special characters should occur like '_'. The following positions do not
+                            Except for the character '_', no special characters should appear. The following positions do not
                             adhere to this: '{$positions}'
 
 variable-redundant-number-suffix = The identifier '{$name}' has a redundant number at the end.
