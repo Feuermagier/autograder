@@ -207,7 +207,7 @@ type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder
 type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben
 
 package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein und alle Buchstaben sollten nach Konvention
-                            klein sein. Zudem sollten keine Sonderzeichen auftreten wie '_'. An folgenden Stellen wird das
+                            klein sein. Außer dem Zeichen '_' sollten zudem keine Sonderzeichen auftreten. An folgenden Stellen wird das
                             nicht eingehalten: '{$positions}'
 
 variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redundante Zahl am Ende.
