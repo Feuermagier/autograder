@@ -25,6 +25,7 @@ import java.io.IOException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Optional;
@@ -144,7 +145,13 @@ public final class CodeModel implements AutoCloseable {
             launcher.getEnvironment().setComplianceLevel(this.file.getVersion().getVersionNumber());
             // The encoding might differ by file
             launcher.getEnvironment().setEncodingProvider(
-                (spoonFile, fileBytes) -> this.file.getCompilationUnit(Path.of(spoonFile.getPath())).charset()
+                (spoonFile, fileBytes) -> {
+                    try {
+                        return this.file.getCompilationUnit(Path.of(spoonFile.getPath())).charset();
+                    } catch (Exception e) {
+                        return StandardCharsets.UTF_8;
+                    }
+                }
             );
             Environment environment = launcher.getEnvironment();
 
