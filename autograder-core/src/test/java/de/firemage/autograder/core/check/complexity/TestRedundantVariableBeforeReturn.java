@@ -354,4 +354,24 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testRedundantPrintln() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public static void main(String[] args) {
+                        int a = 5;
+                        System.out.println(a);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsRedundant(problems.next(), "a", "5");
+
+        problems.assertExhausted();
+    }
 }
