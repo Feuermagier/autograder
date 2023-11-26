@@ -536,4 +536,34 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testInevitablyUnusedLambdaParam() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    import java.util.Map;
+
+                    public class Main {
+                        private static void foo() {
+                            Map.of("Hello", "World").computeIfPresent("Hello", (key, value) -> {
+                                //                                              ^^^ unused, but there is no way to avoid it
+                                return value + "!";
+                            });
+                        }
+
+                        public static void main(String[] args) {
+                            foo();
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
