@@ -7,6 +7,7 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -106,7 +107,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtParameter(CtParameter<T> ctParameter) {
-                if (SpoonUtil.isInOverriddenMethod(ctParameter) || SpoonUtil.isInMainMethod(ctParameter)) {
+                if (SpoonUtil.isInOverriddenMethod(ctParameter) || SpoonUtil.isInMainMethod(ctParameter) || ctParameter.getParent() instanceof CtLambda<?>) {
                     super.visitCtParameter(ctParameter);
                     return;
                 }
