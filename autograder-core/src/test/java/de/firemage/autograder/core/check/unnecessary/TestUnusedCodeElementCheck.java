@@ -499,4 +499,41 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testUsedImplicitLambda() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    import java.util.List;
+
+                    public class Main {
+                        public Main(String string) {
+                            System.out.println(string);
+                        }
+
+                        private static String identity(String value) {
+                            return value;
+                        }
+
+                        public static void main(String[] args) {
+                            List<Main> result = List.of("Hello", "World")
+                                .stream()
+                                .map(Main::identity)
+                                .map(Main::new)
+                                .toList();
+
+                            System.out.println(result);
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

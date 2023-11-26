@@ -21,6 +21,7 @@ import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtConstructorCall;
+import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
@@ -1040,6 +1041,17 @@ public final class SpoonUtil {
         }
     }
 
+    private record ExecutableReferenceExpressionFilter(CtExecutable<?> executable) implements Filter<CtExecutableReferenceExpression<?, ?>> {
+        @Override
+        public boolean matches(CtExecutableReferenceExpression<?, ?> expression) {
+            CtExecutableReference<?> invocationExecutable = expression.getExecutable();
+            return invocationExecutable.equals(this.executable.getReference())
+                || this.executable.equals(invocationExecutable.getExecutableDeclaration())
+                // TODO: consider removing this?
+                || invocationExecutable.isOverriding(this.executable.getReference());
+        }
+    }
+
     public static class UsesFilter implements Filter<CtElement> {
         private final Filter<CtElement> filter;
 
@@ -1078,6 +1090,17 @@ public final class SpoonUtil {
                 new BetterInvocationFilter(ctExecutable),
                 // CtAbstractInvocation.class => Class<CtAbstractInvocation>, but Class<CtAbstractInvocation<?>> is needed
                 (Class<CtAbstractInvocation<?>>) (Object) CtAbstractInvocation.class
+            );
+
+            filter = new CompositeFilter<>(
+                FilteringOperator.UNION,
+                filter,
+                new FilterAdapter<>(
+                    // this filter finds all lambdas that reference the executable:
+                    // someMethod(MyClass::executableName)
+                    new ExecutableReferenceExpressionFilter(ctExecutable),
+                    (Class<CtExecutableReferenceExpression<?, ?>>) (Object) CtExecutableReferenceExpression.class
+                )
             );
 
             if (ctExecutable instanceof CtMethod<?> ctMethod) {
