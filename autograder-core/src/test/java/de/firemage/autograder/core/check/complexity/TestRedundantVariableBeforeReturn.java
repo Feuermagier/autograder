@@ -18,13 +18,13 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.REDUNDANT_VARIABLE_BEFORE_RETURN);
 
-    void assertEqualsRedundant(Problem problem, String name, String value) {
+    void assertEqualsRedundant(Problem problem, String name, String suggestion) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "redundant-variable",
                 Map.of(
                     "name", name,
-                    "value", value
+                    "suggestion", suggestion
                 )
             )),
             this.linter.translateMessage(problem.getExplanation())
@@ -84,7 +84,7 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "a", "5");
+        assertEqualsRedundant(problems.next(), "a", "return 5");
 
         problems.assertExhausted();
     }
@@ -110,8 +110,8 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "a", "5");
-        assertEqualsRedundant(problems.next(), "b", "2");
+        assertEqualsRedundant(problems.next(), "a", "// comment%nreturn 5".formatted());
+        assertEqualsRedundant(problems.next(), "b", "return 2");
 
         problems.assertExhausted();
     }
@@ -199,7 +199,7 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "a", "0");
+        assertEqualsRedundant(problems.next(), "a", "return 0");
 
         problems.assertExhausted();
     }
@@ -284,7 +284,7 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "object", "new Object()");
+        assertEqualsRedundant(problems.next(), "object", "return new Object()");
 
         problems.assertExhausted();
     }
@@ -326,7 +326,7 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "value", "\"some value\"");
+        assertEqualsRedundant(problems.next(), "value", "return \"some value\"");
 
         problems.assertExhausted();
     }
@@ -350,7 +350,7 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "value", "\"some value\"");
+        assertEqualsRedundant(problems.next(), "value", "return \"some value\"");
 
         problems.assertExhausted();
     }
@@ -370,7 +370,7 @@ class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "a", "5");
+        assertEqualsRedundant(problems.next(), "a", "System.out.println(5)");
 
         problems.assertExhausted();
     }
