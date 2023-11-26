@@ -56,7 +56,7 @@ public class RedundantVariableBeforeReturn extends IntegratedCheck {
                     "redundant-variable",
                     Map.of(
                         "name", ctLocalVariable.getSimpleName(),
-                        "value", ctLocalVariable.getDefaultExpression().prettyprint()
+                        "suggestion", ctStatement.prettyprint().replace(ctLocalVariable.getSimpleName(), ctLocalVariable.getDefaultExpression().prettyprint())
                     )
                 ),
                 ProblemType.REDUNDANT_VARIABLE_BEFORE_RETURN
