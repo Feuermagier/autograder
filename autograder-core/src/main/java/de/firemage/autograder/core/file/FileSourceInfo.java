@@ -40,7 +40,7 @@ public class FileSourceInfo implements SourceInfo, Serializable {
         try (Stream<Path> fileStream = Files.walk(this.file.toPath())) {
             this.compilationUnits = fileStream
                 .filter(p -> p.toString().endsWith(".java"))
-                .filter(p -> !p.toString().endsWith("package-info.java"))
+                //.filter(p -> !p.toString().endsWith("package-info.java"))
                 .map(Path::toFile)
                 .map(file -> {
                     Path root = this.path();
