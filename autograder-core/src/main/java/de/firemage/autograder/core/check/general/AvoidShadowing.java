@@ -8,7 +8,10 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeInformation;
@@ -22,7 +25,7 @@ import java.util.List;
 import java.util.Map;
 
 
-@ExecutableCheck(reportedProblems = { ProblemType.AVOID_SHADOWING })
+@ExecutableCheck(reportedProblems = {ProblemType.AVOID_SHADOWING})
 public class AvoidShadowing extends IntegratedCheck {
     private static final List<String> ALLOWED_FIELDS = List.of("serialVersionUID");
 
@@ -44,6 +47,18 @@ public class AvoidShadowing extends IntegratedCheck {
         }
 
         return result;
+    }
+
+    /**
+     * Searches for a variable read of the given variable in the given element.
+     *
+     * @param ctVariable the variable that should be read
+     * @param in the element to search in
+     * @return true if a variable read was found, false otherwise
+     * @param <T> the type of the variable
+     */
+    private static <T> boolean hasVariableReadIn(CtVariable<T> ctVariable, CtElement in) {
+        return SpoonUtil.findUsesIn(ctVariable, in).stream().anyMatch(ctElement -> ctElement instanceof CtVariableRead<?>);
     }
 
     @Override
@@ -68,26 +83,36 @@ public class AvoidShadowing extends IntegratedCheck {
                 }
 
                 CtType<?> parent = ctVariable.getParent(CtType.class);
-
-                if (parent == null) {
+                if (parent == null || ctVariable.getReference() == null) {
                     return;
                 }
 
                 Collection<CtFieldReference<?>> visibleFields = getAllVisibleFields(parent);
 
-                for (CtFieldReference<?> ctFieldReference : visibleFields) {
-                    if (ALLOWED_FIELDS.contains(ctFieldReference.getSimpleName()) || ctVariable.getReference() == null) {
-                        continue;
-                    }
+                List<CtFieldReference<?>> hiddenFields = visibleFields.stream()
+                    .filter(ctFieldReference -> !ALLOWED_FIELDS.contains(ctFieldReference.getSimpleName()))
+                    .filter(ctFieldReference -> ctFieldReference.getSimpleName().equals(ctVariable.getSimpleName())
+                        && !ctFieldReference.equals(ctVariable.getReference()))
+                    .toList();
 
-                    if (ctFieldReference.getSimpleName().equals(ctVariable.getSimpleName())
-                        && !ctFieldReference.equals(ctVariable.getReference())) {
-                        addLocalProblem(
-                            ctVariable,
-                            new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),
-                            ProblemType.AVOID_SHADOWING
-                        );
-                    }
+                // if there are no fields hidden by the variable, skip them
+                if (hiddenFields.isEmpty()) {
+                    return;
+                }
+
+                CtElement variableParent = ctVariable.getParent();
+
+                // there might be multiple fields hidden by the variable (e.g. subclass hides superclass field)
+                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> hasVariableReadIn(ctFieldReference.getFieldDeclaration(), variableParent));
+
+                // to reduce the number of annotations, we only report a problem if the variable AND the hidden field are read in
+                // the same context
+                if (hasVariableReadIn(ctVariable, variableParent) && isFieldRead) {
+                    addLocalProblem(
+                        ctVariable,
+                        new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),
+                        ProblemType.AVOID_SHADOWING
+                    );
                 }
             }
         });
