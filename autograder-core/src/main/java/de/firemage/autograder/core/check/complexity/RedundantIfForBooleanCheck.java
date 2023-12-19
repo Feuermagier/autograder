@@ -61,7 +61,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
         Boolean elseLiteral = SpoonUtil.tryGetBooleanLiteral(elseValue).orElse(null);
 
         // skip non-sense like if (a) return true else return true
-        if (thenLiteral != null && elseLiteral != null && thenLiteral == elseLiteral) {
+        if (thenLiteral != null && thenLiteral.equals(elseLiteral)) {
             return;
         }
 
