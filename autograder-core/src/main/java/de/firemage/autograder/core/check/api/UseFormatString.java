@@ -30,6 +30,7 @@ import java.util.function.UnaryOperator;
 @ExecutableCheck(reportedProblems = { ProblemType.USE_FORMAT_STRING })
 public class UseFormatString extends IntegratedCheck {
     private static final int MIN_NUMBER_CONCATENATIONS = 3;
+    private static final int MIN_NUMBER_LITERALS = 2;
 
     private List<CtExpression<?>> getFormatArgs(CtBinaryOperator<?> ctBinaryOperator) {
         List<CtExpression<?>> result = new ArrayList<>();
@@ -73,6 +74,12 @@ public class UseFormatString extends IntegratedCheck {
         // true if the formatString has a %n placeholder
         boolean hasInlineNewline = false;
         for (CtExpression<?> ctExpression : ctExpressions) {
+            if (SpoonUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal
+                && literal.getValue() != null
+                && SpoonUtil.isTypeEqualTo(literal.getType(), java.lang.String.class)) {
+                ctExpression = literal;
+            }
+
             if (ctExpression instanceof CtLiteral<?> ctLiteral) {
                 CtTypeInformation ctTypeInformation = ctLiteral.getType();
                 if (ctLiteral.getValue() instanceof String value) {
@@ -175,7 +182,14 @@ public class UseFormatString extends IntegratedCheck {
             return;
         }
 
-        this.checkArgs(ctBinaryOperator, this.getFormatArgs(ctBinaryOperator), suggestion -> suggestion);
+        List<CtExpression<?>> formatArgs = this.getFormatArgs(ctBinaryOperator);
+
+        int numberOfLiterals = (int) formatArgs.stream().filter(ctExpression -> SpoonUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal && literal.getValue() != null).count();
+        if (numberOfLiterals < MIN_NUMBER_LITERALS) {
+            return;
+        }
+
+        this.checkArgs(ctBinaryOperator, formatArgs, suggestion -> suggestion);
     }
 
     private void checkCtInvocation(CtInvocation<?> ctInvocation) {
