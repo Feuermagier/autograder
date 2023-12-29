@@ -4,6 +4,7 @@ import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 
 import java.io.File;
@@ -28,7 +29,10 @@ public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine
 
         SourcePath relativePath = sourceInfo.getCompilationUnit(file.toPath()).path();
 
-        if (ctElement instanceof CtType<?> && ctElement.getPosition().equals(sourcePosition)) {
+        // Instead of highlighting all lines of a class or method, only highlight the first line.
+        //
+        // Someone might explicitly specify a source position, in which case it will differ from the element's position.
+        if ((ctElement instanceof CtType<?> || ctElement instanceof CtMethod<?>) && ctElement.getPosition().equals(sourcePosition)) {
             return new CodePosition(
                 sourceInfo,
                 relativePath,
