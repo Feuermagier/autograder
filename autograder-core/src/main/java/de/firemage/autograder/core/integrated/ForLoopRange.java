@@ -5,10 +5,12 @@ import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.UnaryOperatorKind;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtLocalVariableReference;
 
 import java.util.Optional;
@@ -21,14 +23,38 @@ public record ForLoopRange(
 
     @SuppressWarnings("unchecked")
     public static Optional<ForLoopRange> fromCtFor(CtFor ctFor) {
-        // ensure that the loop has exactly one variable initialized with a literal value
-        if (ctFor.getForInit().size() != 1
-            || !(ctFor.getForInit().get(0) instanceof CtLocalVariable<?> ctLocalVariable)
-            || !SpoonUtil.isTypeEqualTo(ctLocalVariable.getType(), int.class, Integer.class)
-            || ctLocalVariable.getDefaultExpression() == null) {
+        CtLocalVariable<?> potentialLoopVariable = null;
+
+        // check if the loop variable is not declared in the for loop
+        if (ctFor.getForInit().isEmpty()
+            // then look at the variable used in the break condition
+            && ctFor.getExpression() instanceof CtBinaryOperator<Boolean> ctBinaryOperator
+            && ctBinaryOperator.getLeftHandOperand() instanceof CtVariableAccess<?> ctVariableAccess
+            && ctVariableAccess.getVariable() != null
+            // check that this variable is a local variable
+            && ctVariableAccess.getVariable().getDeclaration() instanceof CtLocalVariable<?> localVariable
+            // which is declared before the loop
+            && SpoonUtil.getPreviousStatement(ctFor)
+                .map(statement -> statement instanceof CtVariable<?> ctVariable
+                    && ctVariable.getReference().equals(ctVariableAccess.getVariable()))
+                .orElse(false)
+            // the loop variable must not be used after the loop
+            && SpoonUtil.getNextStatements(ctFor).stream().allMatch(statement -> SpoonUtil.findUsesIn(localVariable, statement).isEmpty())
+        ) {
+            potentialLoopVariable = localVariable;
+        } else if (ctFor.getForInit().size() == 1 && ctFor.getForInit().get(0) instanceof CtLocalVariable<?> ctLocalVariable) {
+            potentialLoopVariable = ctLocalVariable;
+        }
+
+        if (potentialLoopVariable == null
+            || !SpoonUtil.isTypeEqualTo(potentialLoopVariable.getType(), int.class, Integer.class)
+            || potentialLoopVariable.getDefaultExpression() == null) {
             return Optional.empty();
         }
 
+        CtLocalVariable<Integer> ctLocalVariable = (CtLocalVariable<Integer>) potentialLoopVariable;
+
+        // ensure that the loop has exactly one variable initialized with a literal value
         CtExpression<?> start = SpoonUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression());
 
         // ensure that it is initialized with some integer

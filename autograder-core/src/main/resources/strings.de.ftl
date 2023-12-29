@@ -151,8 +151,6 @@ double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
 
 field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale Variable sein, da sie in jeder Methode vor dem ersten Lesen überschrieben wird
 
-for-foreach = for-Schleife sollte eine for-each-Schleife sein
-
 missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe https://stackoverflow.com/a/94411/7766117.
 
 system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.

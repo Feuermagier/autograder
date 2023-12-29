@@ -3,6 +3,7 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.check.general.ForToForEachLoop;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -578,22 +579,11 @@ public class CommonReimplementation extends IntegratedCheck {
         }
 
         // ensure that the variable is only used to access the list elements via get
-        CtVariable<?> ctListVariable = null;
-        CtTypeReference<?> listType = ctFor.getFactory().Type().get(java.util.List.class).getReference();
-        for (CtElement use : SpoonUtil.findUsesIn(forLoopRange.loopVariable().getDeclaration(), ctFor.getBody())) {
-            if (!(use instanceof CtVariableAccess<?> variableAccess)
-                || !(variableAccess.getParent() instanceof CtInvocation<?> ctInvocation)
-                || !(SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), Object.class, "get", int.class))
-                || !(ctInvocation.getTarget() instanceof CtVariableAccess<?> ctVariableAccess)
-                || !ctVariableAccess.getType().isSubtypeOf(listType)
-                || (ctListVariable != null && !ctListVariable.getReference().equals(ctVariableAccess.getVariable()))) {
-                return;
-            }
-
-            if (ctListVariable == null) {
-                ctListVariable = ctVariableAccess.getVariable().getDeclaration();
-            }
-        }
+        CtVariable<?> ctListVariable = ForToForEachLoop.getForEachLoopVariable(
+            ctFor,
+            forLoopRange,
+            ForToForEachLoop.LOOP_VARIABLE_ACCESS_LIST
+        ).orElse(null);
 
         if (ctListVariable == null) {
             return;
@@ -603,6 +593,13 @@ public class CommonReimplementation extends IntegratedCheck {
         // size != 1, if the list is a raw type: List list = new ArrayList();
         if (ctListVariable.getType().getActualTypeArguments().size() == 1) {
             listElementType = ctListVariable.getType().getActualTypeArguments().get(0);
+        }
+
+        // check if the loop iterates over the whole list (then it is covered by the foreach loop check)
+        if (SpoonUtil.resolveConstant(forLoopRange.start()) instanceof CtLiteral<Integer> ctLiteral
+            && ctLiteral.getValue() == 0
+            && ForToForEachLoop.findIterable(forLoopRange).isPresent()) {
+            return;
         }
 
         this.addLocalProblem(
