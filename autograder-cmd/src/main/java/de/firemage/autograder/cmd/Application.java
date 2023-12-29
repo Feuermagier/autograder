@@ -37,10 +37,13 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
 import java.util.stream.Stream;
@@ -92,9 +95,11 @@ public class Application implements Callable<Integer> {
     private CommandSpec spec;
 
     private final TempLocation tempLocation;
+    private final Set<String> exludedClasses;
 
     public Application(TempLocation tempLocation) {
         this.tempLocation = tempLocation;
+        this.exludedClasses = new HashSet<>();
     }
 
     private static Charset getConsoleCharset() {
@@ -188,6 +193,33 @@ public class Application implements Callable<Integer> {
         CmdUtil.endSection();
     }
 
+    private List<ProblemType> getChecks() throws IOException {
+        List<String> checks;
+        if (passConfig) {
+            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig, String[].class));
+        } else {
+            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(new File(checkConfig), String[].class));
+        }
+
+        List<ProblemType> result = new ArrayList<>();
+
+        // HACK: EXCLUDE is used to ignore some classes, blame the config format for the hacky solution
+        for (String check : checks) {
+            if (check.startsWith("EXCLUDE")) {
+                this.exludedClasses.addAll(List.of(check.substring("EXCLUDE".length() + 1).split(" ")));
+                continue;
+            }
+
+            try {
+                result.add(ProblemType.valueOf(check));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Unknown check '%s'".formatted(check), e);
+            }
+        }
+
+        return result;
+    }
+
     @Override
     public Integer call() {
         if (!JavaVersion.isValidJavaVersion(javaVersion)) {
@@ -220,11 +252,7 @@ public class Application implements Callable<Integer> {
 
         List<ProblemType> checks;
         try {
-            if (passConfig) {
-                checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig, ProblemType[].class));
-            } else {
-                checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(new File(checkConfig), ProblemType[].class));
-            }
+            checks = this.getChecks();
         } catch (IOException e) {
             e.printStackTrace();
             return IO_EXIT_CODE;
@@ -235,6 +263,7 @@ public class Application implements Callable<Integer> {
             .tempLocation(this.tempLocation)
             .enableDynamicAnalysis(isDynamicAnalysisEnabled)
             .maxProblemsPerCheck(this.maxProblemsPerCheck)
+            .exclude(problem -> this.exludedClasses.contains(problem.getPosition().file().getName().replace(".java", "")))
             .build();
 
         Consumer<LinterStatus> statusConsumer = status ->

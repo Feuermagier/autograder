@@ -34,7 +34,7 @@ class TestUseFormatString extends AbstractCheckTest {
     }
 
     @Test
-    void testSimpleArrayCopy() throws LinterException, IOException {
+    void testMotivatingExample() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
@@ -78,6 +78,52 @@ class TestUseFormatString extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         assertUseFormatString("stringBuilder.append(\"[%s]\".formatted(args[0]))", problems.next());
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testMinimumStringConstantLiterals() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Field",
+            """
+                public class Field {
+                    private static final String OPEN_BRACKET = "[";
+                    private static final String CLOSE_BRACKET = "]";
+
+                    private int number;
+
+                    @Override
+                    public String toString() {
+                        return OPEN_BRACKET + number + CLOSE_BRACKET;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertUseFormatString("\"[%d]\".formatted(number)", problems.next());
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testTooFewStringLiterals() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Field",
+            """
+                public class Field {
+                    private String left;
+                    private int number;
+                    private String right;
+
+                    @Override
+                    public String toString() {
+                        return this.left + number + this.right + ".";
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
         problems.assertExhausted();
     }
 }

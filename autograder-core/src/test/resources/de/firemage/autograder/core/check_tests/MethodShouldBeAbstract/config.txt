@@ -1,9 +1,9 @@
 oop.MethodShouldBeAbstractCheck
 Method should be abstract instead of providing a dummy implementation
-Test.java:32-34
-Test.java:36-38
-Test.java:44-46
-Test.java:48-50
-Test.java:52-54
-Test.java:56-58
-Test.java:60-62
+Test.java:32
+Test.java:36
+Test.java:44
+Test.java:48
+Test.java:52
+Test.java:56
+Test.java:60

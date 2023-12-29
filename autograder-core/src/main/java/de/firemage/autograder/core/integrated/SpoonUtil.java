@@ -1161,6 +1161,20 @@ public final class SpoonUtil {
         return Optional.empty();
     }
 
+    public static List<CtStatement> getNextStatements(CtStatement ctStatement) {
+        List<CtStatement> result = new ArrayList<>();
+        if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
+            List<CtStatement> statements = ctStatementList.getStatements();
+            int index = statements.indexOf(ctStatement);
+
+            if (index > 0) {
+                result.addAll(statements.subList(index + 1, statements.size()));
+            }
+        }
+
+        return result;
+    }
+
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
         return TerminalStatement.of(ctStatement).or(() -> AssignmentStatement.of(ctStatement));
     }

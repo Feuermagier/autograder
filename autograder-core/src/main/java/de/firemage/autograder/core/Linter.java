@@ -35,6 +35,7 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class Linter {
@@ -44,6 +45,7 @@ public final class Linter {
     private final boolean disableDynamicAnalysis;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
+    private final Predicate<Problem> isExcluded;
 
     private Linter(
         Locale locale,
@@ -51,7 +53,8 @@ public final class Linter {
         int threads,
         boolean disableDynamicAnalysis,
         ClassLoader classLoader,
-        int maxProblemsPerCheck
+        int maxProblemsPerCheck,
+        Predicate<Problem> isExcluded
     ) {
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
@@ -72,6 +75,7 @@ public final class Linter {
         this.disableDynamicAnalysis = disableDynamicAnalysis;
         this.classLoader = classLoader;
         this.maxProblemsPerCheck = maxProblemsPerCheck;
+        this.isExcluded = isExcluded;
     }
 
     public static class Builder {
@@ -81,9 +85,11 @@ public final class Linter {
         private boolean disableDynamicAnalysis = true;
         private ClassLoader classLoader;
         private int maxProblemsPerCheck = -1;
+        private Predicate<Problem> isExcluded;
 
         private Builder(Locale locale) {
             this.locale = locale;
+            this.isExcluded = problem -> false;
         }
 
         public Builder tempLocation(TempLocation tempLocation) {
@@ -115,6 +121,11 @@ public final class Linter {
             return this;
         }
 
+        public Builder exclude(Predicate<Problem> isExcluded) {
+            this.isExcluded = isExcluded;
+            return this;
+        }
+
         public Linter build() {
             TempLocation tempLocation = this.tempLocation;
 
@@ -128,7 +139,8 @@ public final class Linter {
                 this.threads,
                 this.disableDynamicAnalysis,
                 this.classLoader,
-                this.maxProblemsPerCheck
+                this.maxProblemsPerCheck,
+                this.isExcluded
             );
         }
     }
@@ -249,9 +261,14 @@ public final class Linter {
             unreducedProblems = result
                 .problems()
                 .stream()
-                .filter(p -> problemsToReport.contains(p.getProblemType()))
+                .filter(problem -> problemsToReport.contains(problem.getProblemType()))
                 .toList();
         }
+
+        // filter out excluded problems:
+        unreducedProblems = unreducedProblems.stream()
+            .filter(this.isExcluded.negate())
+            .toList();
 
         return this.mergeProblems(unreducedProblems);
     }
