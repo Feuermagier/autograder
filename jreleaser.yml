@@ -16,6 +16,7 @@ project:
 release:
   github:
     overwrite: true
+    checksums: false
     signatures: false
     releaseName: '{{tagName}}'
     changelog:
