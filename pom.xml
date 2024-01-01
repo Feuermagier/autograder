@@ -8,7 +8,7 @@
     <groupId>de.firemage.autograder</groupId>
     <artifactId>autograder-parent</artifactId>
     <packaging>pom</packaging>
-    <version>${revision}</version>
+    <version>0.5.22</version>
     <name>Autograder</name>
     <description>Automatic assessment of student code submissions</description>
     <url>https://github.com/Feuermagier/autograder</url>
@@ -84,37 +84,37 @@
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-event</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-agent</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-executor</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-core</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-cmd</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-treeg</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-span</artifactId>
-                <version>${revision}</version>
+                <version>0.5.22</version>
             </dependency>
         </dependencies>
     </dependencyManagement>

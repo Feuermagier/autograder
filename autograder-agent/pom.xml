@@ -5,7 +5,7 @@
     <parent>
         <artifactId>autograder-parent</artifactId>
         <groupId>de.firemage.autograder</groupId>
-        <version>${revision}</version>
+        <version>0.5.22</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
     <artifactId>autograder-agent</artifactId>
