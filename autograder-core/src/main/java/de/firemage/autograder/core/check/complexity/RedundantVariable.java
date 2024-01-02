@@ -17,8 +17,8 @@ import spoon.reflect.visitor.CtScanner;
 
 import java.util.Map;
 
-@ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_VARIABLE_BEFORE_RETURN})
-public class RedundantVariableBeforeReturn extends IntegratedCheck {
+@ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_VARIABLE})
+public class RedundantVariable extends IntegratedCheck {
     /**
      * Checks if the given statement does not influence the variable returned by the return statement.
      *
@@ -59,7 +59,7 @@ public class RedundantVariableBeforeReturn extends IntegratedCheck {
                         "suggestion", ctStatement.prettyprint().replace(ctLocalVariable.getSimpleName(), ctLocalVariable.getDefaultExpression().prettyprint())
                     )
                 ),
-                ProblemType.REDUNDANT_VARIABLE_BEFORE_RETURN
+                ProblemType.REDUNDANT_VARIABLE
             );
         }
     }

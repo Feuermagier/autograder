@@ -15,8 +15,8 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestRedundantVariableBeforeReturn extends AbstractCheckTest {
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.REDUNDANT_VARIABLE_BEFORE_RETURN);
+class TestRedundantVariable extends AbstractCheckTest {
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.REDUNDANT_VARIABLE);
 
     void assertEqualsRedundant(Problem problem, String name, String suggestion) {
         assertEquals(
