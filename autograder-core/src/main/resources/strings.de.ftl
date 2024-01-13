@@ -60,6 +60,8 @@ comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf E
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}
 comment-language-exp-german = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Deutsch. Ein englischer Kommentar befindet sich bei {$path}:{$line}
 
+unnecessary-comment-empty = Dieser Kommentar ist leer und sollte daher entfernt werden
+
 javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
 javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
 
