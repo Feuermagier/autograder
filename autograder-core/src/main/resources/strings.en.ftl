@@ -187,6 +187,9 @@ avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'P
 
 binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'.
 
+object-datatype = Instead of the datatype 'Object', the variable '{$variable}' should have a concrete or generic datatype.
+
+
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.
 

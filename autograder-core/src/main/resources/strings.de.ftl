@@ -187,6 +187,8 @@ merge-nested-if = Die Verschachtelte if kann mit der äußeren if kombiniert wer
 
 binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwenden.
 
+object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
