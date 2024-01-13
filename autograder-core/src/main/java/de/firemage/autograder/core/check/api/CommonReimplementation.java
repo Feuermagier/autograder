@@ -150,110 +150,6 @@ public class CommonReimplementation extends IntegratedCheck {
         }
     }
 
-    private void checkMaxMin(CtIf ctIf) {
-        Set<BinaryOperatorKind> maxOperators = Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE);
-        Set<BinaryOperatorKind> minOperators = Set.of(BinaryOperatorKind.GT, BinaryOperatorKind.GE);
-
-        // ensure that in the if block there is only one assignment to a variable
-        // and the condition is a binary operator with <, <=, > or >=
-        List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
-        if (thenBlock.size() != 1
-            || !(thenBlock.get(0) instanceof CtAssignment<?, ?> thenAssignment)
-            || !(thenAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite)
-            || !(ctIf.getCondition() instanceof CtBinaryOperator<Boolean> ctBinaryOperator)
-            || (!maxOperators.contains(ctBinaryOperator.getKind()) && !minOperators.contains(ctBinaryOperator.getKind()))) {
-            return;
-        }
-
-        // keep track of the assigned variable (must be the same in the else block)
-        CtVariableReference<?> assignedVariable = ctVariableWrite.getVariable();
-
-        // this is the value that is assigned if the then-block is not executed
-        // The variable is not changed without an else-Block (this would be equivalent to an else { variable = variable; })
-        CtExpression<?> elseValue = ctIf.getFactory().createVariableRead(
-            assignedVariable.clone(),
-            assignedVariable.getModifiers().contains(ModifierKind.STATIC)
-        );
-        if (ctIf.getElseStatement() != null) {
-            List<CtStatement> elseBlock = SpoonUtil.getEffectiveStatements(ctIf.getElseStatement());
-            if (elseBlock.size() != 1
-                || !(elseBlock.get(0) instanceof CtAssignment<?,?> elseAssignment)
-                || !(elseAssignment.getAssigned() instanceof CtVariableAccess<?> elseAccess)
-                // ensure that the else block assigns to the same variable
-                || !elseAccess.getVariable().equals(assignedVariable)) {
-                return;
-            }
-
-            elseValue = elseAssignment.getAssignment();
-        }
-
-        CtBinaryOperator<Boolean> condition = ctBinaryOperator;
-        // ensure that the else value is on the left side of the condition
-        if (ctBinaryOperator.getRightHandOperand().equals(elseValue)) {
-            condition = SpoonUtil.swapCtBinaryOperator(condition);
-        }
-
-        // if it is not on either side of the condition, return
-        if (!condition.getLeftHandOperand().equals(elseValue)) {
-            return;
-        }
-
-        // max looks like this:
-        // if (variable < max) {
-        //     variable = max;
-        // }
-        //
-        // or with an explicit else block:
-        //
-        // if (max > expr) {
-        //     v = max;
-        // } else {
-        //     v = expr;
-        // }
-
-        if (maxOperators.contains(condition.getKind())) {
-            addLocalProblem(
-                ctIf,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        "suggestion", "%s = Math.max(%s, %s)".formatted(
-                            ctVariableWrite.prettyprint(),
-                            elseValue.prettyprint(),
-                            condition.getRightHandOperand().prettyprint()
-                        )
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN
-            );
-
-            return;
-        }
-
-        // if (variable > min) {
-        //    variable = min;
-        // }
-
-        if (minOperators.contains(condition.getKind())) {
-            addLocalProblem(
-                ctIf,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        "suggestion", "%s = Math.min(%s, %s)".formatted(
-                            ctVariableWrite.prettyprint(),
-                            elseValue.prettyprint(),
-                            condition.getRightHandOperand().prettyprint()
-                        )
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN
-            );
-
-            return;
-        }
-    }
-
     private void checkAddAll(CtForEach ctFor) {
         List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
         if (statements.size() != 1) {
@@ -654,7 +550,6 @@ public class CommonReimplementation extends IntegratedCheck {
                     return;
                 }
 
-                checkMaxMin(ctIf);
                 checkModulo(ctIf);
                 super.visitCtIf(ctIf);
             }
