@@ -173,7 +173,7 @@ scanner-closed = Scanner should be closed
 
 unchecked-type-cast = It has to be ensured that the type of the object is the same as that of the cast. Otherwise, the code might crash.
 
-compare-char-value = char values in the ASCII range should be compared as char values, not as int values.
+compare-char-value = Here '{$expression}' of type char is compared with the value {$intValue}. It is not obvious which letter the value represents, therefore write '{$charValue}'.
 
 use-guard-clauses = The code cancels the normal control-flow through for example a return. if-else-blocks with those conditions can be written more beautifully using so called guard-clauses. This has the advantage that you can better recognize duplicate code. See for a detailed explanation https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a or https://deviq.com/design-patterns/guard-clause
 
