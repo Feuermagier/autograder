@@ -61,6 +61,8 @@ comment-language-exp-invalid = The language of this comment is neither English n
 comment-language-exp-english = The code contains comments in German and in English. This comment is in English. A German comment can be found at {$path}:{$line}
 comment-language-exp-german = The code contains comments in German and in English. This comment is in German. An English comment can be found at {$path}:{$line}
 
+unnecessary-comment-empty = This comment is empty and should therefore be removed
+
 javadoc-method-exp-param-missing = The parameter '{$param}' is not mentioned in the JavaDoc comment
 javadoc-method-exp-param-unknown = The JavaDoc comment mentions the parameter '{$param}', but the parameter doesn't exist
 
@@ -173,7 +175,7 @@ scanner-closed = Scanner should be closed
 
 unchecked-type-cast = It has to be ensured that the type of the object is the same as that of the cast. Otherwise, the code might crash.
 
-compare-char-value = char values in the ASCII range should be compared as char values, not as int values.
+compare-char-value = Here '{$expression}' of type char is compared with the value {$intValue}. It is not obvious which letter the value represents, therefore write '{$charValue}'.
 
 use-guard-clauses = The code cancels the normal control-flow through for example a return. if-else-blocks with those conditions can be written more beautifully using so called guard-clauses. This has the advantage that you can better recognize duplicate code. See for a detailed explanation https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a or https://deviq.com/design-patterns/guard-clause
 
@@ -184,6 +186,9 @@ use-different-visibility = The visibility of '{$name}' should be '{$suggestion}'
 avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'Pattern.matches'. Convert the constant to a pattern with the value '{$suggestion}'.
 
 binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'.
+
+object-datatype = Instead of the datatype 'Object', the variable '{$variable}' should have a concrete or generic datatype.
+
 
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.

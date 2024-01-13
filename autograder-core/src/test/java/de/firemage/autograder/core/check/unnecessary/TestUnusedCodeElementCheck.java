@@ -566,4 +566,33 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testSerialVersionUID() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            throw new MyException();
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "MyException",
+                    """
+                    public class MyException extends RuntimeException {
+                        private static final long serialVersionUID = 1L;
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

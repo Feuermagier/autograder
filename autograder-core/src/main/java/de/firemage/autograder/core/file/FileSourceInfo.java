@@ -20,6 +20,7 @@ import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -54,9 +55,24 @@ public class FileSourceInfo implements SourceInfo, Serializable {
     }
 
     private SerializableCharset detectCharset(File file, SourcePath sourcePath) {
+        // There is an issue where it detects TIS-620 for a file that contains a '§', even though it is UTF-8.
+        // See https://github.com/Feuermagier/autograder/issues/368.
+        //
+        // According to this issue https://github.com/albfernandez/juniversalchardet/issues/22 it is impossible
+        // for the detector to find the correct charset in some cases.
+        //
+        // The workaround is to use a list of charsets that are likely to be used in a submission and if one
+        // has been detected that is not in the list, use UTF-8 by default.
+        Set<Charset> supportedCharsets = Set.of(
+            StandardCharsets.UTF_8,
+            StandardCharsets.US_ASCII,
+            StandardCharsets.ISO_8859_1
+        );
+
         try {
             return new SerializableCharset(Optional.ofNullable(UniversalDetector.detectCharset(file))
                 .map(Charset::forName)
+                .filter(supportedCharsets::contains)
                 .orElse(StandardCharsets.UTF_8));
         } catch (IOException e) {
             throw new IllegalArgumentException("Failed to read file '%s' for detecting charset".formatted(sourcePath), e);

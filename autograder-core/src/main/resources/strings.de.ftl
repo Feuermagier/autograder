@@ -60,6 +60,8 @@ comment-language-exp-invalid = Dieser Kommentar ist weder auf Deutsch noch auf E
 comment-language-exp-english = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Englisch. Ein deutscher Kommentar befindet sich bei {$path}:{$line}
 comment-language-exp-german = Der Code enthält deutsche und englische Kommentare. Dieser Kommentar ist auf Deutsch. Ein englischer Kommentar befindet sich bei {$path}:{$line}
 
+unnecessary-comment-empty = Dieser Kommentar ist leer und sollte daher entfernt werden
+
 javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
 javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
 
@@ -171,7 +173,7 @@ scanner-closed = Scanner sollte geschlossen werden
 
 unchecked-type-cast = Es muss sicher gestellt werden, dass der Typ des Objekts mit dem Typ des Casts übereinstimmt. Ansonsten kann der Code abstürzen.
 
-compare-char-value = char-Werte im ASCII Bereich sollten als char-Werte verglichen werden, nicht als int-Werte.
+compare-char-value = Hier wird '{$expression}' vom Typ char mit dem Wert {$intValue} verglichen. Es ist nicht offensichtlich für welchen Buchstabe der Wert steht, schreibe stattdessen '{$charValue}'.
 
 use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispiel ein return ab. if-else-Blöcke mit solchen Abbrüchen kann man mithilfe von sogenannten guard-clauses schöner schreiben. Das hat unter anderem den Vorteil, dass man doppelten Code leichter erkennt. Siehe für eine detaillierte Erklärung https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a oder https://deviq.com/design-patterns/guard-clause
 
@@ -184,6 +186,8 @@ avoid-recompiling-regex = Die Konstante wird nur mit 'Pattern.compile' oder 'Pat
 merge-nested-if = Die Verschachtelte if kann mit der äußeren if kombiniert werden. Die Bedingung der äußeren if sollte '{$suggestion}' sein.
 
 binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwenden.
+
+object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.

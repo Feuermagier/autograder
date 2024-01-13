@@ -25,11 +25,7 @@ release:
       preset: conventional-commits
       format: '- {{commitShortHash}} {{commitTitle}}'
       contributors:
-        format: '- {{contributorName}}{{#contributorUsernameAsLink}} ({{.}}){{/contributorUsernameAsLink}}'
-      hide:
-        contributors:
-          - '[bot]'
-          - 'GitHub'
+        enabled: false
 
 distributions:
   helloworld:

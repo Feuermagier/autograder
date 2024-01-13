@@ -1,4 +1,0 @@
-general.CompareCharValue
-Character should be compared to chars and not int values
-Test.java:6
-Test.java:6

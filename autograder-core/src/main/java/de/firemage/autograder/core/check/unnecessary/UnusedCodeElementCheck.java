@@ -125,6 +125,11 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtField(CtField<T> ctField) {
+                if (ctField.getSimpleName().equals("serialVersionUID")) {
+                    super.visitCtField(ctField);
+                    return;
+                }
+
                 checkUnused(staticAnalysis, ctField);
                 super.visitCtField(ctField);
             }
