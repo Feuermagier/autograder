@@ -343,6 +343,37 @@ class TestCommonReimplementation extends AbstractCheckTest {
     }
 
     @Test
+    void testArraysFillRecursiveType() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    class PlayingFieldEntry {
+                        static final PlayingFieldEntry FREE = new PlayingFieldEntry();
+                    }
+
+                    public class Main {
+                        public static void main(String[] args) {
+                            PlayingFieldEntry[] field = new PlayingFieldEntry[1];
+
+                            for (int i = 0; i < field.length; i++) {
+                                field[i] = PlayingFieldEntry.FREE;
+                            }
+                        }
+                    }
+                    """
+                )
+            )
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
+
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(field, 0, field.length, PlayingFieldEntry.FREE)");
+
+        problems.assertExhausted();
+    }
+
+    @Test
     void testEnumValuesAddAllUnorderedSet() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
