@@ -1172,7 +1172,6 @@ public final class SpoonUtil {
         return SpoonUtil.findUses(ctExecutable);
     }
 
-
     public static List<CtElement> findUses(CtElement ctElement) {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }
