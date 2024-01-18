@@ -50,6 +50,7 @@ import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -61,9 +62,13 @@ import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -809,14 +814,11 @@ public final class SpoonUtil {
     }
 
     public static boolean isEffectivelyFinal(CtVariable<?> ctVariable) {
-        CtModel ctModel = ctVariable.getFactory().getModel();
-
         if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
             return true;
         }
 
-        List<CtVariableAccess<?>> variableUses = ctModel
-            .getElements(new BetterVariableAccessFilter<>(ctVariable));
+        List<? extends CtVariableAccess<?>> variableUses = SpoonUtil.findUsesOf(ctVariable);
 
         return variableUses.isEmpty() || variableUses.stream().noneMatch(variableAccess -> variableAccess instanceof CtVariableWrite<?>);
     }
@@ -829,23 +831,59 @@ public final class SpoonUtil {
         return Optional.ofNullable(ctVariable.getDefaultExpression());
     }
 
+    /**
+     * Checks if the given element is guaranteed to be immutable.
+     * <p>
+     * Note that when this method returns {@code false}, the type might still be immutable.
+     *
+     * @param ctTypeReference the type to check
+     * @return true if the given element is guaranteed to be immutable, false otherwise
+     * @param <T> the type of the element
+     */
     public static <T> boolean isImmutable(CtTypeReference<T> ctTypeReference) {
-        CtType<T> ctType = ctTypeReference.getTypeDeclaration();
-        if (ctType == null) {
-            return false;
+        Deque<CtTypeReference<?>> queue = new ArrayDeque<>(Collections.singletonList(ctTypeReference));
+        Collection<CtType<?>> visited = new HashSet<>();
+
+        while (!queue.isEmpty()) {
+            CtType<?> ctType = queue.removeFirst().getTypeDeclaration();
+
+            // if the type is not in the classpath, null is returned
+            // in those cases, assume that the type is not immutable
+            if (ctType == null) {
+                return false;
+            }
+
+            // skip types that have been checked (those are guaranteed to be immutable)
+            if (visited.contains(ctType)) {
+                continue;
+            }
+
+            // primitive types and strings are immutable as well:
+            if (ctType.getReference().unbox().isPrimitive()
+                || SpoonUtil.isTypeEqualTo(ctType.getReference(), java.lang.String.class)) {
+                continue;
+            }
+
+            // types that are not in the classpath like java.util.ArrayList are shadow types.
+            // the source code for those is missing, so it is impossible to check if they are immutable.
+            // => assume they are not immutable
+            if (ctType.isShadow()) {
+                return false;
+            }
+
+            // for a type to be immutable, all of its fields must be final and immutable as well:
+            for (CtFieldReference<?> ctFieldReference : ctType.getAllFields()) {
+                if (!SpoonUtil.isEffectivelyFinal(ctFieldReference.getFieldDeclaration())) {
+                    return false;
+                }
+
+                queue.add(ctFieldReference.getType());
+            }
+
+            visited.add(ctType);
         }
 
-        if (ctTypeReference.unbox().isPrimitive() || SpoonUtil.isTypeEqualTo(ctTypeReference, java.lang.String.class)) {
-            return true;
-        }
-
-        if (ctType.isShadow()) {
-            return false;
-        }
-
-        return ctType.getAllFields().stream()
-            .allMatch(ctFieldReference -> SpoonUtil.isEffectivelyFinal(ctFieldReference.getFieldDeclaration())
-                && SpoonUtil.isImmutable(ctFieldReference.getType()));
+        return true;
     }
 
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
@@ -885,7 +923,7 @@ public final class SpoonUtil {
      * @param ctElement the element to get the parents of
      * @return an iterable over all parents, the given element is not included
      */
-    public static Iterable<CtElement> parents(CtElement ctElement) {
+    private static Iterable<CtElement> parents(CtElement ctElement) {
         return () -> new Iterator<>() {
             private CtElement current = ctElement;
 
@@ -940,10 +978,6 @@ public final class SpoonUtil {
      */
     public static boolean isInnerClass(CtTypeMember type) {
         return type.getDeclaringType() != null;
-    }
-
-    public static boolean isInnerClass(CtTypeReference<?> ctTypeReference) {
-        return ctTypeReference.getDeclaringType() != null;
     }
 
     /**
@@ -1036,7 +1070,6 @@ public final class SpoonUtil {
             CtExecutableReference<?> invocationExecutable = invocation.getExecutable();
             return invocationExecutable.equals(this.executable.getReference())
                 || this.executable.equals(invocationExecutable.getExecutableDeclaration())
-                // TODO: consider removing this?
                 || invocationExecutable.isOverriding(this.executable.getReference());
         }
     }
@@ -1047,7 +1080,6 @@ public final class SpoonUtil {
             CtExecutableReference<?> invocationExecutable = expression.getExecutable();
             return invocationExecutable.equals(this.executable.getReference())
                 || this.executable.equals(invocationExecutable.getExecutableDeclaration())
-                // TODO: consider removing this?
                 || invocationExecutable.isOverriding(this.executable.getReference());
         }
     }
@@ -1124,9 +1156,12 @@ public final class SpoonUtil {
     // - CtVariable<?>
     // - CtExecutable<?>
     // - CtTypeMember
-
-    public static <T> List<CtElement> findUsesOf(CtVariable<T> ctVariable) {
-        return SpoonUtil.findUses(ctVariable);
+    @SuppressWarnings("unchecked")
+    public static <T> List<CtVariableAccess<T>> findUsesOf(CtVariable<T> ctVariable) {
+        return SpoonUtil.findUses(ctVariable)
+            .stream()
+            .map(ctElement -> (CtVariableAccess<T>) ctElement)
+            .collect(Collectors.toList());
     }
 
     public static List<CtElement> findUsesOf(CtTypeMember ctTypeMember) {
@@ -1136,7 +1171,6 @@ public final class SpoonUtil {
     public static <T> List<CtElement> findUsesOf(CtExecutable<T> ctExecutable) {
         return SpoonUtil.findUses(ctExecutable);
     }
-
 
     public static List<CtElement> findUses(CtElement ctElement) {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));

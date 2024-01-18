@@ -12,14 +12,13 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtField;
-import spoon.reflect.declaration.CtVariable;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Stream;
 
-@ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME})
+@ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME, ProblemType.CONSTANT_NAME_CONTAINS_VALUE})
 public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static final List<String> NUMBER_PRE_SUFFIXES =
             List.of("index", "number", "value", "argument", "element", "param", "parameter", "arg", "group", "constant", "value_of");
@@ -145,20 +144,6 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         return lowerCaseName.contains(valueString);
     }
 
-    private void reportProblem(String key, CtVariable<?> ctVariable) {
-        this.addLocalProblem(
-            ctVariable,
-            new LocalizedMessage(
-                key,
-                Map.of(
-                    "name", ctVariable.getSimpleName(),
-                    "value", ctVariable.getDefaultExpression().prettyprint()
-                )
-            ),
-            ProblemType.MEANINGLESS_CONSTANT_NAME
-        );
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
@@ -189,9 +174,29 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
 
                 if (literal.getValue() instanceof Integer v1 && isNonDescriptiveIntegerName(fieldName, v1)
                     || literal.getValue() instanceof String v2 && isNonDescriptiveStringName(fieldName, v2)) {
-                    reportProblem("constants-name-exp", field);
+                    addLocalProblem(
+                        field,
+                        new LocalizedMessage(
+                            "constants-name-exp",
+                            Map.of(
+                                "name", field.getSimpleName(),
+                                "value", field.getDefaultExpression().prettyprint()
+                            )
+                        ),
+                        ProblemType.MEANINGLESS_CONSTANT_NAME
+                    );
                 } else if (containsValueInName(fieldName, literal)) {
-                    reportProblem("constants-name-exp-value", field);
+                    addLocalProblem(
+                        field,
+                        new LocalizedMessage(
+                            "constants-name-exp-value",
+                            Map.of(
+                                "name", field.getSimpleName(),
+                                "value", field.getDefaultExpression().prettyprint()
+                            )
+                        ),
+                        ProblemType.CONSTANT_NAME_CONTAINS_VALUE
+                    );
                 }
             }
         });
