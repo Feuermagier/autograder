@@ -7,6 +7,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
 
@@ -61,6 +62,25 @@ class TestRedundantNegationCheck extends AbstractCheckTest {
         if (expected != null) {
             assertEqualsRedundant(problems.next(), expected);
         }
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testNegatedInvocation() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+
+                public class Test {
+                    public void foo(List<Object> list) {
+                        System.out.println(!((boolean) list.get(0)));
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }
