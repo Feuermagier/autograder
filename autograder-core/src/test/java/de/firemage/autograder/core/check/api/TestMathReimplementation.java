@@ -75,12 +75,17 @@ class TestMathReimplementation extends AbstractCheckTest {
                     private double exampleC(int x, int y) {
                         return Math.sqrt(Math.pow(x, 2) + Math.pow(y, 2));
                     }
+                    
+                    private double exampleD(int x, int y) {
+                        return Math.pow(Math.pow(x, 2) + Math.pow(y, 2), 0.5);
+                    }
 
                     public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
 
+        assertEqualsReimplementation(problems.next(), "Math.hypot(x, y)");
         assertEqualsReimplementation(problems.next(), "Math.hypot(x, y)");
         assertEqualsReimplementation(problems.next(), "Math.hypot(x, y)");
         assertEqualsReimplementation(problems.next(), "Math.hypot(x, y)");
@@ -141,6 +146,27 @@ class TestMathReimplementation extends AbstractCheckTest {
         for (String expectedProblem : expectedProblems) {
             assertEqualsReimplementation(problems.next(), expectedProblem);
         }
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testMaxChangedAssignment() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.List;
+
+                public class Main {
+                    public static void foo(int longestTrip, List<Integer> trip) {
+                        if (longestTrip < trip.size()) {
+                            longestTrip = trip.size() - 1;
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }
