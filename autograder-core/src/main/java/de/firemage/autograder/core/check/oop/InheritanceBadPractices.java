@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
@@ -14,10 +15,12 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.filter.SubtypeFilter;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -90,11 +93,25 @@ public class InheritanceBadPractices extends IntegratedCheck {
                     }
                 }
 
+                // abstract classes must not implement the methods of the interfaces they implement
+                // (this can be delegated to the subclasses)
+                //
+                // in that case it is not a problem, if the abstract class does not have any abstract methods
+                List<CtMethod<?>> interfaceMethods = ctClass.getSuperInterfaces()
+                    .stream()
+                    .map(CtTypeReference::getTypeDeclaration)
+                    .filter(Objects::nonNull)
+                    .flatMap(ctType -> ctType.getMethods().stream())
+                    .filter(ctMethod -> methods.stream().noneMatch(method -> method.isOverriding(ctMethod)))
+                    .toList();
+
+
                 // the abstract class should have at least one abstract method
                 if (ctClass.isAbstract()
                     && constructors.stream().noneMatch(CtModifiable::isAbstract)
                     && methods.stream().noneMatch(CtModifiable::isAbstract)
-                    && !methods.isEmpty()) {
+                    && !methods.isEmpty()
+                    && interfaceMethods.isEmpty()) {
                     addLocalProblem(
                         ctClass,
                         new LocalizedMessage(
