@@ -52,7 +52,7 @@ class TestInheritanceBadPractices extends AbstractCheckTest {
     }
 
     @Test
-    void testFalsePositive() throws LinterException, IOException {
+    void testInheritsUnimplementedInterfaceMethods() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
