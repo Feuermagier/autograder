@@ -2,6 +2,7 @@ package de.firemage.autograder.core.integrated;
 
 import com.google.common.base.CaseFormat;
 
+import java.text.Normalizer;
 import java.util.Arrays;
 import java.util.stream.Stream;
 
@@ -65,6 +66,8 @@ public final class IdentifierNameUtils {
     }
 
     private static CaseFormat getCaseFormat(String identifier) {
+        identifier = Normalizer.normalize(identifier, Normalizer.Form.NFC);
+
         if (isLowerCamelCase(identifier)) {
             return CaseFormat.LOWER_CAMEL;
         }
