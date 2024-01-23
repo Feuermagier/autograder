@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
@@ -16,14 +17,16 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-@ExecutableCheck(reportedProblems = { ProblemType.USE_STRING_FORMATTED })
+@ExecutableCheck(reportedProblems = {ProblemType.USE_STRING_FORMATTED})
 public class UseStringFormatted extends IntegratedCheck {
     private void checkCtInvocation(CtInvocation<?> ctInvocation) {
         boolean hasInvokedStringFormat = ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-               // ensure the method is called on java.lang.String
-               && ctInvocation.getFactory().Type().createReference(java.lang.String.class)
-                              .equals(ctTypeAccess.getAccessedType())
-               && ctInvocation.getExecutable().getSimpleName().equals("format");
+            // ensure the method is called on java.lang.String
+            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.String.class)
+            && ctInvocation.getExecutable().getSimpleName().equals("format")
+            && !ctInvocation.getArguments().isEmpty()
+            // ensure the first argument is a string (this ignores String.format(Locale, String, Object...))
+            && SpoonUtil.isTypeEqualTo(ctInvocation.getArguments().get(0).getType(), java.lang.String.class);
 
         if (!hasInvokedStringFormat) {
             return;
@@ -59,6 +62,6 @@ public class UseStringFormatted extends IntegratedCheck {
 
     @Override
     public Optional<Integer> maximumProblems() {
-        return Optional.of(4);
+        return Optional.of(1);
     }
 }
