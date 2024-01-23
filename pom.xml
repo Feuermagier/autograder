@@ -8,7 +8,7 @@
     <groupId>de.firemage.autograder</groupId>
     <artifactId>autograder-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.5.23</version>
+    <version>0.5.25</version>
     <name>Autograder</name>
     <description>Automatic assessment of student code submissions</description>
     <url>https://github.com/Feuermagier/autograder</url>
@@ -84,37 +84,37 @@
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-event</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-agent</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-executor</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-core</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-cmd</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-treeg</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-span</artifactId>
-                <version>0.5.23</version>
+                <version>0.5.25</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -124,7 +124,7 @@
             <plugin>
                 <groupId>org.codehaus.mojo</groupId>
                 <artifactId>flatten-maven-plugin</artifactId>
-                <version>1.5.0</version>
+                <version>1.6.0</version>
                 <configuration>
                     <updatePomFile>true</updatePomFile>
                     <flattenMode>resolveCiFriendliesOnly</flattenMode>
