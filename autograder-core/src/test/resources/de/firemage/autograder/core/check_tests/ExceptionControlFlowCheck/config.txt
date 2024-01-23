@@ -1,6 +1,6 @@
 exceptions.ExceptionControlFlowCheck
 Don't use exceptions to control the flow
-Test.java:8-15
-Test.java:33-36
-Test.java:54-56
-Test.java:54-56
+Test.java:13
+Test.java:35
+Test.java:54
+Test.java:54

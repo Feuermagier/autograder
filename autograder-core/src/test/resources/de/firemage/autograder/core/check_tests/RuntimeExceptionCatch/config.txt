@@ -1,4 +1,4 @@
 exceptions.RuntimeExceptionCatchCheck
 Runtime exception caught (except NumberFormatException)
-Test.java:7-8
-Test.java:13-14
+Test.java:7
+Test.java:13

@@ -37,7 +37,7 @@ public class RuntimeExceptionCatchCheck extends IntegratedCheck {
 
                 if (varType.isSubtypeOf(runtimeException) && !ALLOWED_EXCEPTIONS.contains(varType.getQualifiedName())) {
                     addLocalProblem(
-                        ctCatch,
+                        ctCatch.getParameter(),
                         new LocalizedMessage(
                             "runtime-exception-caught",
                             Map.of("exception", ctCatch.getParameter().getType().getSimpleName())
