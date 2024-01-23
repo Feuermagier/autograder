@@ -1109,14 +1109,8 @@ public final class SpoonUtil {
      */
     private record TypeUsesFilter(CtType<?> ctType) implements Filter<CtElement> {
         private boolean isType(CtTypeReference<?> ctTypeReference) {
-            return this.ctType.getReference().equals(ctTypeReference)
-                || this.ctType.equals(ctTypeReference.getTypeDeclaration())
-                || (
-                    ctTypeReference.getTypeDeclaration() != null &&
-                        ctTypeReference.getTypeDeclaration().getUsedTypes(true)
-                            .stream()
-                            .anyMatch(type -> type.equals(this.ctType.getReference()))
-                );
+            return this.ctType.getReference() == ctTypeReference
+                || this.ctType == ctTypeReference.getTypeDeclaration();
         }
 
         @Override
@@ -1226,6 +1220,12 @@ public final class SpoonUtil {
 
     public static <T> List<CtElement> findUsesOf(CtExecutable<T> ctExecutable) {
         return SpoonUtil.findUses(ctExecutable);
+    }
+
+    public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
+        return ctElement.getFactory().getModel()
+            .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
+            .first(CtElement.class) != null;
     }
 
     public static List<CtElement> findUses(CtElement ctElement) {

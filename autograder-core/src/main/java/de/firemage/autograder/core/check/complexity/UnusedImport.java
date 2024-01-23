@@ -111,23 +111,22 @@ public class UnusedImport extends IntegratedCheck {
     }
 
     @SuppressWarnings("unchecked")
-    private static List<? extends CtElement> findJavadocUses(CtReference ctReference, Filter<? extends CtJavaDoc> filter) {
+    private static boolean hasAnyJavadocUses(CtReference ctReference, Filter<? extends CtJavaDoc> filter) {
         return ctReference.getFactory()
             .getModel()
-            .getElements(new CompositeFilter<>(
+            .filterChildren(new CompositeFilter<>(
                 FilteringOperator.INTERSECTION,
+                filter,
                 new TypeFilter<>(CtJavaDoc.class),
-                filter
-            ))
-            .stream()
-            .flatMap(ctJavaDoc -> {
-                JavadocParser parser = new JavadocParser(ctJavaDoc.getRawContent(), ctJavaDoc.getParent());
+                ctJavaDoc -> {
+                    JavadocParser parser = new JavadocParser(ctJavaDoc.getRawContent(), ctJavaDoc.getParent());
 
-                return parser.parse()
-                    .stream()
-                    .flatMap(element -> element.accept(new ReferenceFinder()).stream())
-                    .filter(otherReference -> isReferencingTheSameElement(ctReference, otherReference));
-            }).toList();
+                    return parser.parse()
+                        .stream()
+                        .flatMap(element -> element.accept(new ReferenceFinder()).stream())
+                        .anyMatch(otherReference -> isReferencingTheSameElement(ctReference, otherReference));
+                }
+            )).first(CtJavaDoc.class) != null;
     }
 
     private boolean isInSamePackage(CtElement ctElement, CtCompilationUnit ctCompilationUnit) {
@@ -173,13 +172,14 @@ public class UnusedImport extends IntegratedCheck {
             return;
         }
 
-        List<CtElement> uses = SpoonUtil.findUses(element);
+
+        Predicate<CtElement> isAllowed = ctElement -> true;
 
         if ((isJavaLangImport(ctImport) || this.isInSamePackage(element, ctCompilationUnit)) && isInnerType(element)) {
             // when the inner class is used, it's declaring type will be marked implicit
             // therefore, we need to remove all uses that do not use the inner class
             // e.g. Thread.UncaughtExceptionHandler (which is already imported)
-            uses.removeIf(use -> !(use instanceof CtTypeReference<?> ctTypeReference && ctTypeReference.getDeclaringType() != null && ctTypeReference.getDeclaringType().isImplicit()));
+            isAllowed = isAllowed.and(ctElement -> ctElement instanceof CtTypeReference<?> ctTypeReference && ctTypeReference.getDeclaringType() != null && ctTypeReference.getDeclaringType().isImplicit());
         }
 
         Predicate<CtElement> isSameFile = ctElement -> {
@@ -188,19 +188,19 @@ public class UnusedImport extends IntegratedCheck {
             return position != null && position.getCompilationUnit().equals(ctCompilationUnit);
         };
 
-        // remove all uses that are in different files:
-        uses.removeIf(isSameFile.negate());
+        isAllowed = isAllowed.and(isSameFile);
 
 
         // If there are no uses in the code, it might still be used in the javadoc.
         //
         // I don't think it is required to support imports that are only used in javadoc,
         // but spoon makes it easy to support it.
-        if (uses.isEmpty()) {
-            uses.addAll(findJavadocUses(ctImport.getReference(), isSameFile::test));
+        boolean hasAnyUses = SpoonUtil.hasAnyUses(element, isAllowed);
+        if (!hasAnyUses) {
+            hasAnyUses = hasAnyJavadocUses(ctImport.getReference(), isSameFile::test);
         }
 
-        if (uses.isEmpty()) {
+        if (!hasAnyUses) {
             this.reportProblem(ctImport);
         }
     }

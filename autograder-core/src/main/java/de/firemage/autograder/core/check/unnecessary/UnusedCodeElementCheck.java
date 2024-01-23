@@ -21,8 +21,8 @@ import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.visitor.CtScanner;
 
-import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
 public class UnusedCodeElementCheck extends IntegratedCheck {
@@ -31,23 +31,18 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             return;
         }
 
-        List<CtElement> references = SpoonUtil.findUses(ctElement);
-
-        boolean isUnused;
+        Predicate<CtElement> shouldVisit = element -> true;
         if (ctElement instanceof CtMethod<?> method) {
-            // Methods are also unused if they are only called by themselves, i.e. they are recursive
-            isUnused = references.stream().allMatch(r -> method.equals(r.getParent(CtMethod.class)));
-        } else {
-            isUnused = references.isEmpty();
+            // Methods are also unused if they are only referenced by themselves, i.e. they are called recursively
+            shouldVisit = shouldVisit.and(Predicate.not(reference -> method.equals(reference.getParent(CtMethod.class))));
         }
-
 
         ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;
         if (ctElement instanceof CtModifiable ctModifiable && ctModifiable.isPrivate()) {
             problemType = ProblemType.UNUSED_CODE_ELEMENT_PRIVATE;
         }
 
-        if (isUnused) {
+        if (!SpoonUtil.hasAnyUses(ctElement, shouldVisit)) {
             // do not report unused elements if there is no main method in the model and the element is accessible
             // (i.e. not private)
             if (ctElement instanceof CtParameter<?>
