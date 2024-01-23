@@ -258,6 +258,6 @@ public class UseFormatString extends IntegratedCheck {
 
     @Override
     public Optional<Integer> maximumProblems() {
-        return Optional.of(5);
+        return Optional.of(1);
     }
 }
