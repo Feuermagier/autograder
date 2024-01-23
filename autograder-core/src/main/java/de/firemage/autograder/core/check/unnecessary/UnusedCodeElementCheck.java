@@ -12,6 +12,7 @@ import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtNamedElement;
@@ -20,8 +21,8 @@ import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.visitor.CtScanner;
 
-import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
 public class UnusedCodeElementCheck extends IntegratedCheck {
@@ -30,25 +31,28 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             return;
         }
 
-        List<CtElement> references = SpoonUtil.findUses(ctElement);
-
-        boolean isUnused;
+        Predicate<CtElement> shouldVisit = element -> true;
         if (ctElement instanceof CtMethod<?> method) {
-            // Methods are also unused if they are only called by themselves, i.e. they are recursive
-            isUnused = references.stream().allMatch(r -> method.equals(r.getParent(CtMethod.class)));
-        } else {
-            isUnused = references.isEmpty();
+            // Methods are also unused if they are only referenced by themselves, i.e. they are called recursively
+            shouldVisit = shouldVisit.and(Predicate.not(reference -> method.equals(reference.getParent(CtMethod.class))));
         }
-
 
         ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;
         if (ctElement instanceof CtModifiable ctModifiable && ctModifiable.isPrivate()) {
             problemType = ProblemType.UNUSED_CODE_ELEMENT_PRIVATE;
         }
 
-        if (isUnused) {
+        if (!SpoonUtil.hasAnyUses(ctElement, shouldVisit)) {
             // do not report unused elements if there is no main method in the model and the element is accessible
             // (i.e. not private)
+            if (ctElement instanceof CtParameter<?>
+                && ctElement.getParent() instanceof CtTypeMember ctTypeMember
+                && !ctTypeMember.getDeclaringType().isPrivate()
+                // check if there is no main method in the model
+                && !staticAnalysis.getCodeModel().hasMainMethod()) {
+                return;
+            }
+
             if (ctElement instanceof CtModifiable ctModifiable
                 && !ctModifiable.isPrivate()
                 && ctModifiable instanceof CtTypeMember ctTypeMember
@@ -85,7 +89,8 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtMethod(CtMethod<T> ctMethod) {
-                if (SpoonUtil.isOverriddenMethod(ctMethod) || SpoonUtil.isMainMethod(ctMethod)) {
+                if (SpoonUtil.isOverriddenMethod(ctMethod)
+                    || SpoonUtil.isMainMethod(ctMethod)) {
                     super.visitCtMethod(ctMethod);
                     return;
                 }
@@ -107,7 +112,10 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtParameter(CtParameter<T> ctParameter) {
-                if (SpoonUtil.isInOverriddenMethod(ctParameter) || SpoonUtil.isInMainMethod(ctParameter) || ctParameter.getParent() instanceof CtLambda<?>) {
+                if (SpoonUtil.isInOverriddenMethod(ctParameter)
+                    || SpoonUtil.isInMainMethod(ctParameter)
+                    || ctParameter.getParent() instanceof CtLambda<?>
+                    || ctParameter.getParent(CtInterface.class) != null) {
                     super.visitCtParameter(ctParameter);
                     return;
                 }

@@ -13,8 +13,9 @@ import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtThrow;
-import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
+
+import java.util.List;
 
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
@@ -24,22 +25,19 @@ public class ExceptionMessageCheck extends IntegratedCheck {
             && !hasMessage(ctorCall.getArguments());
     }
 
-    private static boolean hasMessage(Iterable<? extends CtExpression<?>> arguments) {
-        for (CtExpression<?> ctExpression : arguments) {
-            String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
-
-            if (literal != null) {
-                return !literal.isBlank();
-            }
-
-            // allow wrapping exceptions into a new exception
-            if (ctExpression instanceof CtVariableAccess<?> ctVariableAccess
-                && SpoonUtil.isSubtypeOf(ctVariableAccess.getType(), java.lang.Throwable.class)) {
-                return true;
-            }
+    private static boolean hasMessage(List<? extends CtExpression<?>> arguments) {
+        if (arguments.isEmpty()) {
+            return false;
         }
 
-        return false;
+        CtExpression<?> ctExpression = arguments.get(0);
+        String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
+
+        if (literal != null) {
+            return !literal.isBlank();
+        }
+
+        return true;
     }
 
     private static boolean isInAllowedContext(CtElement ctElement) {

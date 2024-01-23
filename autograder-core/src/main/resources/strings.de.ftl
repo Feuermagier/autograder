@@ -101,7 +101,7 @@ too-many-exceptions = Das Projekt definiert {$count} Exceptions. Das sind zu vie
 
 redundant-variable = Die Variable '{$name}' ist unnötig, verwende stattdessen den Wert: '{$suggestion}'.
 
-unused-import-exp = Unbenutzter Import
+unused-import = Der Import '{$import}' wird nicht verwendet und sollte deswegen entfernt werden.
 
 use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
 

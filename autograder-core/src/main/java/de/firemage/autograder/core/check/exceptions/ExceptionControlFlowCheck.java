@@ -39,7 +39,7 @@ public class ExceptionControlFlowCheck extends IntegratedCheck {
                         .anyMatch(e -> e.getQualifiedName().equals(caughtException.getQualifiedName()))
                         || thrownExceptions.stream().anyMatch(e -> e.isSubtypeOf(caughtException))) {
                         addLocalProblem(
-                            ctTry,
+                            catchBlock.getParameter(),
                             new LocalizedMessage(
                                 "exception-controlflow-caught",
                                 Map.of("exception", caughtException.getSimpleName())
@@ -75,7 +75,7 @@ public class ExceptionControlFlowCheck extends IntegratedCheck {
                         java.lang.StringIndexOutOfBoundsException.class
                     ) || ctTypeReference.isSubtypeOf(ctCatch.getFactory().createCtTypeReference(java.lang.Error.class))) {
                         addLocalProblem(
-                            ctCatch,
+                            ctCatch.getParameter(),
                             new LocalizedMessage(
                                 "exception-controlflow-should-not-be-caught",
                                 Map.of("exception", ctTypeReference.getSimpleName())

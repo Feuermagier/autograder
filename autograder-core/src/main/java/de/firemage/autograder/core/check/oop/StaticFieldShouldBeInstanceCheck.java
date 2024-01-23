@@ -23,6 +23,10 @@ public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
                     return;
                 }
 
+                // given the code:
+                //
+                // class Foo { static int counter = 0; Foo() { counter++; } } the field counter **must** be static
+
                 // the field is not marked as final, so values can be assigned to it.
                 // if the field is assigned multiple times, it should not be static
                 if (!SpoonUtil.isEffectivelyFinal(ctField)) {

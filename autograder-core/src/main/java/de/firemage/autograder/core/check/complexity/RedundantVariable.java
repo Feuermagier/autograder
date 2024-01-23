@@ -8,10 +8,12 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.CtComment;
+import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtSwitchExpression;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.visitor.CtScanner;
 
@@ -29,6 +31,10 @@ public class RedundantVariable extends IntegratedCheck {
         return ctStatement instanceof CtComment;
     }
 
+    private boolean isComplexExpression(CtExpression<?> ctExpression) {
+        return ctExpression instanceof CtSwitchExpression<?,?>;
+    }
+
     private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead) {
         if (// the variable must be a local variable
             !(ctVariableRead.getVariable().getDeclaration() instanceof CtLocalVariable<?> ctLocalVariable)
@@ -36,6 +42,11 @@ public class RedundantVariable extends IntegratedCheck {
             || !ctLocalVariable.getAnnotations().isEmpty()
             // the variable must only be used in the return statement
             || SpoonUtil.findUsesOf(ctLocalVariable).size() != 1) {
+            return;
+        }
+
+        if (ctLocalVariable.getDefaultExpression() != null
+            && this.isComplexExpression(ctLocalVariable.getDefaultExpression())) {
             return;
         }
 

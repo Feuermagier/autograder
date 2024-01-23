@@ -595,4 +595,76 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testUnusedInterfaceParameter() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main implements A {
+                        public void a(String string) {
+                            System.out.println("Hello");
+                        }
+
+                        public static void main(String[] args) {
+                            Main main = new Main();
+                            main.a("World");
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "A",
+                    """
+                    public interface A {
+                        void a(String string);
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testUnusedParameterWhenMethodIsUsed() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public void b(String parameterName) {
+                            B b = new B();
+                            b.b(parameterName);
+                        }
+
+                        public static void main(String[] args) {
+                            Main main = new Main();
+                            // main.a("World");
+                            main.b("");
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "B",
+                    """
+                    public class B {
+                        void b(String parameterName) {}
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertEqualsUnused("parameterName", problems.next());
+
+        problems.assertExhausted();
+    }
 }

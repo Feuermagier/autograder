@@ -43,4 +43,13 @@ public class Test {
     private static void b() {
         throw new IllegalArgumentException("Error"); /*# ok; method is private #*/
     }
+
+
+    /**
+     * @exception IllegalStateException something went wrong
+     * @exception IllegalArgumentException if the argument is null
+     */
+    public static void c() {
+        throw new IllegalArgumentException("Error"); /*# ok #*/
+    }
 }

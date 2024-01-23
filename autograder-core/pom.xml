@@ -99,6 +99,23 @@
             </exclusions>
         </dependency>
 
+        <dependency>
+            <groupId>fr.inria.gforge.spoon</groupId>
+            <artifactId>spoon-javadoc</artifactId>
+            <version>${spoon.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+                <!-- exclude jdt, because spoon is not using the latest version -->
+                <exclusion>
+                    <groupId>org.eclipse.jdt</groupId>
+                    <artifactId>org.eclipse.jdt.core</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
 
         <!-- PMD -->
         <dependency>

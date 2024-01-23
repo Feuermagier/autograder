@@ -43,12 +43,14 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
+import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtReference;
@@ -59,7 +61,6 @@ import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
-import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.ArrayDeque;
@@ -1030,9 +1031,7 @@ public final class SpoonUtil {
      * @return all uses of {@code ctElement} in {@code in}
      */
     public static List<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
-        return findUses(ctElement).stream()
-            .filter(element -> !in.getElements(new SameFilter(element)).isEmpty())
-            .collect(Collectors.toCollection(ArrayList::new));
+        return new ArrayList<>(in.getElements(new UsesFilter(ctElement)));
     }
 
     public record FilterAdapter<T extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<CtElement> {
@@ -1047,6 +1046,26 @@ public final class SpoonUtil {
     }
 
 
+    public static CtElement getReferenceDeclaration(CtReference ctReference) {
+        // this might be null if the reference is not in the source path
+        // for example, when the reference points to a java.lang type
+        CtElement target = ctReference.getDeclaration();
+
+        if (target == null && ctReference instanceof CtTypeReference<?> ctTypeReference) {
+            target = ctTypeReference.getTypeDeclaration();
+        }
+
+        if (target == null && ctReference instanceof CtExecutableReference<?> ctExecutableReference) {
+            target = ctExecutableReference.getExecutableDeclaration();
+        }
+
+        if (target == null && ctReference instanceof CtFieldReference<?> ctFieldReference) {
+            target = ctFieldReference.getFieldDeclaration();
+        }
+
+        return target;
+    }
+
     private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
 
     /**
@@ -1059,8 +1078,7 @@ public final class SpoonUtil {
     private record BetterVariableAccessFilter<T extends CtVariableAccess<?>>(CtVariable<?> ctVariable) implements Filter<T> {
         @Override
         public boolean matches(T element) {
-            return element.getVariable().equals(this.ctVariable.getReference())
-                || (element.getVariable().getDeclaration() != null && element.getVariable().getDeclaration().equals(this.ctVariable));
+            return getReferenceDeclaration(element.getVariable()) != null && getReferenceDeclaration(element.getVariable()) == this.ctVariable;
         }
     }
 
@@ -1084,6 +1102,31 @@ public final class SpoonUtil {
         }
     }
 
+    /**
+     * This filter finds all {@code CtElement} in the model that use the specified type.
+     *
+     * @param ctType the type to find all uses of
+     */
+    private record TypeUsesFilter(CtType<?> ctType) implements Filter<CtElement> {
+        private boolean isType(CtTypeReference<?> ctTypeReference) {
+            return this.ctType.getReference() == ctTypeReference
+                || this.ctType == ctTypeReference.getTypeDeclaration();
+        }
+
+        @Override
+        public boolean matches(CtElement ctElement) {
+            if (ctElement instanceof CtArrayTypeReference<?> ctArrayTypeReference) {
+                return this.isType(ctArrayTypeReference.getArrayType());
+            }
+
+            if (ctElement instanceof CtTypeReference<?> ctTypeReference) {
+                return this.isType(ctTypeReference);
+            }
+
+            return false;
+        }
+    }
+
     public static class UsesFilter implements Filter<CtElement> {
         private final Filter<CtElement> filter;
 
@@ -1095,6 +1138,13 @@ public final class SpoonUtil {
                 filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
             } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
                 filter = buildExecutableFilter(ctExecutable);
+            } else if (ctElement instanceof CtTypeParameter ctTypeParameter) {
+                filter = new FilterAdapter<>(
+                    new DirectReferenceFilter<>(ctTypeParameter.getReference()),
+                    CtReference.class
+                );
+            } else if (ctElement instanceof CtType<?> ctType) {
+                filter = new FilterAdapter<>(new TypeUsesFilter(ctType), CtElement.class);
             } else if (ctElement instanceof CtTypeMember ctTypeMember) {
                 // CtTypeMember that are not executable or variables are:
                 // - CtType (CtClass, CtEnum, CtInterface, CtRecord)
@@ -1172,6 +1222,12 @@ public final class SpoonUtil {
         return SpoonUtil.findUses(ctExecutable);
     }
 
+    public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
+        return ctElement.getFactory().getModel()
+            .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
+            .first(CtElement.class) != null;
+    }
+
     public static List<CtElement> findUses(CtElement ctElement) {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }
@@ -1245,6 +1301,20 @@ public final class SpoonUtil {
         if (effects.isEmpty()) return new ArrayList<>();
 
         return effects;
+    }
+
+    public static SourcePosition findPosition(CtElement ctElement) {
+        if (ctElement.getPosition().isValidPosition()) {
+            return ctElement.getPosition();
+        }
+
+        for (CtElement element : parents(ctElement)) {
+            if (element.getPosition().isValidPosition()) {
+                return element.getPosition();
+            }
+        }
+
+        return null;
     }
 
     /**

@@ -46,6 +46,14 @@ public class MathReimplementation extends IntegratedCheck {
             && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), double.class, "sqrt", double.class);
     }
 
+    private static boolean isPowSqrt(CtInvocation<?> ctInvocation) {
+        return isMathPow(ctInvocation)
+            && ctInvocation.getArguments().size() == 2
+            && SpoonUtil.resolveConstant(ctInvocation.getArguments().get(1)) instanceof CtLiteral<?> ctLiteral
+            && ctLiteral.getValue() instanceof Double doubleValue
+            && doubleValue == 0.5;
+    }
+
     private static Optional<CtExpression<?>> getPow2(CtExpression<?> ctExpression) {
         if (ctExpression instanceof CtBinaryOperator<?> ctBinaryOperator
             && ctBinaryOperator.getLeftHandOperand().equals(ctBinaryOperator.getRightHandOperand())
@@ -64,12 +72,12 @@ public class MathReimplementation extends IntegratedCheck {
         return Optional.empty();
     }
 
-    private void checkHypot(CtExpression<?> ctExpression) {
+    private boolean checkHypot(CtExpression<?> ctExpression) {
         if (!(ctExpression instanceof CtInvocation<?> ctInvocation)
-            || !isMathSqrt(ctInvocation)
+            || (!isMathSqrt(ctInvocation) && !isPowSqrt(ctInvocation))
             || !(ctInvocation.getArguments().get(0) instanceof CtBinaryOperator<?> ctBinaryOperator)
             || ctBinaryOperator.getKind() != BinaryOperatorKind.PLUS) {
-            return;
+            return false;
         }
 
         Optional<CtExpression<?>> left = getPow2(ctBinaryOperator.getLeftHandOperand());
@@ -84,7 +92,11 @@ public class MathReimplementation extends IntegratedCheck {
                 ),
                 ProblemType.COMMON_REIMPLEMENTATION_HYPOT
             );
+
+            return true;
         }
+
+        return false;
     }
 
     private void checkSqrt(CtExpression<?> ctExpression) {
@@ -92,9 +104,7 @@ public class MathReimplementation extends IntegratedCheck {
             return;
         }
 
-        if (SpoonUtil.resolveCtExpression(ctInvocation.getArguments().get(1)) instanceof CtLiteral<?> ctLiteral
-            && ctLiteral.getValue() instanceof Double doubleValue
-            && doubleValue == 0.5) {
+        if (isPowSqrt(ctInvocation)) {
             addLocalProblem(
                 ctExpression,
                 new LocalizedMessage(
@@ -152,6 +162,12 @@ public class MathReimplementation extends IntegratedCheck {
 
         // if it is not on either side of the condition, return
         if (!condition.getLeftHandOperand().equals(elseValue)) {
+            return;
+        }
+
+        // check that in `if (variable <op> max) { variable = assigned; }` the max is the same as the assigned value
+        if (!condition.getLeftHandOperand().equals(thenAssignment.getAssignment())
+            && !condition.getRightHandOperand().equals(thenAssignment.getAssignment())) {
             return;
         }
 
@@ -219,8 +235,10 @@ public class MathReimplementation extends IntegratedCheck {
                 if (ctElement instanceof CtExpression<?> ctExpression
                     && !ctExpression.isImplicit()
                     && ctExpression.getPosition().isValidPosition()) {
-                    checkSqrt(ctExpression);
-                    checkHypot(ctExpression);
+                    // only check for sqrt if hypot is not applicable
+                    if (!checkHypot(ctExpression)) {
+                        checkSqrt(ctExpression);
+                    }
                 }
 
                 super.enter(ctElement);

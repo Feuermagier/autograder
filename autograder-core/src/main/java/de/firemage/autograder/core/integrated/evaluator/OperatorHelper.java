@@ -336,7 +336,7 @@ public final class OperatorHelper {
                 // See: https://docs.oracle.com/javase/specs/jls/se11/html/jls-15.html#jls-15.15.3
                 unaryNumericPromotion(operandType);
             case NOT -> {
-                if (operand.getType().unbox().equals(typeFactory.BOOLEAN_PRIMITIVE)) {
+                if (operandType.unbox().equals(typeFactory.BOOLEAN_PRIMITIVE)) {
                     yield Optional.of(typeFactory.BOOLEAN_PRIMITIVE);
                 }
                 yield Optional.empty();
