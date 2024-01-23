@@ -19,8 +19,6 @@ import spoon.reflect.declaration.CtImport;
 import spoon.reflect.declaration.CtImportKind;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -108,28 +106,8 @@ public class UnusedImport extends IntegratedCheck {
         }
     }
 
-    private static CtElement getReferenceDeclaration(CtReference ctReference) {
-        // this might be null if the reference is not in the source path
-        // for example, when the reference points to a java.lang type
-        CtElement target = ctReference.getDeclaration();
-
-        if (target == null && ctReference instanceof CtTypeReference<?> ctTypeReference) {
-            target = ctTypeReference.getTypeDeclaration();
-        }
-
-        if (target == null && ctReference instanceof CtExecutableReference<?> ctExecutableReference) {
-            target = ctExecutableReference.getExecutableDeclaration();
-        }
-
-        if (target == null && ctReference instanceof CtFieldReference<?> ctFieldReference) {
-            target = ctFieldReference.getFieldDeclaration();
-        }
-
-        return target;
-    }
-
     private static boolean isReferencingTheSameElement(CtReference left, CtReference right) {
-        return left.equals(right) || Objects.equals(getReferenceDeclaration(left), getReferenceDeclaration(right));
+        return left.equals(right) || Objects.equals(SpoonUtil.getReferenceDeclaration(left), SpoonUtil.getReferenceDeclaration(right));
     }
 
     @SuppressWarnings("unchecked")
@@ -171,7 +149,7 @@ public class UnusedImport extends IntegratedCheck {
             return;
         }
 
-        CtElement element = getReferenceDeclaration(ctImport.getReference());
+        CtElement element = SpoonUtil.getReferenceDeclaration(ctImport.getReference());
 
         // types from the same package are imported implicitly
         //

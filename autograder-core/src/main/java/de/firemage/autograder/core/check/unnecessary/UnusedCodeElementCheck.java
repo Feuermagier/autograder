@@ -12,6 +12,7 @@ import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtModifiable;
 import spoon.reflect.declaration.CtNamedElement;
@@ -49,6 +50,14 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         if (isUnused) {
             // do not report unused elements if there is no main method in the model and the element is accessible
             // (i.e. not private)
+            if (ctElement instanceof CtParameter<?>
+                && ctElement.getParent() instanceof CtTypeMember ctTypeMember
+                && !ctTypeMember.getDeclaringType().isPrivate()
+                // check if there is no main method in the model
+                && !staticAnalysis.getCodeModel().hasMainMethod()) {
+                return;
+            }
+
             if (ctElement instanceof CtModifiable ctModifiable
                 && !ctModifiable.isPrivate()
                 && ctModifiable instanceof CtTypeMember ctTypeMember
@@ -85,7 +94,8 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtMethod(CtMethod<T> ctMethod) {
-                if (SpoonUtil.isOverriddenMethod(ctMethod) || SpoonUtil.isMainMethod(ctMethod)) {
+                if (SpoonUtil.isOverriddenMethod(ctMethod)
+                    || SpoonUtil.isMainMethod(ctMethod)) {
                     super.visitCtMethod(ctMethod);
                     return;
                 }
@@ -107,7 +117,10 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtParameter(CtParameter<T> ctParameter) {
-                if (SpoonUtil.isInOverriddenMethod(ctParameter) || SpoonUtil.isInMainMethod(ctParameter) || ctParameter.getParent() instanceof CtLambda<?>) {
+                if (SpoonUtil.isInOverriddenMethod(ctParameter)
+                    || SpoonUtil.isInMainMethod(ctParameter)
+                    || ctParameter.getParent() instanceof CtLambda<?>
+                    || ctParameter.getParent(CtInterface.class) != null) {
                     super.visitCtParameter(ctParameter);
                     return;
                 }

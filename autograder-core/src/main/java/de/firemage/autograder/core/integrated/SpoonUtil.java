@@ -1046,6 +1046,26 @@ public final class SpoonUtil {
     }
 
 
+    public static CtElement getReferenceDeclaration(CtReference ctReference) {
+        // this might be null if the reference is not in the source path
+        // for example, when the reference points to a java.lang type
+        CtElement target = ctReference.getDeclaration();
+
+        if (target == null && ctReference instanceof CtTypeReference<?> ctTypeReference) {
+            target = ctTypeReference.getTypeDeclaration();
+        }
+
+        if (target == null && ctReference instanceof CtExecutableReference<?> ctExecutableReference) {
+            target = ctExecutableReference.getExecutableDeclaration();
+        }
+
+        if (target == null && ctReference instanceof CtFieldReference<?> ctFieldReference) {
+            target = ctFieldReference.getFieldDeclaration();
+        }
+
+        return target;
+    }
+
     private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
 
     /**
@@ -1058,8 +1078,7 @@ public final class SpoonUtil {
     private record BetterVariableAccessFilter<T extends CtVariableAccess<?>>(CtVariable<?> ctVariable) implements Filter<T> {
         @Override
         public boolean matches(T element) {
-            return element.getVariable().equals(this.ctVariable.getReference())
-                || (element.getVariable().getDeclaration() != null && element.getVariable().getDeclaration().equals(this.ctVariable));
+            return getReferenceDeclaration(element.getVariable()) != null && getReferenceDeclaration(element.getVariable()) == this.ctVariable;
         }
     }
 
