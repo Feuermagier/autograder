@@ -33,7 +33,7 @@ public class ThrowsJavadocCheck extends IntegratedCheck {
         CtJavaDoc ctJavaDoc = doc.get();
 
         Set<String> documentedExceptions = ctJavaDoc.getTags().stream()
-                .filter(tag -> tag.getType() == CtJavaDocTag.TagType.THROWS && tag.getParam() != null)
+                .filter(tag -> (tag.getType() == CtJavaDocTag.TagType.THROWS || tag.getType() == CtJavaDocTag.TagType.EXCEPTION) && tag.getParam() != null)
                 .map(CtJavaDocTag::getParam)
                 .collect(Collectors.toSet());
 
