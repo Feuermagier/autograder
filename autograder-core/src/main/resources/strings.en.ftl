@@ -100,7 +100,7 @@ too-many-exceptions = The project defines {$count} exceptions. Those are too man
 
 redundant-variable = The variable '{$name}' is redundant, the value can be used directly: '{$suggestion}'.
 
-unused-import-exp = Unused import
+unused-import = The import '{$import}' is unused and should therefore be removed.
 
 redundant-boolean-equal = It is redundant to explicitly check if a condition equals true or false. Write instead '{$suggestion}'.
 

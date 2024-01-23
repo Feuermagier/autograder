@@ -49,6 +49,7 @@ import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtReference;
@@ -59,7 +60,6 @@ import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
-import spoon.reflect.visitor.filter.SameFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.ArrayDeque;
@@ -1030,9 +1030,7 @@ public final class SpoonUtil {
      * @return all uses of {@code ctElement} in {@code in}
      */
     public static List<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
-        return findUses(ctElement).stream()
-            .filter(element -> !in.getElements(new SameFilter(element)).isEmpty())
-            .collect(Collectors.toCollection(ArrayList::new));
+        return new ArrayList<>(in.getElements(new UsesFilter(ctElement)));
     }
 
     public record FilterAdapter<T extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<CtElement> {
@@ -1084,6 +1082,37 @@ public final class SpoonUtil {
         }
     }
 
+    /**
+     * This filter finds all {@code CtElement} in the model that use the specified type.
+     *
+     * @param ctType the type to find all uses of
+     */
+    private record TypeUsesFilter(CtType<?> ctType) implements Filter<CtElement> {
+        private boolean isType(CtTypeReference<?> ctTypeReference) {
+            return this.ctType.getReference().equals(ctTypeReference)
+                || this.ctType.equals(ctTypeReference.getTypeDeclaration())
+                || (
+                    ctTypeReference.getTypeDeclaration() != null &&
+                        ctTypeReference.getTypeDeclaration().getUsedTypes(true)
+                            .stream()
+                            .anyMatch(type -> type.equals(this.ctType.getReference()))
+                );
+        }
+
+        @Override
+        public boolean matches(CtElement ctElement) {
+            if (ctElement instanceof CtArrayTypeReference<?> ctArrayTypeReference) {
+                return this.isType(ctArrayTypeReference.getArrayType());
+            }
+
+            if (ctElement instanceof CtTypeReference<?> ctTypeReference) {
+                return this.isType(ctTypeReference);
+            }
+
+            return false;
+        }
+    }
+
     public static class UsesFilter implements Filter<CtElement> {
         private final Filter<CtElement> filter;
 
@@ -1095,6 +1124,8 @@ public final class SpoonUtil {
                 filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
             } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
                 filter = buildExecutableFilter(ctExecutable);
+            } else if (ctElement instanceof CtType<?> ctType) {
+                filter = new FilterAdapter<>(new TypeUsesFilter(ctType), CtElement.class);
             } else if (ctElement instanceof CtTypeMember ctTypeMember) {
                 // CtTypeMember that are not executable or variables are:
                 // - CtType (CtClass, CtEnum, CtInterface, CtRecord)
@@ -1245,6 +1276,20 @@ public final class SpoonUtil {
         if (effects.isEmpty()) return new ArrayList<>();
 
         return effects;
+    }
+
+    public static SourcePosition findPosition(CtElement ctElement) {
+        if (ctElement.getPosition().isValidPosition()) {
+            return ctElement.getPosition();
+        }
+
+        for (CtElement element : parents(ctElement)) {
+            if (element.getPosition().isValidPosition()) {
+                return element.getPosition();
+            }
+        }
+
+        return null;
     }
 
     /**
