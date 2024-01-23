@@ -43,6 +43,7 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
+import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
@@ -1124,6 +1125,11 @@ public final class SpoonUtil {
                 filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
             } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
                 filter = buildExecutableFilter(ctExecutable);
+            } else if (ctElement instanceof CtTypeParameter ctTypeParameter) {
+                filter = new FilterAdapter<>(
+                    new DirectReferenceFilter<>(ctTypeParameter.getReference()),
+                    CtReference.class
+                );
             } else if (ctElement instanceof CtType<?> ctType) {
                 filter = new FilterAdapter<>(new TypeUsesFilter(ctType), CtElement.class);
             } else if (ctElement instanceof CtTypeMember ctTypeMember) {
