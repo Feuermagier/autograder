@@ -374,4 +374,27 @@ class TestRedundantVariable extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testRedundantSwitchExpression() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public int get(int number) {
+                        int result = switch (number) {
+                            case 1 -> 2;
+                            case 2 -> 3;
+                            default -> 10;
+                        };
+                        
+                        return result;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
