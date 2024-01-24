@@ -235,6 +235,32 @@ class TestCommonReimplementation extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
+    @Test
+    void testAddAllCast() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public class Main {
+                    public static <T, U> Collection<U> toCollection(Iterable<T> input) {
+                        Collection<U> result = new ArrayList<>();
+                        
+                        for (T element : input) {
+                            result.add((U) element);
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL));
+
+        problems.assertExhausted();
+    }
+
 
     @Test
     void testArraysFill() throws LinterException, IOException {

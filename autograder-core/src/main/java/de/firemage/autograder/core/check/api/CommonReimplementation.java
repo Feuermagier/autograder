@@ -168,6 +168,11 @@ public class CommonReimplementation extends IntegratedCheck {
             && ctInvocation.getArguments().get(0) instanceof CtVariableRead<?> ctVariableRead
             && ctVariableRead.getVariable().equals(ctFor.getVariable().getReference())) {
 
+            // allow explicit casting
+            if (!ctInvocation.getArguments().get(0).getTypeCasts().isEmpty()) {
+                return;
+            }
+
             String addAllArg = ctFor.getExpression().prettyprint();
             if (ctFor.getExpression().getType().isArray()) {
                 addAllArg = "Arrays.asList(%s)".formatted(addAllArg);
