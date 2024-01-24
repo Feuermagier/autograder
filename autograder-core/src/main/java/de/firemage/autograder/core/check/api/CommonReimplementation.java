@@ -17,6 +17,7 @@ import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
@@ -213,18 +214,28 @@ public class CommonReimplementation extends IntegratedCheck {
             return;
         }
 
+        String suggestion = "Arrays.fill(%s, %s, %s, %s)".formatted(
+            ctArrayWrite.getTarget().prettyprint(),
+            forLoopRange.start().prettyprint(),
+            forLoopRange.end().prettyprint(),
+            ctAssignment.getAssignment().prettyprint()
+        );
+        if (forLoopRange.start() instanceof CtLiteral<Integer> ctLiteral
+            && ctLiteral.getValue() == 0
+            && forLoopRange.end() instanceof CtFieldAccess<Integer> fieldAccess
+            && ctArrayWrite.getTarget().equals(fieldAccess.getTarget())
+            && fieldAccess.getVariable().getSimpleName().equals("length")) {
+            suggestion = "Arrays.fill(%s, %s)".formatted(
+                ctArrayWrite.getTarget().prettyprint(),
+                ctAssignment.getAssignment().prettyprint()
+            );
+        }
+
         this.addLocalProblem(
             ctFor,
             new LocalizedMessage(
                 "common-reimplementation",
-                Map.of(
-                    "suggestion", "Arrays.fill(%s, %s, %s, %s)".formatted(
-                        ctArrayWrite.getTarget().prettyprint(),
-                        forLoopRange.start().prettyprint(),
-                        forLoopRange.end().prettyprint(),
-                        ctAssignment.getAssignment().prettyprint()
-                    )
-                )
+                Map.of("suggestion", suggestion)
             ),
             ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL
         );

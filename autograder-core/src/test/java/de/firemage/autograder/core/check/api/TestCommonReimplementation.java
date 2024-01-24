@@ -250,6 +250,10 @@ class TestCommonReimplementation extends AbstractCheckTest {
                             array[i] = INITIAL_VALUE;
                         }
                         
+                        for (int i = 1; i < array.length; i++) {
+                            array[i] = INITIAL_VALUE;
+                        }
+                        
                         for (int i = 0; i < array.length; i++) {
                             array[i] = INITIAL_VALUE + i; // ignored because it uses i
                         }
@@ -258,7 +262,8 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
 
-        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, 0, array.length, INITIAL_VALUE)");
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, INITIAL_VALUE)");
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, 1, array.length, INITIAL_VALUE)");
         problems.assertExhausted();
     }
 
@@ -368,7 +373,7 @@ class TestCommonReimplementation extends AbstractCheckTest {
             )
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
 
-        assertEqualsReimplementation(problems.next(), "Arrays.fill(field, 0, field.length, PlayingFieldEntry.FREE)");
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(field, PlayingFieldEntry.FREE)");
 
         problems.assertExhausted();
     }
