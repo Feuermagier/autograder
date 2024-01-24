@@ -25,9 +25,11 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
 
     private static final List<String> NON_DESCRIPTIVE_NAMES = List.of("error", "pattern", "regex", "symbol", "constant", "const", "compare", "linebreak");
     private static final Map<String, List<String>> SPECIAL_VALUE_MAPPING = Map.ofEntries(
-            Map.entry("->", List.of("arrow")),
-            Map.entry("-->", List.of("arrow"))
+        Map.entry("->", List.of("arrow")),
+        Map.entry("-->", List.of("arrow"))
     );
+
+    private static final int MAXIMUM_NAME_DIFFERENCE = 2;
 
     private static boolean isNonDescriptiveIntegerName(String name, int value) {
         if (NON_DESCRIPTIVE_NAMES.contains(name.toLowerCase())) {
@@ -110,6 +112,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
     private static boolean containsValueInName(String name, CtLiteral<?> value) {
         String lowerCaseName = name.toLowerCase();
 
+        // convert the value to a lowercase string (makes it easier to compare)
         String valueString = "null";
         if (value.getValue() != null) {
             valueString = value.getValue().toString().toLowerCase();
@@ -125,7 +128,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             return lowerCaseName.startsWith(c + "_") || lowerCaseName.endsWith("_" + c) || lowerCaseName.contains("_" + c + "_");
         }
 
-        // convert special characters like : to their names (colon)
+        // convert special character values like ":" to their names (colon)
         if (valueString.length() == 1 && !Character.isAlphabetic(valueString.charAt(0))) {
             List<String> charOptions = listCharOptions(valueString.charAt(0));
             if (charOptions != null) {
@@ -142,7 +145,15 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         // to detect private static String MY_CONSTANT = "my-constant"
         valueString = valueString.replace('-', '_');
 
-        return lowerCaseName.contains(valueString);
+        if (lowerCaseName.contains(valueString)) {
+            String newName = lowerCaseName.replace(valueString, "");
+
+            // we do not want to detect constants like `QUIT_COMMAND_NAME = "quit"`, so we only complain
+            // if the name is almost the same as the value
+            return newName.length() <= MAXIMUM_NAME_DIFFERENCE;
+        }
+
+        return false;
     }
 
     @Override
