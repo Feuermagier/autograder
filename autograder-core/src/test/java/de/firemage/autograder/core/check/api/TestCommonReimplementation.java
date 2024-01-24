@@ -551,12 +551,19 @@ class TestCommonReimplementation extends AbstractCheckTest {
                             System.out.println(list.get(i));
                         }
                     }
+                    
+                    public static void printList2(List<Integer> list, int start, int end) {
+                        for (int i = start; i < end; i++) {
+                            System.out.println(list.get(i));
+                        }
+                    }
                 }
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_SUBLIST));
 
         assertEqualsReimplementation(problems.next(), "for (T value : list.subList(start, end)) { ... }");
         assertEqualsReimplementation(problems.next(), "for (Object value : list.subList(start, end)) { ... }");
+        assertEqualsReimplementation(problems.next(), "for (int value : list.subList(start, end)) { ... }");
         problems.assertExhausted();
     }
 

@@ -515,7 +515,7 @@ public class CommonReimplementation extends IntegratedCheck {
                 "common-reimplementation",
                 Map.of(
                     "suggestion", "for (%s value : %s.subList(%s, %s)) { ... }".formatted(
-                        listElementType.prettyprint(),
+                        listElementType.unbox().prettyprint(),
                         ctListVariable.getSimpleName(),
                         forLoopRange.start().prettyprint(),
                         forLoopRange.end().prettyprint()
