@@ -102,6 +102,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             case ';' -> List.of("semi_colon", "semicolon");
             case '_' -> List.of("underscore", "dash", "line");
             case '/', '\\' -> List.of("slash", "backslash");
+            case '[', ']' -> List.of("bracket");
             default -> Character.isAlphabetic(c) ? List.of(String.valueOf(Character.toLowerCase(c))) : null;
         };
     }

@@ -35,4 +35,6 @@ public class Test {
     private static final String LINE_BREAK = System.lineSeparator(); /*# not ok #*/
 
     private static final String NO_TASKS = ""; /*# ok #*/
+    private static final String BRACKET_OPEN = "["; /*# not ok #*/
+    private static final String BRACKET_CLOSE = "]"; /*# not ok #*/
 }
