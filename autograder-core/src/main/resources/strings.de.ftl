@@ -53,6 +53,8 @@ equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich s
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
+implement-comparable = Der Typ '{$name}' sollte `Comparable<{$name}>` implementieren, dann kann man sich den `Comparator` sparen.
+
 # Comment
 commented-out-code = Dieser auskommentierte Code sollte entfernt werden
 

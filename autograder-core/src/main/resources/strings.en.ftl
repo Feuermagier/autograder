@@ -54,6 +54,8 @@ array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so compa
                             equality only. If neither deduplication nor lookup are needed, consider using a List
                             instead.
 
+implement-comparable = The type '{$name}' should implement `Comparable<{$name}>`, then the `Comparator` becomes redundant.
+
 # Comment
 commented-out-code = This commented out code should be removed
 
