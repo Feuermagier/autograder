@@ -189,6 +189,8 @@ binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwende
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
+magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden. Siehe Wiki Artikel zu Magic Strings.
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
