@@ -315,11 +315,12 @@ public final class Linter {
 
     public String translateMessage(Translatable message) {
         String output = message.format(this.fluentBundle);
+
         if (output.startsWith("Unknown messageID '")) {
-            return output.substring("Unknown messageID '".length(), output.length() - 1);
-        } else {
-            return output;
+            throw new IllegalStateException(output);
         }
+
+        return output;
     }
 
     private static final Collection<Class<?>> CHECKS = new LinkedHashSet<>(
