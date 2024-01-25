@@ -45,6 +45,7 @@ import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -304,76 +305,34 @@ public class CommonReimplementation extends IntegratedCheck {
         }
     }
 
-    private record AddInvocation(
-        CtVariableReference<?> collection,
-        CtExecutableReference<?> executableReference,
-        CtEnumFieldRead ctEnumFieldRead
-    ) {
-        public static Optional<AddInvocation> of(CtStatement ctStatement) {
-            CtType<?> collectionType = ctStatement.getFactory().Type().get(java.util.Collection.class);
-            if (!(ctStatement instanceof CtInvocation<?> ctInvocation)
-                || !(ctInvocation.getTarget() instanceof CtVariableAccess<?> ctVariableAccess)
-                || ctVariableAccess.getVariable().getType() instanceof CtTypeParameterReference
-                || !ctVariableAccess.getVariable().getType().isSubtypeOf(collectionType.getReference())) {
-                return Optional.empty();
-            }
-
-            CtExecutableReference<?> executableReference = ctInvocation.getExecutable();
-            CtVariableReference<?> collection = ctVariableAccess.getVariable();
-            if (!SpoonUtil.isSignatureEqualTo(
-                executableReference,
-                boolean.class,
-                "add",
-                Object.class)) {
-                return Optional.empty();
-            }
-
-            return CtEnumFieldRead.of(ctInvocation.getArguments().get(0))
-                .map(fieldRead -> new AddInvocation(collection, executableReference, fieldRead));
-        }
-    }
-
     private static <T> boolean isOrderedCollection(CtTypeReference<T> ctTypeReference) {
         return Stream.of(java.util.List.class)
             .map(ctClass -> ctTypeReference.getFactory().createCtTypeReference(ctClass))
             .anyMatch(ctTypeReference::isSubtypeOf);
     }
 
-    private void checkEnumValues(
+    public static boolean checkEnumValues(
         CtEnum<?> ctEnum,
         boolean isOrdered,
-        List<? extends CtEnumValue<?>> enumValues,
-        UnaryOperator<? super String> suggestion,
-        CtElement span
+        Collection<? extends CtEnumValue<?>> enumValues
     ) {
         List<CtEnumValue<?>> expectedValues = new ArrayList<>(ctEnum.getEnumValues());
 
         for (CtEnumValue<?> enumValue : enumValues) {
             // check for out of order add
             if (isOrdered && !expectedValues.isEmpty() && !expectedValues.get(0).equals(enumValue)) {
-                return;
+                return false;
             }
 
             boolean wasPresent = expectedValues.remove(enumValue);
 
             // check for duplicate or out of order add
             if (!wasPresent) {
-                return;
+                return false;
             }
         }
 
-        if (expectedValues.isEmpty() && !enumValues.isEmpty()) {
-            this.addLocalProblem(
-                span == null ? enumValues.get(enumValues.size() - 1) : span,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        "suggestion", suggestion.apply("%s.values()".formatted(ctEnum.getSimpleName()))
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES
-            );
-        }
+        return expectedValues.isEmpty() && !enumValues.isEmpty();
     }
 
     public record CtEnumFieldRead(CtEnum<?> ctEnum, CtEnumValue<?> ctEnumValue) {
@@ -422,64 +381,17 @@ public class CommonReimplementation extends IntegratedCheck {
             addedValues.add(enumFieldRead.ctEnumValue());
         }
 
-        if (ctEnum != null) {
-            this.checkEnumValues(
-                ctEnum,
-                isOrdered,
-                addedValues,
-                suggestion,
-                span
+        if (ctEnum != null && checkEnumValues(ctEnum, isOrdered, addedValues)) {
+            this.addLocalProblem(
+                span == null ? addedValues.get(addedValues.size() - 1) : span,
+                new LocalizedMessage(
+                    "common-reimplementation",
+                    Map.of(
+                        "suggestion", suggestion.apply("%s.values()".formatted(ctEnum.getSimpleName()))
+                    )
+                ),
+                ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES
             );
-        }
-    }
-
-    private void checkAddAllEnumValues(CtBlock<?> ctBlock) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctBlock);
-
-        CtVariableReference<?> collection = null;
-        CtEnum<?> ctEnum = null;
-        List<CtEnumValue<?>> addedValues = new ArrayList<>();
-
-        for (CtStatement ctStatement : statements) {
-            AddInvocation addInvocation = AddInvocation.of(ctStatement).orElse(null);
-            if (addInvocation == null) {
-                collection = null;
-                ctEnum = null;
-                continue;
-            }
-
-            // ensure that all invocations refer to the same collection
-            if (collection == null) {
-                collection = addInvocation.collection();
-            }
-
-            if (!collection.equals(addInvocation.collection())) {
-                // if there are multiple collections, just invalidate the data
-                collection = null;
-                ctEnum = null;
-                continue;
-            }
-
-            if (ctEnum == null) {
-                ctEnum = addInvocation.ctEnumFieldRead().ctEnum();
-                addedValues = new ArrayList<>();
-            }
-
-            addedValues.add(addInvocation.ctEnumFieldRead().ctEnumValue());
-
-            if (addedValues.size() == ctEnum.getEnumValues().size()) {
-                String collectionName = collection.getSimpleName();
-                this.checkEnumValues(
-                    ctEnum,
-                    isOrderedCollection(collection.getType()),
-                    addedValues,
-                    suggestion -> "%s.addAll(Arrays.asList(%s))".formatted(collectionName, suggestion),
-                    null
-                );
-
-                collection = null;
-                ctEnum = null;
-            }
         }
     }
 
@@ -576,8 +488,6 @@ public class CommonReimplementation extends IntegratedCheck {
                     super.visitCtBlock(ctBlock);
                     return;
                 }
-
-                checkAddAllEnumValues(ctBlock);
 
                 super.visitCtBlock(ctBlock);
             }
