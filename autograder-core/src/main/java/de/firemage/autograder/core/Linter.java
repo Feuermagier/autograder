@@ -3,6 +3,7 @@ package de.firemage.autograder.core;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.general.CopyPasteCheck;
+import de.firemage.autograder.core.check.general.MagicString;
 import de.firemage.autograder.core.cpd.CPDLinter;
 import de.firemage.autograder.core.errorprone.ErrorProneCheck;
 import de.firemage.autograder.core.errorprone.ErrorProneLinter;
@@ -287,8 +288,14 @@ public final class Linter {
         for (Map.Entry<Check, List<Problem>> entry : problems.entrySet()) {
             Check check = entry.getKey();
             List<Problem> problemsForCheck = entry.getValue();
+
+            int targetNumberOfProblems = Math.min(
+                this.maxProblemsPerCheck,
+                entry.getKey().maximumProblems().orElse(this.maxProblemsPerCheck)
+            );
+
             // then go through each check and merge the problems if they exceed the maxProblemsPerCheck
-            if (problemsForCheck.size() > Math.min(this.maxProblemsPerCheck, entry.getKey().maximumProblems().orElse(this.maxProblemsPerCheck))) {
+            if (problemsForCheck.size() > targetNumberOfProblems) {
                 // further partition the problems by their ProblemType
                 // (one does not want to merge different types of problems):
                 Map<ProblemType, List<Problem>> problemsByType = problemsForCheck.stream()
@@ -296,9 +303,7 @@ public final class Linter {
 
                 problemsForCheck = problemsByType.values()
                     .stream()
-                    .flatMap(list -> check.merge(list, this.maxProblemsPerCheck)
-                        .stream()
-                        .map(Problem.class::cast))
+                    .flatMap(list -> check.merge(list, targetNumberOfProblems).stream())
                     .collect(Collectors.toCollection(ArrayList::new));
             }
 
