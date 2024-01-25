@@ -122,6 +122,8 @@ multi-threading = Multithreading is out of scope for this lecture. The code is o
 
 try-catch-complexity = The complexity of try-catch-blocks should be kept low. There should be less than {$max} statements in the try-block. You should refactor the code into multiple methods or extract unnecessary statements out of the try-block.
 
+redundant-else = The 'else' is redundant. Write '{$expected}' instead of '{$given}'.
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.

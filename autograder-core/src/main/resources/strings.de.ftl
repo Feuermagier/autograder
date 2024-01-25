@@ -119,6 +119,8 @@ multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur eine
 
 try-catch-complexity = Die Komplexität von try-catch-Blöcken sollte möglichst gering gehalten werden. Es sollten weniger als {$max} Statements vorhanden sein. Versuche den Code in mehrere Methoden aufzuteilen bzw. nicht dringend benötigte Statements aus dem try-Block zu entfernen.
 
+redundant-else = Die 'else' ist unnötig. Schreibe '{$expected}' statt '{$given}'.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,
