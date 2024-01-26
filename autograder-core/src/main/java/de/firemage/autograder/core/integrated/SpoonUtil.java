@@ -1034,9 +1034,9 @@ public final class SpoonUtil {
         return new ArrayList<>(in.getElements(new UsesFilter(ctElement)));
     }
 
-    public record FilterAdapter<T extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<CtElement> {
+    public record FilterAdapter<T extends CtElement, U extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<U> {
         @Override
-        public boolean matches(CtElement element) {
+        public boolean matches(U element) {
             if (this.type.isInstance(element)) {
                 return this.filter.matches(this.type.cast(element));
             }
