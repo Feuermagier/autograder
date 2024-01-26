@@ -293,51 +293,6 @@ class TestCommonReimplementation extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
-    @Test
-    void testModulo() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Main",
-            """
-                public class Main {
-                    private static final int EMPTY = 0;
-
-                    public static int adjust(int value, int limit) {
-                        int result = value;
-
-                        if (result > limit) {
-                            result = 0;
-                        }
-
-                        if (limit <= result) {
-                            result = 0;
-                        }
-                        
-                        if (result == limit) {
-                            result = 0;
-                        }
-
-                        return result;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MODULO));
-
-        List<String> expectedSuggestions = List.of(
-            "result %= (limit + 1)",
-            "result %= limit",
-            "result %= limit"
-        );
-
-        for (String expectedSuggestion : expectedSuggestions) {
-            Problem problem = problems.next();
-
-            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MODULO, problem.getProblemType());
-            assertEqualsReimplementation(problem, expectedSuggestion);
-        }
-        problems.assertExhausted();
-    }
-
     // See https://github.com/Feuermagier/autograder/issues/245
     @Test
     void testArraysFillMutableClass() throws LinterException, IOException {

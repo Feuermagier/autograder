@@ -56,10 +56,8 @@ import java.util.stream.Stream;
 @ExecutableCheck(reportedProblems = {
     ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY,
     ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT,
-    ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN,
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL,
     ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL,
-    ProblemType.COMMON_REIMPLEMENTATION_MODULO,
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES,
     ProblemType.COMMON_REIMPLEMENTATION_SUBLIST
 })
@@ -247,64 +245,6 @@ public class CommonReimplementation extends IntegratedCheck {
         );
     }
 
-    private void checkModulo(CtIf ctIf) {
-        List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
-        if (ctIf.getElseStatement() != null
-            || thenBlock.size() != 1
-            || !(thenBlock.get(0) instanceof CtAssignment<?, ?> thenAssignment)
-            || !(thenAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite)
-            || !(ctIf.getCondition() instanceof CtBinaryOperator<Boolean> ctBinaryOperator)
-            || !Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE, BinaryOperatorKind.GE, BinaryOperatorKind.GT, BinaryOperatorKind.EQ)
-                .contains(ctBinaryOperator.getKind())) {
-            return;
-        }
-
-        // must assign a value of 0
-        if (!(SpoonUtil.resolveCtExpression(thenAssignment.getAssignment()) instanceof CtLiteral<?> ctLiteral)
-            || !(ctLiteral.getValue() instanceof Integer integer)
-            || integer != 0) {
-            return;
-        }
-
-        CtVariableReference<?> assignedVariable = ctVariableWrite.getVariable();
-
-        CtBinaryOperator<Boolean> condition = SpoonUtil.normalizeBy(
-            (left, right) -> right instanceof CtVariableAccess<?> ctVariableAccess && ctVariableAccess.getVariable().equals(assignedVariable),
-            ctBinaryOperator
-        );
-
-        // the assigned variable is not on either side
-        if (!(condition.getLeftHandOperand() instanceof CtVariableAccess<?> ctVariableAccess)
-            || !(ctVariableAccess.getVariable().equals(assignedVariable))) {
-            return;
-        }
-
-        // if (variable >= 3) {
-        //    variable = 0;
-        // }
-        //
-        // is equal to
-        //
-        // variable %= 3;
-        if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
-            CtExpression<?> right = condition.getRightHandOperand();
-
-            addLocalProblem(
-                ctIf,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        "suggestion", "%s %%= %s".formatted(
-                            assignedVariable.prettyprint(),
-                            right.prettyprint()
-                        )
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_MODULO
-            );
-        }
-    }
-
     private static <T> boolean isOrderedCollection(CtTypeReference<T> ctTypeReference) {
         return Stream.of(java.util.List.class)
             .map(ctClass -> ctTypeReference.getFactory().createCtTypeReference(ctClass))
@@ -469,17 +409,6 @@ public class CommonReimplementation extends IntegratedCheck {
 
                 checkAddAll(ctForEach);
                 super.visitCtForEach(ctForEach);
-            }
-
-            @Override
-            public void visitCtIf(CtIf ctIf) {
-                if (ctIf.isImplicit() || !ctIf.getPosition().isValidPosition() || ctIf.getThenStatement() == null) {
-                    super.visitCtIf(ctIf);
-                    return;
-                }
-
-                checkModulo(ctIf);
-                super.visitCtIf(ctIf);
             }
 
             @Override
