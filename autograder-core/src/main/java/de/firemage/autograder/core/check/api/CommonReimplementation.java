@@ -49,69 +49,17 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY,
-    ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT,
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL,
     ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL,
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES,
     ProblemType.COMMON_REIMPLEMENTATION_SUBLIST
 })
 public class CommonReimplementation extends IntegratedCheck {
-    private void checkStringRepeat(CtFor ctFor) {
-        ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
-
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
-        if (statements.size() != 1 || forLoopRange == null) {
-            return;
-        }
-
-        // lhs += rhs
-        if (statements.get(0) instanceof CtOperatorAssignment<?, ?> ctAssignment
-            && ctAssignment.getKind() == BinaryOperatorKind.PLUS) {
-            CtExpression<?> lhs = ctAssignment.getAssigned();
-            if (!SpoonUtil.isTypeEqualTo(lhs.getType(), String.class)) {
-                return;
-            }
-
-            CtExpression<?> rhs = SpoonUtil.resolveCtExpression(ctAssignment.getAssignment());
-            // return if the for loop uses the loop variable (would not be a simple repetition)
-            if (!ctAssignment.getElements(new VariableAccessFilter<>(forLoopRange.loopVariable())).isEmpty()) {
-                return;
-            }
-
-            // return if the rhs uses the lhs: lhs += rhs + lhs
-            if (lhs instanceof CtVariableAccess<?> ctVariableAccess && !rhs.getElements(new VariableAccessFilter<>(ctVariableAccess.getVariable())).isEmpty()) {
-                return;
-            }
-
-            this.addLocalProblem(
-                ctFor,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        // string.repeat(count)
-                        "suggestion", "%s += %s".formatted(
-                            lhs.prettyprint(),
-                            rhs.getFactory().createInvocation(
-                                rhs.clone(),
-                                rhs.getFactory().Type().get(java.lang.String.class)
-                                    .getMethod("repeat", rhs.getFactory().createCtTypeReference(int.class))
-                                    .getReference()
-                                    .clone(),
-                                forLoopRange.length().clone()
-                            ).prettyprint())
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT
-            );
-        }
-    }
-
     private void checkArrayCopy(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
@@ -394,7 +342,6 @@ public class CommonReimplementation extends IntegratedCheck {
                 }
 
                 checkArrayCopy(ctFor);
-                checkStringRepeat(ctFor);
                 checkArraysFill(ctFor);
                 checkSubList(ctFor);
                 super.visitCtFor(ctFor);

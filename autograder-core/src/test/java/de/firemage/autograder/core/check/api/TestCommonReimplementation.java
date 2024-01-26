@@ -106,54 +106,6 @@ class TestCommonReimplementation extends AbstractCheckTest {
     }
 
     @Test
-    void testSimpleStringRepeat() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    private static String repeat(String s, int n) {
-                        String result = "";
-
-                        for (int i = 0; i < n; i++) {
-                            result += s;
-                        }
-
-                        return result;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT));
-
-        assertEqualsReimplementation(problems.next(), "result += s.repeat(n)");
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testStringRepeatWithCustomStart() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    private static String repeat(String s, int n, int start) {
-                        String result = "";
-
-                        for (int i = start; i <= n; i++) {
-                            result += s;
-                        }
-
-                        return result;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT));
-
-        assertEqualsReimplementation(problems.next(), "result += s.repeat((n + 1) - start)");
-        problems.assertExhausted();
-    }
-
-    @Test
     void testDoubleArrayCopy() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
