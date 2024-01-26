@@ -85,4 +85,92 @@ class TestMagicString extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
+    @Test
+    void testEnumLambda() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "EnumTest",
+            """
+                import java.util.function.Function;
+
+                public enum EnumTest {
+                    WEDNESDAY(string -> {
+                        return "NotThursday1"; //# ok
+                    }, "Thursday"); //# ok
+
+                    public static final String OTHER = "other"; //# ok
+                    private final Function<String, String> function;
+                    private final String next;
+
+                    EnumTest(Function<String, String> function, String next) {
+                        this.function = string -> {
+                            return "NotThursday2"; //# not ok
+                        };
+                        this.next = next;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertMagicString(problems.next(), "NotThursday2");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testDoubleBraceInit() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.Map;
+                import java.util.HashMap;
+
+                public class Test {
+                    private static final Map<Object, Object> DOUBLE_BRACE_INIT = new HashMap<>() {{
+                        put("first", 1); //# ok
+                        put(2, "second"); //# ok
+                        put("both", "sides"); //# ok
+                    }};
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testMagicStringsInCode() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.function.Function;
+
+                public class Test {
+                    public static void main(String[] args) {
+                        String magicString = "Hello World"; //# not ok
+                        String empty = "" + 1; //# ok
+                    }
+
+                    private static void doSomething(String string) {
+                        if (string.equals("value")) { //# not ok
+                            throw new IllegalStateException("some error message"); //# not ok
+                        }
+                    }
+
+                    private Function<String, String> getFunction() {
+                        return string -> "whatever"; //# not ok
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertMagicString(problems.next(), "Hello World");
+        assertMagicString(problems.next(), "value");
+        assertMagicString(problems.next(), "some error message");
+        assertMagicString(problems.next(), "whatever");
+
+        problems.assertExhausted();
+    }
 }
