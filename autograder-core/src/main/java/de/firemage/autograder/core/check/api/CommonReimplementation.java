@@ -17,6 +17,7 @@ import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtForEach;
@@ -44,74 +45,21 @@ import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.COMMON_REIMPLEMENTATION_ARRAY_COPY,
-    ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT,
-    ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN,
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL,
     ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL,
-    ProblemType.COMMON_REIMPLEMENTATION_MODULO,
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES,
     ProblemType.COMMON_REIMPLEMENTATION_SUBLIST
 })
 public class CommonReimplementation extends IntegratedCheck {
-    private void checkStringRepeat(CtFor ctFor) {
-        ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
-
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
-        if (statements.size() != 1 || forLoopRange == null) {
-            return;
-        }
-
-        // lhs += rhs
-        if (statements.get(0) instanceof CtOperatorAssignment<?, ?> ctAssignment
-            && ctAssignment.getKind() == BinaryOperatorKind.PLUS) {
-            CtExpression<?> lhs = ctAssignment.getAssigned();
-            if (!SpoonUtil.isTypeEqualTo(lhs.getType(), String.class)) {
-                return;
-            }
-
-            CtExpression<?> rhs = SpoonUtil.resolveCtExpression(ctAssignment.getAssignment());
-            // return if the for loop uses the loop variable (would not be a simple repetition)
-            if (!ctAssignment.getElements(new VariableAccessFilter<>(forLoopRange.loopVariable())).isEmpty()) {
-                return;
-            }
-
-            // return if the rhs uses the lhs: lhs += rhs + lhs
-            if (lhs instanceof CtVariableAccess<?> ctVariableAccess && !rhs.getElements(new VariableAccessFilter<>(ctVariableAccess.getVariable())).isEmpty()) {
-                return;
-            }
-
-            this.addLocalProblem(
-                ctFor,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        // string.repeat(count)
-                        "suggestion", "%s += %s".formatted(
-                            lhs.prettyprint(),
-                            rhs.getFactory().createInvocation(
-                                rhs.clone(),
-                                rhs.getFactory().Type().get(java.lang.String.class)
-                                    .getMethod("repeat", rhs.getFactory().createCtTypeReference(int.class))
-                                    .getReference()
-                                    .clone(),
-                                forLoopRange.length().clone()
-                            ).prettyprint())
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT
-            );
-        }
-    }
-
     private void checkArrayCopy(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
@@ -167,6 +115,11 @@ public class CommonReimplementation extends IntegratedCheck {
             && ctInvocation.getArguments().get(0) instanceof CtVariableRead<?> ctVariableRead
             && ctVariableRead.getVariable().equals(ctFor.getVariable().getReference())) {
 
+            // allow explicit casting
+            if (!ctInvocation.getArguments().get(0).getTypeCasts().isEmpty()) {
+                return;
+            }
+
             String addAllArg = ctFor.getExpression().prettyprint();
             if (ctFor.getExpression().getType().isArray()) {
                 addAllArg = "Arrays.asList(%s)".formatted(addAllArg);
@@ -213,108 +166,31 @@ public class CommonReimplementation extends IntegratedCheck {
             return;
         }
 
+        String suggestion = "Arrays.fill(%s, %s, %s, %s)".formatted(
+            ctArrayWrite.getTarget().prettyprint(),
+            forLoopRange.start().prettyprint(),
+            forLoopRange.end().prettyprint(),
+            ctAssignment.getAssignment().prettyprint()
+        );
+        if (forLoopRange.start() instanceof CtLiteral<Integer> ctLiteral
+            && ctLiteral.getValue() == 0
+            && forLoopRange.end() instanceof CtFieldAccess<Integer> fieldAccess
+            && ctArrayWrite.getTarget().equals(fieldAccess.getTarget())
+            && fieldAccess.getVariable().getSimpleName().equals("length")) {
+            suggestion = "Arrays.fill(%s, %s)".formatted(
+                ctArrayWrite.getTarget().prettyprint(),
+                ctAssignment.getAssignment().prettyprint()
+            );
+        }
+
         this.addLocalProblem(
             ctFor,
             new LocalizedMessage(
                 "common-reimplementation",
-                Map.of(
-                    "suggestion", "Arrays.fill(%s, %s, %s, %s)".formatted(
-                        ctArrayWrite.getTarget().prettyprint(),
-                        forLoopRange.start().prettyprint(),
-                        forLoopRange.end().prettyprint(),
-                        ctAssignment.getAssignment().prettyprint()
-                    )
-                )
+                Map.of("suggestion", suggestion)
             ),
             ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL
         );
-    }
-
-    private void checkModulo(CtIf ctIf) {
-        List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
-        if (ctIf.getElseStatement() != null
-            || thenBlock.size() != 1
-            || !(thenBlock.get(0) instanceof CtAssignment<?, ?> thenAssignment)
-            || !(thenAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite)
-            || !(ctIf.getCondition() instanceof CtBinaryOperator<Boolean> ctBinaryOperator)
-            || !Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE, BinaryOperatorKind.GE, BinaryOperatorKind.GT, BinaryOperatorKind.EQ)
-                .contains(ctBinaryOperator.getKind())) {
-            return;
-        }
-
-        // must assign a value of 0
-        if (!(SpoonUtil.resolveCtExpression(thenAssignment.getAssignment()) instanceof CtLiteral<?> ctLiteral)
-            || !(ctLiteral.getValue() instanceof Integer integer)
-            || integer != 0) {
-            return;
-        }
-
-        CtVariableReference<?> assignedVariable = ctVariableWrite.getVariable();
-
-        CtBinaryOperator<Boolean> condition = SpoonUtil.normalizeBy(
-            (left, right) -> right instanceof CtVariableAccess<?> ctVariableAccess && ctVariableAccess.getVariable().equals(assignedVariable),
-            ctBinaryOperator
-        );
-
-        // the assigned variable is not on either side
-        if (!(condition.getLeftHandOperand() instanceof CtVariableAccess<?> ctVariableAccess)
-            || !(ctVariableAccess.getVariable().equals(assignedVariable))) {
-            return;
-        }
-
-        // if (variable >= 3) {
-        //    variable = 0;
-        // }
-        //
-        // is equal to
-        //
-        // variable %= 3;
-        if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
-            CtExpression<?> right = condition.getRightHandOperand();
-
-            addLocalProblem(
-                ctIf,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        "suggestion", "%s %%= %s".formatted(
-                            assignedVariable.prettyprint(),
-                            right.prettyprint()
-                        )
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_MODULO
-            );
-        }
-    }
-
-    private record AddInvocation(
-        CtVariableReference<?> collection,
-        CtExecutableReference<?> executableReference,
-        CtEnumFieldRead ctEnumFieldRead
-    ) {
-        public static Optional<AddInvocation> of(CtStatement ctStatement) {
-            CtType<?> collectionType = ctStatement.getFactory().Type().get(java.util.Collection.class);
-            if (!(ctStatement instanceof CtInvocation<?> ctInvocation)
-                || !(ctInvocation.getTarget() instanceof CtVariableAccess<?> ctVariableAccess)
-                || ctVariableAccess.getVariable().getType() instanceof CtTypeParameterReference
-                || !ctVariableAccess.getVariable().getType().isSubtypeOf(collectionType.getReference())) {
-                return Optional.empty();
-            }
-
-            CtExecutableReference<?> executableReference = ctInvocation.getExecutable();
-            CtVariableReference<?> collection = ctVariableAccess.getVariable();
-            if (!SpoonUtil.isSignatureEqualTo(
-                executableReference,
-                boolean.class,
-                "add",
-                Object.class)) {
-                return Optional.empty();
-            }
-
-            return CtEnumFieldRead.of(ctInvocation.getArguments().get(0))
-                .map(fieldRead -> new AddInvocation(collection, executableReference, fieldRead));
-        }
     }
 
     private static <T> boolean isOrderedCollection(CtTypeReference<T> ctTypeReference) {
@@ -323,41 +199,28 @@ public class CommonReimplementation extends IntegratedCheck {
             .anyMatch(ctTypeReference::isSubtypeOf);
     }
 
-    private void checkEnumValues(
+    public static boolean checkEnumValues(
         CtEnum<?> ctEnum,
         boolean isOrdered,
-        List<? extends CtEnumValue<?>> enumValues,
-        UnaryOperator<? super String> suggestion,
-        CtElement span
+        Collection<? extends CtEnumValue<?>> enumValues
     ) {
         List<CtEnumValue<?>> expectedValues = new ArrayList<>(ctEnum.getEnumValues());
 
         for (CtEnumValue<?> enumValue : enumValues) {
             // check for out of order add
             if (isOrdered && !expectedValues.isEmpty() && !expectedValues.get(0).equals(enumValue)) {
-                return;
+                return false;
             }
 
             boolean wasPresent = expectedValues.remove(enumValue);
 
             // check for duplicate or out of order add
             if (!wasPresent) {
-                return;
+                return false;
             }
         }
 
-        if (expectedValues.isEmpty() && !enumValues.isEmpty()) {
-            this.addLocalProblem(
-                span == null ? enumValues.get(enumValues.size() - 1) : span,
-                new LocalizedMessage(
-                    "common-reimplementation",
-                    Map.of(
-                        "suggestion", suggestion.apply("%s.values()".formatted(ctEnum.getSimpleName()))
-                    )
-                ),
-                ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES
-            );
-        }
+        return expectedValues.isEmpty() && !enumValues.isEmpty();
     }
 
     public record CtEnumFieldRead(CtEnum<?> ctEnum, CtEnumValue<?> ctEnumValue) {
@@ -406,64 +269,17 @@ public class CommonReimplementation extends IntegratedCheck {
             addedValues.add(enumFieldRead.ctEnumValue());
         }
 
-        if (ctEnum != null) {
-            this.checkEnumValues(
-                ctEnum,
-                isOrdered,
-                addedValues,
-                suggestion,
-                span
+        if (ctEnum != null && checkEnumValues(ctEnum, isOrdered, addedValues)) {
+            this.addLocalProblem(
+                span == null ? addedValues.get(addedValues.size() - 1) : span,
+                new LocalizedMessage(
+                    "common-reimplementation",
+                    Map.of(
+                        "suggestion", suggestion.apply("%s.values()".formatted(ctEnum.getSimpleName()))
+                    )
+                ),
+                ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES
             );
-        }
-    }
-
-    private void checkAddAllEnumValues(CtBlock<?> ctBlock) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctBlock);
-
-        CtVariableReference<?> collection = null;
-        CtEnum<?> ctEnum = null;
-        List<CtEnumValue<?>> addedValues = new ArrayList<>();
-
-        for (CtStatement ctStatement : statements) {
-            AddInvocation addInvocation = AddInvocation.of(ctStatement).orElse(null);
-            if (addInvocation == null) {
-                collection = null;
-                ctEnum = null;
-                continue;
-            }
-
-            // ensure that all invocations refer to the same collection
-            if (collection == null) {
-                collection = addInvocation.collection();
-            }
-
-            if (!collection.equals(addInvocation.collection())) {
-                // if there are multiple collections, just invalidate the data
-                collection = null;
-                ctEnum = null;
-                continue;
-            }
-
-            if (ctEnum == null) {
-                ctEnum = addInvocation.ctEnumFieldRead().ctEnum();
-                addedValues = new ArrayList<>();
-            }
-
-            addedValues.add(addInvocation.ctEnumFieldRead().ctEnumValue());
-
-            if (addedValues.size() == ctEnum.getEnumValues().size()) {
-                String collectionName = collection.getSimpleName();
-                this.checkEnumValues(
-                    ctEnum,
-                    isOrderedCollection(collection.getType()),
-                    addedValues,
-                    suggestion -> "%s.addAll(Arrays.asList(%s))".formatted(collectionName, suggestion),
-                    null
-                );
-
-                collection = null;
-                ctEnum = null;
-            }
         }
     }
 
@@ -504,7 +320,7 @@ public class CommonReimplementation extends IntegratedCheck {
                 "common-reimplementation",
                 Map.of(
                     "suggestion", "for (%s value : %s.subList(%s, %s)) { ... }".formatted(
-                        listElementType.prettyprint(),
+                        listElementType.unbox().prettyprint(),
                         ctListVariable.getSimpleName(),
                         forLoopRange.start().prettyprint(),
                         forLoopRange.end().prettyprint()
@@ -526,7 +342,6 @@ public class CommonReimplementation extends IntegratedCheck {
                 }
 
                 checkArrayCopy(ctFor);
-                checkStringRepeat(ctFor);
                 checkArraysFill(ctFor);
                 checkSubList(ctFor);
                 super.visitCtFor(ctFor);
@@ -544,24 +359,11 @@ public class CommonReimplementation extends IntegratedCheck {
             }
 
             @Override
-            public void visitCtIf(CtIf ctIf) {
-                if (ctIf.isImplicit() || !ctIf.getPosition().isValidPosition() || ctIf.getThenStatement() == null) {
-                    super.visitCtIf(ctIf);
-                    return;
-                }
-
-                checkModulo(ctIf);
-                super.visitCtIf(ctIf);
-            }
-
-            @Override
             public <R> void visitCtBlock(CtBlock<R> ctBlock) {
                 if (ctBlock.isImplicit() || !ctBlock.getPosition().isValidPosition()) {
                     super.visitCtBlock(ctBlock);
                     return;
                 }
-
-                checkAddAllEnumValues(ctBlock);
 
                 super.visitCtBlock(ctBlock);
             }

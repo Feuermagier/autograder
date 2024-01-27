@@ -13,79 +13,61 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.visitor.filter.VariableAccessFilter;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNNECESSARY_BOXING })
 public class UnnecessaryBoxing extends IntegratedCheck {
-    private static final Set<Class<?>> BOXED_TYPES = Set.of(
-        Boolean.class,
-        Byte.class,
-        Character.class,
-        Float.class,
-        Integer.class,
-        Long.class,
-        Short.class,
-        Double.class
-    );
-
     private static boolean isBoxedType(CtTypeReference<?> ctTypeReference) {
-        return BOXED_TYPES.stream().anyMatch(ty -> SpoonUtil.isTypeEqualTo(ctTypeReference, ty));
+        // a type is boxed if it changes when unboxed
+        return !ctTypeReference.equals(ctTypeReference.unbox());
+    }
+
+    private static <T> boolean isLikelyNull(CtExpression<T> ctExpression) {
+        return ctExpression == null
+            || SpoonUtil.isNullLiteral(ctExpression)
+            || isBoxedType(ctExpression.getType());
+    }
+
+    private <T> void checkVariable(CtVariable<T> ctVariable) {
+        if (ctVariable.isImplicit() || !ctVariable.getPosition().isValidPosition()) {
+            return;
+        }
+
+        CtTypeReference<?> ctTypeReference = ctVariable.getType();
+        if (ctTypeReference == null || !isBoxedType(ctTypeReference)) {
+            return;
+        }
+
+        boolean hasNullAssigned = isLikelyNull(ctVariable.getDefaultExpression()) || SpoonUtil.hasAnyUses(
+            ctVariable,
+            ctElement -> ctElement instanceof CtVariableWrite<?>
+                && ctElement.getParent() instanceof CtAssignment<?,?> ctAssignment
+                && ctAssignment.getAssignment() != null
+                && isLikelyNull(ctAssignment.getAssignment())
+        );
+
+        if (!hasNullAssigned) {
+            addLocalProblem(
+                ctVariable,
+                new LocalizedMessage(
+                    "suggest-replacement",
+                    Map.of(
+                        "original", ctTypeReference.getSimpleName(),
+                        "suggestion", ctTypeReference.unbox().getSimpleName()
+                    )
+                ),
+                ProblemType.UNNECESSARY_BOXING
+            );
+        }
     }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtTypeReference<?>>() {
+        staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
-            public void process(CtTypeReference<?> ctTypeReference) {
-                if (ctTypeReference.isImplicit()
-                    || !ctTypeReference.getPosition().isValidPosition()
-                    || !isBoxedType(ctTypeReference)) {
-                    return;
-                }
-
-                CtVariable<?> ctVariable = ctTypeReference.getParent(CtVariable.class);
-                if (ctVariable != null && isBoxedType(ctVariable.getType()) && ctVariable.getReference().getDeclaration() != null) {
-                    List<CtExpression<?>> assignedValues = staticAnalysis.getModel()
-                        .getElements(new VariableAccessFilter<>(ctVariable.getReference()))
-                        .stream()
-                        .filter(ctVariableAccess -> ctVariableAccess instanceof CtVariableWrite<?>
-                            && ctVariableAccess.getParent() instanceof CtAssignment<?,?>)
-                        .map(ctVariableAccess -> ((CtAssignment<?, ?>) ctVariableAccess.getParent()).getAssignment())
-                        .filter(Objects::nonNull)
-                        .collect(Collectors.toCollection(ArrayList::new));
-
-                    if (ctVariable.getDefaultExpression() != null) {
-                        assignedValues.add(ctVariable.getDefaultExpression());
-                    }
-
-                    boolean canBeNull = assignedValues.stream()
-                        .anyMatch(value -> SpoonUtil.isNullLiteral(value) || isBoxedType(value.getType()))
-                        || assignedValues.isEmpty()
-                        || ctVariable.getDefaultExpression() == null;
-
-                    if (canBeNull) {
-                        return;
-                    }
-
-                    addLocalProblem(
-                        ctVariable,
-                        new LocalizedMessage(
-                            "suggest-replacement",
-                            Map.of(
-                                "original", ctVariable.getType().getSimpleName(),
-                                "suggestion", ctVariable.getType().unbox().getSimpleName()
-                            )
-                        ),
-                        ProblemType.UNNECESSARY_BOXING
-                    );
-                }
+            public void process(CtVariable<?> ctVariable) {
+                checkVariable(ctVariable);
             }
         });
     }

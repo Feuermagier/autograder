@@ -53,6 +53,8 @@ equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich s
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
+implement-comparable = Der Typ '{$name}' sollte `Comparable<{$name}>` implementieren, dann kann man sich den `Comparator` sparen.
+
 # Comment
 commented-out-code = Dieser auskommentierte Code sollte entfernt werden
 
@@ -116,6 +118,8 @@ multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile st
 multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
 
 try-catch-complexity = Die Komplexität von try-catch-Blöcken sollte möglichst gering gehalten werden. Es sollten weniger als {$max} Statements vorhanden sein. Versuche den Code in mehrere Methoden aufzuteilen bzw. nicht dringend benötigte Statements aus dem try-Block zu entfernen.
+
+redundant-else = Die 'else' ist unnötig. Schreibe '{$expected}' statt '{$given}'.
 
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
@@ -188,6 +192,8 @@ merge-nested-if = Die Verschachtelte if kann mit der äußeren if kombiniert wer
 binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwenden.
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
+
+magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden. Siehe Wiki Artikel zu Magic Strings.
 
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.

@@ -106,54 +106,6 @@ class TestCommonReimplementation extends AbstractCheckTest {
     }
 
     @Test
-    void testSimpleStringRepeat() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    private static String repeat(String s, int n) {
-                        String result = "";
-
-                        for (int i = 0; i < n; i++) {
-                            result += s;
-                        }
-
-                        return result;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT));
-
-        assertEqualsReimplementation(problems.next(), "result += s.repeat(n)");
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testStringRepeatWithCustomStart() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    private static String repeat(String s, int n, int start) {
-                        String result = "";
-
-                        for (int i = start; i <= n; i++) {
-                            result += s;
-                        }
-
-                        return result;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT));
-
-        assertEqualsReimplementation(problems.next(), "result += s.repeat((n + 1) - start)");
-        problems.assertExhausted();
-    }
-
-    @Test
     void testDoubleArrayCopy() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
@@ -235,6 +187,32 @@ class TestCommonReimplementation extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
+    @Test
+    void testAddAllCast() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public class Main {
+                    public static <T, U> Collection<U> toCollection(Iterable<T> input) {
+                        Collection<U> result = new ArrayList<>();
+                        
+                        for (T element : input) {
+                            result.add((U) element);
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL));
+
+        problems.assertExhausted();
+    }
+
 
     @Test
     void testArraysFill() throws LinterException, IOException {
@@ -250,6 +228,10 @@ class TestCommonReimplementation extends AbstractCheckTest {
                             array[i] = INITIAL_VALUE;
                         }
                         
+                        for (int i = 1; i < array.length; i++) {
+                            array[i] = INITIAL_VALUE;
+                        }
+                        
                         for (int i = 0; i < array.length; i++) {
                             array[i] = INITIAL_VALUE + i; // ignored because it uses i
                         }
@@ -258,52 +240,8 @@ class TestCommonReimplementation extends AbstractCheckTest {
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
 
-        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, 0, array.length, INITIAL_VALUE)");
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testModulo() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Main",
-            """
-                public class Main {
-                    private static final int EMPTY = 0;
-
-                    public static int adjust(int value, int limit) {
-                        int result = value;
-
-                        if (result > limit) {
-                            result = 0;
-                        }
-
-                        if (limit <= result) {
-                            result = 0;
-                        }
-                        
-                        if (result == limit) {
-                            result = 0;
-                        }
-
-                        return result;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_MODULO));
-
-        List<String> expectedSuggestions = List.of(
-            "result %= (limit + 1)",
-            "result %= limit",
-            "result %= limit"
-        );
-
-        for (String expectedSuggestion : expectedSuggestions) {
-            Problem problem = problems.next();
-
-            assertEquals(ProblemType.COMMON_REIMPLEMENTATION_MODULO, problem.getProblemType());
-            assertEqualsReimplementation(problem, expectedSuggestion);
-        }
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, INITIAL_VALUE)");
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(array, 1, array.length, INITIAL_VALUE)");
         problems.assertExhausted();
     }
 
@@ -368,123 +306,8 @@ class TestCommonReimplementation extends AbstractCheckTest {
             )
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL));
 
-        assertEqualsReimplementation(problems.next(), "Arrays.fill(field, 0, field.length, PlayingFieldEntry.FREE)");
+        assertEqualsReimplementation(problems.next(), "Arrays.fill(field, PlayingFieldEntry.FREE)");
 
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testEnumValuesAddAllUnorderedSet() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                import java.util.HashSet;
-                import java.util.Set;
-
-                enum Fruit {
-                    APPLE, BANANA, CHERRY;
-                }
-
-                public class Test {
-                    public static void main(String[] args) {
-                        Set<Fruit> fruits = new HashSet<>();
-                        
-                        fruits.add(Fruit.APPLE);
-                        fruits.add(Fruit.BANANA);
-                        fruits.add(Fruit.CHERRY);
-
-                        System.out.println(fruits);
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES));
-
-        assertEqualsReimplementation(problems.next(), "fruits.addAll(Arrays.asList(Fruit.values()))");
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testEnumValuesAddAllOrderedList() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                import java.util.ArrayList;
-                import java.util.List;
-
-                enum GodCard {
-                    APOLLO,
-                    ARTEMIS,
-                    ATHENA,
-                    ATLAS,
-                    DEMETER,
-                    HERMES;
-                }
-
-                public class Test {
-                    private static List<GodCard> getAvailableCards() {
-                        List<GodCard> availableCards = new ArrayList<>();
-
-                        availableCards.add(GodCard.APOLLO);
-                        availableCards.add(GodCard.ARTEMIS);
-                        availableCards.add(GodCard.ATHENA);
-                        availableCards.add(GodCard.ATLAS);
-                        availableCards.add(GodCard.DEMETER);
-                        availableCards.add(GodCard.HERMES);
-
-                        return availableCards;
-                    }
-
-                    // NOTE: Enum.values() returns the variants in the order they are declared
-                    //       For Sets this is not a problem, but for Lists the order in which add
-                    //       is called is important
-                    private static List<GodCard> getReversedAvailableGodCards() {
-                        List<GodCard> availableCards = new ArrayList<>();
-
-                        availableCards.add(GodCard.HERMES);
-                        availableCards.add(GodCard.DEMETER);
-                        availableCards.add(GodCard.ATLAS);
-                        availableCards.add(GodCard.APOLLO);
-                        availableCards.add(GodCard.ATHENA);
-                        availableCards.add(GodCard.ARTEMIS);
-
-                        return availableCards;
-                    }
-                    
-                    private static List<GodCard> getAvailableCardsDuplicateMiddle() {
-                        List<GodCard> availableCards = new ArrayList<>();
-
-                        availableCards.add(GodCard.APOLLO);
-                        availableCards.add(GodCard.ARTEMIS);
-                        availableCards.add(GodCard.ATHENA);
-                        availableCards.add(GodCard.ATLAS);
-                        availableCards.add(GodCard.ATLAS);
-                        availableCards.add(GodCard.DEMETER);
-                        availableCards.add(GodCard.HERMES);
-
-                        return availableCards;
-                    }
-
-                    private static List<GodCard> getAvailableCardsDuplicateEnd() {
-                        List<GodCard> availableCards = new ArrayList<>();
-
-                        availableCards.add(GodCard.APOLLO);
-                        availableCards.add(GodCard.ARTEMIS);
-                        availableCards.add(GodCard.ATHENA);
-                        availableCards.add(GodCard.ATLAS);
-                        availableCards.add(GodCard.DEMETER);
-                        availableCards.add(GodCard.HERMES);
-                        availableCards.add(GodCard.HERMES);
-
-                        return availableCards;
-                    }
-                }
-                """
-        ), List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES));
-
-        assertEqualsReimplementation(problems.next(), "availableCards.addAll(Arrays.asList(GodCard.values()))");
-        assertEqualsReimplementation(problems.next(), "availableCards.addAll(Arrays.asList(GodCard.values()))");
         problems.assertExhausted();
     }
 
@@ -546,12 +369,19 @@ class TestCommonReimplementation extends AbstractCheckTest {
                             System.out.println(list.get(i));
                         }
                     }
+                    
+                    public static void printList2(List<Integer> list, int start, int end) {
+                        for (int i = start; i < end; i++) {
+                            System.out.println(list.get(i));
+                        }
+                    }
                 }
                 """
         ), List.of(ProblemType.COMMON_REIMPLEMENTATION_SUBLIST));
 
         assertEqualsReimplementation(problems.next(), "for (T value : list.subList(start, end)) { ... }");
         assertEqualsReimplementation(problems.next(), "for (Object value : list.subList(start, end)) { ... }");
+        assertEqualsReimplementation(problems.next(), "for (int value : list.subList(start, end)) { ... }");
         problems.assertExhausted();
     }
 

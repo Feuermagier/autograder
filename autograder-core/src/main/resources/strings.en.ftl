@@ -54,6 +54,8 @@ array-as-key-of-set-or-map = Arrays do not override equals or hashCode, so compa
                             equality only. If neither deduplication nor lookup are needed, consider using a List
                             instead.
 
+implement-comparable = The type '{$name}' should implement `Comparable<{$name}>`, then the `Comparator` becomes redundant.
+
 # Comment
 commented-out-code = This commented out code should be removed
 
@@ -119,6 +121,8 @@ multiple-inline-statements = There should not be multiple statements in a single
 multi-threading = Multithreading is out of scope for this lecture. The code is only executed on a single thread. Writing it thread-safe makes the code unnecessarily complex.
 
 try-catch-complexity = The complexity of try-catch-blocks should be kept low. There should be less than {$max} statements in the try-block. You should refactor the code into multiple methods or extract unnecessary statements out of the try-block.
+
+redundant-else = The 'else' is redundant. Write '{$expected}' instead of '{$given}'.
 
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
@@ -188,6 +192,8 @@ avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'P
 binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'.
 
 object-datatype = Instead of the datatype 'Object', the variable '{$variable}' should have a concrete or generic datatype.
+
+magic-string = The string '{$value}' should be in a constant. See the wiki article for magic strings.
 
 
 # Naming

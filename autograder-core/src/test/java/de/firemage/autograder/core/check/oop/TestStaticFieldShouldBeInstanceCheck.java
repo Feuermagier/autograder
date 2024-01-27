@@ -35,11 +35,11 @@ class TestStaticFieldShouldBeInstanceCheck extends AbstractCheckTest {
             "Main",
             """
                 public class Main {
-                    private static int a = 0; //# not ok
-                    private static int b = 1; //# ok, effectively final
+                    private static String a = "a"; //# not ok
+                    private static String b = "b"; //# ok, effectively final
 
                     public static void main(String[] args) {
-                        a = 1;
+                        a = "c";
 
                         System.out.println(a);
                         System.out.println(b);
@@ -49,6 +49,26 @@ class TestStaticFieldShouldBeInstanceCheck extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         assertShouldBeInstance(problems.next(), "a");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testGlobalCounter() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Customer",
+            """
+                public class Customer {
+                    private static int counter = 1; //# ok
+                    private int customerNumber;
+
+                    public Customer() {
+                        this.customerNumber = counter++;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }
