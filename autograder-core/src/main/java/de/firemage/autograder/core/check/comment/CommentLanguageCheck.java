@@ -23,6 +23,12 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.INVALID_COMMENT_LANGUAGE, ProblemType.INCONSISTENT_COMMENT_LANGUAGE})
 public class CommentLanguageCheck extends IntegratedCheck {
+    // Lingua uses ai models for language detection that are backed into the jar.
+    // It supports a lot of languages which is ~200MB extra data if we include all of them.
+    //
+    // Not all languages are needed for this check, so here is a list of supported languages and in
+    // the maven pom.xml we exclude all other languages.
+    private static final List<Language> SUPPORTED_LANGUAGES = List.of(Language.ENGLISH, Language.GERMAN, Language.CHINESE);
     private final LanguageDetector detector;
 
     public CommentLanguageCheck() {
@@ -31,7 +37,9 @@ public class CommentLanguageCheck extends IntegratedCheck {
 
     public CommentLanguageCheck(double threshold) {
         super();
-        this.detector = LanguageDetectorBuilder.fromAllLanguages().withMinimumRelativeDistance(threshold).build();
+        this.detector = LanguageDetectorBuilder.fromLanguages(SUPPORTED_LANGUAGES.toArray(new Language[0]))
+            .withMinimumRelativeDistance(threshold)
+            .build();
     }
 
     @Override
@@ -81,7 +89,7 @@ public class CommentLanguageCheck extends IntegratedCheck {
         }
     }
 
-    private static record CommentLanguageResult(CtComment comment, Language language, double confidence) {
+    private record CommentLanguageResult(CtComment comment, Language language, double confidence) {
 
         public static CommentLanguageResult detect(CtComment comment, LanguageDetector detector) {
             // Remove @see because it is always in English
