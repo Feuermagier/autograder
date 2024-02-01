@@ -161,7 +161,7 @@ missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe htt
 
 system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
 
-field-final-exp = Das Attribut '{$name}' sollte final sein
+field-should-be-final = Das Attribut '{$name}' sollte final sein.
 
 string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Methode verglichen werden: '{$lhs}.equals({$rhs})' statt '{$lhs} == {$rhs}'
 

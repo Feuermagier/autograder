@@ -163,7 +163,7 @@ missing-override = '{$name}' should have an '@Override'-annotation, see https://
 
 system-specific-linebreak = Always use system-independent line breaks such as the value obtained from System.lineSeparator() or %n in format strings
 
-field-final-exp = The attribute '{$name}' should be final
+field-should-be-final = The attribute '{$name}' should be final.
 
 string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lhs} == {$rhs}'
 
