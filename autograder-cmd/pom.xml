@@ -10,6 +10,7 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>autograder-cmd</artifactId>
+    <name>autograder-cmd</name>
     <description>CLI for the Autograder</description>
     <url>https://github.com/Feuermagier/autograder/autograder-cmd</url>
 
