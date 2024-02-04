@@ -11,6 +11,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: Maven Central Release
     steps:
       - uses: actions/checkout@v4
         with:
