@@ -11,6 +11,8 @@
 
     <artifactId>autograder-core</artifactId>
     <name>autograder-core</name>
+    <description>Core checking code of the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-core</url>
 
     <properties>
         <spoon.version>10.4.2</spoon.version>

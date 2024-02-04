@@ -10,4 +10,6 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>autograder-treeg</artifactId>
+    <description>Regex Parsing for the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-treeg</url>
 </project>

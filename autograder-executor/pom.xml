@@ -10,6 +10,8 @@
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>autograder-executor</artifactId>
+    <description>Safe execution of untrusted Java code as part of the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-executor</url>
 
     <dependencies>
         <!-- Internal -->

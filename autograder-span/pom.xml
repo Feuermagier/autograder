@@ -11,6 +11,8 @@
 
     <artifactId>autograder-span</artifactId>
     <name>autograder-span</name>
+    <description>Rendering of code with annotations as part of the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-span</url>
 
     <dependencies>
         <!-- Commons -->
