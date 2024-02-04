@@ -44,7 +44,7 @@ public class Formatter {
      * | |_^
      * 13 |
      * 14 |   fn another_function {
-     * }
+     * }}
      * <p>
      * Here the two lines before and after the span are shown.
      * So a viewbox of 0 will only show the lines of the span.
