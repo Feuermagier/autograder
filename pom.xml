@@ -245,6 +245,7 @@
             </build>
             <modules>
                 <module>autograder-core</module>
+                <module>autograder-cmd</module>
                 <module>autograder-executor</module>
                 <module>autograder-event</module>
                 <module>autograder-agent</module>
