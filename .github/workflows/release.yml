@@ -37,8 +37,8 @@ jobs:
           git config --global user.name "GitHub Action"
           git commit -a -m "release version v$VERSION"
           git push origin main
-      - name: Verify with Maven
-        run: mvn -B verify -DskipTests --file pom.xml
+      - name: Deploy with Maven
+        run: mvn -B deploy -DskipTests -Prelease --file pom.xml
       - name: Release
         uses: jreleaser/release-action@v2
         with:

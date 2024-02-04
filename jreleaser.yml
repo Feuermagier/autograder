@@ -13,6 +13,10 @@ project:
     groupId: de.firemage.autograder
     version: 17
 
+signing:
+  active: ALWAYS
+  armored: true
+
 release:
   github:
     overwrite: true
@@ -26,6 +30,18 @@ release:
       format: '- {{commitShortHash}} {{commitTitle}}'
       contributors:
         enabled: false
+
+deploy:
+  maven:
+    nexus2:
+      maven-central:
+        active: ALWAYS
+        url: https://s01.oss.sonatype.org/service/local
+        snapshotUrl: https://s01.oss.sonatype.org/content/repositories/snapshots/
+        closeRepository: true
+        releaseRepository: false
+        stagingRepositories:
+          - target/staging-deploy
 
 distributions:
   helloworld:
