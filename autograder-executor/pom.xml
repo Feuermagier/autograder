@@ -5,11 +5,14 @@
     <parent>
         <artifactId>autograder-parent</artifactId>
         <groupId>de.firemage.autograder</groupId>
-        <version>0.5.28</version>
+        <version>0.5.29</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
     <artifactId>autograder-executor</artifactId>
+    <name>autograder-executor</name>
+    <description>Safe execution of untrusted Java code as part of the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-executor</url>
 
     <dependencies>
         <!-- Internal -->

@@ -5,10 +5,14 @@
     <parent>
         <artifactId>autograder-parent</artifactId>
         <groupId>de.firemage.autograder</groupId>
-        <version>0.5.28</version>
+        <version>0.5.29</version>
     </parent>
+
     <modelVersion>4.0.0</modelVersion>
     <artifactId>autograder-agent</artifactId>
+    <name>autograder-agent</name>
+    <description>Test runtime of the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-agent</url>
 
     <dependencies>
         <!-- Internal -->

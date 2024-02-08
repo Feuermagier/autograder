@@ -11,6 +11,7 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+    environment: Maven Central Release
     steps:
       - uses: actions/checkout@v4
         with:
@@ -37,8 +38,8 @@ jobs:
           git config --global user.name "GitHub Action"
           git commit -a -m "release version v$VERSION"
           git push origin main
-      - name: Verify with Maven
-        run: mvn -B verify -DskipTests --file pom.xml
+      - name: Deploy with Maven
+        run: mvn -B deploy -DskipTests -Prelease --file pom.xml
       - name: Release
         uses: jreleaser/release-action@v2
         with:
@@ -46,6 +47,11 @@ jobs:
         env:
           JRELEASER_PROJECT_VERSION: ${{ github.event.inputs.version }}
           JRELEASER_GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          JRELEASER_GPG_PUBLIC_KEY: ${{ secrets.JRELEASER_GPG_PUBLIC_KEY }}
+          JRELEASER_GPG_SECRET_KEY: ${{ secrets.JRELEASER_GPG_SECRET_KEY }}
+          JRELEASER_GPG_PASSPHRASE: ${{ secrets.JRELEASER_GPG_PASSPHRASE }}
+          JRELEASER_NEXUS2_MAVEN_CENTRAL_USERNAME: ${{ secrets.JRELEASER_NEXUS2_MAVEN_CENTRAL_USERNAME }}
+          JRELEASER_NEXUS2_MAVEN_CENTRAL_PASSWORD: ${{ secrets.JRELEASER_NEXUS2_MAVEN_CENTRAL_PASSWORD }}
       - name: JReleaser output
         if: always()
         uses: actions/upload-artifact@v4

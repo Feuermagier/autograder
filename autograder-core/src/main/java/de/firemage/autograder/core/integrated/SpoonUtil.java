@@ -493,7 +493,7 @@ public final class SpoonUtil {
     }
 
     /**
-     * Converts a binary operator like < to <= or > to >= and adjusts the operands accordingly
+     * Converts a binary operator like &lt; to &lt;= or > to >= and adjusts the operands accordingly
      * to make finding patterns on them easier by not having to special-case them. Additionally,
      * one can specify a predicate to swap the operands if necessary. For example, to ensure that
      * a literal is always on the right-hand side.

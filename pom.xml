@@ -8,7 +8,7 @@
     <groupId>de.firemage.autograder</groupId>
     <artifactId>autograder-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.5.28</version>
+    <version>0.5.29</version>
     <name>Autograder</name>
     <description>Automatic assessment of student code submissions</description>
     <url>https://github.com/Feuermagier/autograder</url>
@@ -84,37 +84,37 @@
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-event</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-agent</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-executor</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-core</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-cmd</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-treeg</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-span</artifactId>
-                <version>0.5.28</version>
+                <version>0.5.29</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -166,11 +166,6 @@
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
-                    <artifactId>maven-gpg-plugin</artifactId>
-                    <version>3.1.0</version>
-                </plugin>
-                <plugin>
-                    <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
                     <version>3.3.0</version>
                 </plugin>
@@ -201,6 +196,11 @@
                         <maxmem>512m</maxmem>
                     </configuration>
                 </plugin>
+                <plugin>
+                    <groupId>org.apache.maven.plugins</groupId>
+                    <artifactId>maven-deploy-plugin</artifactId>
+                    <version>3.0.0</version>
+                </plugin>
             </plugins>
         </pluginManagement>
     </build>
@@ -209,6 +209,10 @@
     <profiles>
         <profile>
             <id>release</id>
+            <properties>
+                <!-- Stage to local file - jreleaser wants this-->
+                <altDeploymentRepository>local::file:./target/staging-deploy</altDeploymentRepository>
+            </properties>
             <build>
                 <plugins>
                     <plugin>
@@ -237,39 +241,11 @@
                             </execution>
                         </executions>
                     </plugin>
-                    <plugin>
-                        <groupId>org.sonatype.plugins</groupId>
-                        <artifactId>nexus-staging-maven-plugin</artifactId>
-                        <version>1.6.13</version>
-                        <extensions>true</extensions>
-                        <configuration>
-                            <serverId>ossrh</serverId>
-                            <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>
-                            <autoReleaseAfterClose>true</autoReleaseAfterClose>
-                        </configuration>
-                    </plugin>
-                    <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-gpg-plugin</artifactId>
-                        <version>3.1.0</version>
-                        <executions>
-                            <execution>
-                                <id>sign-artifacts</id>
-                                <phase>verify</phase>
-                                <goals>
-                                    <goal>sign</goal>
-                                </goals>
-                                <configuration>
-                                    <keyname>0x2CAD0D78</keyname>
-                                    <passphraseSeverId>0x2CAD0D78</passphraseSeverId>
-                                </configuration>
-                            </execution>
-                        </executions>
-                    </plugin>
                 </plugins>
             </build>
             <modules>
                 <module>autograder-core</module>
+                <module>autograder-cmd</module>
                 <module>autograder-executor</module>
                 <module>autograder-event</module>
                 <module>autograder-agent</module>
