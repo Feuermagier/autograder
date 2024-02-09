@@ -538,4 +538,39 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
 
         assertEquals(0, problems.size());
     }
+
+    @Test
+    void testConventionExceptionConstructor() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            throw new MyException("abc123", 123);
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "MyException",
+                    """
+                    public class MyException extends RuntimeException {
+                        public MyException() {}
+                        
+                        public MyException(String message) { super(message); }
+                        public MyException(String message, Throwable cause) { super(message, cause); }
+                        public MyException(Throwable cause) { super(cause); }
+                        
+                        public MyException(String message, int number) { super(message + number); } // this is used
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

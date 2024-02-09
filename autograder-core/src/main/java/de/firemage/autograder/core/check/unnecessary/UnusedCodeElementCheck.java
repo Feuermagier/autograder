@@ -31,6 +31,16 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             return;
         }
 
+        // ignore exception constructors and params in those constructors
+        CtConstructor<?> parentConstructor = ctElement.getParent(CtConstructor.class);
+        if (parentConstructor == null && ctElement instanceof CtConstructor<?> ctConstructor) {
+            parentConstructor = ctConstructor;
+        }
+
+        if (parentConstructor != null && SpoonUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
+            return;
+        }
+
         Predicate<CtElement> shouldVisit = element -> true;
         if (ctElement instanceof CtMethod<?> method) {
             // Methods are also unused if they are only referenced by themselves, i.e. they are called recursively
