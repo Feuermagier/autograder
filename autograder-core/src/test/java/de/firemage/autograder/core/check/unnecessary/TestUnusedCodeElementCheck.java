@@ -702,4 +702,45 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testUsedMethodParamInImplementation() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            Command command = new EvaluateCommand();
+                            command.execute("Hello");
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Command",
+                    """
+                    public abstract class Command {
+                        public abstract void execute(String data);
+                    }
+                    """
+                ),
+                Map.entry(
+                    "EvaluateCommand",
+                    """
+                    public class EvaluateCommand extends Command {
+                        @Override
+                        public void execute(String data) {
+                            System.out.println(data);
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

@@ -41,6 +41,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
@@ -60,6 +61,7 @@ import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
+import spoon.reflect.visitor.filter.OverriddenMethodFilter;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
@@ -1136,6 +1138,21 @@ public final class SpoonUtil {
 
             if (ctElement instanceof CtVariable<?> ctVariable) {
                 filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
+
+                // parameters might be declared in a super class, but not used in the method itself, but only in overrides
+                // therefore we consider uses in overriding methods as well
+                if (ctVariable instanceof CtParameter<?> ctParameter
+                    && ctParameter.getParent() instanceof CtMethod<?> ctMethod) {
+                    filter = ctMethod.getFactory().getModel().getElements(new OverridingMethodFilter(ctMethod))
+                        .stream()
+                        .flatMap(method -> method.getParameters().stream().filter(ctParameter::equals).findAny().stream())
+                        .map(parameter -> (Filter<CtElement>) new FilterAdapter<>(new BetterVariableAccessFilter<>(parameter), CtVariableAccess.class))
+                        .reduce(filter, (currentFilter, parameterFilter) -> new CompositeFilter<>(
+                            FilteringOperator.UNION,
+                            currentFilter,
+                            parameterFilter
+                        ));
+                }
             } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
                 filter = buildExecutableFilter(ctExecutable);
             } else if (ctElement instanceof CtTypeParameter ctTypeParameter) {
