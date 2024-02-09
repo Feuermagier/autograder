@@ -27,9 +27,11 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
@@ -48,12 +50,14 @@ import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
+import spoon.reflect.declaration.ParentNotInitializedException;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
+import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -63,7 +67,9 @@ import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
 import spoon.reflect.visitor.filter.OverriddenMethodFilter;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
+import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
+import spoon.support.reflect.reference.CtLocalVariableReferenceImpl;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -1065,7 +1071,33 @@ public final class SpoonUtil {
             target = ctFieldReference.getFieldDeclaration();
         }
 
+        if (target == null && ctReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
+            target = getLocalVariableDeclaration(ctLocalVariableReference);
+        }
+
         return target;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> CtLocalVariable<T> getLocalVariableDeclaration(CtLocalVariableReference<T> ctLocalVariableReference) {
+        if (ctLocalVariableReference.getDeclaration() != null) {
+            return ctLocalVariableReference.getDeclaration();
+        }
+
+        // handle the special case, where we have an instanceof Pattern:
+        for (CtElement parent : parents(ctLocalVariableReference)) {
+            CtLocalVariable<?> candidate = parent.filterChildren(new TypeFilter<>(CtTypePattern.class)).filterChildren(new CompositeFilter<>(
+                FilteringOperator.INTERSECTION,
+                new TypeFilter<>(CtLocalVariable.class),
+                element -> element.getReference().equals(ctLocalVariableReference)
+            )).first();
+
+            if (candidate != null) {
+                return (CtLocalVariable<T>) candidate;
+            }
+        }
+
+        return null;
     }
 
     private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
