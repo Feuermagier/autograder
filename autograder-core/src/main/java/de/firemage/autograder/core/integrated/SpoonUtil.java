@@ -1,7 +1,5 @@
 package de.firemage.autograder.core.integrated;
 
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -50,7 +48,6 @@ import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
-import spoon.reflect.declaration.ParentNotInitializedException;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
@@ -65,11 +62,9 @@ import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
-import spoon.reflect.visitor.filter.OverriddenMethodFilter;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
-import spoon.support.reflect.reference.CtLocalVariableReferenceImpl;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -688,19 +683,30 @@ public final class SpoonUtil {
         CtTypeReference<?>... parameterTypes
     ) {
         // check that they both return the same type
-        return SpoonUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)
-            // their names should match:
-            && ctExecutableReference.getSimpleName().equals(methodName)
-            // the number of parameters should match
-            && ctExecutableReference.getParameters().size() == parameterTypes.length
-            && Streams.zip(
-                // combine both the parameters of the executable and the expected types
-                ctExecutableReference.getParameters().stream(),
-                Arrays.stream(parameterTypes),
-                // evaluate if the type of the parameter is equal to the expected type:
-                SpoonUtil::isTypeEqualTo
-                // On this stream of booleans, check if all are true
-            ).allMatch(value -> value);
+        if (!SpoonUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)) {
+            return false;
+        }
+
+        // their names should match:
+        if (!ctExecutableReference.getSimpleName().equals(methodName)) {
+            return false;
+        }
+
+        List<CtTypeReference<?>> givenParameters = ctExecutableReference.getParameters();
+
+        // the number of parameters should match
+        if (givenParameters.size() != parameterTypes.length) {
+            return false;
+        }
+
+        for (int i = 0; i < parameterTypes.length; i++) {
+            // check if the type of the parameter is equal to the expected type
+            if (!SpoonUtil.isTypeEqualTo(givenParameters.get(i), parameterTypes[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -895,6 +901,13 @@ public final class SpoonUtil {
         return true;
     }
 
+    /**
+     * Checks if the given type is equal to any of the expected types.
+     *
+     * @param ctType the type to check
+     * @param expected all allowed types
+     * @return true if the given type is equal to any of the expected types, false otherwise
+     */
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
         TypeFactory factory = ctType.getFactory().Type();
         return SpoonUtil.isTypeEqualTo(
@@ -905,6 +918,13 @@ public final class SpoonUtil {
         );
     }
 
+    /**
+     * Checks if the given type is equal to any of the expected types.
+     *
+     * @param ctType the type to check
+     * @param expected all allowed types
+     * @return true if the given type is equal to any of the expected types, false otherwise
+     */
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, CtTypeReference<?>... expected) {
         return Arrays.asList(expected).contains(ctType);
     }
@@ -954,6 +974,12 @@ public final class SpoonUtil {
         };
     }
 
+    private static <E extends Object> HashSet<E> newHashSet(Iterator<? extends E> elements) {
+        HashSet<E> set = new HashSet<>();
+        for (; elements.hasNext(); set.add(elements.next()));
+        return set;
+    }
+
     /**
      * Finds the closest common parent of the given elements.
      *
@@ -972,7 +998,7 @@ public final class SpoonUtil {
 
         for (CtElement other : others) {
             // only keep the parents that the firstElement and the other have in common
-            ctParents.retainAll(Sets.newHashSet(parents(other).iterator()));
+            ctParents.retainAll(newHashSet(parents(other).iterator()));
         }
 
         // the first element in the set is the closest common parent
