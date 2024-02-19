@@ -15,12 +15,30 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-public class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
-    private static final String LOCALIZED_MESSAGE_KEY = "variable-should-be";
+class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(
+        ProblemType.FIELD_SHOULD_BE_CONSTANT,
+        ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
+    );
+
+    private void assertProblem(Problem problem, String variable, String suggestion) {
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    "variable-should-be",
+                    Map.of(
+                        "variable", variable,
+                        "suggestion", suggestion
+                    )
+                )
+            ),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
 
     @Test
     void testDefaultVisibility() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -28,26 +46,16 @@ public class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
                     String exampleConstant = "example";
                 }
                 """
-        ), List.of(ProblemType.FIELD_SHOULD_BE_CONSTANT));
+        ), PROBLEM_TYPES);
 
+        assertProblem(problems.next(), "exampleConstant", "static final String EXAMPLE_CONSTANT = \"example\"");
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.FIELD_SHOULD_BE_CONSTANT, problems.get(0).getProblemType());
-        assertEquals(super.linter.translateMessage(
-            new LocalizedMessage(
-                LOCALIZED_MESSAGE_KEY,
-                Map.of(
-                    "variable", "exampleConstant",
-                    "suggestion", "static final String EXAMPLE_CONSTANT = \"example\""
-                )
-            )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        problems.assertExhausted();
     }
 
     @Test
     void testOtherVisibility() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -55,20 +63,29 @@ public class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
                     private final int variable = 1;
                 }
                 """
-        ), List.of(ProblemType.FIELD_SHOULD_BE_CONSTANT));
+        ), PROBLEM_TYPES);
 
+        assertProblem(problems.next(), "variable", "private static final int VARIABLE = 1");
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.FIELD_SHOULD_BE_CONSTANT, problems.get(0).getProblemType());
-        assertEquals(super.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "variable", "variable",
-                        "suggestion", "private static final int VARIABLE = 1"
-                    )
-                )),
-            super.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testLocalFinalVariableWithWrongNamingConvention() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    void foo() {
+                        final int DAMAGE = 1;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertProblem(problems.next(), "DAMAGE", "private static final int DAMAGE = 1");
+
+        problems.assertExhausted();
     }
 }

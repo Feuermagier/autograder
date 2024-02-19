@@ -46,10 +46,20 @@ public final class IdentifierNameUtils {
     }
 
     public static String toUpperSnakeCase(String identifier) {
+        // If the identifier is already in upper snake case like `DAMAGE`,
+        // don't change it, which would otherwise result in `D_A_M_A_G_E`.
+        if (isUpperSnakeCase(identifier)) {
+            return identifier;
+        }
+
         return getCaseFormat(identifier).converterTo(CaseFormat.UPPER_UNDERSCORE).convert(identifier);
     }
 
     public static String toLowerCamelCase(String identifier) {
+        if (isLowerCamelCase(identifier)) {
+            return identifier;
+        }
+
         return getCaseFormat(identifier).converterTo(CaseFormat.LOWER_CAMEL).convert(identifier);
     }
 
