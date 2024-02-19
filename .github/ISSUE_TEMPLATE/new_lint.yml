@@ -11,8 +11,6 @@ body:
     attributes:
       label: What it does
       description: What does this lint do?
-    validations:
-      required: true
   - type: input
     id: lint-name
     attributes:
@@ -37,21 +35,6 @@ body:
         - oop
         - structure
         - unnecessary
-  - type: textarea
-    id: advantage
-    attributes:
-      label: Advantage
-      description: >
-        What is the advantage of the recommended code over the original code?
-      placeholder: |
-        - Remove bounds check inserted by ...
-        - Remove the need to duplicate/store ...
-        - Remove typo ...
-  - type: textarea
-    id: drawbacks
-    attributes:
-      label: Drawbacks
-      description: What might be possible drawbacks of such a lint?
   - type: textarea
     id: example
     attributes:
