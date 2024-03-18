@@ -93,7 +93,7 @@ public class FileSourceInfo implements SourceInfo, Serializable {
     @Override
     public SourceInfo copyTo(Path target) throws IOException {
         // HACK: this filters out symbolic links (we had one submission with a symlink to itself, which caused a crash...)
-        FileUtils.copyDirectory(this.file, target.toFile(), file -> file.isDirectory() || file.isFile() && !Files.notExists(file.toPath()));
+        FileUtils.copyDirectory(this.file, target.toFile(), file -> file.isDirectory() || file.isFile() && !Files.isSymbolicLink(file.toPath()));
 
         return new FileSourceInfo(target, this.version);
     }
