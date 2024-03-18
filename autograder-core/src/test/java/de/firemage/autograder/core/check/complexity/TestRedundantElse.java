@@ -59,6 +59,10 @@ class TestRedundantElse extends AbstractCheckTest {
                         return 1;
                     } else {
                         System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 2;
                     }
                 }
@@ -83,9 +87,18 @@ class TestRedundantElse extends AbstractCheckTest {
                         return 1;
                     } else if (a == 1) {
                         System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 2;
                     }
                     
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
                     return 0;
                 }
             }
@@ -107,8 +120,19 @@ class TestRedundantElse extends AbstractCheckTest {
                         return 1;
                     } else if (a == 1) {
                         System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 2;
                     } else {
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 3;
                     }
                 }
@@ -133,11 +157,27 @@ class TestRedundantElse extends AbstractCheckTest {
                         return 1;
                     } else if (a == 1) {
                         System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 2;
                     } else if (a == 2) {
                         System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 2;
                     }  else {
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 3;
                     }
                 }
@@ -187,8 +227,18 @@ class TestRedundantElse extends AbstractCheckTest {
                         return 1;
                     } else if (a == 1) {
                         System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                     } else {
-                        System.out.println("ha");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                     }
                     
                     return 3;
@@ -211,7 +261,13 @@ class TestRedundantElse extends AbstractCheckTest {
                     if (a == 0) {
                         return 1;
                     }
-                    
+
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
+                    System.out.println("hello");
                     return 0;
                 }
             }
@@ -230,6 +286,12 @@ class TestRedundantElse extends AbstractCheckTest {
             class Test {
                 int foo(int a) {
                     if (a == 0); {
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
+                        System.out.println("hello");
                         return 1;
                     }
                 }

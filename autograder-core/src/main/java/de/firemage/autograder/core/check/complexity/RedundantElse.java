@@ -19,6 +19,8 @@ import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_ELSE })
 public class RedundantElse extends IntegratedCheck {
+    private static final int MINIMUM_STATEMENTS = 5;
+
     private Optional<TerminalEffect> getTerminalEffect(CtStatement ctStatement) {
         List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(ctStatement);
 
@@ -49,6 +51,7 @@ public class RedundantElse extends IntegratedCheck {
 
         String elseIf = "";
         List<CtStatement> elseStatements = SpoonUtil.getEffectiveStatements(ctIf.getElseStatement());
+        int numberOfElseStatements = elseStatements.size();
         if (elseStatements.size() == 1 && elseStatements.get(0) instanceof CtIf ctElseIf) {
             // skip else { if ... }
             if (!ctIf.getElseStatement().isImplicit()) {
@@ -65,11 +68,14 @@ public class RedundantElse extends IntegratedCheck {
                 return;
             }
 
-            elseIf = " else if (b) { ... }";
+            numberOfElseStatements = SpoonUtil.getEffectiveStatements(ctElseIf.getThenStatement()).size();
 
-            /*if (getTerminalEffect(ctElseIf.getThenStatement()).isPresent()) {
-            }*/
+            elseIf = " else if (b) { ... }";
         } else if (ctIf.getElseStatement().isImplicit()) {
+            return;
+        }
+
+        if (numberOfElseStatements <= MINIMUM_STATEMENTS) {
             return;
         }
 
