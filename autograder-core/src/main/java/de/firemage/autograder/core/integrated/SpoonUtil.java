@@ -81,6 +81,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -974,10 +975,33 @@ public final class SpoonUtil {
         };
     }
 
-    private static <E extends Object> HashSet<E> newHashSet(Iterator<? extends E> elements) {
-        HashSet<E> set = new HashSet<>();
-        for (; elements.hasNext(); set.add(elements.next()));
+    private static <T, E> HashSet<T> newHashSet(Iterator<? extends E> elements, Function<E, ? extends T> mapper) {
+        HashSet<T> set = new HashSet<>();
+        for (; elements.hasNext(); set.add(mapper.apply(elements.next())));
         return set;
+    }
+
+    private record IdentityKey<T>(T value) {
+        public static <T> IdentityKey<T> of(T value) {
+            return new IdentityKey<>(value);
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(this.value);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || this.getClass() != obj.getClass()) {
+                return false;
+            }
+            IdentityKey<?> that = (IdentityKey<?>) obj;
+            return this.value == that.value();
+        }
     }
 
     /**
@@ -992,17 +1016,17 @@ public final class SpoonUtil {
         // => inefficient and might cause a stack overflow
 
         // add all parents of the firstElement to a set sorted by distance to the firstElement:
-        Set<CtElement> ctParents = new LinkedHashSet<>();
-        ctParents.add(firstElement);
-        parents(firstElement).forEach(ctParents::add);
+        Set<IdentityKey<CtElement>> ctParents = new LinkedHashSet<>();
+        ctParents.add(IdentityKey.of(firstElement));
+        parents(firstElement).forEach(element -> ctParents.add(IdentityKey.of(element)));
 
         for (CtElement other : others) {
             // only keep the parents that the firstElement and the other have in common
-            ctParents.retainAll(newHashSet(parents(other).iterator()));
+            ctParents.retainAll(newHashSet(parents(other).iterator(), IdentityKey::of));
         }
 
         // the first element in the set is the closest common parent
-        return ctParents.iterator().next();
+        return ctParents.iterator().next().value();
     }
 
     /**

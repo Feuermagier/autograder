@@ -238,8 +238,8 @@ interface-static-method-exp = Interfaces sollte keine statischen Methoden haben,
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 
-ui-input-separation = Eingaben sollten zentral in einer Klasse eingelesen werden. Wurde auch verwendet in {$first}.
-ui-output-separation = Ausgaben sollten zentral in einer Klasse gemacht werden. Wurde auch verwendet in {$first}.
+ui-input-separation = Eingaben sollten nicht im Programm verteilt sein. Wurde auch verwendet in {$first}.
+ui-output-separation = Ausgaben sollten nicht im Programm verteilt sein. Wurde auch verwendet in {$first}.
 
 do-not-use-system-exit = System.exit() darf nicht verwendet werden. Strukturiere deinen Code so, dass er sich natürlich beendet.
 
