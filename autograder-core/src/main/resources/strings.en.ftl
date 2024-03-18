@@ -145,6 +145,8 @@ runtime-exception-caught = RuntimeExceptions '{$exception}' should not be caught
 
 exception-message = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
+number-format-exception-ignored = NumberFormatException should be caught or replaced through your own exception.
+
 # General
 
 compare-objects-exp = Implement an equals method for type {$type} and use it for comparisons

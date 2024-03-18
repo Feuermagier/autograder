@@ -143,6 +143,8 @@ runtime-exception-caught = RuntimeExceptions '{$exception}' sollten nicht gefang
 
 exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
 
+number-format-exception-ignored = NumberFormatException sollte gefangen werden und entweder behandelt oder durch eine eigene Exception ersetzt werden.
+
 # General
 
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
