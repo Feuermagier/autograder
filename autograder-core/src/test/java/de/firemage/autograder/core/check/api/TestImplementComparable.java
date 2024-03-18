@@ -66,8 +66,6 @@ class TestImplementComparable extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertImplement(problems.next(), "Account");
-
         problems.assertExhausted();
     }
 
@@ -180,6 +178,53 @@ class TestImplementComparable extends AbstractCheckTest {
                         
                         public int getBalance() {
                             return balance;
+                        }
+                    }
+                    """
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testImplementsComparatorForItself() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.of(
+                "AccountIdComparator",
+                """
+                    import java.util.Comparator;
+                    
+                    public class AccountIdComparator implements Comparator<Account> {
+                        public int compare(Account left, Account right) {
+                            return Integer.compare(left.getId(), right.getId());
+                        }
+                    }
+                    """,
+                "Account",
+                """
+                    import java.util.Comparator;
+
+                    public class Account implements Comparator<Account> {
+                        private int id;
+                        private int balance;
+                        
+                        public Account(int id, int balance) {
+                            this.id = id;
+                            this.balance = balance;
+                        }
+                        
+                        public int getId() {
+                            return id;
+                        }
+                        
+                        public int getBalance() {
+                            return balance;
+                        }
+
+                        public int compare(Account left, Account right) {
+                            return Integer.compare(left.getBalance(), right.getBalance());
                         }
                     }
                     """
