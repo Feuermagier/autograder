@@ -1327,6 +1327,12 @@ public final class SpoonUtil {
             .first(CtElement.class) != null;
     }
 
+    public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
+        return toSearchIn
+            .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
+            .first(CtElement.class) != null;
+    }
+
     public static List<CtElement> findUses(CtElement ctElement) {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }

@@ -26,11 +26,7 @@ import java.util.function.Predicate;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
 public class UnusedCodeElementCheck extends IntegratedCheck {
-    private void checkUnused(StaticAnalysis staticAnalysis, CtNamedElement ctElement) {
-        if (ctElement.isImplicit() || !ctElement.getPosition().isValidPosition()) {
-            return;
-        }
-
+    public static boolean isUnused(CtNamedElement ctElement, boolean hasMainMethod) {
         // ignore exception constructors and params in those constructors
         CtConstructor<?> parentConstructor = ctElement.getParent(CtConstructor.class);
         if (parentConstructor == null && ctElement instanceof CtConstructor<?> ctConstructor) {
@@ -38,18 +34,13 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         }
 
         if (parentConstructor != null && SpoonUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
-            return;
+            return false;
         }
 
         Predicate<CtElement> shouldVisit = element -> true;
         if (ctElement instanceof CtMethod<?> method) {
             // Methods are also unused if they are only referenced by themselves, i.e. they are called recursively
             shouldVisit = shouldVisit.and(Predicate.not(reference -> method.equals(reference.getParent(CtMethod.class))));
-        }
-
-        ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;
-        if (ctElement instanceof CtModifiable ctModifiable && ctModifiable.isPrivate()) {
-            problemType = ProblemType.UNUSED_CODE_ELEMENT_PRIVATE;
         }
 
         if (!SpoonUtil.hasAnyUses(ctElement, shouldVisit)) {
@@ -59,8 +50,8 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                 && ctElement.getParent() instanceof CtTypeMember ctTypeMember
                 && !ctTypeMember.getDeclaringType().isPrivate()
                 // check if there is no main method in the model
-                && !staticAnalysis.getCodeModel().hasMainMethod()) {
-                return;
+                && !hasMainMethod) {
+                return false;
             }
 
             if (ctElement instanceof CtModifiable ctModifiable
@@ -68,9 +59,27 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                 && ctModifiable instanceof CtTypeMember ctTypeMember
                 && !ctTypeMember.getDeclaringType().isPrivate()
                 // check if there is no main method in the model
-                && !staticAnalysis.getCodeModel().hasMainMethod()
+                && !hasMainMethod
             ) {
-                return;
+                return false;
+            }
+
+            return true;
+        }
+
+        return false;
+    }
+
+    private void checkUnused(StaticAnalysis staticAnalysis, CtNamedElement ctElement) {
+        if (ctElement.isImplicit() || !ctElement.getPosition().isValidPosition()) {
+            return;
+        }
+
+
+        if (isUnused(ctElement, staticAnalysis.getCodeModel().hasMainMethod())) {
+            ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;
+            if (ctElement instanceof CtModifiable ctModifiable && ctModifiable.isPrivate()) {
+                problemType = ProblemType.UNUSED_CODE_ELEMENT_PRIVATE;
             }
 
             String name = ctElement.getSimpleName();

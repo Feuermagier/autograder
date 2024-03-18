@@ -124,6 +124,8 @@ try-catch-complexity = The complexity of try-catch-blocks should be kept low. Th
 
 redundant-else = The 'else' is redundant. Write '{$expected}' instead of '{$given}'.
 
+redundant-assignment = The variable '{$variable}' is assigned a value that is never read, therefore the assignment can be removed.
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
