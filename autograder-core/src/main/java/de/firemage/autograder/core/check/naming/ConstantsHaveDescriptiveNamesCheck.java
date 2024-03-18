@@ -16,6 +16,7 @@ import spoon.reflect.declaration.CtField;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.MEANINGLESS_CONSTANT_NAME, ProblemType.CONSTANT_NAME_CONTAINS_VALUE})
@@ -212,5 +213,10 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(6);
     }
 }

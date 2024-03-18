@@ -22,6 +22,7 @@ import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.function.Predicate;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_CODE_ELEMENT, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE })
@@ -180,5 +181,10 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                 super.visitCtEnum(ctEnum);
             }*/
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(6);
     }
 }

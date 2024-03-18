@@ -178,4 +178,9 @@ public class UseDifferentVisibility extends IntegratedCheck {
             }
         });
     }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(6);
+    }
 }

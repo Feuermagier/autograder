@@ -11,6 +11,7 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 
 import java.util.Map;
+import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.STATIC_FIELD_SHOULD_BE_INSTANCE })
 public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
@@ -46,5 +47,10 @@ public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(4);
     }
 }

@@ -13,6 +13,7 @@ import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtField;
 
 import java.util.Map;
+import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = {ProblemType.FIELD_SHOULD_BE_FINAL})
 public class FieldShouldBeFinal extends IntegratedCheck {
@@ -70,5 +71,10 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(6);
     }
 }
