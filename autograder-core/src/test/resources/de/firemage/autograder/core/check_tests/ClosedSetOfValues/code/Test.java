@@ -144,3 +144,9 @@ class EnumMappingCrash {
         };
     }
 }
+
+class LocalVariable {
+    public static void foo() {
+        String[] godFavors = {"HW", "IR", "MW", "TS", "TT", "VB", "GHW", "GIR", "GMW", "GTS", "GTT", "GVB"}; //# Not ok
+    }
+}

@@ -1,9 +1,0 @@
-oop.IOUISeparation
-Separation of I/O and UI
-Test.java:30
-Test.java:32
-Test.java:44
-Test.java:46
-Test.java:53
-Test.java:55
-Test.java:69

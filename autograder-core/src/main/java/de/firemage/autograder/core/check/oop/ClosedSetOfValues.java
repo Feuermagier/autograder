@@ -12,6 +12,7 @@ import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtSwitch;
@@ -217,6 +218,30 @@ public class ClosedSetOfValues extends IntegratedCheck {
                 }
 
                 super.visitCtField(ctField);
+            }
+
+            @Override
+            public <T> void visitCtLocalVariable(CtLocalVariable<T> ctLocalVariable) {
+                if (!SpoonUtil.isEffectivelyFinal(ctLocalVariable)) {
+                    return;
+                }
+
+                CtExpression<?> ctExpression = ctLocalVariable.getDefaultExpression();
+                if (ctExpression == null) {
+                    return;
+                }
+
+                if (ctExpression.isImplicit()) {
+                    return;
+                }
+
+                if (ctLocalVariable.getType().isArray() && ctExpression instanceof CtNewArray<?> ctNewArray) {
+                    checkFiniteListing(ctExpression, ctNewArray.getElements());
+                } else {
+                    checkFiniteListing(ctExpression, SpoonUtil.getElementsOfExpression(ctExpression));
+                }
+
+                super.visitCtLocalVariable(ctLocalVariable);
             }
 
             @Override

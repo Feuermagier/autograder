@@ -1,7 +1,5 @@
 package de.firemage.autograder.core.integrated;
 
-import com.google.common.collect.Sets;
-import com.google.common.collect.Streams;
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -27,9 +25,11 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
+import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
@@ -41,6 +41,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
+import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
@@ -53,6 +54,7 @@ import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
+import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -61,6 +63,7 @@ import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
 import spoon.reflect.visitor.filter.OverridingMethodFilter;
+import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.ArrayDeque;
@@ -78,6 +81,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -680,19 +684,30 @@ public final class SpoonUtil {
         CtTypeReference<?>... parameterTypes
     ) {
         // check that they both return the same type
-        return SpoonUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)
-            // their names should match:
-            && ctExecutableReference.getSimpleName().equals(methodName)
-            // the number of parameters should match
-            && ctExecutableReference.getParameters().size() == parameterTypes.length
-            && Streams.zip(
-                // combine both the parameters of the executable and the expected types
-                ctExecutableReference.getParameters().stream(),
-                Arrays.stream(parameterTypes),
-                // evaluate if the type of the parameter is equal to the expected type:
-                SpoonUtil::isTypeEqualTo
-                // On this stream of booleans, check if all are true
-            ).allMatch(value -> value);
+        if (!SpoonUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)) {
+            return false;
+        }
+
+        // their names should match:
+        if (!ctExecutableReference.getSimpleName().equals(methodName)) {
+            return false;
+        }
+
+        List<CtTypeReference<?>> givenParameters = ctExecutableReference.getParameters();
+
+        // the number of parameters should match
+        if (givenParameters.size() != parameterTypes.length) {
+            return false;
+        }
+
+        for (int i = 0; i < parameterTypes.length; i++) {
+            // check if the type of the parameter is equal to the expected type
+            if (!SpoonUtil.isTypeEqualTo(givenParameters.get(i), parameterTypes[i])) {
+                return false;
+            }
+        }
+
+        return true;
     }
 
     /**
@@ -887,6 +902,13 @@ public final class SpoonUtil {
         return true;
     }
 
+    /**
+     * Checks if the given type is equal to any of the expected types.
+     *
+     * @param ctType the type to check
+     * @param expected all allowed types
+     * @return true if the given type is equal to any of the expected types, false otherwise
+     */
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
         TypeFactory factory = ctType.getFactory().Type();
         return SpoonUtil.isTypeEqualTo(
@@ -897,6 +919,13 @@ public final class SpoonUtil {
         );
     }
 
+    /**
+     * Checks if the given type is equal to any of the expected types.
+     *
+     * @param ctType the type to check
+     * @param expected all allowed types
+     * @return true if the given type is equal to any of the expected types, false otherwise
+     */
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, CtTypeReference<?>... expected) {
         return Arrays.asList(expected).contains(ctType);
     }
@@ -946,6 +975,35 @@ public final class SpoonUtil {
         };
     }
 
+    private static <T, E> HashSet<T> newHashSet(Iterator<? extends E> elements, Function<E, ? extends T> mapper) {
+        HashSet<T> set = new HashSet<>();
+        for (; elements.hasNext(); set.add(mapper.apply(elements.next())));
+        return set;
+    }
+
+    private record IdentityKey<T>(T value) {
+        public static <T> IdentityKey<T> of(T value) {
+            return new IdentityKey<>(value);
+        }
+
+        @Override
+        public int hashCode() {
+            return System.identityHashCode(this.value);
+        }
+
+        @Override
+        public boolean equals(Object obj) {
+            if (this == obj) {
+                return true;
+            }
+            if (obj == null || this.getClass() != obj.getClass()) {
+                return false;
+            }
+            IdentityKey<?> that = (IdentityKey<?>) obj;
+            return this.value == that.value();
+        }
+    }
+
     /**
      * Finds the closest common parent of the given elements.
      *
@@ -958,17 +1016,17 @@ public final class SpoonUtil {
         // => inefficient and might cause a stack overflow
 
         // add all parents of the firstElement to a set sorted by distance to the firstElement:
-        Set<CtElement> ctParents = new LinkedHashSet<>();
-        ctParents.add(firstElement);
-        parents(firstElement).forEach(ctParents::add);
+        Set<IdentityKey<CtElement>> ctParents = new LinkedHashSet<>();
+        ctParents.add(IdentityKey.of(firstElement));
+        parents(firstElement).forEach(element -> ctParents.add(IdentityKey.of(element)));
 
         for (CtElement other : others) {
             // only keep the parents that the firstElement and the other have in common
-            ctParents.retainAll(Sets.newHashSet(parents(other).iterator()));
+            ctParents.retainAll(newHashSet(parents(other).iterator(), IdentityKey::of));
         }
 
         // the first element in the set is the closest common parent
-        return ctParents.iterator().next();
+        return ctParents.iterator().next().value();
     }
 
     /**
@@ -1063,7 +1121,33 @@ public final class SpoonUtil {
             target = ctFieldReference.getFieldDeclaration();
         }
 
+        if (target == null && ctReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
+            target = getLocalVariableDeclaration(ctLocalVariableReference);
+        }
+
         return target;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static <T> CtLocalVariable<T> getLocalVariableDeclaration(CtLocalVariableReference<T> ctLocalVariableReference) {
+        if (ctLocalVariableReference.getDeclaration() != null) {
+            return ctLocalVariableReference.getDeclaration();
+        }
+
+        // handle the special case, where we have an instanceof Pattern:
+        for (CtElement parent : parents(ctLocalVariableReference)) {
+            CtLocalVariable<?> candidate = parent.filterChildren(new TypeFilter<>(CtTypePattern.class)).filterChildren(new CompositeFilter<>(
+                FilteringOperator.INTERSECTION,
+                new TypeFilter<>(CtLocalVariable.class),
+                element -> element.getReference().equals(ctLocalVariableReference)
+            )).first();
+
+            if (candidate != null) {
+                return (CtLocalVariable<T>) candidate;
+            }
+        }
+
+        return null;
     }
 
     private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
@@ -1136,6 +1220,21 @@ public final class SpoonUtil {
 
             if (ctElement instanceof CtVariable<?> ctVariable) {
                 filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
+
+                // parameters might be declared in a super class, but not used in the method itself, but only in overrides
+                // therefore we consider uses in overriding methods as well
+                if (ctVariable instanceof CtParameter<?> ctParameter
+                    && ctParameter.getParent() instanceof CtMethod<?> ctMethod) {
+                    filter = ctMethod.getFactory().getModel().getElements(new OverridingMethodFilter(ctMethod))
+                        .stream()
+                        .flatMap(method -> method.getParameters().stream().filter(ctParameter::equals).findAny().stream())
+                        .map(parameter -> (Filter<CtElement>) new FilterAdapter<>(new BetterVariableAccessFilter<>(parameter), CtVariableAccess.class))
+                        .reduce(filter, (currentFilter, parameterFilter) -> new CompositeFilter<>(
+                            FilteringOperator.UNION,
+                            currentFilter,
+                            parameterFilter
+                        ));
+                }
             } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
                 filter = buildExecutableFilter(ctExecutable);
             } else if (ctElement instanceof CtTypeParameter ctTypeParameter) {
@@ -1224,6 +1323,12 @@ public final class SpoonUtil {
 
     public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
         return ctElement.getFactory().getModel()
+            .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
+            .first(CtElement.class) != null;
+    }
+
+    public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
+        return toSearchIn
             .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
             .first(CtElement.class) != null;
     }

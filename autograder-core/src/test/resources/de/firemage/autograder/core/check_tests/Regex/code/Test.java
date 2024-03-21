@@ -52,6 +52,8 @@ class RegexContext {
     private static final String UNUSED_REGEX = "(foo)* [bar]+ x? x?"; /*# ok #*/
     private static final String NOT_USED_AS_REGEX = "(foo)* [bar]+ x? x?"; /*# ok #*/
 
+    private static final Pattern SYMBOL_REGEX = Pattern.compile("[0-9a-zA-Z]*"); /*# ok #*/
+
     void foo() {
         boolean matches = Pattern.matches(DEFINITELY_REGEX_1, "foo bar x");
         matches = "foo bar x".matches(DEFINITELY_REGEX_2);

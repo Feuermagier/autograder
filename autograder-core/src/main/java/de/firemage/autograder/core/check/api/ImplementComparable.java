@@ -13,8 +13,6 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.reference.CtTypeReference;
 
-import java.util.Collection;
-import java.util.HashSet;
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.IMPLEMENT_COMPARABLE })
@@ -28,17 +26,8 @@ public class ImplementComparable extends IntegratedCheck {
             .orElse(null);
     }
 
-    private static boolean isOwnType(CtType<?> ctType) {
-        return ctType.getFactory()
-            .getModel()
-            .getAllTypes()
-            .stream()
-            .anyMatch(type -> type.equals(ctType) && !type.isShadow());
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        Collection<String> mentionedTypes = new HashSet<>();
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
             public void process(CtClass<?> ctType) {
@@ -56,8 +45,7 @@ public class ImplementComparable extends IntegratedCheck {
                 CtType<?> compared = comparator.getActualTypeArguments().get(0).getTypeDeclaration();
 
                 // if that type does not implement comparable, it should implement it
-                CtTypeReference<?> comparableImpl = getInterface(compared, java.lang.Comparable.class);
-                if (comparableImpl == null && isOwnType(compared) && mentionedTypes.add(compared.getQualifiedName())) {
+                if (ctType.equals(compared)) {
                     addLocalProblem(
                         ctType,
                         new LocalizedMessage(

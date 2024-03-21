@@ -1,12 +1,12 @@
-package de.firemage.autograder.core.check.general;
+package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -15,76 +15,80 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(
-        ProblemType.FIELD_SHOULD_BE_CONSTANT,
-        ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
-    );
+class TestRedundantAssignment extends AbstractCheckTest {
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.REDUNDANT_ASSIGNMENT);
 
-    private void assertProblem(Problem problem, String variable, String suggestion) {
+    void assertEqualsRedundant(Problem problem, String variable) {
         assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    "variable-should-be",
-                    Map.of(
-                        "variable", variable,
-                        "suggestion", suggestion
-                    )
-                )
-            ),
+            this.linter.translateMessage(new LocalizedMessage(
+                "redundant-assignment",
+                Map.of("variable", variable)
+            )),
             this.linter.translateMessage(problem.getExplanation())
         );
     }
 
     @Test
-    void testDefaultVisibility() throws LinterException, IOException {
+    void testMotivation() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
                 public class Test {
-                    String exampleConstant = "example";
-                }
-                """
-        ), PROBLEM_TYPES);
-
-        assertProblem(problems.next(), "exampleConstant", "static final String EXAMPLE_CONSTANT = \"example\"");
-
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testOtherVisibility() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    private final int variable = 1;
-                }
-                """
-        ), PROBLEM_TYPES);
-
-        assertProblem(problems.next(), "variable", "private static final int VARIABLE = 1");
-
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testLocalFinalVariableWithWrongNamingConvention() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    void foo() {
-                        final int DAMAGE = 1;
+                    public void test() {
+                        int a = 5;
+                        
+                        System.out.println(a);
+                        
+                        a = 3;
                     }
                 }
                 """
         ), PROBLEM_TYPES);
 
-        assertProblem(problems.next(), "DAMAGE", "private static final int DAMAGE = 1");
+
+        assertEqualsRedundant(problems.next(), "a");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testInLoop() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public void test() {
+                        int a = 5;
+                        for (int i = 0; i < 5; i++) {
+                            System.out.println(a);
+                            a = i * 2;
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testAllowedAssignment() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public void test() {
+                        int a = 5;
+                        a = 3;
+
+                        System.out.println(a);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }

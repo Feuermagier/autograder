@@ -14,9 +14,7 @@ import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.visitor.CtScanner;
 import spoon.support.reflect.CtExtendedModifier;
 
-@ExecutableCheck(reportedProblems = {
-
-})
+@ExecutableCheck(reportedProblems = { ProblemType.MULTI_THREADING })
 public class MultiThreading extends IntegratedCheck {
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {

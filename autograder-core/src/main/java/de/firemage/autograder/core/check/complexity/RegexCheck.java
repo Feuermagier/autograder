@@ -38,7 +38,7 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.COMPLEX_REGEX})
 public class RegexCheck extends IntegratedCheck {
-    private static final double MAX_ALLOWED_SCORE = 10.0;
+    private static final double MAX_ALLOWED_SCORE = 12.0;
     private static final List<String> REGEX_HINTS = List.of("?", "<", ">", "+", "*", "[", "]", "$", "^", "|", "\\");
     private static final int MIN_REGEX_HINTS = 2;
 

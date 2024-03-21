@@ -124,6 +124,8 @@ try-catch-complexity = The complexity of try-catch-blocks should be kept low. Th
 
 redundant-else = The 'else' is redundant. Write '{$expected}' instead of '{$given}'.
 
+redundant-assignment = The variable '{$variable}' is assigned a value that is never read, therefore the assignment can be removed.
+
 # Debug
 assert-used-exp = Assertions crash the entire program if they evaluate to false.
               Also they can be disabled, so never rely on them to e.g. check user input.
@@ -145,6 +147,8 @@ runtime-exception-caught = RuntimeExceptions '{$exception}' should not be caught
 
 exception-message = An exception should always have a message that explains what the problem is and ideally how it occurred.
 
+number-format-exception-ignored = NumberFormatException should be caught or replaced through your own exception.
+
 # General
 
 compare-objects-exp = Implement an equals method for type {$type} and use it for comparisons
@@ -163,7 +167,7 @@ missing-override = '{$name}' should have an '@Override'-annotation, see https://
 
 system-specific-linebreak = Always use system-independent line breaks such as the value obtained from System.lineSeparator() or %n in format strings
 
-field-final-exp = The attribute '{$name}' should be final
+field-should-be-final = The attribute '{$name}' should be final.
 
 string-cmp-exp = Use the equals method: '{$lhs}.equals({$rhs})' instead of '{$lhs} == {$rhs}'
 
@@ -238,8 +242,8 @@ interface-static-method-exp = Interfaces should not have static methods, because
 
 empty-interface-exp = Interfaces should not be empty.
 
-ui-input-separation = Input should not be spread over multiple classes. First use in {$first}.
-ui-output-separation = Output should not be spread over multiple classes. First use in {$first}.
+ui-input-separation = Input should not be spread over the program. Other use in {$first}.
+ui-output-separation = Output should not be spread over the program. Other use in {$first}.
 
 do-not-use-system-exit = System.exit() must not be used. Structure your code in so that it exits naturally.
 

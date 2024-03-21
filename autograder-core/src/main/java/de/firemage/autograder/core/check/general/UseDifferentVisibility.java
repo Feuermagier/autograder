@@ -79,6 +79,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
         }
 
         if (commonParent instanceof CtPackage ctPackage && ctPackage.equals(ctModel.getRootPackage())) {
+            // handle the case where all references are in the default package
             if (ctTypeMember.getParent(CtPackage.class).equals(ctPackage)
                 && references.stream().allMatch(ref -> ref.getParent(CtPackage.class).equals(ctPackage))) {
                 return Visibility.DEFAULT;
@@ -176,5 +177,10 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(6);
     }
 }

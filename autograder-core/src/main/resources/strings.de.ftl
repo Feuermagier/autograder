@@ -121,6 +121,8 @@ try-catch-complexity = Die Komplexität von try-catch-Blöcken sollte möglichst
 
 redundant-else = Die 'else' ist unnötig. Schreibe '{$expected}' statt '{$given}'.
 
+redundant-assignment = Der Variable '{$variable}' wird hier ein Wert zugewiesen, der dann nie verwendet wird. Deswegen kann die Zuweisung entfernt werden.
+
 # Debug
 assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
     Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,
@@ -143,6 +145,8 @@ runtime-exception-caught = RuntimeExceptions '{$exception}' sollten nicht gefang
 
 exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
 
+number-format-exception-ignored = NumberFormatException sollte gefangen werden und entweder behandelt oder durch eine eigene Exception ersetzt werden.
+
 # General
 
 compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
@@ -161,7 +165,7 @@ missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe htt
 
 system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
 
-field-final-exp = Das Attribut '{$name}' sollte final sein
+field-should-be-final = Das Attribut '{$name}' sollte final sein.
 
 string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Methode verglichen werden: '{$lhs}.equals({$rhs})' statt '{$lhs} == {$rhs}'
 
@@ -238,8 +242,8 @@ interface-static-method-exp = Interfaces sollte keine statischen Methoden haben,
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 
-ui-input-separation = Eingaben sollten zentral in einer Klasse eingelesen werden. Wurde auch verwendet in {$first}.
-ui-output-separation = Ausgaben sollten zentral in einer Klasse gemacht werden. Wurde auch verwendet in {$first}.
+ui-input-separation = Eingaben sollten nicht im Programm verteilt sein. Wurde auch verwendet in {$first}.
+ui-output-separation = Ausgaben sollten nicht im Programm verteilt sein. Wurde auch verwendet in {$first}.
 
 do-not-use-system-exit = System.exit() darf nicht verwendet werden. Strukturiere deinen Code so, dass er sich natürlich beendet.
 
