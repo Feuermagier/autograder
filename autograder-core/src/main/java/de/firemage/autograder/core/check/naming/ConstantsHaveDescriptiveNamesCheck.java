@@ -14,6 +14,7 @@ import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtField;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -29,7 +30,14 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         Map.entry("->", List.of("arrow")),
         Map.entry("-->", List.of("arrow"))
     );
+    private static final List<String> CONTEXTUAL_WORDS = List.of(
+        "space", "whitespace",
+        "white_space",
+        "empty",
+        "blank"
+    );
 
+    private static final double CONTEXTUAL_WORD_THRESHOLD = 0.5;
     private static final int MAXIMUM_NAME_DIFFERENCE = 2;
 
     private static boolean isNonDescriptiveIntegerName(String name, int value) {
@@ -133,7 +141,22 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
         if (valueString.length() == 1 && !Character.isAlphabetic(valueString.charAt(0))) {
             List<String> charOptions = listCharOptions(valueString.charAt(0));
             if (charOptions != null) {
-                return charOptions.stream().anyMatch(lowerCaseName::contains);
+                for (var option : charOptions) {
+                    for (String word : name.split("_")) {
+                        word = word.toLowerCase();
+
+                        // some words should be allowed in a context, like space between should be fine when the value is a space.
+                        if (CONTEXTUAL_WORDS.contains(word) && (word.length() * 1.0) / (lowerCaseName.length() * 1.0) < CONTEXTUAL_WORD_THRESHOLD) {
+                            return false;
+                        }
+
+                        if (word.equals(option)) {
+                            return true;
+                        }
+                    }
+                }
+
+                return false;
             }
         }
 

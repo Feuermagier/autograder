@@ -48,4 +48,6 @@ public class Test {
     private static final String BOOK_COMMAND_NAME = "book"; /*# ok #*/
     private static final String LIST_BOOKINGS_COMMAND_NAME = "list-bookings"; /*# ok #*/
     private static final String REMOVE_COMMAND_NAME = "remove"; /*# ok #*/
+    private static final String AI_COMMAND_SEPARATOR = ","; /*# ok #*/
+    private static final String DEFAULT_SPACE_BETWEEN_XY = " "; /*# ok #*/
 }

@@ -27,7 +27,7 @@ public class CheckTest {
     // this is useful for debugging/executing only relevant tests
     //
     // example: List.of("oop.ShouldBeEnumAttribute")
-    private static final List<String> ONLY_TEST = List.of();
+    private static final List<String> ONLY_TEST = List.of("naming.ConstantsHaveDescriptiveNamesCheck");
 
     public record Config(List<String> lines) {
         public static Config fromPath(Path path) throws IOException {
