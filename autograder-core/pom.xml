@@ -16,7 +16,7 @@
 
     <properties>
         <spoon.version>10.4.2</spoon.version>
-        <pmd.version>7.0.0-rc3</pmd.version>
+        <pmd.version>7.0.0</pmd.version>
         <spotbugs.version>6.45.0</spotbugs.version>
 
         <docker.version>3.3.6</docker.version>
