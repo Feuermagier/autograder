@@ -21,6 +21,8 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.REDUNDANT_VARIABLE})
 public class RedundantVariable extends IntegratedCheck {
+    private static final int MAX_EXPRESSION_SIZE = 40;
+
     /**
      * Checks if the given statement does not influence the variable returned by the return statement.
      *
@@ -32,7 +34,7 @@ public class RedundantVariable extends IntegratedCheck {
     }
 
     private boolean isComplexExpression(CtExpression<?> ctExpression) {
-        return ctExpression instanceof CtSwitchExpression<?,?>;
+        return ctExpression instanceof CtSwitchExpression<?,?> || ctExpression.toString().length() > MAX_EXPRESSION_SIZE;
     }
 
     private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead) {
