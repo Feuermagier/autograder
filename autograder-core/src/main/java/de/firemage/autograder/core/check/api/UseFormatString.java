@@ -90,6 +90,11 @@ public class UseFormatString extends IntegratedCheck {
                     } else {
                         formatString.append(value);
                     }
+
+                    // if the string ends with a %, the concatenation is likely used to build a format string
+                    if (value.endsWith("%")) {
+                        return null;
+                    }
                 } else if (ctTypeInformation.isPrimitive() && !ctTypeInformation.isArray()) {
                     // inline literals:
                     formatString.append(ctLiteral.getValue());

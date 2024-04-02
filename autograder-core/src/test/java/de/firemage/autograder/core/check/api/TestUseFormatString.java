@@ -126,4 +126,26 @@ class TestUseFormatString extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testBuildFormatString() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Field",
+            """
+                public class Field {
+                    private String left;
+                    private int number;
+                    private String right;
+
+                    @Override
+                    public String toString() {
+                        return String.format("output: " + "%" + this.number + "d", this.number);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
