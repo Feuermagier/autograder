@@ -48,14 +48,14 @@ public class InheritanceBadPractices extends IntegratedCheck {
                 }
 
                 // check if the class can be an interface:
-                if (fields.isEmpty()) {
+                if (fields.isEmpty() && ctClass.getSuperclass() == null) {
                     addLocalProblem(
                         ctClass,
                         new LocalizedMessage("should-be-interface"),
                         ProblemType.SHOULD_BE_INTERFACE
                     );
                     // check if the class has only fields (data class)
-                } else if (methods.isEmpty()) {
+                } else if (methods.isEmpty() && ctClass.getSuperclass() == null) {
                     String methodName = IdentifierNameUtils.toLowerCamelCase(ctClass.getSimpleName());
                     addLocalProblem(
                         ctClass,

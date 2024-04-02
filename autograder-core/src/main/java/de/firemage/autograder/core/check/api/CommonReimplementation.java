@@ -25,6 +25,7 @@ import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtNewArray;
+import spoon.reflect.code.CtNewClass;
 import spoon.reflect.code.CtOperatorAssignment;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
@@ -158,6 +159,11 @@ public class CommonReimplementation extends IntegratedCheck {
 
         // return if the for loop uses the loop variable (would not be a simple repetition)
         if (!ctAssignment.getAssignment().getElements(new VariableAccessFilter<>(forLoopRange.loopVariable())).isEmpty()) {
+            return;
+        }
+
+        // ignore new array or new class assignments
+        if (ctAssignment.getAssignment() instanceof CtNewClass<?> || ctAssignment.getAssignment() instanceof CtNewArray<?>) {
             return;
         }
 
