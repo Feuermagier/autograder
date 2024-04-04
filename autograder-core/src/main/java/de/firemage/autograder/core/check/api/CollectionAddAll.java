@@ -73,7 +73,7 @@ public class CollectionAddAll extends IntegratedCheck {
             .anyMatch(ctTypeReference::isSubtypeOf);
     }
 
-    private void reportProblem(CtVariable<?> ctVariable, List<CtExpression<?>> addedValues) {
+    private void reportProblem(CtVariable<?> ctVariable, List<? extends CtExpression<?>> addedValues) {
         String values = "List.of(%s)".formatted(addedValues.stream()
             .map(CtElement::prettyprint)
             .collect(Collectors.joining(", "))
@@ -102,7 +102,7 @@ public class CollectionAddAll extends IntegratedCheck {
 
         if (ctEnum != null && UseEnumValues.checkEnumValues(ctEnum, isOrderedCollection(ctVariable.getType()), fieldReads)) {
             addLocalProblem(
-                ctVariable,
+                addedValues.get(0).getParent(CtStatement.class),
                 new LocalizedMessage(
                     "common-reimplementation",
                     Map.of(
