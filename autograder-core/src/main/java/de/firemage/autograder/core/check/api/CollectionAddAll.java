@@ -8,12 +8,13 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.check.api.UseEnumValues.CtEnumFieldRead;
-import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtEnum;
 import spoon.reflect.declaration.CtEnumValue;
@@ -23,6 +24,7 @@ import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -31,7 +33,11 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@ExecutableCheck(reportedProblems = { ProblemType.COLLECTION_ADD_ALL, ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES })
+@ExecutableCheck(reportedProblems = {
+    ProblemType.COLLECTION_ADD_ALL,
+    ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES,
+    ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL
+})
 public class CollectionAddAll extends IntegratedCheck {
     private record AddInvocation(
         CtVariableReference<?> collection,
@@ -165,16 +171,73 @@ public class CollectionAddAll extends IntegratedCheck {
         }
     }
 
+    private void checkAddAll(CtForEach ctFor) {
+        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+        if (statements.size() != 1) {
+            return;
+        }
+
+        if (statements.get(0) instanceof CtInvocation<?> ctInvocation
+            && SpoonUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Collection.class)
+            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), boolean.class, "add", Object.class)
+            && ctInvocation.getExecutable().getParameters().size() == 1
+            // ensure that the add argument simply accesses the for variable:
+            // for (T t : array) {
+            //     collection.add(t);
+            // }
+            && ctInvocation.getArguments().get(0) instanceof CtVariableRead<?> ctVariableRead
+            && ctVariableRead.getVariable().equals(ctFor.getVariable().getReference())) {
+
+            // allow explicit casting
+            if (!ctInvocation.getArguments().get(0).getTypeCasts().isEmpty()) {
+                return;
+            }
+
+            String addAllArg = ctFor.getExpression().prettyprint();
+            if (ctFor.getExpression().getType().isArray()) {
+                addAllArg = "Arrays.asList(%s)".formatted(addAllArg);
+            }
+
+
+            this.addLocalProblem(
+                ctFor,
+                new LocalizedMessage(
+                    "common-reimplementation",
+                    Map.of(
+                        "suggestion", "%s.addAll(%s)".formatted(
+                            ctInvocation.getTarget().prettyprint(),
+                            addAllArg
+                        )
+                    )
+                ),
+                ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL
+            );
+        }
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtBlock<?>>() {
+        staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
-            public void process(CtBlock<?> ctBlock) {
+            public <T> void visitCtBlock(CtBlock<T> ctBlock) {
                 if (ctBlock.isImplicit() || !ctBlock.getPosition().isValidPosition()) {
+                    super.visitCtBlock(ctBlock);
                     return;
                 }
 
                 checkAddAll(ctBlock);
+                super.visitCtBlock(ctBlock);
+            }
+
+            @Override
+            public void visitCtForEach(CtForEach ctFor) {
+                if (ctFor.isImplicit() || !ctFor.getPosition().isValidPosition()) {
+                    super.visitCtForEach(ctFor);
+                    return;
+                }
+
+                checkAddAll(ctFor);
+                super.visitCtForEach(ctFor);
             }
         });
     }
