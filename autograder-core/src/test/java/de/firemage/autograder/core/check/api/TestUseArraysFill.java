@@ -37,6 +37,8 @@ class TestUseArraysFill extends AbstractCheckTest {
             JavaVersion.JAVA_17,
             "Main",
             """
+                import java.util.Arrays;
+
                 public class Main {
                     private static final String INITIAL_VALUE = "X";
 
@@ -105,6 +107,8 @@ class TestUseArraysFill extends AbstractCheckTest {
                 Map.entry(
                     "Main",
                     """
+                    import java.util.Arrays;
+
                     class PlayingFieldEntry {
                         static final PlayingFieldEntry FREE = new PlayingFieldEntry();
                     }
@@ -124,6 +128,35 @@ class TestUseArraysFill extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         assertEqualsReimplementation(problems.next(), "Arrays.fill(field, PlayingFieldEntry.FREE)");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testHasNoJavaUtilImports() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    class PlayingFieldEntry {
+                        static final PlayingFieldEntry FREE = new PlayingFieldEntry();
+                    }
+
+                    public class Main {
+                        public static void main(String[] args) {
+                            PlayingFieldEntry[] field = new PlayingFieldEntry[1];
+
+                            for (int i = 0; i < field.length; i++) {
+                                field[i] = PlayingFieldEntry.FREE;
+                            }
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }

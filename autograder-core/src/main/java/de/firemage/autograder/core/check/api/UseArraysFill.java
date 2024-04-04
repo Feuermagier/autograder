@@ -86,6 +86,10 @@ public class UseArraysFill extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+        if (!staticAnalysis.hasJavaUtilImport()) {
+            return;
+        }
+
         staticAnalysis.processWith(new AbstractProcessor<CtFor>() {
             @Override
             public void process(CtFor ctFor) {
