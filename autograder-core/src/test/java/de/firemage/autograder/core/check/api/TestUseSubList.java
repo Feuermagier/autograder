@@ -67,4 +67,46 @@ class TestUseSubList extends AbstractCheckTest {
         assertEqualsReimplementation(problems.next(), "for (int value : list.subList(start, end)) { ... }");
         problems.assertExhausted();
     }
+
+    @Test
+    void testEntireList() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+
+                public class Test {
+                    public static void iter(List<String> storage) {
+                        for (int i = 0; i < storage.size(); i++) {
+                            System.out.println(storage.get(i));
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testMap() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.Map;
+
+                public class Test {
+                    public static void iterMap(Map<Integer, String> storage) {
+                        for (int i = 0; i < storage.size(); i++) {
+                            System.out.println(storage.get(i));
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
