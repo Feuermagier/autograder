@@ -148,4 +148,23 @@ class TestUseFormatString extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testLongConstant() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Field",
+            """
+                public class Field {
+                    private static final String MY_VERY_LONG_CONSTANT_STRING = "This is a very long constant string that is used in the code."
+                        + "It is so long that it has to be split over multiple lines."
+                        + "It is so long that it has to be split over multiple lines."
+                        + "It is so long that it has to be split over multiple lines."
+                        + "It is so long that it has to be split over multiple lines.";
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
