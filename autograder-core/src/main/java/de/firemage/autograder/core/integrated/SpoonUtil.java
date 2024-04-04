@@ -659,6 +659,11 @@ public final class SpoonUtil {
                && (method.isAbstract() || getEffectiveStatements(method.getBody()).size() == 1);
     }
 
+    public static boolean isInSetter(CtElement ctElement) {
+        CtMethod<?> parent = ctElement.getParent(CtMethod.class);
+        return parent != null && SpoonUtil.isSetter(parent);
+    }
+
     public static boolean isPrimitiveNumeric(CtTypeReference<?> type) {
         return type.isPrimitive()
                && !type.getQualifiedName().equals("boolean")
