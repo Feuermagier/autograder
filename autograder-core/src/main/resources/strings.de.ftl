@@ -188,6 +188,7 @@ use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispie
 import-types = Statt den Pfad zum Typ anzugeben, sollte '{$type}' importiert werden. Datentypen aus dem selben Paket oder 'java.lang' müssen nicht explizit importiert werden.
 
 use-different-visibility = Die Sichtbarkeit von '{$name}' sollte '{$suggestion}' sein.
+use-different-visibility-field = Die Sichtbarkeit vom Feld '{$name}' sollte immer '{$suggestion}' sein.
 
 avoid-recompiling-regex = Die Konstante wird nur mit 'Pattern.compile' oder 'Pattern.matches' verwendet. Konvertiere die Konstante zu einem Pattern mit dem Wert '{$suggestion}'.
 

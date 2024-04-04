@@ -166,7 +166,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                     addLocalProblem(
                         ctField,
                         new LocalizedMessage(
-                            "use-different-visibility",
+                            "use-different-visibility-field",
                             Map.of(
                                 "name", ctField.getSimpleName(),
                                 "suggestion", Visibility.PRIVATE.toString()

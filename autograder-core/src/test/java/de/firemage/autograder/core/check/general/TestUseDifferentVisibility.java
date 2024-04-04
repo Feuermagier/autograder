@@ -17,21 +17,42 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestUseDifferentVisibility extends AbstractCheckTest {
-    private static final String LOCALIZED_MESSAGE_KEY = "use-different-visibility";
-    private static final ProblemType PROBLEM_TYPE = ProblemType.USE_DIFFERENT_VISIBILITY;
-    private static final ProblemType PROBLEM_TYPE_PEDANTIC = ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC;
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(PROBLEM_TYPE, PROBLEM_TYPE_PEDANTIC);
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(
+        ProblemType.USE_DIFFERENT_VISIBILITY,
+        ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC,
+        ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD
+    );
+
+    void assertDifferentVisibility(Problem problem, String name, String suggestion) {
+        assertEquals(
+            this.linter.translateMessage(new LocalizedMessage(
+                "use-different-visibility",
+                Map.of("name", name, "suggestion", suggestion)
+            )),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
+
+    void assertDifferentVisibilityField(Problem problem, String name, String suggestion) {
+        assertEquals(
+            this.linter.translateMessage(new LocalizedMessage(
+                "use-different-visibility-field",
+                Map.of("name", name, "suggestion", suggestion)
+            )),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
 
     @Test
     void testNoOtherReferences() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
                     "Example",
                     """
                         public class Example {
-                            String exampleVariable;
+                            void foo() {}
 
                             public static void main(String[] args) {}
                         }
@@ -41,19 +62,19 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testPackagePrivateRoot() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
                     "Example",
                     """
                         public class Example {
-                            String exampleVariable;
+                            void example() {}
                             
                             public static void main(String[] args) {}
                         }
@@ -65,7 +86,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         public class Other {
                             private static void foo() {
                                 Example example = new Example();
-                                example.exampleVariable = "foo";
+                                example.example();
                             }
                         }
                         """
@@ -74,12 +95,12 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testPackagePrivateDifferentPackage() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -109,13 +130,14 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
+        assertDifferentVisibilityField(problems.next(), "exampleVariable", "private");
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testPrivate() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -123,7 +145,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     """
                         public class Example {
                             public String exampleVariable;
-                                            
+
                             private void foo() {
                                 exampleVariable = "foo";
                             }
@@ -142,32 +164,21 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
+        assertDifferentVisibility(problems.next(), "exampleVariable", "private");
 
-        assertEquals(1, problems.size());
-        assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "name", "exampleVariable",
-                        "suggestion", "private"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        problems.assertExhausted();
     }
 
     @Test
     void testPrivateNestedClass() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
                     "Example",
                     """
                         public class Example {
-                                            
+
                             private void foo() {
                                 Inner inner = new Inner();
                                 inner.exampleVariable = "foo";
@@ -185,24 +196,14 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
 
-        assertEquals(1, problems.size());
-        assertEquals(PROBLEM_TYPE, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(
-                new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
-                    Map.of(
-                        "name", "exampleVariable",
-                        "suggestion", "private"
-                    )
-                )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertDifferentVisibility(problems.next(), "exampleVariable", "private");
+
+        problems.assertExhausted();
     }
 
     @Test
     void testMainMethod() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -217,12 +218,12 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testMethodVisibility() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -284,24 +285,16 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
 
         int i = 0;
         for (var entry : expected.entrySet()) {
-            assertEquals(
-                this.linter.translateMessage(
-                    new LocalizedMessage(
-                        LOCALIZED_MESSAGE_KEY,
-                        Map.of(
-                            "name", entry.getKey(),
-                            "suggestion", entry.getValue()
-                        )
-                    )),
-                this.linter.translateMessage(problems.get(i).getExplanation())
-            );
+            assertDifferentVisibility(problems.next(), entry.getKey(), entry.getValue());
             i += 1;
         }
+
+        problems.assertExhausted();
     }
 
     @Test
     void testOverriddenMethod() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -320,7 +313,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
@@ -339,7 +332,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         //
         // The solution: Constants must not have a lower visibility than the constants (in the same class)
         //               they are referenced in.
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -366,12 +359,12 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testBackwardReferenceCanBeLowered() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -388,12 +381,13 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEquals(1, problems.size());
+        assertDifferentVisibility(problems.next(), "DATE_FORMAT", "private");
+        problems.assertExhausted();
     }
 
     @Test
     void testVisibilityProtected() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -421,12 +415,12 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testImplementedProtectedMethod() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -449,7 +443,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                     "ui.commands.ExampleCommand",
                     """
                         package ui.commands;
-                        
+                                                
                         import ui.Command;
 
                         public class ExampleCommand extends Command {
@@ -475,12 +469,12 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testOnlyPublicFields() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -497,21 +491,25 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         """
                 )
             )
-        ), List.of(ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD));
+        ), PROBLEM_TYPES);
 
-        assertEquals(3, problems.size());
+        assertDifferentVisibilityField(problems.next(), "a", "private");
+        assertDifferentVisibilityField(problems.next(), "b", "private");
+        assertDifferentVisibilityField(problems.next(), "d", "private");
+
+        problems.assertExhausted();
     }
 
     @Test
     void testEnum() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
                     "model.Fruit",
                     """
                         package model;
-                        
+
                         public enum Fruit {
                             STRAWBERRY;
 
@@ -534,9 +532,9 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                         """
                 )
             )
-        ), List.of(ProblemType.USE_DIFFERENT_VISIBILITY));
+        ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
@@ -547,26 +545,26 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
                 Map.entry(
                     "Main",
                     """
-                    public class Main {
-                        public static void main(String[] args) {
-                            throw new MyException("abc123", 123);
+                        public class Main {
+                            public static void main(String[] args) {
+                                throw new MyException("abc123", 123);
+                            }
                         }
-                    }
-                    """
+                        """
                 ),
                 Map.entry(
                     "MyException",
                     """
-                    public class MyException extends RuntimeException {
-                        public MyException() {}
-                        
-                        public MyException(String message) { super(message); }
-                        public MyException(String message, Throwable cause) { super(message, cause); }
-                        public MyException(Throwable cause) { super(cause); }
-                        
-                        public MyException(String message, int number) { super(message + number); } // this is used
-                    }
-                    """
+                        public class MyException extends RuntimeException {
+                            public MyException() {}
+                            
+                            public MyException(String message) { super(message); }
+                            public MyException(String message, Throwable cause) { super(message, cause); }
+                            public MyException(Throwable cause) { super(cause); }
+                            
+                            public MyException(String message, int number) { super(message + number); } // this is used
+                        }
+                        """
                 )
             )
         ), PROBLEM_TYPES);
