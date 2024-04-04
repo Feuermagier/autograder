@@ -31,6 +31,16 @@ import java.util.function.UnaryOperator;
 public class UseFormatString extends IntegratedCheck {
     private static final int MIN_NUMBER_CONCATENATIONS = 3;
     private static final int MIN_NUMBER_LITERALS = 2;
+    // A line is about 120 - 140 characters long. Assuming a relatively long constant name,
+    // there remain around 70 characters for the string value.
+    //
+    // For longer string values one will split the string into multiple lines:
+    //
+    // "This is a very long string that is split into multiple lines"
+    //     + " to make it more readable."
+    //
+    // Those should not be flagged.
+    private static final int MAXIMUM_STRING_LENGTH_IN_LINE = 55;
 
     private List<CtExpression<?>> getFormatArgs(CtBinaryOperator<?> ctBinaryOperator) {
         List<CtExpression<?>> result = new ArrayList<>();
@@ -105,6 +115,10 @@ public class UseFormatString extends IntegratedCheck {
 
             formatString.append(this.getFormatPlaceholder(ctExpression.getType()));
             args.add(ctExpression.prettyprint());
+        }
+
+        if (args.isEmpty() && formatString.length() >= MAXIMUM_STRING_LENGTH_IN_LINE) {
+            return null;
         }
 
         if (args.isEmpty() && !hasInlineNewline) {

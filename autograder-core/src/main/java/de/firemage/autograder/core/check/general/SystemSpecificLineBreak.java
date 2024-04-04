@@ -10,6 +10,8 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTextBlock;
 
+import java.util.Optional;
+
 @ExecutableCheck(reportedProblems = { ProblemType.SYSTEM_SPECIFIC_LINE_BREAK })
 public class SystemSpecificLineBreak extends IntegratedCheck {
     @Override
@@ -43,5 +45,10 @@ public class SystemSpecificLineBreak extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(3);
     }
 }

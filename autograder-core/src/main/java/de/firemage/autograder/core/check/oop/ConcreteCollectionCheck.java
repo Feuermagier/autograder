@@ -41,6 +41,7 @@ import spoon.reflect.visitor.CtScanner;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE })
@@ -276,5 +277,10 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
                 this.exit(ctRecord);
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(5);
     }
 }

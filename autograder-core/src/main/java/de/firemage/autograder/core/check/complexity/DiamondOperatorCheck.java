@@ -6,6 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.pmd.PMDCheck;
 import net.sourceforge.pmd.lang.java.rule.codestyle.UseDiamondOperatorRule;
 
+import java.util.Optional;
+
 @ExecutableCheck(reportedProblems = {ProblemType.UNUSED_DIAMOND_OPERATOR})
 public class DiamondOperatorCheck extends PMDCheck {
     public DiamondOperatorCheck() {
@@ -14,5 +16,10 @@ public class DiamondOperatorCheck extends PMDCheck {
             new UseDiamondOperatorRule(),
             ProblemType.UNUSED_DIAMOND_OPERATOR
         );
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(3);
     }
 }

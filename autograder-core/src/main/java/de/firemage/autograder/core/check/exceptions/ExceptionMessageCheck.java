@@ -13,6 +13,7 @@ import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtThrow;
+import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 
 import java.util.List;
@@ -41,6 +42,16 @@ public class ExceptionMessageCheck extends IntegratedCheck {
     }
 
     private static boolean isInAllowedContext(CtElement ctElement) {
+        // allow exceptions without messages in utility classes:
+        //
+        // private MyUtilityClass {
+        //   throw new UnsupportedOperationException();
+        // }
+        CtConstructor<?> ctConstructor = ctElement.getParent(CtConstructor.class);
+        if (ctConstructor != null && ctConstructor.isPrivate()) {
+            return true;
+        }
+
         CtCase<?> ctCase = ctElement.getParent(CtCase.class);
         // allow no message in default case of switch (most likely used as an unreachable default case)
         // See: https://github.com/Feuermagier/autograder/issues/82

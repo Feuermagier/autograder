@@ -47,21 +47,6 @@ public class UnusedImport extends IntegratedCheck {
         // therefore, they are not supported
     );
 
-    private void visitCtCompilationUnit(StaticAnalysis staticAnalysis, Consumer<? super CtCompilationUnit> lambda) {
-        // it is not possible to visit CtCompilationUnit through the processor API.
-        //
-        // in https://github.com/INRIA/spoon/issues/5168 the below code is mentioned as a workaround:
-        staticAnalysis.getModel()
-            .getAllTypes()
-            .stream()
-            .map(CtType::getPosition)
-            .filter(SourcePosition::isValidPosition)
-            .map(SourcePosition::getCompilationUnit)
-            // visit each compilation unit only once
-            .distinct()
-            .forEach(lambda);
-    }
-
     private static boolean isJavaLangImport(CtImport ctImport) {
         // check if the import is from the java.lang package, which is redundant
 
@@ -207,7 +192,7 @@ public class UnusedImport extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
-        this.visitCtCompilationUnit(staticAnalysis, ctCompilationUnit -> {
+        SpoonUtil.visitCtCompilationUnit(staticAnalysis.getModel(), ctCompilationUnit -> {
             Collection<CtElement> importedElements = new HashSet<>();
 
             for (CtImport ctImport : ctCompilationUnit.getImports()) {

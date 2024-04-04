@@ -1,6 +1,0 @@
-exceptions.ExceptionMessageCheck
-Exceptions need messages
-Test.java:9
-Test.java:13
-Test.java:17
-Test.java:25

@@ -21,6 +21,8 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtTypeInformation;
 
+import java.util.Optional;
+
 @ExecutableCheck(reportedProblems = {ProblemType.LIST_NOT_COPIED_IN_GETTER})
 public class ListGetterSetterCheck extends IntegratedCheck {
     @Override
@@ -114,5 +116,10 @@ public class ListGetterSetterCheck extends IntegratedCheck {
         } else {
             return expression instanceof CtConstructorCall<?>;
         }
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(4);
     }
 }

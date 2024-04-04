@@ -53,7 +53,8 @@ public class ForToForEachLoop extends IntegratedCheck {
         if (ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
             // && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), Object.class, "get", int.class)
             && ctInvocation.getExecutable().getSimpleName().equals("get")
-            && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess) {
+            && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess
+            && SpoonUtil.isSubtypeOf(variableAccess.getType(), java.util.List.class)) {
             return Optional.of(variableAccess);
         }
 

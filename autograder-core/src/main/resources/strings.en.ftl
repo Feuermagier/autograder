@@ -190,6 +190,7 @@ use-guard-clauses = The code cancels the normal control-flow through for example
 import-types = Instead of qualifying the type, '{$type}' should be imported. Types from the same package or 'java.lang' do not have to be imported explicitly.
 
 use-different-visibility = The visibility of '{$name}' should be '{$suggestion}'.
+use-different-visibility-field = The visibility of field '{$name}' should always be '{$suggestion}'.
 
 avoid-recompiling-regex = The constant is only used with 'Pattern.compile' or 'Pattern.matches'. Convert the constant to a pattern with the value '{$suggestion}'.
 

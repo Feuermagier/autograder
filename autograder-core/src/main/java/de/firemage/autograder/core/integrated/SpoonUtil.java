@@ -37,8 +37,10 @@ import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.CompoundSourcePosition;
+import spoon.reflect.declaration.CtCompilationUnit;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtImport;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
@@ -81,6 +83,7 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -656,6 +659,11 @@ public final class SpoonUtil {
                && (method.isAbstract() || getEffectiveStatements(method.getBody()).size() == 1);
     }
 
+    public static boolean isInSetter(CtElement ctElement) {
+        CtMethod<?> parent = ctElement.getParent(CtMethod.class);
+        return parent != null && SpoonUtil.isSetter(parent);
+    }
+
     public static boolean isPrimitiveNumeric(CtTypeReference<?> type) {
         return type.isPrimitive()
                && !type.getQualifiedName().equals("boolean")
@@ -1002,6 +1010,21 @@ public final class SpoonUtil {
             IdentityKey<?> that = (IdentityKey<?>) obj;
             return this.value == that.value();
         }
+    }
+
+    public static void visitCtCompilationUnit(CtModel ctModel, Consumer<? super CtCompilationUnit> lambda) {
+        // it is not possible to visit CtCompilationUnit through the processor API.
+        //
+        // in https://github.com/INRIA/spoon/issues/5168 the below code is mentioned as a workaround:
+        ctModel
+            .getAllTypes()
+            .stream()
+            .map(CtType::getPosition)
+            .filter(SourcePosition::isValidPosition)
+            .map(SourcePosition::getCompilationUnit)
+            // visit each compilation unit only once
+            .distinct()
+            .forEach(lambda);
     }
 
     /**
