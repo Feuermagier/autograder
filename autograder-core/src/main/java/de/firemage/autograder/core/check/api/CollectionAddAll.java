@@ -7,7 +7,7 @@ import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.check.api.CommonReimplementation.CtEnumFieldRead;
+import de.firemage.autograder.core.check.api.UseEnumValues.CtEnumFieldRead;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
@@ -94,7 +94,7 @@ public class CollectionAddAll extends IntegratedCheck {
             fieldReads.add(fieldRead.ctEnumValue());
         }
 
-        if (ctEnum != null && CommonReimplementation.checkEnumValues(ctEnum, isOrderedCollection(ctVariable.getType()), fieldReads)) {
+        if (ctEnum != null && UseEnumValues.checkEnumValues(ctEnum, isOrderedCollection(ctVariable.getType()), fieldReads)) {
             addLocalProblem(
                 ctVariable,
                 new LocalizedMessage(
