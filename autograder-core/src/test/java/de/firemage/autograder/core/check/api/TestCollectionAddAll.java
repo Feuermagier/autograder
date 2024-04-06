@@ -48,12 +48,13 @@ class TestCollectionAddAll extends AbstractCheckTest {
                         list.add(" ");
                         list.add("a");
                         list.add("b");
+                        list.add("c");
                     }
                 }
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsReimplementation(problems.next(), "list.addAll(List.of(\" \", \"a\", \"b\"))");
+        assertEqualsReimplementation(problems.next(), "list.addAll(List.of(\" \", \"a\", \"b\", \"c\"))");
 
         problems.assertExhausted();
     }
