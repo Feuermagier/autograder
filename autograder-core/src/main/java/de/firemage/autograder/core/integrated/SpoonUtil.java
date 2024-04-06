@@ -367,7 +367,7 @@ public final class SpoonUtil {
         if (isCharacter.test(ctBinaryOperator.getRightHandOperand().getType())) {
             // for character use an integer literal
             step.setValue((char) 1);
-            step.setType(ctBinaryOperator.getFactory().Type().CHARACTER_PRIMITIVE);
+            step.setType(ctBinaryOperator.getFactory().Type().characterPrimitiveType());
         } else {
             // this assumes that < and > are only used with numbers
             step.setValue(FoldUtils.convert(ctBinaryOperator.getRightHandOperand().getType(), ((Number) 1).doubleValue()));

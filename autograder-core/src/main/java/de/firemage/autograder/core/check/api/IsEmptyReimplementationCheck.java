@@ -40,7 +40,7 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
             && target.getType().getTypeDeclaration() != null
             // the type with the size method must have an isEmpty method
             && target.getType().getTypeDeclaration().getMethod(
-                ctInvocation.getFactory().Type().BOOLEAN_PRIMITIVE,
+                ctInvocation.getFactory().Type().booleanPrimitiveType(),
                 "isEmpty"
             ) != null
             && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size");

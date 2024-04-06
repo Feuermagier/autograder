@@ -168,7 +168,7 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
                             typeFactory.get(java.lang.Math.class).getReference(),
                             "pow",
                             expression,
-                            SpoonUtil.makeLiteralNumber(typeFactory.INTEGER_PRIMITIVE, count)
+                            SpoonUtil.makeLiteralNumber(typeFactory.integerPrimitiveType(), count)
                         );
                     }
                 );

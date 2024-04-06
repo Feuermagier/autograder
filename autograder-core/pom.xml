@@ -15,7 +15,7 @@
     <url>https://github.com/Feuermagier/autograder/autograder-core</url>
 
     <properties>
-        <spoon.version>10.4.2</spoon.version>
+        <spoon.version>11.0.0</spoon.version>
         <pmd.version>7.0.0-rc3</pmd.version>
         <spotbugs.version>6.45.0</spotbugs.version>
 
@@ -77,12 +77,6 @@
             <scope>test</scope>
         </dependency>
 
-        <dependency>
-            <groupId>org.eclipse.jdt</groupId>
-            <artifactId>org.eclipse.jdt.core</artifactId>
-            <version>3.34.0</version>
-        </dependency>
-
         <!-- Spoon -->
         <dependency>
             <groupId>fr.inria.gforge.spoon</groupId>
@@ -92,11 +86,6 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <!-- exclude jdt, because spoon is not using the latest version -->
-                <exclusion>
-                    <groupId>org.eclipse.jdt</groupId>
-                    <artifactId>org.eclipse.jdt.core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
@@ -109,11 +98,6 @@
                 <exclusion>
                     <groupId>org.slf4j</groupId>
                     <artifactId>slf4j-api</artifactId>
-                </exclusion>
-                <!-- exclude jdt, because spoon is not using the latest version -->
-                <exclusion>
-                    <groupId>org.eclipse.jdt</groupId>
-                    <artifactId>org.eclipse.jdt.core</artifactId>
                 </exclusion>
             </exclusions>
         </dependency>
