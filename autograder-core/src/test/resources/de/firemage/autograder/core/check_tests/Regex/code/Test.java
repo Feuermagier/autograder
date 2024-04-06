@@ -4,8 +4,8 @@ import java.util.regex.Pattern;
 
 public class Test {
     private String noRegex = "Should we do this? I guess we shouldn't! f*ck you!";
-    private String regex1 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private String regex2 = "(?<g1>foo)"; /*# not ok #*/
+    private String regex1 = "(foo)* [bar]+ x? x?"; /*# ok #*/
+    private String regex2 = "(?<g1>foo)"; /*# ok #*/
     private String regex3 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
     private String regex4 = "^(?<start>\\d+)-->(?<end>\\d+):(?<length>\\d+)m,(?<type>\\d+)x,(?<velocity>\\d+)max$"; /*# not ok #*/
     private String regex5 = "^(?<identifier>\\d+),(?<street>\\d+),(?<velocity>\\d+),(?<acceleration>\\d+)$"; /*# not ok #*/
@@ -43,14 +43,14 @@ public class Test {
 
 // test that context of regex is considered
 class RegexContext {
-    private static final String DEFINITELY_REGEX_1 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private static final String DEFINITELY_REGEX_2 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private static final String DEFINITELY_REGEX_3 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private static final String DEFINITELY_REGEX_4 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private static final String DEFINITELY_REGEX_5 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private static final String DEFINITELY_REGEX_6 = "(foo)* [bar]+ x? x?"; /*# not ok #*/
-    private static final String UNUSED_REGEX = "(foo)* [bar]+ x? x?"; /*# ok #*/
-    private static final String NOT_USED_AS_REGEX = "(foo)* [bar]+ x? x?"; /*# ok #*/
+    private static final String DEFINITELY_REGEX_1 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
+    private static final String DEFINITELY_REGEX_2 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
+    private static final String DEFINITELY_REGEX_3 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
+    private static final String DEFINITELY_REGEX_4 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
+    private static final String DEFINITELY_REGEX_5 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
+    private static final String DEFINITELY_REGEX_6 = "^[a-z]+(?: \\S+)?$"; /*# not ok #*/
+    private static final String UNUSED_REGEX = "^[a-z]+(?: \\S+)?$"; /*# ok #*/
+    private static final String NOT_USED_AS_REGEX = "^[a-z]+(?: \\S+)?$"; /*# ok #*/
 
     private static final Pattern SYMBOL_REGEX = Pattern.compile("[0-9a-zA-Z]*"); /*# ok #*/
 

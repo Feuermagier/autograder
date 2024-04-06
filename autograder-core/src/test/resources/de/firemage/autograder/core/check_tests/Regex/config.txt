@@ -1,7 +1,5 @@
 complexity.RegexCheck
 Complex regex
-Test.java:7
-Test.java:8
 Test.java:9
 Test.java:10
 Test.java:11
