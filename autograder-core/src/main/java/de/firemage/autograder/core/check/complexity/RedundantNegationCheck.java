@@ -40,6 +40,8 @@ public class RedundantNegationCheck extends IntegratedCheck {
                     return;
                 }
 
+                // TODO: do the same as in RepeatedMathOperationCheck
+
                 addLocalProblem(
                     ctUnaryOperator,
                     new LocalizedMessage(
