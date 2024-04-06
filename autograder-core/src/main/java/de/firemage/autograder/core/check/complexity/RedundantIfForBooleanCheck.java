@@ -17,12 +17,16 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtIf;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.declaration.CtMethod;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_IF_FOR_BOOLEAN })
 public class RedundantIfForBooleanCheck extends IntegratedCheck {
+    private static final Set<String> METHODS_TO_IGNORE = Set.of("equals", "hashCode");
+
     private String makeSuggestion(CtExpression<?> ctExpression, Effect thenEffect, Effect elseEffect) {
         if (thenEffect instanceof AssignmentEffect thenAssignment && elseEffect instanceof AssignmentEffect) {
             return "%s = %s".formatted(
@@ -129,7 +133,14 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtBlock<?>>() {
             @Override
             public void process(CtBlock<?> block) {
+                CtMethod<?> parentMethod = block.getParent(CtMethod.class);
+                if (parentMethod != null && METHODS_TO_IGNORE.contains(parentMethod.getSimpleName())) {
+                    return;
+                }
+
                 List<CtStatement> statements = SpoonUtil.getEffectiveStatements(block);
+
+                // TODO: write test
 
                 for (int i = 0; i < statements.size(); i++) {
                     CtStatement statement = statements.get(i);

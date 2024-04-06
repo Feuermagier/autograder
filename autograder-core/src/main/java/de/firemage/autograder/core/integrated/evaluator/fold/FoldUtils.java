@@ -62,7 +62,7 @@ public final class FoldUtils {
 
     public static CtTypeReference<?> inferType(CtBinaryOperator<?> ctBinaryOperator) {
         return switch (ctBinaryOperator.getKind()) {
-            case AND, OR, INSTANCEOF, EQ, NE, LT, LE, GT, GE -> ctBinaryOperator.getFactory().Type().BOOLEAN_PRIMITIVE;
+            case AND, OR, INSTANCEOF, EQ, NE, LT, LE, GT, GE -> ctBinaryOperator.getFactory().Type().booleanPrimitiveType();
             case SL, SR, USR, MUL, DIV, MOD, MINUS, PLUS, BITAND, BITXOR, BITOR -> OperatorHelper.getPromotedType(
                 ctBinaryOperator.getKind(),
                 inferTypeIfNeeded(ctBinaryOperator.getLeftHandOperand()),

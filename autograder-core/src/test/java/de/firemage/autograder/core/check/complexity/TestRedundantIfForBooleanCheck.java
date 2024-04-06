@@ -307,6 +307,32 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
+
+    @Test
+    void testInEquals() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    int a;
+
+                    @Override
+                    public boolean equals(Object other) {
+                        if (a == 0) {
+                            return a == 1;
+                        }
+
+                        return a == 2;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+
     @Test
     void testIgnoreInvalidIfWithValidElseIfElse() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(

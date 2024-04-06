@@ -76,7 +76,7 @@ public class CharRange extends IntegratedCheck {
         return Optional.ofNullable(MAPPING.get(range)).map(fn -> fn.suggest(
             ctExpression.getFactory(),
             ctExpression,
-            ctExpression.getFactory().Type().CHARACTER
+            ctExpression.getFactory().Type().characterType()
         ));
     }
 

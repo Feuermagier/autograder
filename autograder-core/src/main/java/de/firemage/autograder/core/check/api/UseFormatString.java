@@ -142,15 +142,15 @@ public class UseFormatString extends IntegratedCheck {
             && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
             && SpoonUtil.isSignatureEqualTo(
                 ctInvocation.getExecutable(),
-                typeFactory.STRING,
+                typeFactory.stringType(),
                 "lineSeparator"
             )) {
-            return SpoonUtil.makeLiteral(typeFactory.STRING, "\n");
+            return SpoonUtil.makeLiteral(typeFactory.stringType(), "\n");
         }
 
         if (ctExpression instanceof CtLiteral<?> ctLiteral
-            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral(typeFactory.CHARACTER_PRIMITIVE, '\n'))) {
-            return SpoonUtil.makeLiteral(typeFactory.STRING, "\n");
+            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral(typeFactory.characterPrimitiveType(), '\n'))) {
+            return SpoonUtil.makeLiteral(typeFactory.stringType(), "\n");
         }
 
         return ctExpression;

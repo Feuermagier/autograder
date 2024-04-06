@@ -53,7 +53,7 @@ class TestRedundantNegationCheck extends AbstractCheckTest {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
-            "public class Test { public void foo(%s) { System.out.println(%s); } }".formatted(
+            "public class Test { public void foo(%s) { var value = %s; } }".formatted(
                 arguments,
                 expression
             )
@@ -81,6 +81,29 @@ class TestRedundantNegationCheck extends AbstractCheckTest {
                 }
                 """
         ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testNestedUnnecessaryNegation() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+
+                public class Test {
+                    public void foo(int a, int b, int c) {
+                        if (a == 0 || a == 1 && !(b == 0 || b == 1)) {
+                            System.out.println("Hello");
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsRedundant(problems.next(), "(a == 0) || ((a == 1) && ((b != 0) && (b != 1)))");
 
         problems.assertExhausted();
     }

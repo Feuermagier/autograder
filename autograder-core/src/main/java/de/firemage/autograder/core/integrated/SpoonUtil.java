@@ -194,6 +194,13 @@ public final class SpoonUtil {
         return valLeft.longValue() == valRight.longValue();
     }
 
+    @SuppressWarnings("unchecked")
+    public static <T> CtLiteral<T> makeLiteralNumber(CtTypeReference<T> ctTypeReference, Number number) {
+        Object value = FoldUtils.convert(ctTypeReference, number);
+
+        return SpoonUtil.makeLiteral(ctTypeReference, (T) value);
+    }
+
     /**
      * Makes a new literal with the given value and type.
      *
@@ -360,7 +367,7 @@ public final class SpoonUtil {
         if (isCharacter.test(ctBinaryOperator.getRightHandOperand().getType())) {
             // for character use an integer literal
             step.setValue((char) 1);
-            step.setType(ctBinaryOperator.getFactory().Type().CHARACTER_PRIMITIVE);
+            step.setType(ctBinaryOperator.getFactory().Type().characterPrimitiveType());
         } else {
             // this assumes that < and > are only used with numbers
             step.setValue(FoldUtils.convert(ctBinaryOperator.getRightHandOperand().getType(), ((Number) 1).doubleValue()));
@@ -733,10 +740,17 @@ public final class SpoonUtil {
         CtExpression<?>... parameters
     ) {
         Factory factory = targetType.getFactory();
-        CtMethod<T> methodHandle = targetType.getTypeDeclaration().getMethod(
-            methodName,
-            Arrays.stream(parameters).map(SpoonUtil::getExpressionType).toArray(CtTypeReference[]::new)
-        );
+
+        CtMethod<T> methodHandle = null;
+        List<CtMethod<?>> potentialMethods = targetType.getTypeDeclaration().getMethodsByName(methodName);
+        if (potentialMethods.size() == 1) {
+            methodHandle = (CtMethod<T>) potentialMethods.get(0);
+        } else {
+            methodHandle = targetType.getTypeDeclaration().getMethod(
+                methodName,
+                Arrays.stream(parameters).map(SpoonUtil::getExpressionType).toArray(CtTypeReference[]::new)
+            );
+        }
 
         return factory.createInvocation(
             factory.createTypeAccess(methodHandle.getDeclaringType().getReference()),

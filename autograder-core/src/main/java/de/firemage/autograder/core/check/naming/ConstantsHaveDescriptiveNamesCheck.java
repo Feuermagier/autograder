@@ -201,7 +201,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                     && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
                     && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
                     && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "lineSeparator")) {
-                    literal = SpoonUtil.makeLiteral(field.getFactory().Type().STRING, "\n");
+                    literal = SpoonUtil.makeLiteral(field.getFactory().Type().stringType(), "\n");
                 } else {
                     return;
                 }

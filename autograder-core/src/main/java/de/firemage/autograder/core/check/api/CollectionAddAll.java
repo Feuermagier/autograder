@@ -39,6 +39,8 @@ import java.util.stream.Stream;
     ProblemType.COMMON_REIMPLEMENTATION_ADD_ALL
 })
 public class CollectionAddAll extends IntegratedCheck {
+    private static final int MIN_ADD_ALL_SIZE = 4;
+
     private record AddInvocation(
         CtVariableReference<?> collection,
         CtExecutableReference<?> executableReference,
@@ -117,9 +119,13 @@ public class CollectionAddAll extends IntegratedCheck {
             return;
         }
 
+        if (addedValues.size() < MIN_ADD_ALL_SIZE) {
+            return;
+        }
+
 
         addLocalProblem(
-            ctVariable,
+            addedValues.get(0).getParent(CtStatement.class),
             new LocalizedMessage(
                 "common-reimplementation",
                 Map.of(
