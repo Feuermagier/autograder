@@ -23,7 +23,7 @@ public class BooleanIdentifierCheck extends IntegratedCheck {
                 }
 
                 String methodName = ctMethod.getSimpleName();
-                if (ctMethod.getType().equals(ctMethod.getFactory().Type().createReference(boolean.class))
+                if (ctMethod.getType().equals(ctMethod.getFactory().Type().booleanPrimitiveType())
                     && methodName.startsWith("get")) {
                     String newName = "is" + methodName.substring(3);
                     addLocalProblem(

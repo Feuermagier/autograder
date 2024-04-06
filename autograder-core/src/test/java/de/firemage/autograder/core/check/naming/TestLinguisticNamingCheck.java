@@ -161,4 +161,20 @@ class TestLinguisticNamingCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testVariablesToIgnore() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    private static final String HAS_VALUE_REGEX = "value"; // ok
+                    private static final String HAS_VALUE_PATTERN = "value"; // ok
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

@@ -24,6 +24,7 @@ import java.util.Set;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONFUSING_IDENTIFIER })
 public class LinguisticNamingCheck extends IntegratedCheck {
+    private static final Set<String> IGNORE_VARIABLES_WITH = Set.of("regex", "pattern");
     private static final Set<String> COMMON_BOOLEAN_GETTER_PREFIXES = Set.of(
         "is", "are", "can", "could", "must", "has", "have", "does", "will", "should", "would",
         "takes", "looks", "uses", "finds"
@@ -55,6 +56,10 @@ public class LinguisticNamingCheck extends IntegratedCheck {
     }
 
     private <T> void checkCtVariable(CtVariable<T> ctVariable) {
+        if (IGNORE_VARIABLES_WITH.stream().anyMatch(s -> ctVariable.getSimpleName().toLowerCase().contains(s))) {
+            return;
+        }
+
         if (hasBooleanPrefix(ctVariable) && !SpoonUtil.isBoolean(ctVariable)) {
             this.reportProblem(
                 "linguistic-naming-boolean",
