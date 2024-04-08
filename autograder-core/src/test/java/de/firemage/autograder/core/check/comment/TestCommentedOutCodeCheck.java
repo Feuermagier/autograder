@@ -17,11 +17,14 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestCommentedOutCodeCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.COMMENTED_OUT_CODE);
 
-    void assertEqualsCode(Problem problem) {
+    void assertEqualsCode(Problem problem, int startLine, int endLine) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage("commented-out-code")),
             this.linter.translateMessage(problem.getExplanation())
         );
+        var position = problem.getPosition();
+        assertEquals(startLine, position.startLine());
+        assertEquals(endLine, position.endLine());
     }
 
     @Test
@@ -43,9 +46,9 @@ class TestCommentedOutCodeCheck extends AbstractCheckTest {
             PROBLEM_TYPES
         );
 
-        assertEqualsCode(problems.next());
-        assertEqualsCode(problems.next());
-        assertEqualsCode(problems.next());
+        assertEqualsCode(problems.next(), 2, 2);
+        assertEqualsCode(problems.next(), 4, 4);
+        assertEqualsCode(problems.next(), 6, 6);
 
         problems.assertExhausted();
     }
@@ -71,7 +74,41 @@ class TestCommentedOutCodeCheck extends AbstractCheckTest {
             PROBLEM_TYPES
         );
 
-        assertEqualsCode(problems.next());
+        assertEqualsCode(problems.next(), 2, 8);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCoalescing() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(
+            StringSourceInfo.fromSourceString(
+                JavaVersion.JAVA_17,
+                "Test",
+                """
+                    public class Test {
+                        // int a = b;
+
+                        // if (a) {
+                        //    print(a);
+                        // }
+                         // differentIndent();
+
+                        // while (true) {
+                        /*     a += 7;
+
+                             */ // another = one;
+                        // }
+                    }
+                    """
+            ),
+            PROBLEM_TYPES
+        );
+
+        assertEqualsCode(problems.next(), 2, 2);
+        assertEqualsCode(problems.next(), 4, 6);
+        assertEqualsCode(problems.next(), 7, 7);
+        assertEqualsCode(problems.next(), 9, 13);
 
         problems.assertExhausted();
     }
