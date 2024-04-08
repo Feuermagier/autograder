@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtParameter;
 
 import java.util.Map;
@@ -19,7 +20,10 @@ public class ReassignedParameterCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtParameter<?>>() {
             @Override
             public void process(CtParameter<?> ctParameter) {
-                if (ctParameter.isImplicit() || !ctParameter.getPosition().isValidPosition()) {
+                if (ctParameter.isImplicit()
+                    || !ctParameter.getPosition().isValidPosition()
+                    // reassignment in compact constructor is used to modify the future record field value
+                    || (ctParameter.getParent() instanceof CtConstructor<?> ctor && ctor.isCompactConstructor())) {
                     return;
                 }
 

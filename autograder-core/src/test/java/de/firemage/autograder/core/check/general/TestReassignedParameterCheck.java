@@ -82,6 +82,29 @@ class TestReassignedParameterCheck extends AbstractCheckTest {
     }
 
     @Test
+    void testRecordConstructor() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                record Test(int a) {
+                    Test {
+                        a = 1; //# ok
+                    }
+
+                    Test(int a, int b) {
+                        this(a);
+                        b = 3; //# not ok
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsReassigned(problems.next(), "b");
+        problems.assertExhausted();
+    }
+
+    @Test
     void testLambda() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
