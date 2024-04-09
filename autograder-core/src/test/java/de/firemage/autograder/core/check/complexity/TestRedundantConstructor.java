@@ -105,12 +105,27 @@ class TestRedundantConstructor extends AbstractCheckTest {
     }
 
     @Test
-    void testRedundantRecordNormalConstructor() throws IOException, LinterException {
+    void testRedundantEmptyRecordNormalConstructor() throws IOException, LinterException {
         assertRedundant(
             "Test",
             """
                 public record Test() {
                     public Test() {
+                    }
+                }
+                """
+        );
+    }
+
+    @Test
+    void testRedundantRecordNormalConstructor() throws IOException, LinterException {
+        assertRedundant(
+            "Test",
+            """
+                public record Test(int a, int b) {
+                    public Test(int a, int b) {
+                        this.b = b;
+                        this.a = a;
                     }
                 }
                 """
@@ -134,6 +149,37 @@ class TestRedundantConstructor extends AbstractCheckTest {
             "TestRecord",
             """
                 record TestRecord() {
+                }
+                """
+        );
+    }
+
+    @Test
+    void testNotRedundantRecordNormalConstructor() throws IOException, LinterException {
+        assertNotRedundant(
+            "Test",
+            """
+                public record Test(int a, int b) {
+                    public Test(int a, int b) {
+                        this.a = b;
+                        this.b = a;
+                    }
+                }
+                """
+        );
+    }
+
+    @Test
+    void testNotRedundantRecordNormalConstructor2() throws IOException, LinterException {
+        assertNotRedundant(
+            "Test",
+            """
+                public record Test(int a, int b) {
+                    public Test(int a, int b) {
+                        this.a = a;
+                        this.b = b;
+                        System.out.println();
+                    }
                 }
                 """
         );
