@@ -16,7 +16,7 @@ public class Test {
 
     class B implements A {
         @Override
-        public void call() {} /*# not ok #*/
+        public void call() {} /*# ok #*/
     }
 
     class C implements A {

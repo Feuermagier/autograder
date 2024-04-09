@@ -43,7 +43,7 @@ public class RedundantVariable extends IntegratedCheck {
             // it should not have any annotations (e.g. @SuppressWarnings("unchecked"))
             || !ctLocalVariable.getAnnotations().isEmpty()
             // the variable must only be used in the return statement
-            || SpoonUtil.findUsesOf(ctLocalVariable).size() != 1) {
+            || SpoonUtil.hasAnyUses(ctLocalVariable, ctElement -> ctElement.getParent(CtStatement.class) != ctStatement)) {
             return;
         }
 
