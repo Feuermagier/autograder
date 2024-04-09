@@ -21,6 +21,7 @@ import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLambda;
@@ -38,6 +39,7 @@ import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.CompoundSourcePosition;
 import spoon.reflect.declaration.CtCompilationUnit;
+import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtImport;
@@ -61,6 +63,7 @@ import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.Filter;
+import spoon.reflect.visitor.chain.CtQueryable;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
@@ -856,9 +859,10 @@ public final class SpoonUtil {
             return true;
         }
 
-        List<? extends CtVariableAccess<?>> variableUses = SpoonUtil.findUsesOf(ctVariable);
-
-        return variableUses.isEmpty() || variableUses.stream().noneMatch(variableAccess -> variableAccess instanceof CtVariableWrite<?>);
+        return !SpoonUtil.hasAnyUses(
+            ctVariable,
+            ctElement -> ctElement instanceof CtVariableWrite<?>
+        );
     }
 
     public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariable<T> ctVariable) {
@@ -1358,19 +1362,35 @@ public final class SpoonUtil {
         return SpoonUtil.findUses(ctExecutable);
     }
 
-    public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
-        return ctElement.getFactory().getModel()
+    private static boolean internalHasAnyUses(CtQueryable model, CtElement ctElement, Predicate<? super CtElement> predicate) {
+        // for local variables, one does not need to search the whole model
+        if (ctElement instanceof CtLocalVariable<?> ctLocalVariable && model == ctElement.getFactory().getModel()) {
+            CtBlock<?> parentBlock = ctLocalVariable.getParent(CtBlock.class);
+            if (parentBlock != null) {
+                return parentBlock
+                    .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
+                    .first(CtElement.class) != null;
+            }
+        }
+
+        return model
             .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
             .first(CtElement.class) != null;
+    }
+
+    public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
+        return internalHasAnyUses(ctElement.getFactory().getModel(), ctElement, predicate);
+    }
+
+    public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn) {
+        return hasAnyUsesIn(toSearchIn, ctElement, element -> true);
     }
 
     public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
-        return toSearchIn
-            .filterChildren(new CompositeFilter<>(FilteringOperator.INTERSECTION, predicate::test, new UsesFilter(ctElement)))
-            .first(CtElement.class) != null;
+        return internalHasAnyUses(toSearchIn, ctElement, predicate);
     }
 
-    public static List<CtElement> findUses(CtElement ctElement) {
+    private static List<CtElement> findUses(CtElement ctElement) {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }
 
