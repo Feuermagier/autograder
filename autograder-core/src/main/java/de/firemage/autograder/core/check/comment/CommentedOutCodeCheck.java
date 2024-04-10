@@ -18,6 +18,7 @@ import java.nio.file.Path;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedSet;
 import java.util.TreeSet;
 
@@ -26,6 +27,10 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
     private static final Comparator<SourcePosition> POSITION_COMPARATOR =
         Comparator.comparingInt(SourcePosition::getSourceStart);
     private static final Translatable MESSAGE = new LocalizedMessage("commented-out-code");
+    private static final Set<CtComment.CommentType> ALLOWED_COMMENT_TYPES = Set.of(
+        CtComment.CommentType.BLOCK,
+        CtComment.CommentType.INLINE
+    );
 
     @Override
     protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
@@ -34,6 +39,9 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtComment>() {
             @Override
             public void process(CtComment comment) {
+                if (!ALLOWED_COMMENT_TYPES.contains(comment.getCommentType())) {
+                    return;
+                }
                 String content = comment.getContent().trim();
 
                 if (StringUtils.containsAny(content, ';', '{', '}', '=')) {
