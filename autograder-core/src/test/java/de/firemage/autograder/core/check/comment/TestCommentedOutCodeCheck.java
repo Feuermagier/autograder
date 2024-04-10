@@ -112,4 +112,27 @@ class TestCommentedOutCodeCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testJavadoc() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(
+            StringSourceInfo.fromSourceString(
+                JavaVersion.JAVA_17,
+                "RunCommand",
+                """
+                     /**
+                     * This {@link RunCommand} executes a run on the target.
+                     * 
+                     * @author Programmieren-Team
+                     */
+                    public class RunCommand {
+                        // some comment
+                    }
+                    """
+            ),
+            PROBLEM_TYPES
+        );
+
+        problems.assertExhausted();
+    }
 }
