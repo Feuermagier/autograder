@@ -34,7 +34,34 @@ class TestRedundantConstructor extends AbstractCheckTest {
     }
 
     @Test
-    void testRedundantConstructorSuper() throws IOException, LinterException {
+    void testRedundantHigherVisibility() throws IOException, LinterException {
+        assertRedundant(
+            "Test",
+            """
+                class Test {
+                    public Test() {
+                    }
+                }
+                """
+        );
+    }
+
+    @Test
+    void testRedundantHigherVisibilityInner() throws IOException, LinterException {
+        assertRedundant(
+            "Outer",
+            """
+                public class Outer {
+                    private class Inner {
+                        Inner() {}
+                    }
+                }
+                """
+        );
+    }
+
+    @Test
+    void testRedundantExplicitSuper() throws IOException, LinterException {
         assertRedundant(
             "Test",
             """
@@ -56,6 +83,21 @@ class TestRedundantConstructor extends AbstractCheckTest {
                     public class Inner {
                         public Inner() {
                             super(/* test */);
+                        }
+                    }
+                }
+                """
+        );
+    }
+
+    @Test
+    void testRedundantConstructorStaticInner() throws IOException, LinterException {
+        assertRedundant(
+            "Test",
+            """
+                public class Test {
+                    private static class Inner {
+                        private Inner() {
                         }
                     }
                 }
@@ -213,6 +255,19 @@ class TestRedundantConstructor extends AbstractCheckTest {
     }
 
     @Test
+    void testNotRedundantThrows() throws IOException, LinterException {
+        assertNotRedundant(
+            "Test",
+            """
+                public class Test {
+                    public Test() throws java.io.IOException {
+                    }
+                }
+                """
+        );
+    }
+
+    @Test
     void testNotRedundantConstructorSuperArgs() throws IOException, LinterException {
         assertRedundant(
             StringSourceInfo.fromSourceStrings(JavaVersion.JAVA_17, Map.of(
@@ -228,6 +283,58 @@ class TestRedundantConstructor extends AbstractCheckTest {
                     public class Child extends Base {
                         public Child() {
                             super("foo");
+                        }
+                    }
+                    """
+            )),
+            false
+        );
+    }
+
+    @Test
+    void testNotRedundantQualifiedSuper() throws IOException, LinterException {
+        // taken from JLS example 8.8.7.1-2
+        assertRedundant(
+            StringSourceInfo.fromSourceStrings(JavaVersion.JAVA_17, Map.of(
+                "Outer",
+                """
+                    class Outer {
+                        class Inner {}
+                    }
+                    """,
+                "Child",
+                """
+                    class Child extends Outer.Inner {
+                        Child() {
+                            (new Outer()).super();
+                        }
+                    }
+                    """
+            )),
+            false
+        );
+    }
+
+    @Test
+    void testNotRedundantConstructorProtectedInnerClass() throws IOException, LinterException {
+        // Taken from JLS example 8.8.9-2
+        assertRedundant(
+            StringSourceInfo.fromSourceStrings(JavaVersion.JAVA_17, Map.of(
+                "a.Outer",
+                """
+                    package a;
+                    public class Outer {
+                        protected class Inner {
+                            public Inner() {}
+                        }
+                    }
+                    """,
+                "b.Child",
+                """
+                    package b;
+                    public class Child extends a.Outer {
+                        void foo() {
+                            new Inner();
                         }
                     }
                     """

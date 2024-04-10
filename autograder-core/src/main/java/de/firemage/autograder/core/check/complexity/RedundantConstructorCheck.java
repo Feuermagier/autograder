@@ -10,8 +10,16 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.*;
-import spoon.reflect.declaration.*;
+import spoon.reflect.code.CtAssignment;
+import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtFieldWrite;
+import spoon.reflect.code.CtInvocation;
+import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.declaration.CtClass;
+import spoon.reflect.declaration.CtConstructor;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
+import spoon.reflect.declaration.CtRecord;
 import spoon.reflect.reference.CtParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 
@@ -37,7 +45,7 @@ public class RedundantConstructorCheck extends IntegratedCheck {
                     var canonicalCtor = record.getConstructor(types);
 
                     if (!canonicalCtor.isImplicit()
-                        && hasDefaultVisibility(record, canonicalCtor)
+                        && hasEffectivelyDefaultVisibility(record, canonicalCtor)
                         && isDefaultBodyRecord(record, canonicalCtor)) {
                         redundantCtor = canonicalCtor;
                     }
@@ -48,7 +56,7 @@ public class RedundantConstructorCheck extends IntegratedCheck {
 
                     if (!ctor.isImplicit()
                         && ctor.getParameters().isEmpty()
-                        && hasDefaultVisibility(element, ctor)
+                        && hasEffectivelyDefaultVisibility(element, ctor)
                         && isDefaultBody(ctor.getBody())
                         && ctor.getThrownTypes().isEmpty()) {
                         redundantCtor = ctor;
@@ -61,9 +69,22 @@ public class RedundantConstructorCheck extends IntegratedCheck {
         });
     }
 
-    private boolean hasDefaultVisibility(CtClass<?> type, CtConstructor<?> ctor) {
+    /**
+     * Checks if the constructor visibility is effectively the same as the class
+     * visibility.
+     * <p>
+     * A constructor with higher visibility than the containing class is only ever useful
+     * with a protected (inner) class, because it can allow the class to be instantiated
+     * from a different package.
+     */
+    private boolean hasEffectivelyDefaultVisibility(CtClass<?> type, CtConstructor<?> ctor) {
         // enum constructors are always private
-        return type.isEnum() || ctor.getVisibility() == type.getVisibility();
+        if (type.isEnum() || type.isPrivate()) return true;
+
+        if (type.isPublic()) return ctor.isPublic();
+        else if (type.isProtected()) return ctor.isProtected();
+        // package-access class, only private is smaller
+        else return !ctor.isPrivate();
     }
 
     private boolean isDefaultBody(CtBlock<?> block) {
@@ -74,9 +95,12 @@ public class RedundantConstructorCheck extends IntegratedCheck {
             // A constructor invocation is either this or super.
             // Because we know we are analyzing the body of a no-args constructor, it
             // cannot be a recursive this() call, but has to be a redundant super() call.
+            // If the target is not null it is a qualified super invocation, which is
+            // required and not redundant.
             .allMatch(statement -> statement instanceof CtInvocation<?> invocation
                 && invocation.getExecutable().isConstructor()
-                && invocation.getArguments().isEmpty());
+                && invocation.getArguments().isEmpty()
+                && invocation.getTarget() == null);
     }
 
     private boolean isDefaultBodyRecord(CtRecord record, CtConstructor<?> ctor) {
