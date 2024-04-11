@@ -99,6 +99,10 @@ public class LinguisticNamingCheck extends IntegratedCheck {
             return;
         }
 
+        if (ctMethod.getBody() == null) {
+            return;
+        }
+
         if (prefix.equals("set") && isInvalidSetterReturnType(ctMethod) && SpoonUtil.getEffectiveStatements(ctMethod.getBody()).size() <= 3) {
             // it is expected that a setter returns nothing (void)
             this.reportProblem(
