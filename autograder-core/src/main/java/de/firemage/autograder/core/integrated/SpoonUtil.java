@@ -85,6 +85,7 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
+import java.util.StringJoiner;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -1394,6 +1395,16 @@ public final class SpoonUtil {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
     }
 
+    private static <T> int referenceIndexOf(List<T> list, T element) {
+        for (int i = 0; i < list.size(); i++) {
+            if (list.get(i) == element) {
+                return i;
+            }
+        }
+
+        return -1;
+    }
+
     /**
      * Finds the statement that is before the given statement if possible.
      *
@@ -1403,7 +1414,7 @@ public final class SpoonUtil {
     public static Optional<CtStatement> getPreviousStatement(CtStatement ctStatement) {
         if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
             List<CtStatement> statements = ctStatementList.getStatements();
-            int index = statements.indexOf(ctStatement);
+            int index = referenceIndexOf(statements, ctStatement);
 
             if (index > 0) {
                 return Optional.of(statements.get(index - 1));
@@ -1417,7 +1428,7 @@ public final class SpoonUtil {
         List<CtStatement> result = new ArrayList<>();
         if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
             List<CtStatement> statements = ctStatementList.getStatements();
-            int index = statements.indexOf(ctStatement);
+            int index = referenceIndexOf(statements, ctStatement);
 
             if (index > 0) {
                 result.addAll(statements.subList(index + 1, statements.size()));
@@ -1425,6 +1436,30 @@ public final class SpoonUtil {
         }
 
         return result;
+    }
+
+    public static String truncatedSuggestion(CtElement ctElement) {
+        StringJoiner result = new StringJoiner(System.lineSeparator());
+
+        for (String line : ctElement.toString().split("\\r?\\n")) {
+            if (result.length() > 150) {
+                if (line.startsWith(" ")) {
+                    result.add("...".indent(line.length() - line.stripIndent().length()).stripTrailing());
+                } else {
+                    result.add("...");
+                }
+
+                if (result.toString().startsWith("{")) {
+                    result.add("}");
+                }
+
+                break;
+            }
+
+            result.add(line);
+        }
+
+        return result.toString();
     }
 
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
