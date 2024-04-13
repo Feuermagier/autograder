@@ -357,7 +357,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedConstructor() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -373,8 +373,9 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(1, problems);
-        assertEqualsUnused("Main()", problems.get(0));
+        assertEqualsUnused("Main()", problems.next());
+
+        problems.assertExhausted();
     }
 
     @Test
@@ -760,6 +761,129 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
                                 //                 ^ variable reference .getDeclaration() returns null here, which is a bug in Spoon
                             }
                         }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testImplicitConstructorCall() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            Parent parent = new Child();
+                            System.out.println(parent);
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Parent",
+                    """
+                    public class Parent {
+                        protected Parent() {
+                            System.out.println("Called Parent Constructor");
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Child",
+                    """
+                    public class Child extends Parent {
+                        public Child() {
+                            // implicit super() call
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testExplicitSuperConstructorCall() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            Parent parent = new Child();
+                            System.out.println(parent);
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Parent",
+                    """
+                    public class Parent {
+                        protected Parent() {
+                            System.out.println("Called Parent Constructor");
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Child",
+                    """
+                    public class Child extends Parent {
+                        public Child() {
+                            super();
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testImplicitConstructorCallWithoutConstructor() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    public class Main {
+                        public static void main(String[] args) {
+                            Parent parent = new Child();
+                            System.out.println(parent);
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Parent",
+                    """
+                    public class Parent {
+                        protected Parent() {
+                            System.out.println("Called Parent Constructor");
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Child",
+                    """
+                    public class Child extends Parent {
                     }
                     """
                 )
