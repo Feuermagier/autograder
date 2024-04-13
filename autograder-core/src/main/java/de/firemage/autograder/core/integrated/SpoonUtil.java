@@ -1442,7 +1442,14 @@ public final class SpoonUtil {
         StringJoiner result = new StringJoiner(System.lineSeparator());
 
         for (String line : ctElement.toString().split("\\r?\\n")) {
-            if (result.length() > 150) {
+            int newLineLength = 0;
+
+            // this ensures that the truncation is the same on linux and windows
+            if (!result.toString().contains("\r\n")) {
+                newLineLength += (int) result.toString().chars().filter(ch -> ch == '\n').count();
+            }
+
+            if (result.length() + newLineLength > 150) {
                 if (line.startsWith(" ")) {
                     result.add("...".indent(line.length() - line.stripIndent().length()).stripTrailing());
                 } else {
