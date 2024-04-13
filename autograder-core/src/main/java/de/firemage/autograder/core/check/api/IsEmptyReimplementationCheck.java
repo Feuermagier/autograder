@@ -135,19 +135,19 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
             // f() <= 0    : isEmpty
             case EQ, LE -> {
                 if (isZero) {
-                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.prettyprint(), suggestion.prettyprint(), problemType);
+                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), suggestion.toString(), problemType);
                 }
             }
             // f() != 0    : !isEmpty
             case NE -> {
                 if (isZero) {
-                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.prettyprint(), SpoonUtil.negate(suggestion).prettyprint(), problemType);
+                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), SpoonUtil.negate(suggestion).toString(), problemType);
                 }
             }
             // f() >= 1    : !isEmpty
             case GE -> {
                 if (isOne) {
-                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.prettyprint(), SpoonUtil.negate(suggestion).prettyprint(), problemType);
+                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), SpoonUtil.negate(suggestion).toString(), problemType);
                 }
             }
         }
@@ -156,12 +156,12 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
     private void checkEqualsCall(CtExpression<?> target, CtInvocation<?> ctInvocation, ProblemType problemType) {
         CtExpression<?> argument = ctInvocation.getArguments().get(0);
         if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(argument), "")) {
-            this.reportProblem(ctInvocation, ctInvocation.prettyprint(), buildIsEmptySuggestion(target).prettyprint(), problemType);
+            this.reportProblem(ctInvocation, ctInvocation.toString(), buildIsEmptySuggestion(target).toString(), problemType);
         }
 
         // detect "".equals(s)
         if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(target), "")) {
-            this.reportProblem(ctInvocation, ctInvocation.prettyprint(), buildIsEmptySuggestion(argument).prettyprint(), problemType);
+            this.reportProblem(ctInvocation, ctInvocation.toString(), buildIsEmptySuggestion(argument).toString(), problemType);
         }
     }
 

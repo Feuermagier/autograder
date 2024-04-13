@@ -58,10 +58,10 @@ public class UseArraysFill extends IntegratedCheck {
         }
 
         String suggestion = "Arrays.fill(%s, %s, %s, %s)".formatted(
-            ctArrayWrite.getTarget().prettyprint(),
-            forLoopRange.start().prettyprint(),
-            forLoopRange.end().prettyprint(),
-            ctAssignment.getAssignment().prettyprint()
+            ctArrayWrite.getTarget(),
+            forLoopRange.start(),
+            forLoopRange.end(),
+            ctAssignment.getAssignment()
         );
         if (forLoopRange.start() instanceof CtLiteral<Integer> ctLiteral
             && ctLiteral.getValue() == 0
@@ -69,8 +69,8 @@ public class UseArraysFill extends IntegratedCheck {
             && ctArrayWrite.getTarget().equals(fieldAccess.getTarget())
             && fieldAccess.getVariable().getSimpleName().equals("length")) {
             suggestion = "Arrays.fill(%s, %s)".formatted(
-                ctArrayWrite.getTarget().prettyprint(),
-                ctAssignment.getAssignment().prettyprint()
+                ctArrayWrite.getTarget(),
+                ctAssignment.getAssignment()
             );
         }
 

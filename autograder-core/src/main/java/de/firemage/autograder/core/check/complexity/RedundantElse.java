@@ -84,8 +84,8 @@ public class RedundantElse extends IntegratedCheck {
             new LocalizedMessage(
                 "redundant-else",
                 Map.of(
-                    "expected", "if (a) { ... %s; }%s elseCode;".formatted(effect.ctStatement().prettyprint(), elseIf),
-                    "given", "if (a) { ... %s; }%s else { elseCode; }".formatted(effect.ctStatement().prettyprint(), elseIf)
+                    "expected", "if (a) { ... %s; }%s elseCode;".formatted(effect.ctStatement(), elseIf),
+                    "given", "if (a) { ... %s; }%s else { elseCode; }".formatted(effect.ctStatement(), elseIf)
                 )
             ),
             ProblemType.REDUNDANT_ELSE

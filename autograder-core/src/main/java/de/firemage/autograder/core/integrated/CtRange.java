@@ -50,7 +50,7 @@ public record CtRange<T extends Comparable<T>>(
                 lowerBound = exprLiteral.getValue();
             }
 
-            return Range.between(lowerBound, this.ctLiteral.getValue());
+            return Range.of(lowerBound, this.ctLiteral.getValue());
         } else if (this.operator == BinaryOperatorKind.GE) {
             // <expr> >= <literal>
             T upperBound = SpoonUtil.maximumValue(this.ctLiteral).getValue();
@@ -58,7 +58,7 @@ public record CtRange<T extends Comparable<T>>(
                 upperBound = exprLiteral.getValue();
             }
 
-            return Range.between(this.ctLiteral.getValue(), upperBound);
+            return Range.of(this.ctLiteral.getValue(), upperBound);
         } else {
             throw new IllegalStateException("Unsupported operator: " + this.operator);
         }

@@ -10,6 +10,7 @@ import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
 import org.apache.commons.compress.utils.FileNameUtils;
+import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAbstractInvocation;
@@ -71,6 +72,7 @@ import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
+import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1603,7 +1605,14 @@ public final class SpoonUtil {
      * @return a human-readable string representation of the source position
      */
     public static String formatSourcePosition(SourcePosition sourcePosition) {
-        return String.format("%s:L%d", FileNameUtils.getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
+        return String.format("%s:L%d", getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
+    }
+
+    private static String getBaseName(String fileName) {
+        if (fileName == null) {
+            return null;
+        }
+        return FilenameUtils.removeExtension(new File(fileName).getName());
     }
 
     public static SourcePosition getNamePosition(CtNamedElement ctNamedElement) {

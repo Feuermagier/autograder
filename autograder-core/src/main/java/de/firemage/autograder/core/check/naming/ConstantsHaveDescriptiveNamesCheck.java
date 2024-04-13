@@ -216,7 +216,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                             "constants-name-exp",
                             Map.of(
                                 "name", field.getSimpleName(),
-                                "value", field.getDefaultExpression().prettyprint()
+                                "value", field.getDefaultExpression()
                             )
                         ),
                         ProblemType.MEANINGLESS_CONSTANT_NAME
@@ -228,7 +228,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                             "constants-name-exp-value",
                             Map.of(
                                 "name", field.getSimpleName(),
-                                "value", field.getDefaultExpression().prettyprint()
+                                "value", field.getDefaultExpression()
                             )
                         ),
                         ProblemType.CONSTANT_NAME_CONTAINS_VALUE

@@ -66,7 +66,7 @@ public class AvoidRecompilingRegex extends IntegratedCheck {
                         new LocalizedMessage(
                             "avoid-recompiling-regex",
                             Map.of(
-                                "suggestion", "Pattern.compile(" + ctExpression.prettyprint() + ")"
+                                "suggestion", "Pattern.compile(" + ctExpression + ")"
                             )
                         ),
                         ProblemType.AVOID_RECOMPILING_REGEX

@@ -42,7 +42,7 @@ public class ChainedIfCheck extends IntegratedCheck {
                                     ctIf.getCondition(),
                                     nestedIf.getCondition(),
                                     spoon.reflect.code.BinaryOperatorKind.AND
-                                ).prettyprint()
+                                )
                             )
                         ),
                         ProblemType.MERGE_NESTED_IF

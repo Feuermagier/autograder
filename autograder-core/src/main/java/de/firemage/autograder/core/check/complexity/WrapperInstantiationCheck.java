@@ -40,7 +40,7 @@ public class WrapperInstantiationCheck extends IntegratedCheck {
                 if (isPrimitiveWrapper(boxedType) && ctConstructorCall.getArguments().size() == 1) {
                     // the primitive wrapper constructors should all have exactly one argument
                     CtExpression<?> value = ctConstructorCall.getArguments().get(0);
-                    String suggestion = "%s".formatted(value.prettyprint());
+                    String suggestion = "%s".formatted(value);
 
                     // check if the argument is not the unboxed type
                     // for example Integer(String)
@@ -54,7 +54,7 @@ public class WrapperInstantiationCheck extends IntegratedCheck {
                             "suggest-replacement",
                             Map.of(
                                 "suggestion", suggestion,
-                                "original", ctConstructorCall.prettyprint()
+                                "original", ctConstructorCall
                             )
                         ),
                         ProblemType.PRIMITIVE_WRAPPER_INSTANTIATION

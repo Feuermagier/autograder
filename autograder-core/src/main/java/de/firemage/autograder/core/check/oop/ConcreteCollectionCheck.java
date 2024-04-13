@@ -192,7 +192,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             new LocalizedMessage(
                 "concrete-collection",
                 Map.of(
-                    "type", ctTypeReference.prettyprint()
+                    "type", ctTypeReference
                 )
             ),
             ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE
