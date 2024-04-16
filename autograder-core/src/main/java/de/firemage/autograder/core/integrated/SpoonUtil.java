@@ -622,6 +622,10 @@ public final class SpoonUtil {
     }
 
     public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {
+        if (ctStatement == null) {
+            return List.of();
+        }
+
         if (ctStatement instanceof CtStatementList ctStatementList) {
             return getEffectiveStatements(ctStatementList.getStatements());
         }
@@ -1461,7 +1465,7 @@ public final class SpoonUtil {
     }
 
     public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn) {
-        return hasAnyUsesIn(toSearchIn, ctElement, element -> true);
+        return hasAnyUsesIn(ctElement, toSearchIn, element -> true);
     }
 
     public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
