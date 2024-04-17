@@ -199,7 +199,7 @@ public class CollectionAddAll extends IntegratedCheck {
                 return;
             }
 
-            String addAllArg = ctFor.getExpression().prettyprint();
+            String addAllArg = ctFor.getExpression().toString();
             if (ctFor.getExpression().getType().isArray()) {
                 addAllArg = "Arrays.asList(%s)".formatted(addAllArg);
             }
@@ -211,7 +211,7 @@ public class CollectionAddAll extends IntegratedCheck {
                     "common-reimplementation",
                     Map.of(
                         "suggestion", "%s.addAll(%s)".formatted(
-                            ctInvocation.getTarget().prettyprint(),
+                            ctInvocation.getTarget(),
                             addAllArg
                         )
                     )

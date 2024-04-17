@@ -200,6 +200,9 @@ object-datatype = Instead of the datatype 'Object', the variable '{$variable}' s
 
 magic-string = The string '{$value}' should be in a constant. See the wiki article for magic strings.
 
+loop-should-be-do-while = This loop should be a do-while loop, because the code before the loop is the same as the code in the loop: {$suggestion}
+
+loop-should-be-for = This loop should be a for-loop: {$suggestion}
 
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.

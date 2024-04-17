@@ -47,11 +47,11 @@ public class UseArrayCopy extends IntegratedCheck {
                     Map.of(
                         // System.arraycopy(src, srcPos, dest, destPos, length)
                         "suggestion", "System.arraycopy(%s, %s, %s, %s, %s)".formatted(
-                            rhs.getTarget().prettyprint(),
-                            forLoopRange.start().prettyprint(),
-                            lhs.getTarget().prettyprint(),
-                            forLoopRange.start().prettyprint(),
-                            forLoopRange.length().prettyprint()
+                            rhs.getTarget(),
+                            forLoopRange.start(),
+                            lhs.getTarget(),
+                            forLoopRange.start(),
+                            forLoopRange.length()
                         )
                     )
                 ),

@@ -38,7 +38,7 @@ public class RedundantBooleanEqual extends IntegratedCheck {
             new LocalizedMessage(
                 "redundant-boolean-equal",
                 Map.of(
-                    "suggestion", suggestion.prettyprint()
+                    "suggestion", suggestion
                 )
             ),
             ProblemType.REDUNDANT_BOOLEAN_EQUAL

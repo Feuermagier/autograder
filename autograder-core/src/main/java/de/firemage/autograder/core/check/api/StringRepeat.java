@@ -56,7 +56,7 @@ public class StringRepeat extends IntegratedCheck {
                     Map.of(
                         // string.repeat(count)
                         "suggestion", "%s += %s".formatted(
-                            lhs.prettyprint(),
+                            lhs,
                             rhs.getFactory().createInvocation(
                                 rhs.clone(),
                                 rhs.getFactory().Type().get(java.lang.String.class)
@@ -64,7 +64,7 @@ public class StringRepeat extends IntegratedCheck {
                                     .getReference()
                                     .clone(),
                                 forLoopRange.length().clone()
-                            ).prettyprint())
+                            ))
                     )
                 ),
                 ProblemType.COMMON_REIMPLEMENTATION_STRING_REPEAT

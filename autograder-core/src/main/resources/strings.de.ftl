@@ -200,6 +200,10 @@ object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}'
 
 magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden. Siehe Wiki Artikel zu Magic Strings.
 
+loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
+
+loop-should-be-for = Diese Schleife sollte eine Zählschleife (for) sein: {$suggestion}
+
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
