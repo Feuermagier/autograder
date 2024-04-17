@@ -8,7 +8,7 @@ class A1Test {
     @Test
     void testA1() {
         // Only checks whether the autograder fails
-        int returnCode = Application.runApplication("../sample_config.yaml", "../test_submissions/A1/code", "-j", "17", "-s");
+        int returnCode = Application.runApplication("../sample_config.yaml", "../test_submissions/A1/code", "-j", "17");
         assertEquals(0, returnCode);
     }
 }
