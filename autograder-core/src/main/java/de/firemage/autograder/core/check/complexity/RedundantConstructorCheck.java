@@ -4,7 +4,6 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.Translatable;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import org.slf4j.Logger;
@@ -31,7 +30,7 @@ public class RedundantConstructorCheck extends IntegratedCheck {
     private static final Translatable MESSAGE = new LocalizedMessage("implicit-constructor-exp");
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
             public void process(CtClass<?> element) {

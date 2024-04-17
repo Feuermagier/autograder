@@ -5,8 +5,6 @@ status-pmd = Running PMD
 status-cpd = Running Copy/Paste-Detection
 status-error-prone = Running error-prone
 status-model = Building the code model
-status-docker = Building the Docker image
-status-tests = Executing tests
 status-integrated = Running integrated analysis
 
 # Linters
@@ -71,8 +69,6 @@ javadoc-method-exp-param-unknown = The JavaDoc comment mentions the parameter '{
 javadoc-unexpected-tag = The JavaDoc comment should not have an '@{$tag}' tag.
 
 javadoc-type-exp-invalid-author = The @author tag should contain your u-shorthand: {$authors}
-
-javadoc-return-null-exp = The method {$method} may return null but the @return tag doesn't mention it
 
 javadoc-stub-exp-desc = Javadoc has an empty description
 javadoc-stub-exp-param = Stub description for parameter {$param}
@@ -160,8 +156,6 @@ constants-interfaces-exp = Interfaces must not have fields
 reassigned-parameter = The parameter '{$name}' should not be assigned a new value.
 
 double-brace-init = Don't use the obscure 'double brace initialization' syntax
-
-field-local-exp = Field '{$field}' of class {$class} should be converted to a local variable as every method overwrites it before reading it
 
 missing-override = '{$name}' should have an '@Override'-annotation, see https://stackoverflow.com/a/94411/7766117.
 

@@ -22,7 +22,6 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public class CheckTest {
-    private static final boolean ENABLE_DYNAMIC = false;
     // an empty list means that all tests should be executed
     // this is useful for debugging/executing only relevant tests
     //
@@ -77,15 +76,6 @@ public class CheckTest {
             }
         }
 
-        /**
-         * Checks if the test is dynamic or static.
-         *
-         * @return true if the test is dynamic, false otherwise
-         */
-        public boolean isDynamic() {
-            return Files.exists(this.path.resolve("tests"));
-        }
-
         public String testName() {
             return "Check E2E Test: %s".formatted(this.config.description());
         }
@@ -104,7 +94,7 @@ public class CheckTest {
         TempLocation tempLocation = TempLocation.random();
 
         return DynamicTest.stream(
-            folders.stream().map(TestInput::fromPath).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
+            folders.stream().map(TestInput::fromPath)
                 .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
             TestInput::testName,
             testInput -> {
@@ -119,7 +109,6 @@ public class CheckTest {
                         }, null
                     );
                     var linter = Linter.builder(Locale.US)
-                        .enableDynamicAnalysis(ENABLE_DYNAMIC && testInput.isDynamic())
                         .threads(1) // Use a single thread for performance reasons
                         .tempLocation(tmpDirectory)
                         .build();

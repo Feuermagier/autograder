@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.comment;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -14,7 +13,7 @@ import spoon.reflect.code.CtStatement;
 @ExecutableCheck(reportedProblems = { ProblemType.UNNECESSARY_COMMENT })
 public class UnnecessaryComment extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtComment>() {
             @Override
             public void process(CtComment ctComment) {

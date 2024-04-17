@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.unnecessary;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -99,7 +98,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtLocalVariable(CtLocalVariable<T> ctLocalVariable) {

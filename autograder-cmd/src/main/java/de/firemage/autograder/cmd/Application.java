@@ -69,10 +69,6 @@ public class Application implements Callable<Integer> {
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
 
-    @Option(names = {"-s",
-            "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
-    private boolean staticOnly;
-
     @Option(names = {
             "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
     private boolean artemisFolders;
@@ -244,12 +240,6 @@ public class Application implements Callable<Integer> {
             System.out.println("Student source code directory is " + file);
         }
 
-        boolean isDynamicAnalysisEnabled = !this.staticOnly && !this.tests.toString().equals("");
-        if (!isDynamicAnalysisEnabled && !outputJson) {
-            CmdUtil.println("Note: Dynamic analysis is disabled.");
-            CmdUtil.println();
-        }
-
         List<ProblemType> checks;
         try {
             checks = this.getChecks();
@@ -261,7 +251,6 @@ public class Application implements Callable<Integer> {
         Linter linter = Linter.builder(Locale.GERMANY)
             .threads(0)
             .tempLocation(this.tempLocation)
-            .enableDynamicAnalysis(isDynamicAnalysisEnabled)
             .maxProblemsPerCheck(this.maxProblemsPerCheck)
             .exclude(problem -> this.exludedClasses.contains(problem.getPosition().file().getName().replace(".java", "")))
             .build();

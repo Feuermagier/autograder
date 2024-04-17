@@ -43,7 +43,6 @@ public final class Linter {
     private final int threads;
     private final TempLocation tempLocation;
     private final FluentBundle fluentBundle;
-    private final boolean disableDynamicAnalysis;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
     private final Predicate<Problem> isExcluded;
@@ -52,7 +51,6 @@ public final class Linter {
         Locale locale,
         TempLocation tempLocation,
         int threads,
-        boolean disableDynamicAnalysis,
         ClassLoader classLoader,
         int maxProblemsPerCheck,
         Predicate<Problem> isExcluded
@@ -73,7 +71,6 @@ public final class Linter {
 
         this.tempLocation = tempLocation;
         this.threads = threads;
-        this.disableDynamicAnalysis = disableDynamicAnalysis;
         this.classLoader = classLoader;
         this.maxProblemsPerCheck = maxProblemsPerCheck;
         this.isExcluded = isExcluded;
@@ -83,7 +80,6 @@ public final class Linter {
         private final Locale locale;
         private TempLocation tempLocation;
         private int threads;
-        private boolean disableDynamicAnalysis = true;
         private ClassLoader classLoader;
         private int maxProblemsPerCheck = -1;
         private Predicate<Problem> isExcluded;
@@ -108,15 +104,6 @@ public final class Linter {
             return this;
         }
 
-        public Builder enableDynamicAnalysis() {
-            return this.enableDynamicAnalysis(true);
-        }
-
-        public Builder enableDynamicAnalysis(boolean shouldEnable) {
-            this.disableDynamicAnalysis = !shouldEnable;
-            return this;
-        }
-
         public Builder classLoader(ClassLoader classLoader) {
             this.classLoader = classLoader;
             return this;
@@ -138,7 +125,6 @@ public final class Linter {
                 this.locale,
                 tempLocation,
                 this.threads,
-                this.disableDynamicAnalysis,
                 this.classLoader,
                 this.maxProblemsPerCheck,
                 this.isExcluded
@@ -237,9 +223,6 @@ public final class Linter {
             if (!integratedChecks.isEmpty()) {
                 scheduler.submitTask((s, reporter) -> {
                     IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
-                    if (!this.disableDynamicAnalysis) {
-                        analysis.runDynamicAnalysis(tests, statusConsumer);
-                    }
                     analysis.lint(integratedChecks, statusConsumer, s);
                 });
             }

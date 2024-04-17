@@ -65,8 +65,6 @@ class TestLocalizedStrings {
         "status-pmd",
         "status-cpd",
         "status-model",
-        "status-docker",
-        "status-tests",
         "status-integrated",
         "linter-cpd",
         "linter-spotbugs",

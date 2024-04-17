@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -119,7 +118,7 @@ public class IOUISeparation extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         CtModel ctModel = staticAnalysis.getModel();
 
         // Check if all types are in one package. If they are, all io/ui should be in one class, otherwise in one package.

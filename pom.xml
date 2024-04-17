@@ -83,21 +83,6 @@
         <dependencies>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
-                <artifactId>autograder-event</artifactId>
-                <version>0.5.35</version>
-            </dependency>
-            <dependency>
-                <groupId>de.firemage.autograder</groupId>
-                <artifactId>autograder-agent</artifactId>
-                <version>0.5.35</version>
-            </dependency>
-            <dependency>
-                <groupId>de.firemage.autograder</groupId>
-                <artifactId>autograder-executor</artifactId>
-                <version>0.5.35</version>
-            </dependency>
-            <dependency>
-                <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-core</artifactId>
                 <version>0.5.35</version>
             </dependency>
@@ -246,9 +231,6 @@
             <modules>
                 <module>autograder-core</module>
                 <module>autograder-cmd</module>
-                <module>autograder-executor</module>
-                <module>autograder-event</module>
-                <module>autograder-agent</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
             </modules>
@@ -262,9 +244,6 @@
             <modules>
                 <module>autograder-core</module>
                 <module>autograder-cmd</module>
-                <module>autograder-executor</module>
-                <module>autograder-event</module>
-                <module>autograder-agent</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
             </modules>
