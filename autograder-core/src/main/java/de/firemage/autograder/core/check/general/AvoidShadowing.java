@@ -89,7 +89,9 @@ public class AvoidShadowing extends IntegratedCheck {
                 Collection<CtFieldReference<?>> visibleFields = getAllVisibleFields(parent);
 
                 List<CtFieldReference<?>> hiddenFields = visibleFields.stream()
+                    // ignore fields that are allowed to be hidden
                     .filter(ctFieldReference -> !ALLOWED_FIELDS.contains(ctFieldReference.getSimpleName()))
+                    // only keep fields that have the same name as the variable, but are not the same field
                     .filter(ctFieldReference -> ctFieldReference.getSimpleName().equals(ctVariable.getSimpleName())
                         && !ctFieldReference.equals(ctVariable.getReference()))
                     .toList();
