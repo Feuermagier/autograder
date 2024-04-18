@@ -38,7 +38,7 @@ public class CharRange extends IntegratedCheck {
     }
 
     private static final Map<Range<Character>, Suggester<Character, Boolean>> MAPPING = Map.of(
-        Range.between('a', 'z'), (factory, ctExpression, targetType) -> factory.createBinaryOperator(
+        Range.of('a', 'z'), (factory, ctExpression, targetType) -> factory.createBinaryOperator(
             SpoonUtil.createStaticInvocation(
                 targetType,
                 "isAlphabetic",
@@ -51,7 +51,7 @@ public class CharRange extends IntegratedCheck {
             ),
             BinaryOperatorKind.AND
         ),
-        Range.between('A', 'Z'), (factory, ctExpression, targetType) -> factory.createBinaryOperator(
+        Range.of('A', 'Z'), (factory, ctExpression, targetType) -> factory.createBinaryOperator(
             SpoonUtil.createStaticInvocation(
                 targetType,
                 "isAlphabetic",
@@ -64,7 +64,7 @@ public class CharRange extends IntegratedCheck {
             ),
             BinaryOperatorKind.AND
         ),
-        Range.between('0', '9'), (factory, ctExpression, targetType) -> SpoonUtil.createStaticInvocation(
+        Range.of('0', '9'), (factory, ctExpression, targetType) -> SpoonUtil.createStaticInvocation(
             targetType,
             "isDigit",
             SpoonUtil.castExpression(char.class, ctExpression)
@@ -139,7 +139,7 @@ public class CharRange extends IntegratedCheck {
                         ctBinaryOperator,
                         new LocalizedMessage(
                             "common-reimplementation",
-                            Map.of("suggestion", suggestion.prettyprint())
+                            Map.of("suggestion", suggestion)
                         ),
                         ProblemType.CHAR_RANGE
                     );

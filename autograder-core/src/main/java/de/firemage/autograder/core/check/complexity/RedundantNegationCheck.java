@@ -57,7 +57,7 @@ public class RedundantNegationCheck extends IntegratedCheck {
                     ctExpression,
                     new LocalizedMessage(
                         "common-reimplementation",
-                        Map.of("suggestion", negated.prettyprint())
+                        Map.of("suggestion", negated)
                     ),
                     ProblemType.REDUNDANT_NEGATION
                 );

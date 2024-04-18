@@ -61,8 +61,12 @@ public class ImportTypes extends IntegratedCheck {
         }
 
         List<CtTypeReference<?>> result = new ArrayList<>();
-        // the right condition is a workaround for https://github.com/INRIA/spoon/issues/5428
-        if (!isSimplyQualified(type) && (type.getPosition().isValidPosition() || type.getParent(CtArrayTypeReference.class) != null)) {
+        // The not simplified type check does not always work, especially when spoon is buggy.
+        // See forEach test, where the type is not implicit, but its parent is.
+        //
+        // I can not think of a case where the parent is implicit and the child is not, so I added
+        // this as a workaround to avoid making a spoon PR.
+        if (!isSimplyQualified(type) && !type.getParent().isImplicit()) {
             result.add(type);
         }
 

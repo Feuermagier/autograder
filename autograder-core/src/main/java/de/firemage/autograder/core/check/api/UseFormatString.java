@@ -113,7 +113,7 @@ public class UseFormatString extends IntegratedCheck {
             }
 
             formatString.append(this.getFormatPlaceholder(ctExpression.getType()));
-            args.add(ctExpression.prettyprint());
+            args.add(ctExpression.toString());
         }
 
         if (args.isEmpty() && formatString.length() >= MAXIMUM_STRING_LENGTH_IN_LINE) {
@@ -256,7 +256,7 @@ public class UseFormatString extends IntegratedCheck {
 
         Collections.reverse(formatArgs);
 
-        String target = invocationExpression.prettyprint();
+        String target = invocationExpression.toString();
         this.checkArgs(ctInvocation, formatArgs, suggestion -> "%s.append(%s)".formatted(target, suggestion));
     }
 

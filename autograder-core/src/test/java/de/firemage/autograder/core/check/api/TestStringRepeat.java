@@ -73,7 +73,7 @@ class TestStringRepeat extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertReimplementation(problems.next(), "result += s.repeat((n + 1) - start)");
+        assertReimplementation(problems.next(), "result += s.repeat(n + 1 - start)");
         problems.assertExhausted();
     }
 }

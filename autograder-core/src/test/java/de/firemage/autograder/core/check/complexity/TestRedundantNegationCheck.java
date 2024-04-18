@@ -40,8 +40,8 @@ class TestRedundantNegationCheck extends AbstractCheckTest {
             " !(b)                ; boolean b             ;              ",
             " !(a == b)           ; int a, int b          ; a != b       ",
             " !(a != b)           ; int a, int b          ; a == b       ",
-            " !(a && b)           ; boolean a, boolean b  ; (!a) || (!b) ",
-            " !(a || b)           ; boolean a, boolean b  ; (!a) && (!b) ",
+            " !(a && b)           ; boolean a, boolean b  ; !a || !b     ",
+            " !(a || b)           ; boolean a, boolean b  ; !a && !b     ",
             " !(a >= b)           ; int a, int b          ; a < b        ",
             " !(a > b)            ; int a, int b          ; a <= b       ",
             " !(a <= b)           ; int a, int b          ; a > b        ",
@@ -103,7 +103,7 @@ class TestRedundantNegationCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "(a == 0) || ((a == 1) && ((b != 0) && (b != 1)))");
+        assertEqualsRedundant(problems.next(), "a == 0 || a == 1 && (b != 0 && b != 1)");
 
         problems.assertExhausted();
     }

@@ -29,13 +29,13 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
     private String makeSuggestion(CtExpression<?> ctExpression, Effect thenEffect, Effect elseEffect) {
         if (thenEffect instanceof AssignmentEffect thenAssignment && elseEffect instanceof AssignmentEffect) {
             return "%s = %s".formatted(
-                thenAssignment.target().prettyprint(),
-                ctExpression.prettyprint()
+                thenAssignment.target(),
+                ctExpression
             );
         }
 
         // otherwise it is a return statement
-        return "return %s".formatted(ctExpression.prettyprint());
+        return "return %s".formatted(ctExpression);
     }
 
     private void checkIfElse(CtExpression<?> condition, CtStatement thenStmt, CtStatement elseStmt) {
