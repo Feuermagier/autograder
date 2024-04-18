@@ -73,4 +73,45 @@ class TestUseModuloOperator extends AbstractCheckTest {
         }
         problems.assertExhausted();
     }
+
+    @Test
+    void testBoxedEqualsNull() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    public static void test(Integer i) {
+                        if (i == null) {
+                            i = 0;
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testBoxedInteger() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    public static void test(Integer i) {
+                        Integer j = 7;
+                        if (i == j) {
+                            i = 0;
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertReimplementation(problems.next(), "i %= j");
+
+        problems.assertExhausted();
+    }
 }
