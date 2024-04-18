@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.naming;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -14,7 +13,7 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = {ProblemType.BOOLEAN_GETTER_NOT_CALLED_IS})
 public class BooleanIdentifierCheck extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtMethod<?>>() {
             @Override
             public void process(CtMethod<?> ctMethod) {

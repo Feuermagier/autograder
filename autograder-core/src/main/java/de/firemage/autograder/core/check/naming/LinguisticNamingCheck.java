@@ -4,7 +4,7 @@ import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
+
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -135,7 +135,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtNamedElement>() {
             @Override
             public void process(CtNamedElement ctNamedElement) {

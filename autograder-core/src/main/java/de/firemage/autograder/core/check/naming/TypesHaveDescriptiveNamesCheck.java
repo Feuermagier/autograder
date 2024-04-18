@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.naming;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -17,7 +16,7 @@ public class TypesHaveDescriptiveNamesCheck extends IntegratedCheck {
         List.of("object", "class", "record", "interface", "enum");
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtType<?>>() {
             @Override
             public void process(CtType<?> ctType) {

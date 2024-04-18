@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.structure;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @ExecutableCheck(reportedProblems = {ProblemType.DEFAULT_PACKAGE_USED})
 public class DefaultPackageCheck extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         CtPackage defaultPackage = staticAnalysis.getModel().getRootPackage();
 
         if (!defaultPackage.getQualifiedName().isEmpty()) {

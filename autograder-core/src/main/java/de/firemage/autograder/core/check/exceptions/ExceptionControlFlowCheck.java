@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.exceptions;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -20,7 +19,7 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = {ProblemType.EXCEPTION_CAUGHT_IN_SURROUNDING_BLOCK, ProblemType.EXCEPTION_SHOULD_NEVER_BE_CAUGHT})
 public class ExceptionControlFlowCheck extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public void visitCtTry(CtTry ctTry) {

@@ -42,15 +42,6 @@ public final class TestInput {
         this.sourceInfo = StringSourceInfo.fromSourceStrings(JavaVersion.JAVA_17, sources);
     }
 
-    /**
-     * Checks if the test is dynamic or static.
-     *
-     * @return true if the test is dynamic, false otherwise
-     */
-    public boolean isDynamic() {
-        return Files.exists(this.path.resolve("tests"));
-    }
-
     public String testName() {
         return "Check E2E Test: %s".formatted(this.path.getFileName());
     }

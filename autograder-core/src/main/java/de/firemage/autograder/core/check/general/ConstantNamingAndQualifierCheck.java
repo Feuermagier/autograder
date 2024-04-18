@@ -3,7 +3,7 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
+
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -52,7 +52,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
             public void process(CtVariable<?> ctVariable) {

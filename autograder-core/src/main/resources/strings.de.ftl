@@ -5,8 +5,6 @@ status-pmd = Running PMD
 status-cpd = Running Copy/Paste-Detection
 status-error-prone = Running error-prone
 status-model = Building the code model
-status-docker = Building the Docker image
-status-tests = Executing tests
 status-integrated = Running integrated analysis
 
 # Linters
@@ -70,8 +68,6 @@ javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter 
 javadoc-unexpected-tag = Der JavaDoc-Kommentar sollte keinen '@{$tag}'-Tag haben.
 
 javadoc-type-exp-invalid-author = Im @author-Tag sollte dein u-Kürzel stehen: {$authors}
-
-javadoc-return-null-exp = Die Methode {$method} kann null zurückgeben, der @return-Tag erwähnt das aber nicht
 
 javadoc-stub-exp-desc = Die Beschreibung des Javadoc-Kommentars ist leer
 javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}'
@@ -158,8 +154,6 @@ constants-interfaces-exp = Interfaces sollten keine Attribute haben
 reassigned-parameter = Dem Parameter '{$name}' sollte kein neuer Wert zugewiesen werden.
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
-
-field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale Variable sein, da sie in jeder Methode vor dem ersten Lesen überschrieben wird
 
 missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe https://stackoverflow.com/a/94411/7766117.
 

@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -19,7 +18,7 @@ public class TooManyExceptions extends IntegratedCheck {
     private static final int MAXIMUM_NUMBER_OF_EXCEPTIONS = 5;
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis) {
         List<CtClass<?>> declaredExceptions = new ArrayList<>();
 
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {

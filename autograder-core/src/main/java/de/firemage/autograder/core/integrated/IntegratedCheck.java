@@ -7,7 +7,6 @@ import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.Translatable;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.file.SourceInfo;
 import spoon.reflect.declaration.CtElement;
 
@@ -28,14 +27,14 @@ public abstract class IntegratedCheck implements Check {
         this.problems.add(new ProblemImpl(this, position, explanation, problemType) {});
     }
 
-    public List<Problem> run(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis, SourceInfo sourceInfo) {
+    public List<Problem> run(StaticAnalysis staticAnalysis, SourceInfo sourceInfo) {
         this.problems.clear();
         this.sourceInfo = sourceInfo;
-        this.check(staticAnalysis, dynamicAnalysis);
+        this.check(staticAnalysis);
         return this.problems;
     }
 
-    protected abstract void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis);
+    protected abstract void check(StaticAnalysis staticAnalysis);
 
     @Override
     public LocalizedMessage getLinter() {

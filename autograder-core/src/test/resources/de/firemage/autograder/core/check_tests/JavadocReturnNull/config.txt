@@ -1,4 +1,0 @@
-comment.JavadocReturnNullCheck
-Javadoc doesn't mention possible null return
-Test.java:36-39
-Test.java:72-75

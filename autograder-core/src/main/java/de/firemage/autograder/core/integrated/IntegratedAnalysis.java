@@ -2,10 +2,6 @@ package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.dynamic.DockerConsoleRunner;
-import de.firemage.autograder.core.dynamic.DynamicAnalysis;
-import de.firemage.autograder.core.dynamic.RunnerException;
-import de.firemage.autograder.core.dynamic.TestRunResult;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.integrated.graph.GraphAnalysis;
 import de.firemage.autograder.core.parallel.AnalysisScheduler;
@@ -43,7 +39,6 @@ public class IntegratedAnalysis {
     private final CtModel originalModel;
     private final StaticAnalysis staticAnalysis;
     private final GraphAnalysis graphAnalysis;
-    private DynamicAnalysis dynamicAnalysis;
 
     public IntegratedAnalysis(UploadedFile file, Path tmpPath) {
         this.file = file;
@@ -55,23 +50,7 @@ public class IntegratedAnalysis {
         this.staticAnalysis = new StaticAnalysis(file.getModel(), file.getCompilationResult());
         //this.graphAnalysis = new GraphAnalysis(this.staticAnalysis.getCodeModel());
         this.graphAnalysis = null; //TODO
-        this.dynamicAnalysis = new DynamicAnalysis(List.of());
 
-    }
-
-    public void runDynamicAnalysis(Path tests, Consumer<LinterStatus> statusConsumer)
-        throws RunnerException, InterruptedException {
-        try {
-            DockerConsoleRunner runner = new DockerConsoleRunner(toPath(this.getClass().getResource("/executor.jar")),
-                toPath(this.getClass().getResource("/agent.jar")), tests, this.tmpPath);
-            List<TestRunResult> results =
-                runner.runTests(this.staticAnalysis, this.file.getCompilationResult().jar(), statusConsumer);
-            this.dynamicAnalysis = new DynamicAnalysis(results);
-        } catch (URISyntaxException | IOException e) {
-            throw new RunnerException(e);
-        } finally {
-            closeOpenFileSystems();
-        }
     }
 
     private Path toPath(URL resource) throws URISyntaxException, IOException {
@@ -121,7 +100,6 @@ public class IntegratedAnalysis {
                 long beforeTime = System.nanoTime();
                 reporter.reportProblems(check.run(
                     this.staticAnalysis,
-                    this.dynamicAnalysis,
                     this.file.getSource()
                 ));
                 long afterTime = System.nanoTime();
@@ -207,9 +185,5 @@ public class IntegratedAnalysis {
 
     public StaticAnalysis getStaticAnalysis() {
         return staticAnalysis;
-    }
-
-    public DynamicAnalysis getDynamicAnalysis() {
-        return dynamicAnalysis;
     }
 }
