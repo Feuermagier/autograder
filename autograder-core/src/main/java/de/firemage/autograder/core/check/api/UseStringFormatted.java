@@ -37,6 +37,11 @@ public class UseStringFormatted extends IntegratedCheck {
         }
 
         CtExpression<?> format = args.remove(0);
+        // skip if the format string is not a string literal (e.g. a complex concatenation)
+        if (SpoonUtil.tryGetStringLiteral(SpoonUtil.resolveConstant(format)).isEmpty()) {
+            return;
+        }
+
         String output = "%s.formatted(%s)".formatted(
             format,
             args.stream().map(CtExpression::toString).reduce((a, b) -> a + ", " + b).orElse("")
