@@ -1,18 +1,21 @@
 package de.firemage.autograder.core.integrated.graph;
 
-import lombok.Getter;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Objects;
 
 public final class UsageCallMethod extends Usage {
-    @Getter
+
     private final CtMethod<?> method;
     
     public UsageCallMethod(CtTypeReference<?> start, CtTypeReference<?> end, CtMethod<?> method) {
         super(start, end);
         this.method = method;
+    }
+
+    public CtMethod<?> getMethod() {
+        return method;
     }
 
     @Override

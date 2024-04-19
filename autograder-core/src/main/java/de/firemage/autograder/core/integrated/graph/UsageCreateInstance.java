@@ -1,18 +1,21 @@
 package de.firemage.autograder.core.integrated.graph;
 
-import lombok.Getter;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Objects;
 
 public final class UsageCreateInstance extends Usage {
-    @Getter
+
     private final CtConstructor<?> constructor;
 
     public UsageCreateInstance(CtTypeReference<?> start, CtTypeReference<?> end, CtConstructor<?> constructor) {
         super(start, end);
         this.constructor = constructor;
+    }
+
+    public CtConstructor<?> getConstructor() {
+        return constructor;
     }
 
     @Override
