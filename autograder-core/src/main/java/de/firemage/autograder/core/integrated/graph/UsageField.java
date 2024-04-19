@@ -1,22 +1,27 @@
 package de.firemage.autograder.core.integrated.graph;
 
-import lombok.Getter;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Objects;
 
 public final class UsageField extends Usage {
-    @Getter
+
     private final CtField<?> field;
-    
-    @Getter
     private final int typeParameterIndex;
 
     public UsageField(CtTypeReference<?> start, CtTypeReference<?> end, CtField<?> field, int typeParameterIndex) {
         super(start, end);
         this.field = field;
         this.typeParameterIndex = typeParameterIndex;
+    }
+
+    public CtField<?> getField() {
+        return field;
+    }
+
+    public int getTypeParameterIndex() {
+        return typeParameterIndex;
     }
 
     @Override
