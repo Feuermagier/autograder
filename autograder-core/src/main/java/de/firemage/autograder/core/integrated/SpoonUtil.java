@@ -9,7 +9,6 @@ import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
-import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -1600,6 +1599,14 @@ public final class SpoonUtil {
         }
 
         return null;
+    }
+
+    public static CtElement findValidPosition(CtElement ctElement) {
+        CtElement result = ctElement;
+        while (result != null && !result.getPosition().isValidPosition()) {
+            result = result.getParent();
+        }
+        return result;
     }
 
     /**

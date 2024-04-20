@@ -226,7 +226,8 @@ variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redund
 # OOP
 concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
 
-list-getter-exp = Kopiere diese veränderbare Collection bevor du sie zurückgibst, um unbeabsichtigte Veränderungen durch andere Klassen zu verhindern
+leaked-collection-return = Die Methode '{$method}' gibt eine Referenz zu dem Feld '{$field}' zurück. Dadurch ist es möglich das Feld von außerhalb zu verändern. Gebe stattdessen eine Kopie zurück.
+leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu. Dadurch ist es möglich das Feld von außerhalb zu verändern. Weiße stattdessen eine Kopie dem Feld zu.
 
 method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
 
