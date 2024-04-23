@@ -15,6 +15,7 @@ import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtLambda;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
@@ -30,14 +31,14 @@ import spoon.reflect.declaration.CtRecord;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtFieldReference;
+import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
-import spoon.reflect.visitor.Filter;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.function.Predicate;
 
 // What should be supported:
 // - Any mutable collection (List, Set, Map, ...)
@@ -56,6 +57,84 @@ import java.util.function.Predicate;
     ProblemType.LEAKED_COLLECTION_ASSIGN
 })
 public class LeakedCollectionCheck extends IntegratedCheck {
+    /**
+     * Checks if the field can be mutated from the outside.
+     * <p>
+     * Because we do not want to lint when people store an immutable copy via List.of() or similar.
+     *
+     * @param ctFieldAccess the accessed field
+     * @return true if the field can be mutated, false otherwise
+     */
+    private static boolean canBeMutated(CtFieldAccess<?> ctFieldAccess) {
+        CtFieldReference<?> ctFieldReference = ctFieldAccess.getVariable();
+        CtField<?> ctField = ctFieldReference.getFieldDeclaration();
+
+        // arrays are always mutable, there is no immutable array
+        if (ctField.getType().isArray()) {
+            return true;
+        }
+
+        if (!SpoonUtil.isSubtypeOf(ctField.getType(), java.util.Collection.class)) {
+            // not a collection
+            return false;
+        }
+
+        // if the field has a default value that is mutable, the field is mutable
+        if (ctField.getAssignment() != null && isMutableAssignee(ctField.getAssignment())) {
+            return true;
+        }
+
+        // there are some special classes that are always immutable
+        // for those we check if they were assigned that special construct
+        //
+        // (e.g. List.of(), Set.of(), Map.of(), Collections.unmodifiableList(), ...)
+
+        // we check if there is a write to the field with a value that is guaranteed to be mutable
+        return UsesFinder.ofVariableWrite(ctField)
+            .hasAnyMatch(ctFieldWrite -> ctFieldWrite.getParent() instanceof CtAssignment<?, ?> ctAssignment
+                && isMutableAssignee(ctAssignment.getAssignment()));
+    }
+
+    private static boolean isMutableAssignee(CtExpression<?> ctExpression) {
+        if (ctExpression instanceof CtNewArray<?>) {
+            return true;
+        }
+
+        if (ctExpression instanceof CtConstructorCall<?>) {
+            return true;
+        }
+
+        if (ctExpression instanceof CtVariableRead<?> ctVariableRead
+            && ctVariableRead.getVariable() instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
+            CtLocalVariable<?> ctVariable = ctLocalVariableReference.getDeclaration();
+            return (ctVariable.getDefaultExpression() != null && isMutableAssignee(ctVariable.getDefaultExpression()))
+                || UsesFinder.ofVariableWrite(ctVariable)
+                .hasAnyMatch(ctVariableWrite -> ctVariableWrite.getParent() instanceof CtAssignment<?,?> ctAssignment
+                    && isMutableAssignee(ctAssignment.getAssignment()));
+        }
+
+        // if a public method assigns a parameter to a field that parameter can be mutated from the outside
+        // => the field is mutable assignee
+        CtExecutable<?> ctExecutable = ctExpression.getParent(CtExecutable.class);
+        return ctExecutable instanceof CtModifiable ctModifiable
+            && !ctModifiable.isPrivate()
+            && hasAssignedParameterReference(ctExpression, ctExecutable);
+    }
+
+    private static boolean hasAssignedParameterReference(CtExpression<?> ctExpression, CtExecutable<?> ctExecutable) {
+        return ctExpression instanceof CtVariableRead<?> ctVariableRead
+            && isParameterOf(ctVariableRead.getVariable(), ctExecutable);
+    }
+
+    private static boolean isParameterOf(CtVariableReference<?> ctVariableReference, CtExecutable<?> ctExecutable) {
+        CtElement declaration = SpoonUtil.getReferenceDeclaration(ctVariableReference);
+        if (declaration == null) {
+            return false;
+        }
+
+        return ctExecutable.getParameters().stream().anyMatch(ctParameter -> ctParameter == declaration);
+    }
+
     private void checkCtExecutableReturn(CtExecutable<?> ctExecutable) {
         List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctExecutable.getBody());
 
@@ -67,39 +146,49 @@ public class LeakedCollectionCheck extends IntegratedCheck {
 
         if (statements.isEmpty()
             // we should not check private methods (for those it should be okay to return a not-copied collection)
-            || (ctExecutable instanceof CtModifiable ctModifiable && ctModifiable.isPrivate())
-            // TODO: shouldn't we check ALL returns (like in an if-else block)?
-            || !(statements.getLast() instanceof CtReturn<?> ctReturn)
-            || ctReturn.getReturnedExpression() == null) {
+            || (ctExecutable instanceof CtModifiable ctModifiable && ctModifiable.isPrivate())) {
             return;
         }
 
-        CtExpression<?> returnedExpression = ctReturn.getReturnedExpression();
+        List<CtReturn> returns = statements.stream().flatMap(ctStatement -> {
+            if (ctStatement instanceof CtReturn<?> ctReturn) {
+                return List.of(ctReturn).stream();
+            } else {
+                return ctStatement.filterChildren(new TypeFilter<>(CtReturn.class)).list(CtReturn.class).stream();
+            }
+        }).toList();
 
-        if (!(returnedExpression instanceof CtFieldRead<?> ctFieldRead)) {
-            return;
-        }
+        for (CtReturn<?> ctReturn : returns) {
+            if (ctReturn.getReturnedExpression() == null) {
+                continue;
+            }
 
-        // TODO: could this crash?
-        CtField<?> field = ctFieldRead.getVariable().getFieldDeclaration();
+            CtExpression<?> returnedExpression = ctReturn.getReturnedExpression();
 
-        // if the field is not private, it can not be leaked/mutated anyway.
-        if (!field.isPrivate()) {
-            return;
-        }
+            if (!(returnedExpression instanceof CtFieldRead<?> ctFieldRead)) {
+                continue;
+            }
 
-        if (canBeMutated(ctFieldRead)) {
-            addLocalProblem(
-                SpoonUtil.findValidPosition(ctExecutable),
-                new LocalizedMessage(
-                    "leaked-collection-return",
-                    Map.of(
-                        "method", ctExecutable.getSimpleName(),
-                        "field", field.getSimpleName()
-                    )
-                ),
-                ProblemType.LEAKED_COLLECTION_RETURN
-            );
+            CtField<?> field = ctFieldRead.getVariable().getFieldDeclaration();
+
+            // if the field is not private, it can not be leaked/mutated anyway.
+            if (!field.isPrivate()) {
+                continue;
+            }
+
+            if (canBeMutated(ctFieldRead)) {
+                addLocalProblem(
+                    SpoonUtil.findValidPosition(ctExecutable),
+                    new LocalizedMessage(
+                        "leaked-collection-return",
+                        Map.of(
+                            "method", ctExecutable.getSimpleName(),
+                            "field", field.getSimpleName()
+                        )
+                    ),
+                    ProblemType.LEAKED_COLLECTION_RETURN
+                );
+            }
         }
     }
 
@@ -207,75 +296,6 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                 super.visitCtAnonymousExecutable(ctAnonymousExecutable);
             }
         });
-    }
-
-    /**
-     * Checks if the field can be mutated from the outside.
-     * <p>
-     * Because we do not want to lint when people store an immutable copy via List.of() or similar.
-     *
-     * @param ctFieldAccess the accessed field
-     * @return true if the field can be mutated, false otherwise
-     */
-    private static boolean canBeMutated(CtFieldAccess<?> ctFieldAccess) {
-        CtFieldReference<?> ctFieldReference = ctFieldAccess.getVariable();
-        CtField<?> ctField = ctFieldReference.getFieldDeclaration();
-
-        // arrays are always mutable, there is no immutable array
-        if (ctField.getType().isArray()) {
-            return true;
-        }
-
-        if (!SpoonUtil.isSubtypeOf(ctField.getType(), java.util.Collection.class)) {
-            // not a collection
-            return false;
-        }
-
-        // if the field has a default value that is mutable, the field is mutable
-        if (ctField.getAssignment() != null && isMutableAssignee(ctField.getAssignment())) {
-            return true;
-        }
-
-        // there are some special classes that are always immutable
-        // for those we check if they were assigned that special construct
-        //
-        // (e.g. List.of(), Set.of(), Map.of(), Collections.unmodifiableList(), ...)
-
-        // we check if there is a write to the field with a value that is guranteed to be mutable
-        return UsesFinder.ofVariableWrite(ctField)
-            .hasAnyMatch(ctFieldWrite -> ctFieldWrite.getParent() instanceof CtAssignment<?, ?> ctAssignment
-                && isMutableAssignee(ctAssignment.getAssignment()));
-    }
-
-    private static boolean isMutableAssignee(CtExpression<?> ctExpression) {
-        if (ctExpression instanceof CtNewArray<?>) {
-            return true;
-        }
-
-        if (ctExpression instanceof CtConstructorCall<?>) {
-            return true;
-        }
-
-        // if a public method assigns a parameter to a field that parameter can be mutated from the outside
-        // => the field is mutable assignee
-        CtExecutable<?> ctExecutable = ctExpression.getParent(CtExecutable.class);
-        return ctExecutable instanceof CtModifiable ctModifiable
-            && !ctModifiable.isPrivate()
-            && hasAssignedParameterReference(ctExpression, ctExecutable);
-    }
-
-    private static boolean hasAssignedParameterReference(CtExpression<?> ctExpression, CtExecutable<?> ctExecutable) {
-        return ctExpression instanceof CtVariableRead<?> ctVariableRead
-            && isParameterOf(ctVariableRead.getVariable(), ctExecutable);
-    }
-
-    private static boolean isParameterOf(CtVariableReference<?> ctVariableReference, CtExecutable<?> ctExecutable) {
-        CtElement declaration = SpoonUtil.getReferenceDeclaration(ctVariableReference);
-        if (declaration == null) {
-            return false;
-        }
-
-        return ctExecutable.getParameters().stream().anyMatch(ctParameter -> ctParameter == declaration);
     }
 
     @Override

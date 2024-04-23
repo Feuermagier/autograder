@@ -543,7 +543,6 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
-
     @Test
     void testAssignNotParameter() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
@@ -806,6 +805,34 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         assertEqualsLeakedReturn(problems.next(), "animals", "animals");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testConditionalReturn() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+                import java.util.ArrayList;
+                
+                class Test {
+                    private List<String> list = new ArrayList<>();
+                    
+                    public List<String> get() {
+                        if (list.isEmpty()) {
+                            return new ArrayList<>();
+                        } else {
+                            return list;
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedReturn(problems.next(), "get", "list");
 
         problems.assertExhausted();
     }
