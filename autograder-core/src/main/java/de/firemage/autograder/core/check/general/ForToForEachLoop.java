@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayRead;
 import spoon.reflect.code.CtBodyHolder;
@@ -64,20 +65,15 @@ public class ForToForEachLoop extends IntegratedCheck {
     public static Optional<CtVariable<?>> getForEachLoopVariable(
         CtBodyHolder ctBodyHolder,
         ForLoopRange forLoopRange,
-        Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess
+        Function<? super CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess
     ) {
         CtVariable<?> loopVariable = forLoopRange.loopVariable().getDeclaration();
 
-        // if a ForLoopRange exists, it is guranteed that the variable is incremented by 1 for each step
+        // if a ForLoopRange exists, it is guaranteed that the variable is incremented by 1 for each step
 
         CtVariable<?> ctVariable = null;
         CtVariableAccess<?> expectedAccess = null;
-        for (CtElement use : SpoonUtil.findUsesIn(loopVariable, ctBodyHolder.getBody())) {
-            if (!(use instanceof CtVariableAccess<?> ctVariableAccess)) {
-                throw new IllegalStateException(
-                    "SpoonUtil.findUsesIn returned non-variable access for '%s' as input".formatted(loopVariable));
-            }
-
+        for (CtVariableAccess<?> ctVariableAccess : UsesFinder.of(loopVariable).in(ctBodyHolder.getBody()).all()) {
             // We need to get the variable on which the access is performed (e.g. in a[i] we need to get a)
             CtVariableAccess<?> potentialLoopVariableAccess = getPotentialLoopVariableAccess.apply(ctVariableAccess)
                 .orElse(null);

@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConstructorCall;
@@ -31,10 +32,12 @@ import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtVariableReference;
 import spoon.reflect.visitor.CtScanner;
+import spoon.reflect.visitor.Filter;
 
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Predicate;
 
 // What should be supported:
 // - Any mutable collection (List, Set, Map, ...)
@@ -54,16 +57,18 @@ import java.util.Optional;
 })
 public class LeakedCollectionCheck extends IntegratedCheck {
     private void checkCtExecutableReturn(CtExecutable<?> ctExecutable) {
-        // parent will be null, if the return is in a constructor.
-        // constructors are not considered methods.
         List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctExecutable.getBody());
 
+        // a lambda like () -> true does not have a body, but an expression which is a return statement
+        // this case is handled here
         if (statements.isEmpty() && ctExecutable instanceof CtLambda<?> ctLambda) {
             statements = List.of(createCtReturn(ctLambda.getExpression().clone()));
         }
 
         if (statements.isEmpty()
+            // we should not check private methods (for those it should be okay to return a not-copied collection)
             || (ctExecutable instanceof CtModifiable ctModifiable && ctModifiable.isPrivate())
+            // TODO: shouldn't we check ALL returns (like in an if-else block)?
             || !(statements.getLast() instanceof CtReturn<?> ctReturn)
             || ctReturn.getReturnedExpression() == null) {
             return;
@@ -74,9 +79,16 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         if (!(returnedExpression instanceof CtFieldRead<?> ctFieldRead)) {
             return;
         }
+
+        // TODO: could this crash?
         CtField<?> field = ctFieldRead.getVariable().getFieldDeclaration();
 
-        if (canBeMutated(ctFieldRead) && field.isPrivate()) {
+        // if the field is not private, it can not be leaked/mutated anyway.
+        if (!field.isPrivate()) {
+            return;
+        }
+
+        if (canBeMutated(ctFieldRead)) {
             addLocalProblem(
                 SpoonUtil.findValidPosition(ctExecutable),
                 new LocalizedMessage(
@@ -97,7 +109,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         }
 
         for (CtStatement ctStatement : SpoonUtil.getEffectiveStatements(ctExecutable.getBody())) {
-            if (!(ctStatement instanceof CtAssignment<?,?> ctAssignment)
+            if (!(ctStatement instanceof CtAssignment<?, ?> ctAssignment)
                 || !(ctAssignment.getAssigned() instanceof CtFieldWrite<?> ctFieldWrite)) {
                 continue;
             }
@@ -197,7 +209,14 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         });
     }
 
-    // checks if the variable can be mutated from the outside
+    /**
+     * Checks if the field can be mutated from the outside.
+     * <p>
+     * Because we do not want to lint when people store an immutable copy via List.of() or similar.
+     *
+     * @param ctFieldAccess the accessed field
+     * @return true if the field can be mutated, false otherwise
+     */
     private static boolean canBeMutated(CtFieldAccess<?> ctFieldAccess) {
         CtFieldReference<?> ctFieldReference = ctFieldAccess.getVariable();
         CtField<?> ctField = ctFieldReference.getFieldDeclaration();
@@ -212,18 +231,20 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             return false;
         }
 
+        // if the field has a default value that is mutable, the field is mutable
+        if (ctField.getAssignment() != null && isMutableAssignee(ctField.getAssignment())) {
+            return true;
+        }
+
         // there are some special classes that are always immutable
         // for those we check if they were assigned that special construct
         //
         // (e.g. List.of(), Set.of(), Map.of(), Collections.unmodifiableList(), ...)
 
         // we check if there is a write to the field with a value that is guranteed to be mutable
-        return SpoonUtil.hasAnyUses(ctField, ctElement -> ctElement instanceof CtFieldWrite<?> ctVariableWrite
-            && ctVariableWrite.getVariable().equals(ctFieldReference)
-            && ctVariableWrite.getParent() instanceof CtAssignment<?,?> ctAssignment
-            && ctAssignment.getAssigned() == ctVariableWrite
-            && isMutableAssignee(ctAssignment.getAssignment()))
-            || (ctField.getAssignment() != null && isMutableAssignee(ctField.getAssignment()));
+        return UsesFinder.ofVariableWrite(ctField)
+            .hasAnyMatch(ctFieldWrite -> ctFieldWrite.getParent() instanceof CtAssignment<?, ?> ctAssignment
+                && isMutableAssignee(ctAssignment.getAssignment()));
     }
 
     private static boolean isMutableAssignee(CtExpression<?> ctExpression) {

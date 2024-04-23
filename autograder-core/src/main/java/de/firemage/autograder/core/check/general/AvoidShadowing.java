@@ -6,9 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -46,18 +45,6 @@ public class AvoidShadowing extends IntegratedCheck {
         }
 
         return result;
-    }
-
-    /**
-     * Searches for a variable read of the given variable in the given element.
-     *
-     * @param ctVariable the variable that should be read
-     * @param in the element to search in
-     * @return true if a variable read was found, false otherwise
-     * @param <T> the type of the variable
-     */
-    private static <T> boolean hasVariableReadIn(CtVariable<T> ctVariable, CtElement in) {
-        return SpoonUtil.findUsesIn(ctVariable, in).stream().anyMatch(ctElement -> ctElement instanceof CtVariableRead<?>);
     }
 
     @Override
@@ -104,11 +91,11 @@ public class AvoidShadowing extends IntegratedCheck {
                 CtElement variableParent = ctVariable.getParent();
 
                 // there might be multiple fields hidden by the variable (e.g. subclass hides superclass field)
-                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> hasVariableReadIn(ctFieldReference.getFieldDeclaration(), variableParent));
+                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> UsesFinder.ofVariableRead(ctFieldReference.getFieldDeclaration()).in(variableParent).hasAny());
 
                 // to reduce the number of annotations, we only report a problem if the variable AND the hidden field are read in
                 // the same context
-                if (hasVariableReadIn(ctVariable, variableParent) && isFieldRead) {
+                if (UsesFinder.ofVariableRead(ctVariable).in(variableParent).hasAny() && isFieldRead) {
                     addLocalProblem(
                         ctVariable,
                         new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),

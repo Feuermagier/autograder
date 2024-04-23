@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
@@ -59,7 +60,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
     private static Visibility getVisibility(CtTypeMember ctTypeMember) {
         CtModel ctModel = ctTypeMember.getFactory().getModel();
 
-        List<CtElement> references = SpoonUtil.findUsesOf(ctTypeMember);
+        List<CtElement> references = UsesFinder.of(ctTypeMember).all();
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
@@ -124,7 +125,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                         .getFields()
                         .stream()
                         // filter out the field itself and those that do not reference the field
-                        .filter(field -> field != ctField && !SpoonUtil.findUsesIn(ctField, field).isEmpty())
+                        .filter(field -> field != ctField && SpoonUtil.hasAnyUsesIn(ctField, field))
                         .map(UseDifferentVisibility::getVisibility)
                         .max(Visibility::compareTo);
 
