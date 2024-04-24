@@ -1096,6 +1096,16 @@ public final class SpoonUtil {
         return !topDefinitions.isEmpty();
     }
 
+    /**
+     * Checks if the given method is overridden by another method.
+     *
+     * @param ctMethod the method to check, must not be null
+     * @return true if the given method is overridden by another method, false otherwise
+     */
+    public static boolean isOverridden(CtMethod<?> ctMethod) {
+        return ctMethod.getFactory().getModel().filterChildren(new OverridingMethodFilter(ctMethod)).first() != null;
+    }
+
     public static boolean isInOverriddenMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {

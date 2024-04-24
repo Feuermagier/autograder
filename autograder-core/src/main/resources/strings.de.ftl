@@ -231,6 +231,8 @@ leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' ei
 
 method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
 
+method-should-be-static = Die Methode '{$name}' sollte statisch sein, da sie auf keine Instanzattribute oder Methoden zugreift.
+
 utility-exp-final = Utility-Klasse ist nicht final
 utility-exp-constructor = Utility-Klassen müssen genau einen privaten und parameterlosen Konstruktor haben
 

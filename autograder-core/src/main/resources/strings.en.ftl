@@ -230,6 +230,8 @@ leaked-collection-assign = The method '{$method}' assigns a reference to the fie
 
 method-abstract-exp = {$type}::{$method} should be abstract and not provide a default implementation
 
+method-should-be-static = The method '{$name}' should be static, because it does not access instance attributes or methods.
+
 utility-exp-final = Utility class is not final
 utility-exp-constructor = Utility classes must have a single private no-arg constructor
 
