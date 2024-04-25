@@ -41,6 +41,7 @@ public final class CodeModel implements AutoCloseable {
     private Factory factory;
     private CtModel model;
     private CtPackage basePackage;
+    private Uses uses;
     private Optional<CtMethod<Void>> mainMethod;
 
     private CodeModel(SourceInfo file, Path jar, ClassLoader classLoader) {
@@ -114,6 +115,10 @@ public final class CodeModel implements AutoCloseable {
     public CtPackage getBasePackage() {
         this.buildModelMaybe();
         return basePackage;
+    }
+
+    public Uses getUses() {
+        return uses;
     }
 
     @Override
@@ -208,6 +213,8 @@ public final class CodeModel implements AutoCloseable {
                     }
                 }
             });
+
+            this.uses = new Uses(model);
 
             // Only set the model at the end when everything has been initialized
             this.model = model;

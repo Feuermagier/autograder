@@ -85,6 +85,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -1632,5 +1633,13 @@ public final class SpoonUtil {
         }
 
         return position;
+    }
+
+    public static <P extends CtElement> P getParentOrSelf(CtElement element, Class<P> parentType) {
+        Objects.requireNonNull(element);
+        if (element.getClass().isAssignableFrom(parentType)) {
+            return (P) element;
+        }
+        return element.getParent(parentType);
     }
 }
