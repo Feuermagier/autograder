@@ -1,12 +1,22 @@
 package de.firemage.autograder.core.check.utils;
 
 import java.util.Iterator;
+import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
 public sealed interface Option<T> extends Iterable<T> permits Option.Some, Option.None {
     static <T> Option<T> ofNullable(T value) {
         return value == null ? new None<>() : new Some<>(value);
+    }
+
+    static <T> Option<T> some(T value) {
+        Objects.requireNonNull(value, "Value must not be null.");
+        return new Some<>(value);
+    }
+
+    static <T> Option<T> none() {
+        return new None<>();
     }
 
     default T unwrap() {

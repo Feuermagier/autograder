@@ -1,14 +1,20 @@
 package de.firemage.autograder.core.integrated.uses;
 
 import de.firemage.autograder.core.integrated.SpoonUtil;
-import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtCatchVariable;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtResource;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.declaration.CtTypeMember;
+import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.chain.CtQuery;
 import spoon.reflect.visitor.chain.CtQueryable;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
+
+import java.util.List;
 
 class BaseUsesFinder<R extends CtElement> implements UsesFinder<R> {
     private final CtElement toSearchFor;
@@ -48,24 +54,7 @@ class BaseUsesFinder<R extends CtElement> implements UsesFinder<R> {
         return (UsesFinder<U>) this;
     }
 
-    // TODO: figure out the overhead for creating a query, maybe this should be cached
-    @Override
-    public CtQuery query() {
-        CtQueryable searchScope = this.toSearchIn;
-
-        // TODO: other uses that could be optimized:
-        // - if the element is not public, we can reduce the search scope to the class/package
-        // - if the element is a CtParameter, we can reduce the search scope to the method?
-        // - there might be other things that could be optimized
-
-        if (this.toSearchIn == this.toSearchFor.getFactory().getModel()) {
-            // for local variables, one does not need to search the whole model, it is enough to search in the parent block
-            CtBlock<?> parentBlock = this.toSearchFor.getParent(CtBlock.class);
-            if (parentBlock != null && this.toSearchFor instanceof CtLocalVariable<?>) {
-                searchScope = parentBlock;
-            }
-        }
-
+    public CtQuery query(CtQueryable searchScope) {
         Filter<CtElement> filter = new SpoonUtil.UsesFilter(this.toSearchFor);
 
         if (this.preFilter != null) {
@@ -81,5 +70,47 @@ class BaseUsesFinder<R extends CtElement> implements UsesFinder<R> {
         }
 
         return searchScope.filterChildren(filter);
+    }
+
+    // TODO: figure out the overhead for creating a query, maybe this should be cached
+    @Override
+    public CtQuery query() {
+        CtQueryable searchScope = this.toSearchIn;
+
+        if (this.toSearchIn == this.toSearchFor.getFactory().getModel()) {
+            switch (this.toSearchFor) {
+                // for local variables, one does not need to search the whole model, it is enough to search in the parent block
+                case CtLocalVariable<?> ctLocalVariable -> {
+                    searchScope = ctLocalVariable.getParent();
+                }
+                case CtParameter<?> ctParameter -> {
+                    searchScope = ctParameter.getParent();
+                }
+                case CtCatchVariable<?> ctCatchVariable -> {
+                    searchScope = ctCatchVariable.getParent();
+                }
+                case CtResource<?> ctResource -> {
+                    searchScope = ctResource.getParent();
+                }
+                case CtTypeMember ctTypeMember when ctTypeMember.isPrivate() -> {
+                    searchScope = ctTypeMember.getDeclaringType();
+                }
+                case CtTypeMember ctTypeMember when !ctTypeMember.isPublic() -> {
+                    searchScope = ctTypeMember.getDeclaringType().getPackage();
+                }
+                case CtTypeParameter ctTypeParameter -> {
+                    searchScope = ctTypeParameter.getParent();
+                }
+                default -> {
+                }
+            }
+        }
+
+        return this.query(searchScope);
+    }
+
+    @Override
+    public List<R> all() {
+        return this.query().list();
     }
 }
