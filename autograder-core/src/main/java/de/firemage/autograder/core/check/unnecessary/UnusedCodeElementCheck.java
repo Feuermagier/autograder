@@ -11,6 +11,7 @@ import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtMethod;
@@ -20,6 +21,7 @@ import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.Map;
@@ -77,14 +79,8 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             return;
         }
 
-        boolean unused;
-        if (ctElement instanceof CtVariable<?> variable) {
-            unused = !staticAnalysis.getCodeModel().getUses().hasAnyUses(variable, r -> true);
-        } else {
-            unused = isUnused(ctElement, staticAnalysis.getCodeModel().hasMainMethod());
-        }
+        boolean unused = staticAnalysis.getCodeModel().getUses().isConsideredUnused(ctElement, staticAnalysis.getCodeModel().hasMainMethod());;
         // unused = isUnused(ctElement, staticAnalysis.getCodeModel().hasMainMethod());
-
 
         if (unused) {
             ProblemType problemType = ProblemType.UNUSED_CODE_ELEMENT;

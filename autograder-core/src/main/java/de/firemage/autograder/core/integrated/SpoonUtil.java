@@ -1637,9 +1637,18 @@ public final class SpoonUtil {
 
     public static <P extends CtElement> P getParentOrSelf(CtElement element, Class<P> parentType) {
         Objects.requireNonNull(element);
-        if (element.getClass().isAssignableFrom(parentType)) {
+        if (parentType.isAssignableFrom(element.getClass())) {
             return (P) element;
         }
         return element.getParent(parentType);
+    }
+
+    public static int getParameterIndex(CtParameter<?> parameter, CtExecutable<?> executable) {
+        for (int i = 0; i < executable.getParameters().size(); i++) {
+            if (executable.getParameters().get(i) == parameter) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Parameter not found in executable");
     }
 }
