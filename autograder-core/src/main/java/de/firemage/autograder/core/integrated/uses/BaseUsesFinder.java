@@ -3,8 +3,11 @@ package de.firemage.autograder.core.integrated.uses;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import spoon.reflect.code.CtCatchVariable;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtPattern;
 import spoon.reflect.code.CtResource;
+import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
@@ -81,9 +84,11 @@ class BaseUsesFinder<R extends CtElement> implements UsesFinder<R> {
             switch (this.toSearchFor) {
                 // for local variables, one does not need to search the whole model, it is enough to search in the parent block
                 case CtLocalVariable<?> ctLocalVariable -> {
-                    searchScope = ctLocalVariable.getParent();
+                    if (ctLocalVariable.getParent(CtPattern.class) == null) {
+                        searchScope = ctLocalVariable.getParent();
+                    }
                 }
-                case CtParameter<?> ctParameter -> {
+                case CtParameter<?> ctParameter when ctParameter.getParent() instanceof CtExecutable<?> ctExecutable && ctExecutable.getBody() != null -> {
                     searchScope = ctParameter.getParent();
                 }
                 case CtCatchVariable<?> ctCatchVariable -> {
@@ -107,10 +112,5 @@ class BaseUsesFinder<R extends CtElement> implements UsesFinder<R> {
         }
 
         return this.query(searchScope);
-    }
-
-    @Override
-    public List<R> all() {
-        return this.query().list();
     }
 }
