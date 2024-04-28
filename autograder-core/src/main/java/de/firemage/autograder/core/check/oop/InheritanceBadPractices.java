@@ -6,7 +6,6 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
@@ -26,7 +25,7 @@ import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.ABSTRACT_CLASS_WITHOUT_ABSTRACT_METHOD,
-    ProblemType.USE_DIFFERENT_VISIBILITY,
+    ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC,
     ProblemType.SHOULD_BE_INTERFACE,
     ProblemType.COMPOSITION_OVER_INHERITANCE
 })
@@ -87,7 +86,7 @@ public class InheritanceBadPractices extends IntegratedCheck {
                                         "suggestion", "protected"
                                     )
                                 ),
-                                ProblemType.USE_DIFFERENT_VISIBILITY
+                                ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC
                             );
                         }
                     }
