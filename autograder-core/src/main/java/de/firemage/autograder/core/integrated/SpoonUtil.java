@@ -14,6 +14,7 @@ import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtBodyHolder;
 import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
@@ -620,6 +621,19 @@ public final class SpoonUtil {
         return getEffectiveStatements(List.of(ctStatement));
     }
 
+    public static List<CtStatement> getEffectiveStatementsOf(CtBodyHolder ctBodyHolder) {
+        if (ctBodyHolder == null) {
+            return List.of();
+        }
+
+        CtStatement body = ctBodyHolder.getBody();
+        if (body == null) {
+            return List.of();
+        }
+
+        return getEffectiveStatements(body);
+    }
+
     public static <T> CtExpression<T> resolveCtExpression(CtExpression<T> ctExpression) {
         if (ctExpression == null) return null;
 
@@ -720,6 +734,17 @@ public final class SpoonUtil {
         }
 
         return true;
+    }
+
+    private record SubtypeFilter(CtTypeReference<?> ctTypeReference) implements Filter<CtType<?>> {
+        @Override
+        public boolean matches(CtType<?> element) {
+            return element != this.ctTypeReference.getTypeDeclaration() && element.isSubtypeOf(this.ctTypeReference);
+        }
+    }
+
+    public static boolean hasSubtype(CtType<?> ctType) {
+        return ctType.getFactory().getModel().filterChildren(new SubtypeFilter(ctType.getReference())).first() != null;
     }
 
     /**

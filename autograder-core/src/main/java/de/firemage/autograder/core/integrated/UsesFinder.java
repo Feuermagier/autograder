@@ -86,6 +86,16 @@ public class UsesFinder {
         return CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType();
     }
 
+    @SuppressWarnings("unchecked")
+    public static CtElementStream<CtVariableWrite<?>> variableWrites(CtVariable<?> variable) {
+        return (CtElementStream<CtVariableWrite<?>>) (Object) CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType().ofType(CtVariableWrite.class);
+    }
+
+    @SuppressWarnings("unchecked")
+    public static CtElementStream<CtVariableRead<?>> variableReads(CtVariable<?> variable) {
+        return (CtElementStream<CtVariableRead<?>>) (Object) CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType().ofType(CtVariableRead.class);
+    }
+
     public static CtElementStream<CtTypeParameterReference> typeParameterUses(CtTypeParameter typeParameter) {
         return CtElementStream.of(UsesFinder.getFor(typeParameter).scanner.typeParameterUses.getOrDefault(typeParameter, List.of()));
     }
