@@ -7,16 +7,17 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.visitor.CtScanner;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 import java.util.stream.Stream;
 
+/**
+ * Provides a hierarchy of overwritten methods within the code model.
+ * The hierarchy is built once at construction time for all methods, so that all subsequent queries are fast.
+ */
 public class MethodHierarchy {
 
     private final IdentityHashMap<CtMethod<?>, SurroundingMethods> methodHierarchy;
@@ -46,6 +47,17 @@ public class MethodHierarchy {
         });
     }
 
+    /**
+     * Finds all methods that are *direct* super methods of the given method.
+     * In the following example, when calling {@code getDirectSuperMethods(C.m)}, only {@code B.m} is returned:
+     * <pre>
+     *     class A { void m() {} }
+     *     class B extends A { void m() {} }
+     *     class C extends B { void m() {} }
+     * </pre>
+     * @param method
+     * @return
+     */
     public Set<MethodOrLambda<?>> getDirectSuperMethods(CtMethod<?> method) {
         var surroundingMethods = this.methodHierarchy.get(method);
         if (surroundingMethods == null) {
@@ -55,6 +67,17 @@ public class MethodHierarchy {
         }
     }
 
+    /**
+     * Finds all methods that *directly* override the given method.
+     * In the following example, when calling {@code getDirectOverridingMethods(A.m)}, only {@code B.m} is returned:
+     * <pre>
+     *     class A { void m() {} }
+     *     class B extends A { void m() {} }
+     *     class C extends B { void m() {} }
+     * </pre>
+     * @param method
+     * @return
+     */
     public Set<MethodOrLambda<?>> getDirectOverridingMethods(CtMethod<?> method) {
         var surroundingMethods = this.methodHierarchy.get(method);
         if (surroundingMethods == null) {
@@ -64,15 +87,57 @@ public class MethodHierarchy {
         }
     }
 
-    public Stream<MethodOrLambda<?>> getAllOverridingMethods(CtMethod<?> method) {
+    /**
+     * Finds all methods overriding the given method, including overrides of methods overriding the given method.
+     * In the following example, when calling {@code getDirectOverridingMethods(A.m)}, both {@code B.m} and {@code C.m}
+     * are returned:
+     * <pre>
+     *     class A { void m() {} }
+     *     class B extends A { void m() {} }
+     *     class C extends B { void m() {} }
+     * </pre>
+     * @param method
+     * @return
+     */
+    public Stream<MethodOrLambda<?>> streamAllOverridingMethods(CtMethod<?> method) {
         var surroundingMethods = this.methodHierarchy.get(method);
         if (surroundingMethods == null) {
             return Stream.of();
         } else {
             return surroundingMethods.overridingMethods
                     .stream()
-                    .flatMap(m -> Stream.concat(Stream.of(m), this.getAllOverridingMethods(m.getMethod())));
+                    .flatMap(m -> Stream.concat(Stream.of(m), this.streamAllOverridingMethods(m.getMethod())));
         }
+    }
+
+    /**
+     * Checks if the method overrides any other method.
+     * In the following example, this is true for B.m, but not for A.m.
+     * <pre>
+     *     class A { void m() {} }
+     *     class B extends A { void m() {} }
+     * </pre>
+     * @param method
+     * @return
+     */
+    public boolean isOverridingMethod(CtMethod<?> method) {
+        var surroundingMethods = this.methodHierarchy.get(method);
+        return surroundingMethods != null && !surroundingMethods.superMethods.isEmpty();
+    }
+
+    /**
+     * Checks if any methods overrides this method.
+     * In the following example, this is true for A.m, but not for B.m.
+     * <pre>
+     *     class A { void m() {} }
+     *     class B extends A { void m() {} }
+     * </pre>
+     * @param method
+     * @return
+     */
+    public boolean isOverriddenMethod(CtMethod<?> method) {
+        var surroundingMethods = this.methodHierarchy.get(method);
+        return surroundingMethods != null && !surroundingMethods.overridingMethods.isEmpty();
     }
 
     private void searchSuperTypesForSuperMethod(CtType<?> currentType, CtMethod<?> subMethod, Set<CtType<?>> visitedTypes) {
@@ -81,9 +146,12 @@ public class MethodHierarchy {
         }
         visitedTypes.add(currentType);
 
-        if (currentType.getSuperclass() != null) {
-            this.searchSuperMethodInType(currentType.getSuperclass().getTypeDeclaration(), subMethod, visitedTypes);
+        var superType = currentType.getSuperclass();
+        if (currentType.getSuperclass() == null) {
+            // Finally visit Object
+            superType = currentType.getFactory().Type().objectType();
         }
+        this.searchSuperMethodInType(superType.getTypeDeclaration(), subMethod, visitedTypes);
 
         for (var superInterface : currentType.getSuperInterfaces()) {
             this.searchSuperMethodInType(superInterface.getTypeDeclaration(), subMethod, visitedTypes);

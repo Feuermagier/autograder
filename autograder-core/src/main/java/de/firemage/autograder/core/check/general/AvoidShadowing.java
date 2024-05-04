@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -7,7 +8,6 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -56,8 +56,8 @@ public class AvoidShadowing extends IntegratedCheck {
      * @return true if a variable read was found, false otherwise
      * @param <T> the type of the variable
      */
-    private static <T> boolean hasVariableReadIn(CtVariable<T> ctVariable, CtElement in) {
-        return SpoonUtil.findUsesIn(ctVariable, in).stream().anyMatch(ctElement -> ctElement instanceof CtVariableRead<?>);
+    private static <T> boolean hasVariableReadIn(CtVariable<T> ctVariable, CtElement in, CodeModel model) {
+        return model.getUses().hasAnyUsesIn(ctVariable, in, ctElement -> ctElement instanceof CtVariableRead<?>);
     }
 
     @Override
@@ -71,7 +71,7 @@ public class AvoidShadowing extends IntegratedCheck {
                 }
 
                 // skip fields inside overridden methods
-                if (SpoonUtil.isInOverriddenMethod(ctVariable) || SpoonUtil.isInSetter(ctVariable)) {
+                if (SpoonUtil.isInOverridingMethod(ctVariable) || SpoonUtil.isInSetter(ctVariable)) {
                     return;
                 }
 
@@ -102,11 +102,11 @@ public class AvoidShadowing extends IntegratedCheck {
                 CtElement variableParent = ctVariable.getParent();
 
                 // there might be multiple fields hidden by the variable (e.g. subclass hides superclass field)
-                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> hasVariableReadIn(ctFieldReference.getFieldDeclaration(), variableParent));
+                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> hasVariableReadIn(ctFieldReference.getFieldDeclaration(), variableParent, staticAnalysis.getCodeModel()));
 
                 // to reduce the number of annotations, we only report a problem if the variable AND the hidden field are read in
                 // the same context
-                if (hasVariableReadIn(ctVariable, variableParent) && isFieldRead) {
+                if (hasVariableReadIn(ctVariable, variableParent, staticAnalysis.getCodeModel()) && isFieldRead) {
                     addLocalProblem(
                         ctVariable,
                         new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),

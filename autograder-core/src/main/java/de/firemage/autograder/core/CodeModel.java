@@ -4,7 +4,6 @@ import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import de.firemage.autograder.core.integrated.SpoonUtil;
-import de.firemage.autograder.core.integrated.TypeHierarchy;
 import spoon.Launcher;
 import spoon.compiler.Environment;
 import spoon.compiler.ModelBuildingException;
@@ -31,6 +30,8 @@ import java.util.Optional;
  * The model is build lazily to work better with the multithreaded core architecture.
  */
 public final class CodeModel implements AutoCloseable {
+    private static final String MODEL_METADATA_KEY = "autograder_code_model";
+
     private final SourceInfo file;
     private final Path jar;
     private final ClassLoader userClassLoader;
@@ -39,7 +40,6 @@ public final class CodeModel implements AutoCloseable {
     private CtModel model;
     private CtPackage basePackage;
     private Uses uses;
-    private TypeHierarchy typeHierarchy;
     private MethodHierarchy methodHierarchy;
     private Optional<CtMethod<Void>> mainMethod;
 
@@ -64,6 +64,14 @@ public final class CodeModel implements AutoCloseable {
 
     public static CodeModel buildFor(SourceInfo file, Path jar, ClassLoader classLoader) {
         return new CodeModel(file, jar, classLoader);
+    }
+
+    public static CodeModel getFor(CtElement element) {
+        var model = (CodeModel) element.getFactory().getModel().getRootPackage().getMetadata(MODEL_METADATA_KEY);
+        if (model == null) {
+            throw new IllegalStateException("CodeModel not found in the metadata");
+        }
+        return model;
     }
 
     public void ensureModelBuild() {
@@ -117,14 +125,12 @@ public final class CodeModel implements AutoCloseable {
     }
 
     public Uses getUses() {
+        this.buildModelMaybe();
         return uses;
     }
 
-    public TypeHierarchy getTypeHierarchy() {
-        return typeHierarchy;
-    }
-
     public MethodHierarchy getMethodHierarchy() {
+        this.buildModelMaybe();
         return methodHierarchy;
     }
 
@@ -227,8 +233,10 @@ public final class CodeModel implements AutoCloseable {
             });
 
             this.methodHierarchy = new MethodHierarchy(model);
-            this.typeHierarchy = new TypeHierarchy(model);
-            this.uses = new Uses(model, this.methodHierarchy);
+            this.uses = new Uses(model);
+
+            // Cache this struct in the code model
+            model.getRootPackage().putMetadata(MODEL_METADATA_KEY, this);
 
             // Only set the model at the end when everything has been initialized
             this.model = model;

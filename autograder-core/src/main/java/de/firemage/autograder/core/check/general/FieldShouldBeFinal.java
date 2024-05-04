@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.Uses;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -24,9 +25,10 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 if (ctField.isImplicit() || !ctField.getPosition().isValidPosition() || ctField.isFinal()) {
                     return;
                 }
+                Uses uses = staticAnalysis.getCodeModel().getUses();
 
                 // check if the field is written to outside of constructors
-                boolean hasWrite = SpoonUtil.hasAnyUses(
+                boolean hasWrite = uses.hasAnyUses(
                     ctField,
                     ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
                         && ctFieldWrite.getParent(CtConstructor.class) == null
@@ -38,7 +40,7 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 }
 
                 // check if the field is written to in constructors, which is fine if it does not have an explicit value
-                boolean hasWriteInConstructor = SpoonUtil.hasAnyUses(
+                boolean hasWriteInConstructor = uses.hasAnyUses(
                     ctField,
                     ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
                         && ctFieldWrite.getParent(CtConstructor.class) != null

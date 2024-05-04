@@ -9,7 +9,6 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
-import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExecutableReferenceExpression;
@@ -158,7 +157,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             return true;
         }
 
-        if (SpoonUtil.isInOverriddenMethod(ctTypeReference)
+        if (SpoonUtil.isInOverridingMethod(ctTypeReference)
             || this.isInAllowedContext(ctTypeReference)
             || this.isAllowedType(ctTypeReference)) {
             return false;

@@ -1,7 +1,9 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.Uses;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.ForLoopRange;
@@ -72,10 +74,15 @@ public class ForToForEachLoop extends IntegratedCheck {
 
         CtVariable<?> ctVariable = null;
         CtVariableAccess<?> expectedAccess = null;
-        for (CtElement use : SpoonUtil.findUsesIn(loopVariable, ctBodyHolder.getBody())) {
+        Uses uses = CodeModel.getFor(loopVariable).getUses();
+        for (CtElement use : uses.getAllUses(loopVariable)) {
             if (!(use instanceof CtVariableAccess<?> ctVariableAccess)) {
                 throw new IllegalStateException(
                     "SpoonUtil.findUsesIn returned non-variable access for '%s' as input".formatted(loopVariable));
+            }
+
+            if (!use.hasParent(ctBodyHolder.getBody())) {
+                continue;
             }
 
             // We need to get the variable on which the access is performed (e.g. in a[i] we need to get a)

@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
@@ -69,9 +70,9 @@ public class LinguisticNamingCheck extends IntegratedCheck {
         }
     }
 
-    private <T> void checkCtMethod(CtMethod<T> ctMethod) {
+    private <T> void checkCtMethod(CtMethod<T> ctMethod, CodeModel model) {
         // to avoid duplicate reports, only report the first method declaration
-        if (SpoonUtil.isOverriddenMethod(ctMethod)) {
+        if (model.getMethodHierarchy().isOverridingMethod(ctMethod)) {
             return;
         }
 
@@ -144,7 +145,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
                 }
 
                 if (ctNamedElement instanceof CtMethod<?> ctMethod) {
-                    checkCtMethod(ctMethod);
+                    checkCtMethod(ctMethod, staticAnalysis.getCodeModel());
                 }
 
                 if (ctNamedElement instanceof CtField<?> ctVariable) {

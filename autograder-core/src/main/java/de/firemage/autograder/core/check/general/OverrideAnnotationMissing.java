@@ -24,7 +24,7 @@ public class OverrideAnnotationMissing extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isOverriddenMethod(ctMethod)) {
+                if (staticAnalysis.getCodeModel().getMethodHierarchy().isOverridingMethod(ctMethod)) {
                     addLocalProblem(
                         ctMethod,
                         new LocalizedMessage(

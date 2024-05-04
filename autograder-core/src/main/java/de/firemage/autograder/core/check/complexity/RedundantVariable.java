@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -36,13 +37,13 @@ public class RedundantVariable extends IntegratedCheck {
         return ctExpression instanceof CtSwitchExpression<?,?> || ctExpression.toString().length() > MAX_EXPRESSION_SIZE;
     }
 
-    private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead) {
+    private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead, CodeModel model) {
         if (// the variable must be a local variable
             !(ctVariableRead.getVariable().getDeclaration() instanceof CtLocalVariable<?> ctLocalVariable)
             // it should not have any annotations (e.g. @SuppressWarnings("unchecked"))
             || !ctLocalVariable.getAnnotations().isEmpty()
             // the variable must only be used in the return statement
-            || SpoonUtil.hasAnyUses(ctLocalVariable, ctElement -> ctElement.getParent(CtStatement.class) != ctStatement)) {
+            || model.getUses().hasAnyUses(ctLocalVariable, ctElement -> ctElement.getParent(CtStatement.class) != ctStatement)) {
             return;
         }
 
@@ -90,7 +91,7 @@ public class RedundantVariable extends IntegratedCheck {
                     return;
                 }
 
-                checkVariableRead(ctInvocation, ctVariableRead);
+                checkVariableRead(ctInvocation, ctVariableRead, staticAnalysis.getCodeModel());
 
                 super.visitCtInvocation(ctInvocation);
             }
@@ -105,7 +106,7 @@ public class RedundantVariable extends IntegratedCheck {
                     return;
                 }
 
-                checkVariableRead(ctReturn, ctVariableRead);
+                checkVariableRead(ctReturn, ctVariableRead, staticAnalysis.getCodeModel());
 
                 super.visitCtReturn(ctReturn);
             }

@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.core.Uses;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
@@ -46,12 +47,11 @@ public class RedundantAssignment extends IntegratedCheck {
 
                 CtLocalVariable<?> ctLocalVariable = ctLocalVariableReference.getDeclaration();
 
-                if (UnusedCodeElementCheck.isUnused(ctLocalVariable, true)) {
+                if (UnusedCodeElementCheck.isConsideredUnused(ctLocalVariable, staticAnalysis.getCodeModel())) {
                     return;
                 }
 
-
-                if (followingStatements.stream().noneMatch(statement -> SpoonUtil.hasAnyUsesIn(
+                if (followingStatements.stream().noneMatch(statement -> staticAnalysis.getCodeModel().getUses().hasAnyUsesIn(
                     ctLocalVariable,
                     statement,
                     element -> element instanceof CtVariableRead<?>

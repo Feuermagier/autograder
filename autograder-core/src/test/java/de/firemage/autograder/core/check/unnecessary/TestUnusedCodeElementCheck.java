@@ -233,6 +233,37 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     }
 
     @Test
+    void testUsedWildcardBound() throws LinterException, IOException {
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
+                JavaVersion.JAVA_17,
+                Map.ofEntries(
+                        Map.entry(
+                                "Cat",
+                                """
+                                    class Cat<T> {
+                                         Dog<? extends T> dog;
+                                         
+                                         public static void main(String[] args) {
+                                            System.out.println(new Cat<String>().dog.field);
+                                         }
+                                     }
+                                    """
+                        ),
+                        Map.entry(
+                                "Dog",
+                                """
+                                    class Dog<X> {
+                                        X field;
+                                    }
+                                    """
+                        )
+                )
+        ), PROBLEM_TYPES);
+
+        assertProblemSize(0, problems);
+    }
+
+    @Test
     void testOnlyWrittenVariable() throws LinterException, IOException {
         // For now, this is not detected as unused, because it might result in false positives
         List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(

@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -59,7 +60,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
         }
     }
 
-    private static LoopSuggestion getCounter(CtLoop ctLoop) {
+    private static LoopSuggestion getCounter(CtLoop ctLoop, CodeModel model) {
         List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctLoop.getBody());
 
         if (statements.isEmpty()) {
@@ -88,7 +89,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
             }
 
             // the control variable is used after the update statement or there is no update statement
-            if (SpoonUtil.hasAnyUsesIn(ctLocalVariable, statement)) {
+            if (model.getUses().hasAnyUsesIn(ctLocalVariable, statement)) {
                 return null;
             }
         }
@@ -103,7 +104,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
         boolean isUpdatedMultipleTimes = statements.stream()
             .filter(statement -> statement != finalLastStatement)
             .anyMatch(
-                statement -> SpoonUtil.hasAnyUsesIn(ctLocalVariable, statement, ctElement -> ctElement instanceof CtVariableWrite<?>));
+                statement -> model.getUses().hasAnyUsesIn(ctLocalVariable, statement, ctElement -> ctElement instanceof CtVariableWrite<?>));
 
         if (isUpdatedMultipleTimes) {
             return null;
@@ -129,7 +130,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
 
         boolean isUsedAfterLoop = SpoonUtil.getNextStatements(ctLoop)
             .stream()
-            .anyMatch(statement -> SpoonUtil.hasAnyUsesIn(ctLocalVariable, statement));
+            .anyMatch(statement -> model.getUses().hasAnyUsesIn(ctLocalVariable, statement));
 
         var init = List.of(ctLocalVariable);
         if (isUsedAfterLoop) {
@@ -143,7 +144,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
             }
         } else if (ctLoop instanceof CtForEach ctForEach) {
             // ignore loops where the variable is used in the loop body
-            if (SpoonUtil.hasAnyUsesIn(ctForEach.getVariable(), ctForEach.getBody())) {
+            if (model.getUses().hasAnyUsesIn(ctForEach.getVariable(), ctForEach.getBody())) {
                 return null;
             }
 
@@ -199,7 +200,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
                     return;
                 }
 
-                LoopSuggestion forLoop = getCounter(ctLoop);
+                LoopSuggestion forLoop = getCounter(ctLoop, staticAnalysis.getCodeModel());
 
                 if (forLoop != null) {
                     addLocalProblem(

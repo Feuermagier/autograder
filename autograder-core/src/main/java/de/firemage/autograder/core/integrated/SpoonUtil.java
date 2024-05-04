@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -9,7 +10,6 @@ import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
-import org.apache.commons.compress.utils.FileNameUtils;
 import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -93,7 +93,6 @@ import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
@@ -866,11 +865,7 @@ public final class SpoonUtil {
         if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
             return true;
         }
-
-        return !SpoonUtil.hasAnyUses(
-            ctVariable,
-            ctElement -> ctElement instanceof CtVariableWrite<?>
-        );
+        return !CodeModel.getFor(ctVariable).getUses().hasAnyUses(ctVariable, use -> use instanceof CtVariableWrite<?>);
     }
 
     public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariable<T> ctVariable) {
@@ -1088,31 +1083,17 @@ public final class SpoonUtil {
         return type.getDeclaringType() != null;
     }
 
-    /**
-     * Checks if the given method is overriding another method.
-     * <p>
-     * This implies that there is another method in a super class or interface that has the same signature.
-     *
-     * @param ctMethod the method to check, must not be null
-     * @return true if the given method is overriding another method, false otherwise
-     */
-    public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
-        Collection<CtMethod<?>> topDefinitions = ctMethod.getTopDefinitions();
-        // if the method is defined for the first time, this should return an empty collection
-        return !topDefinitions.isEmpty();
-    }
-
-    public static boolean isInOverriddenMethod(CtElement ctElement) {
+    public static boolean isInOverridingMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
             return false;
         }
 
-        return isOverriddenMethod(ctMethod);
+        return CodeModel.getFor(ctElement).getMethodHierarchy().isOverridingMethod(ctMethod);
     }
 
     /**
-     * Checks if the given method is overriding another method.
+     * Checks if the given method is an invocation.
      * @param statement which is checked
      * @return true if the statement is an invocation (instance of CtInvocation, CtConstructorCall or CtLambda),
      * false otherwise
@@ -1121,6 +1102,7 @@ public final class SpoonUtil {
         return statement instanceof CtInvocation<?> || statement instanceof CtConstructorCall<?> ||
                 statement instanceof CtLambda<?>;
     }
+
     public static boolean isInMainMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
@@ -1130,16 +1112,16 @@ public final class SpoonUtil {
         return isMainMethod(ctMethod);
     }
 
-    /**
-     * Finds all uses of {@code ctElement} in {@code in}.
-     *
-     * @param ctElement the element to search for
-     * @param in the element to search in
-     * @return all uses of {@code ctElement} in {@code in}
-     */
-    public static List<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
-        return new ArrayList<>(in.getElements(new UsesFilter(ctElement)));
-    }
+    // /**
+    //  * Finds all uses of {@code ctElement} in {@code in}.
+    //  *
+    //  * @param ctElement the element to search for
+    //  * @param in the element to search in
+    //  * @return all uses of {@code ctElement} in {@code in}
+    //  */
+    // public static List<CtElement> findUsesIn(CtElement ctElement, CtElement in) {
+    //     return new ArrayList<>(in.getElements(new UsesFilter(ctElement)));
+    // }
 
     public record FilterAdapter<T extends CtElement, U extends CtElement>(Filter<T> filter, Class<T> type) implements Filter<U> {
         @Override
@@ -1425,26 +1407,6 @@ public final class SpoonUtil {
             || ctType.getSuperInterfaces().contains(superType.getReference());
     }
 
-    // Supported CtElement subtypes:
-    // - CtVariable<?>
-    // - CtExecutable<?>
-    // - CtTypeMember
-    @SuppressWarnings("unchecked")
-    public static <T> List<CtVariableAccess<T>> findUsesOf(CtVariable<T> ctVariable) {
-        return SpoonUtil.findUses(ctVariable)
-            .stream()
-            .map(ctElement -> (CtVariableAccess<T>) ctElement)
-            .collect(Collectors.toList());
-    }
-
-    public static List<CtElement> findUsesOf(CtTypeMember ctTypeMember) {
-        return SpoonUtil.findUses(ctTypeMember);
-    }
-
-    public static <T> List<CtElement> findUsesOf(CtExecutable<T> ctExecutable) {
-        return SpoonUtil.findUses(ctExecutable);
-    }
-
     private static boolean internalHasAnyUses(CtQueryable model, CtElement ctElement, Predicate<? super CtElement> predicate) {
         // for local variables, one does not need to search the whole model
         if (ctElement instanceof CtLocalVariable<?> ctLocalVariable && model == ctElement.getFactory().getModel()) {
@@ -1461,21 +1423,21 @@ public final class SpoonUtil {
             .first(CtElement.class) != null;
     }
 
-    public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
-        return internalHasAnyUses(ctElement.getFactory().getModel(), ctElement, predicate);
-    }
-
-    public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn) {
-        return hasAnyUsesIn(ctElement, toSearchIn, element -> true);
-    }
-
-    public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
-        return internalHasAnyUses(toSearchIn, ctElement, predicate);
-    }
-
-    private static List<CtElement> findUses(CtElement ctElement) {
-        return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
-    }
+    // public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
+    //     return internalHasAnyUses(ctElement.getFactory().getModel(), ctElement, predicate);
+    // }
+    //
+    // public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn) {
+    //     return hasAnyUsesIn(ctElement, toSearchIn, element -> true);
+    // }
+    //
+    // public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
+    //     return internalHasAnyUses(toSearchIn, ctElement, predicate);
+    // }
+    //
+    // private static List<CtElement> findUses(CtElement ctElement) {
+    //     return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
+    // }
 
     private static <T> int referenceIndexOf(List<T> list, T element) {
         for (int i = 0; i < list.size(); i++) {

@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.CodeModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
@@ -39,7 +40,7 @@ public record ForLoopRange(
                     && ctVariable.getReference().equals(ctVariableAccess.getVariable()))
                 .orElse(false)
             // the loop variable must not be used after the loop
-            && SpoonUtil.getNextStatements(ctFor).stream().allMatch(statement -> SpoonUtil.findUsesIn(localVariable, statement).isEmpty())
+            && SpoonUtil.getNextStatements(ctFor).stream().noneMatch(statement -> CodeModel.getFor(localVariable).getUses().hasAnyUsesIn(localVariable, statement))
         ) {
             potentialLoopVariable = localVariable;
         } else if (ctFor.getForInit().size() == 1 && ctFor.getForInit().get(0) instanceof CtLocalVariable<?> ctLocalVariable) {

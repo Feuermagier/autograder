@@ -33,7 +33,7 @@ public class EmptyBlockCheck extends IntegratedCheck {
 
                 if (ctBlock.getParent() instanceof CtMethod<?> ctMethod
                     && ctMethod.getBody().equals(ctBlock)
-                    && SpoonUtil.isInOverriddenMethod(ctBlock)) {
+                    && SpoonUtil.isInOverridingMethod(ctBlock)) {
                     return;
                 }
 

@@ -18,44 +18,100 @@ import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtFormalTypeDeclarer;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
+import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtTypeParameterReference;
+import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtWildcardReference;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Stack;
 import java.util.function.Predicate;
 
+/**
+ * Provides usage-relationships between code elements in the code model.
+ * Uses are tracked for variables of all kinds, type parameters, executables, and types.
+ * The graph is built once at construction time with a single pass over the model for all elements,
+ * so that all subsequent queries are fast.
+ */
 public class Uses {
-    private final MethodHierarchy methodHierarchy;
     private final UsesScanner scanner;
 
-    public Uses(CtModel model, MethodHierarchy methodHierarchy) {
-        this.methodHierarchy = methodHierarchy;
+    public Uses(CtModel model) {
         this.scanner = new UsesScanner();
         model.getRootPackage().accept(this.scanner);
     }
 
-    public boolean hasAnyUses(CtVariable<?> variable, Predicate<? super CtVariableAccess> filter) {
+    public boolean variableHasAnyUses(CtVariable<?> variable, Predicate<? super CtVariableAccess> filter) {
         return this.hasAnyUses(this.scanner.variableUses.get(variable), filter);
     }
 
-    public boolean hasAnyUses(CtTypeParameter typeParameter, Predicate<? super CtTypeParameterReference> filter) {
+    public boolean typeParameterHasAnyUses(CtTypeParameter typeParameter, Predicate<? super CtTypeParameterReference> filter) {
         return this.hasAnyUses(this.scanner.typeParameterUses.get(typeParameter), filter);
     }
 
-    public boolean hasAnyUses(CtExecutable executable, Predicate<? super CtElement> filter) {
+    public boolean executableHasAnyUses(CtExecutable executable, Predicate<? super CtElement> filter) {
         return this.hasAnyUses(this.scanner.executableUses.get(executable), filter);
+    }
+
+    public boolean typeHasAnyUses(CtType type, Predicate<? super CtTypeReference> filter) {
+        return this.hasAnyUses(this.scanner.typeUses.get(type), filter);
+    }
+
+    public boolean hasAnyUses(CtElement element, Predicate<CtElement> filter) {
+        if (element instanceof CtVariable<?> variable) {
+            return this.variableHasAnyUses(variable, filter);
+        } else if (element instanceof CtTypeParameter typeParameter) {
+            return this.typeParameterHasAnyUses(typeParameter, filter);
+        } else if (element instanceof CtExecutable executable) {
+            return this.executableHasAnyUses(executable, filter);
+        } else if (element instanceof CtType type) {
+            return this.typeHasAnyUses(type, filter);
+        } else {
+            throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
+        }
+    }
+
+    public boolean hasAnyUses(CtElement element) {
+        return this.hasAnyUses(element, e -> true);
+    }
+
+    public boolean hasAnyUsesIn(CtElement element, CtElement parent, Predicate<CtElement> filter) {
+        // this can be slow if the parent chain is very long
+        return this.hasAnyUses(element, filter.and(e -> (e == parent || e.hasParent(parent))));
+    }
+
+    public boolean hasAnyUsesIn(CtElement element, CtElement parent) {
+        return this.hasAnyUsesIn(element, parent, e -> true);
+    }
+
+    public List<? extends CtElement> getAllUses(CtNamedElement element) {
+        if (element instanceof CtVariable<?> variable) {
+            return Collections.unmodifiableList(this.scanner.variableUses.getOrDefault(variable, List.of()));
+        } else if (element instanceof CtTypeParameter typeParameter) {
+            return Collections.unmodifiableList(this.scanner.typeParameterUses.getOrDefault(typeParameter, List.of()));
+        } else if (element instanceof CtExecutable executable) {
+            return Collections.unmodifiableList(this.scanner.executableUses.getOrDefault(executable, List.of()));
+        } else if (element instanceof CtType type) {
+            return Collections.unmodifiableList(this.scanner.typeUses.getOrDefault(type, List.of()));
+        } else {
+            throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
+        }
     }
 
     private <T> boolean hasAnyUses(List<T> uses, Predicate<? super T> filter) {
@@ -67,76 +123,20 @@ public class Uses {
     }
 
     /**
-     * This method implements a number of special cases for elements that we allow to be unused,
-     * e.g. methods of a public API (when no main method is present), or parameters mandated by Java's API.
-     *
-     * @param element
-     * @param hasMainMethod
-     * @return
-     */
-    public boolean isConsideredUnused(CtNamedElement element, boolean hasMainMethod) {
-        // ignore exception constructors and params in those constructors
-        var parentConstructor = SpoonUtil.getParentOrSelf(element, CtConstructor.class);
-        if (parentConstructor != null && SpoonUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
-            return false;
-        }
-
-        // Special cases for public API if we have no main method:
-        if (!hasMainMethod) {
-            // ignore unused parameters of non-private methods
-            if (element instanceof CtParameter<?> && element.getParent() instanceof CtTypeMember typeMember && !typeMember.getDeclaringType().isPrivate()) {
-                return false;
-            }
-
-            // ignore unused public type members (i.e. fields, methods, ...)
-            if (element instanceof CtTypeMember typeMember && !typeMember.isPrivate() && !typeMember.getDeclaringType().isPrivate()) {
-                return false;
-            }
-        }
-
-        if (element instanceof CtVariable<?> variable) {
-            if (this.hasAnyUses(variable, access -> true)) {
-                return false;
-            } else if (variable instanceof CtParameter<?> parameter && parameter.getParent() instanceof CtMethod<?> method) {
-                // For method parameters, also look in overriding methods
-                int parameterIndex = SpoonUtil.getParameterIndex(parameter, method);
-                return this.methodHierarchy
-                        .getAllOverridingMethods(method)
-                        .allMatch(m -> this.isConsideredUnused(m.getExecutable().getParameters().get(parameterIndex), hasMainMethod));
-            }
-            return true;
-        } else if (element instanceof CtTypeParameter typeParameter) {
-            return !this.hasAnyUses(typeParameter, reference -> true);
-        } else if (element instanceof CtExecutable<?> executable) {
-            // Ignore recursive calls
-            if (this.hasAnyUses(executable, reference -> reference.getParent(CtMethod.class) != executable)) {
-                return false;
-            } else if (executable instanceof CtMethod<?> method) {
-                // For methods, also look for used overriding methods
-                return this.methodHierarchy
-                        .getAllOverridingMethods(method)
-                        .allMatch(m -> this.isConsideredUnused(m.getExecutable(), hasMainMethod));
-            }
-            return true;
-        } else {
-            throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
-        }
-    }
-
-    /**
      * The scanner searches for uses of supported code elements in a single pass over the entire model.
      * Since inserting into the hash map requires (amortized) constant time, usage search runs in O(n) time.
      */
-    static class UsesScanner extends CtScanner {
+    private static class UsesScanner extends CtScanner {
         // The IdentityHashMaps are very important here, since
         // E.g. CtVariable's equals method considers locals with the same name to be equal
         public final IdentityHashMap<CtVariable, List<CtVariableAccess>> variableUses = new IdentityHashMap<>();
         public final IdentityHashMap<CtTypeParameter, List<CtTypeParameterReference>> typeParameterUses = new IdentityHashMap<>();
         public final IdentityHashMap<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
+        public final IdentityHashMap<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block
-        // (in reality, the scope is based on 'normal completion', see JLS, but the rules look way too complex for us)
+        // (in reality, the scope is based on 'normal completion', see JLS, but the rules are way too complex for us)
         private final Stack<HashMap<String, CtVariable>> instanceofPatternVariables = new Stack<>();
 
         @Override
@@ -168,7 +168,7 @@ public class Uses {
             if (invocation.getTarget() instanceof CtVariableAccess reference) {
                 this.recordVariableAccess(reference);
             }
-            this.recordExecutableReference(invocation.getExecutable());
+            this.recordExecutableReference(invocation.getExecutable(), invocation);
             super.visitCtInvocation(invocation);
         }
 
@@ -187,14 +187,20 @@ public class Uses {
 
         @Override
         public <T, E extends CtExpression<?>> void visitCtExecutableReferenceExpression(CtExecutableReferenceExpression<T, E> expression) {
-            this.recordExecutableReference(expression.getExecutable());
+            this.recordExecutableReference(expression.getExecutable(), expression);
             super.visitCtExecutableReferenceExpression(expression);
         }
 
         @Override
         public <T> void visitCtConstructorCall(CtConstructorCall<T> ctConstructorCall) {
-            this.recordExecutableReference(ctConstructorCall.getExecutable());
+            this.recordExecutableReference(ctConstructorCall.getExecutable(), ctConstructorCall);
             super.visitCtConstructorCall(ctConstructorCall);
+        }
+
+        @Override
+        public <T> void visitCtTypeReference(CtTypeReference<T> reference) {
+            this.recordTypeReference(reference);
+            super.visitCtTypeReference(reference);
         }
 
         @Override
@@ -217,6 +223,9 @@ public class Uses {
                             break;
                         }
                     }
+                } else if (variableAccess.getVariable() instanceof CtFieldReference<?> fieldReference) {
+                    // We can use the shadow model
+                    variable = fieldReference.getFieldDeclaration();
                 }
             }
 
@@ -227,17 +236,29 @@ public class Uses {
         }
 
         private void recordTypeParameterReference(CtTypeParameterReference reference) {
-            var type = reference.getDeclaration();
-            if (type != null) {
-                var uses = this.typeParameterUses.computeIfAbsent(type, k -> new ArrayList<>());
+            CtTypeParameter parameter = reference.getDeclaration();
+            if (parameter != null) {
+                var uses = this.typeParameterUses.computeIfAbsent(parameter, k -> new ArrayList<>());
                 uses.add(reference);
             }
         }
 
-        private void recordExecutableReference(CtExecutableReference reference) {
-            var executable = reference.getDeclaration();
+        private void recordExecutableReference(CtExecutableReference reference, CtElement referencingElement) {
+            var executable = reference.getExecutableDeclaration();
             if (executable != null) {
                 var uses = this.executableUses.computeIfAbsent(executable, k -> new ArrayList<>());
+                uses.add(referencingElement);
+            }
+        }
+
+        private void recordTypeReference(CtTypeReference reference) {
+            if (reference instanceof CtArrayTypeReference<?> arrayType) {
+                reference = arrayType.getArrayType();
+            }
+
+            var type = reference.getTypeDeclaration();
+            if (type != null) {
+                var uses = this.typeUses.computeIfAbsent(type, k -> new ArrayList<>());
                 uses.add(reference);
             }
         }

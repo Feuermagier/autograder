@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.api;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -43,7 +44,7 @@ public class UseArraysFill extends IntegratedCheck {
 
         CtElement loopVariable = SpoonUtil.getReferenceDeclaration(forLoopRange.loopVariable());
         // return if the for loop uses the loop variable (would not be a simple repetition)
-        if (SpoonUtil.hasAnyUsesIn(loopVariable, ctAssignment.getAssignment(), e -> true)) {
+        if (CodeModel.getFor(ctFor).getUses().hasAnyUsesIn(loopVariable, ctAssignment.getAssignment())) {
             return;
         }
 

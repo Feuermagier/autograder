@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
+import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -16,8 +17,10 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtImport;
 import spoon.reflect.declaration.CtImportKind;
+import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
+import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -123,7 +126,7 @@ public class UnusedImport extends IntegratedCheck {
         return Objects.equals(declaredPackage, ctCompilationUnit.getDeclaredPackage());
     }
 
-    private void checkImport(CtImport ctImport, CtCompilationUnit ctCompilationUnit, Collection<? super CtElement> importedElements) {
+    private void checkImport(CtImport ctImport, CtCompilationUnit ctCompilationUnit, Collection<? super CtElement> importedElements, CodeModel model) {
         // check if the import is from the java.lang package, which is redundant
 
         // inner class imports might not be redundant, therefore, they are skipped here
@@ -179,9 +182,27 @@ public class UnusedImport extends IntegratedCheck {
         //
         // I don't think it is required to support imports that are only used in javadoc,
         // but spoon makes it easy to support it.
-        boolean hasAnyUses = SpoonUtil.hasAnyUses(element, isAllowed);
+        boolean hasAnyUses = model.getUses().hasAnyUses(element, isAllowed);
         if (!hasAnyUses) {
             hasAnyUses = hasAnyJavadocUses(ctImport.getReference(), isSameFile::test);
+        }
+        if (!hasAnyUses && ctImport.getImportKind() == CtImportKind.METHOD && element instanceof CtMethod<?> method) {
+            // There is an edge case for static imports of overloaded methods in spoon,
+            // where spoon arbitrarily chooses one of the overloaded methods to import.
+            // This may not match the actually used method.
+            // For example: we do `import static java.lang.String.valueOf;` and call valueOf(5),
+            // where 5 is implicitly an integer. Spoon however imports `valueOf(long)`, and we
+            // detect an unused import.
+            // Therefore, whether any overload of the method is used.
+            var declaringType = method.getDeclaringType();
+            if (declaringType != null) {
+                for (var overloadedMethod : declaringType.getMethodsByName(method.getSimpleName())) {
+                    if (model.getUses().hasAnyUses(overloadedMethod, isSameFile)) {
+                        hasAnyUses = true;
+                        break;
+                    }
+                }
+            }
         }
 
         if (!hasAnyUses) {
@@ -199,7 +220,7 @@ public class UnusedImport extends IntegratedCheck {
                     continue;
                 }
 
-                this.checkImport(ctImport, ctCompilationUnit, importedElements);
+                this.checkImport(ctImport, ctCompilationUnit, importedElements, staticAnalysis.getCodeModel());
             }
         });
     }
