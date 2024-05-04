@@ -731,6 +731,40 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     }
 
     @Test
+    void testUsedRenamedParameter() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+                JavaVersion.JAVA_17,
+                Map.ofEntries(
+                        Map.entry(
+                                "Main",
+                                """
+                                public class Main extends B {
+                                    public void b(String parameterRenamed) {
+                                        System.out.println(parameterRenamed);
+                                    }
+            
+                                    public static void main(String[] args) {
+                                        Main main = new Main();
+                                        main.b("");
+                                    }
+                                }
+                                """
+                        ),
+                        Map.entry(
+                                "B",
+                                """
+                                public class B {
+                                    void b(String parameterName) {}
+                                }
+                                """
+                        )
+                )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
     void testConventionExceptionConstructor() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
