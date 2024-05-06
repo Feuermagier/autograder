@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAssignment;
@@ -102,8 +103,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
         CtStatement finalLastStatement = lastStatement;
         boolean isUpdatedMultipleTimes = statements.stream()
             .filter(statement -> statement != finalLastStatement)
-            .anyMatch(
-                statement -> SpoonUtil.hasAnyUsesIn(ctLocalVariable, statement, ctElement -> ctElement instanceof CtVariableWrite<?>));
+            .anyMatch(statement -> UsesFinder.ofVariableWrite(ctLocalVariable).in(statement).hasAny());
 
         if (isUpdatedMultipleTimes) {
             return null;

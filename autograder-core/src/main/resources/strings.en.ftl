@@ -225,9 +225,12 @@ variable-redundant-number-suffix = The identifier '{$name}' has a redundant numb
 # OOP
 concrete-collection = The type '{$type}' should be replaced by an interface like 'List' or 'Set'.
 
-list-getter-exp = Copy this mutable collection before returning it to avoid unwanted mutations by other classes
+leaked-collection-return = The method '{$method}' returns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be returned.
+leaked-collection-assign = The method '{$method}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 
 method-abstract-exp = {$type}::{$method} should be abstract and not provide a default implementation
+
+method-should-be-static = The method '{$name}' should be static, because it does not access instance attributes or methods.
 
 utility-exp-final = Utility class is not final
 utility-exp-constructor = Utility classes must have a single private no-arg constructor

@@ -43,7 +43,7 @@ public class UseArraysFill extends IntegratedCheck {
 
         CtElement loopVariable = SpoonUtil.getReferenceDeclaration(forLoopRange.loopVariable());
         // return if the for loop uses the loop variable (would not be a simple repetition)
-        if (SpoonUtil.hasAnyUsesIn(loopVariable, ctAssignment.getAssignment(), e -> true)) {
+        if (SpoonUtil.hasAnyUsesIn(loopVariable, ctAssignment.getAssignment())) {
             return;
         }
 

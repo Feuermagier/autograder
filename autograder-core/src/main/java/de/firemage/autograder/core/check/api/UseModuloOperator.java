@@ -70,9 +70,15 @@ public class UseModuloOperator extends IntegratedCheck {
         // is equal to
         //
         // variable %= 3;
-        if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
-            CtExpression<?> right = condition.getRightHandOperand();
+        CtExpression<?> checkedValue = condition.getRightHandOperand();
 
+        // for boxed types, one could check if the value is null,
+        // for which the suggestion `a %= null` would not make sense
+        if (SpoonUtil.isNullLiteral(checkedValue)) {
+            return;
+        }
+
+        if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
             addLocalProblem(
                 ctIf,
                 new LocalizedMessage(
@@ -80,7 +86,7 @@ public class UseModuloOperator extends IntegratedCheck {
                     Map.of(
                         "suggestion", "%s %%= %s".formatted(
                             assignedVariable,
-                            right
+                            checkedValue
                         )
                     )
                 ),

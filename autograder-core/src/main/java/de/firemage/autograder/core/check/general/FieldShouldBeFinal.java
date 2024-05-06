@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.declaration.CtConstructor;
@@ -38,11 +39,8 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 }
 
                 // check if the field is written to in constructors, which is fine if it does not have an explicit value
-                boolean hasWriteInConstructor = SpoonUtil.hasAnyUses(
-                    ctField,
-                    ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
-                        && ctFieldWrite.getParent(CtConstructor.class) != null
-                );
+                boolean hasWriteInConstructor = UsesFinder.ofVariableWrite(ctField)
+                    .hasAnyMatch(ctFieldWrite -> ctFieldWrite.getParent(CtConstructor.class) != null);
 
                 // we need to check if the field is explicitly initialized, because this is not allowed:
                 //
