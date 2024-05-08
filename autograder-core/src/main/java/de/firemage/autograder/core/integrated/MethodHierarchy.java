@@ -118,6 +118,10 @@ public class MethodHierarchy {
      * @return
      */
     public static Stream<MethodOrLambda<?>> streamAllOverridingMethods(CtMethod<?> method) {
+        if (method == null) {
+            return Stream.empty();
+        }
+
         var surroundingMethods = MethodHierarchy.getFor(method).methodHierarchy.get(method);
         if (surroundingMethods == null) {
             return Stream.of();
