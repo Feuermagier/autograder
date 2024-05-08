@@ -94,7 +94,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
     /**
      * Assumes that all elements in the stream are of the given type.
      * This method is potentially unsafe and may throw class cast exceptions at runtime!
-     * Use withType() for a safer alternative.
+     * Use ofType() for a safer alternative.
      * @return
      * @param <R>
      */
