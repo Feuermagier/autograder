@@ -1,15 +1,14 @@
 package de.firemage.autograder.core.check.general;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Uses;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayRead;
 import spoon.reflect.code.CtBodyHolder;
@@ -20,7 +19,6 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -34,8 +32,8 @@ import java.util.function.Function;
 public class ForToForEachLoop extends IntegratedCheck {
     private static final Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> LOOP_VARIABLE_ACCESS_STRING = ctVariableAccess -> {
         if (ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), char.class, "charAt", int.class)
-            && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess) {
+                && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), char.class, "charAt", int.class)
+                && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess) {
             return Optional.of(variableAccess);
         }
 
@@ -44,7 +42,7 @@ public class ForToForEachLoop extends IntegratedCheck {
 
     private static final Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> LOOP_VARIABLE_ACCESS_ARRAY = ctVariableAccess -> {
         if (ctVariableAccess.getParent() instanceof CtArrayRead<?> arrayAccess
-            && arrayAccess.getTarget() instanceof CtVariableAccess<?> variableAccess) {
+                && arrayAccess.getTarget() instanceof CtVariableAccess<?> variableAccess) {
             return Optional.of(variableAccess);
         }
 
@@ -53,10 +51,10 @@ public class ForToForEachLoop extends IntegratedCheck {
 
     public static final Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> LOOP_VARIABLE_ACCESS_LIST = ctVariableAccess -> {
         if (ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
-            // && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), Object.class, "get", int.class)
-            && ctInvocation.getExecutable().getSimpleName().equals("get")
-            && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess
-            && SpoonUtil.isSubtypeOf(variableAccess.getType(), java.util.List.class)) {
+                // && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), Object.class, "get", int.class)
+                && ctInvocation.getExecutable().getSimpleName().equals("get")
+                && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess
+                && SpoonUtil.isSubtypeOf(variableAccess.getType(), java.util.List.class)) {
             return Optional.of(variableAccess);
         }
 
@@ -64,30 +62,20 @@ public class ForToForEachLoop extends IntegratedCheck {
     };
 
     public static Optional<CtVariable<?>> getForEachLoopVariable(
-        CtBodyHolder ctBodyHolder,
-        ForLoopRange forLoopRange,
-        Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess
+            CtBodyHolder ctBodyHolder,
+            ForLoopRange forLoopRange,
+            Function<? super CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess
     ) {
         CtVariable<?> loopVariable = forLoopRange.loopVariable().getDeclaration();
 
-        // if a ForLoopRange exists, it is guranteed that the variable is incremented by 1 for each step
+        // if a ForLoopRange exists, it is guaranteed that the variable is incremented by 1 for each step
 
         CtVariable<?> ctVariable = null;
         CtVariableAccess<?> expectedAccess = null;
-        Uses uses = CodeModel.getFor(loopVariable).getUses();
-        for (CtElement use : uses.getAllUses(loopVariable)) {
-            if (!(use instanceof CtVariableAccess<?> ctVariableAccess)) {
-                throw new IllegalStateException(
-                    "SpoonUtil.findUsesIn returned non-variable access for '%s' as input".formatted(loopVariable));
-            }
-
-            if (!use.hasParent(ctBodyHolder.getBody())) {
-                continue;
-            }
-
+        for (CtVariableAccess<?> ctVariableAccess : UsesFinder.variableUses(loopVariable).nestedIn(ctBodyHolder.getBody()).iterable()) {
             // We need to get the variable on which the access is performed (e.g. in a[i] we need to get a)
             CtVariableAccess<?> potentialLoopVariableAccess = getPotentialLoopVariableAccess.apply(ctVariableAccess)
-                .orElse(null);
+                    .orElse(null);
 
             if (!(potentialLoopVariableAccess instanceof CtVariableRead<?>)) {
                 return Optional.empty();
@@ -131,25 +119,25 @@ public class ForToForEachLoop extends IntegratedCheck {
 
         // check if the end condition is array.length
         if (end instanceof CtFieldRead<?> ctFieldRead
-            && ctFieldRead.getVariable().getSimpleName().equals("length")
-            && ctFieldRead.getTarget() instanceof CtVariableAccess<?> target
-            && target.getType().isArray()) {
+                && ctFieldRead.getVariable().getSimpleName().equals("length")
+                && ctFieldRead.getTarget() instanceof CtVariableAccess<?> target
+                && target.getType().isArray()) {
             return Optional.ofNullable(target.getVariable().getDeclaration());
         }
 
         // check if the end condition is collection.size()
         if (end instanceof CtInvocation<?> ctInvocation
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size")
-            && ctInvocation.getTarget() instanceof CtVariableAccess<?> target
-            && SpoonUtil.isSubtypeOf(target.getType(), java.util.Collection.class)) {
+                && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size")
+                && ctInvocation.getTarget() instanceof CtVariableAccess<?> target
+                && SpoonUtil.isSubtypeOf(target.getType(), java.util.Collection.class)) {
             return Optional.ofNullable(target.getVariable().getDeclaration());
         }
 
         // check if the end condition is string.length()
         if (end instanceof CtInvocation<?> ctInvocation
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "length")
-            && ctInvocation.getTarget() instanceof CtVariableAccess<?> target
-            && SpoonUtil.isTypeEqualTo(target.getType(), java.lang.String.class)) {
+                && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "length")
+                && ctInvocation.getTarget() instanceof CtVariableAccess<?> target
+                && SpoonUtil.isTypeEqualTo(target.getType(), java.lang.String.class)) {
             return Optional.ofNullable(target.getVariable().getDeclaration());
         }
 
@@ -207,9 +195,9 @@ public class ForToForEachLoop extends IntegratedCheck {
                 }
 
                 CtVariable<?> ctLoopVariable = getForEachLoopVariable(
-                    ctFor,
-                    forLoopRange,
-                    getPotentialLoopVariableAccess
+                        ctFor,
+                        forLoopRange,
+                        getPotentialLoopVariableAccess
                 ).orElse(null);
 
                 if (!iterable.equals(ctLoopVariable)) {
@@ -218,17 +206,17 @@ public class ForToForEachLoop extends IntegratedCheck {
 
 
                 addLocalProblem(
-                    ctFor,
-                    new LocalizedMessage(
-                        "common-reimplementation",
-                        Map.of(
-                            "suggestion", "for (%s value : %s) { ... }".formatted(
-                                elementType,
-                                iterableExpression
-                            )
-                        )
-                    ),
-                    ProblemType.FOR_CAN_BE_FOREACH
+                        ctFor,
+                        new LocalizedMessage(
+                                "common-reimplementation",
+                                Map.of(
+                                        "suggestion", "for (%s value : %s) { ... }".formatted(
+                                                elementType,
+                                                iterableExpression
+                                        )
+                                )
+                        ),
+                        ProblemType.FOR_CAN_BE_FOREACH
                 );
             }
         });

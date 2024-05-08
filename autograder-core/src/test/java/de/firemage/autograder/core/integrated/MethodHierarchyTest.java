@@ -51,11 +51,11 @@ class MethodHierarchyTest {
         var fooA = findMethod("foo()", "A", model);
         var fooB = findMethod("foo()", "B", model);
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooA));
-        assertEquals(Set.of(method(fooB)), model.getMethodHierarchy().getDirectOverridingMethods(fooA));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooA));
+        assertEquals(Set.of(method(fooB)), MethodHierarchy.getDirectOverridingMethods(fooA));
 
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooB));
     }
 
     @Test
@@ -93,14 +93,14 @@ class MethodHierarchyTest {
         var fooB = findMethod("foo()", "B", model);
         var fooC = findMethod("foo()", "C", model);
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooA));
-        assertEquals(Set.of(method(fooB)), model.getMethodHierarchy().getDirectOverridingMethods(fooA));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooA));
+        assertEquals(Set.of(method(fooB)), MethodHierarchy.getDirectOverridingMethods(fooA));
 
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(method(fooC)), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(method(fooC)), MethodHierarchy.getDirectOverridingMethods(fooB));
 
-        assertEquals(Set.of(method(fooB)), model.getMethodHierarchy().getDirectSuperMethods(fooC));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooC));
+        assertEquals(Set.of(method(fooB)), MethodHierarchy.getDirectSuperMethods(fooC));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooC));
     }
 
     @Test
@@ -134,11 +134,11 @@ class MethodHierarchyTest {
         var fooA = findMethod("foo()", "A", model);
         var fooC = findMethod("foo()", "C", model);
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooA));
-        assertEquals(Set.of(method(fooC)), model.getMethodHierarchy().getDirectOverridingMethods(fooA));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooA));
+        assertEquals(Set.of(method(fooC)), MethodHierarchy.getDirectOverridingMethods(fooA));
 
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectSuperMethods(fooC));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooC));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectSuperMethods(fooC));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooC));
     }
 
     @Test
@@ -170,14 +170,14 @@ class MethodHierarchyTest {
         var fooB = findMethod("foo()", "B", model);
         var fooC = findMethod("foo()", "C", model);
 
-        assertEquals(Set.of(method(fooB), method(fooC)), model.getMethodHierarchy().getDirectSuperMethods(fooA));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooA));
+        assertEquals(Set.of(method(fooB), method(fooC)), MethodHierarchy.getDirectSuperMethods(fooA));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooA));
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectOverridingMethods(fooB));
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooC));
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectOverridingMethods(fooC));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooC));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectOverridingMethods(fooC));
     }
 
     @Test
@@ -209,14 +209,14 @@ class MethodHierarchyTest {
         var fooB = findMethod("foo()", "B", model);
         var fooC = findMethod("foo()", "C", model);
 
-        assertEquals(Set.of(method(fooB)), model.getMethodHierarchy().getDirectSuperMethods(fooA));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooA));
+        assertEquals(Set.of(method(fooB)), MethodHierarchy.getDirectSuperMethods(fooA));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooA));
 
-        assertEquals(Set.of(method(fooC)), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(method(fooC)), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectOverridingMethods(fooB));
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooC));
-        assertEquals(Set.of(method(fooB)), model.getMethodHierarchy().getDirectOverridingMethods(fooC));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooC));
+        assertEquals(Set.of(method(fooB)), MethodHierarchy.getDirectOverridingMethods(fooC));
     }
 
     @Test
@@ -248,14 +248,14 @@ class MethodHierarchyTest {
         var fooB = findMethod("foo()", "B", model);
         var fooC = findMethod("foo()", "C", model);
 
-        assertEquals(Set.of(method(fooB), method(fooC)), model.getMethodHierarchy().getDirectSuperMethods(fooA));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooA));
+        assertEquals(Set.of(method(fooB), method(fooC)), MethodHierarchy.getDirectSuperMethods(fooA));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooA));
 
-        assertEquals(Set.of(method(fooC)), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(method(fooA)), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(method(fooC)), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(method(fooA)), MethodHierarchy.getDirectOverridingMethods(fooB));
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooC));
-        assertEquals(Set.of(method(fooA), method(fooB)), model.getMethodHierarchy().getDirectOverridingMethods(fooC));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooC));
+        assertEquals(Set.of(method(fooA), method(fooB)), MethodHierarchy.getDirectOverridingMethods(fooC));
     }
 
     @Test
@@ -286,11 +286,11 @@ class MethodHierarchyTest {
         var fooB = findMethod("foo(int)", "B", model);
         var fooAnon = findMethod("foo(int)", "A$1", model);
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(method(fooAnon)), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(method(fooAnon)), MethodHierarchy.getDirectOverridingMethods(fooB));
 
-        assertEquals(Set.of(method(fooB)), model.getMethodHierarchy().getDirectSuperMethods(fooAnon));
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectOverridingMethods(fooAnon));
+        assertEquals(Set.of(method(fooB)), MethodHierarchy.getDirectSuperMethods(fooAnon));
+        assertEquals(Set.of(), MethodHierarchy.getDirectOverridingMethods(fooAnon));
     }
 
     @Test
@@ -319,8 +319,8 @@ class MethodHierarchyTest {
         var fooB = findMethod("foo(int)", "B", model);
         var fooAnon = (CtLambda<?>) model.getModel().filterChildren(e -> e instanceof CtLambda<?>).first();
 
-        assertEquals(Set.of(), model.getMethodHierarchy().getDirectSuperMethods(fooB));
-        assertEquals(Set.of(lambda(fooAnon)), model.getMethodHierarchy().getDirectOverridingMethods(fooB));
+        assertEquals(Set.of(), MethodHierarchy.getDirectSuperMethods(fooB));
+        assertEquals(Set.of(lambda(fooAnon)), MethodHierarchy.getDirectOverridingMethods(fooB));
     }
 
     private CtMethod<?> findMethod(String signature, String type, CodeModel model) {

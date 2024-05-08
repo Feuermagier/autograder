@@ -2,10 +2,9 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Uses;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFieldWrite;
@@ -25,14 +24,11 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 if (ctField.isImplicit() || !ctField.getPosition().isValidPosition() || ctField.isFinal()) {
                     return;
                 }
-                Uses uses = staticAnalysis.getCodeModel().getUses();
 
                 // check if the field is written to outside of constructors
-                boolean hasWrite = uses.hasAnyUses(
-                    ctField,
-                    ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
-                        && ctFieldWrite.getParent(CtConstructor.class) == null
-                );
+                boolean hasWrite = UsesFinder.variableUses(ctField)
+                        .ofType(CtFieldWrite.class)
+                        .notNestedIn(CtConstructor.class).hasAny();
 
                 // a field can not be final if it is written to from outside of constructors
                 if (hasWrite) {
@@ -40,11 +36,9 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 }
 
                 // check if the field is written to in constructors, which is fine if it does not have an explicit value
-                boolean hasWriteInConstructor = uses.hasAnyUses(
-                    ctField,
-                    ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
-                        && ctFieldWrite.getParent(CtConstructor.class) != null
-                );
+                boolean hasWriteInConstructor = UsesFinder.variableUses(ctField)
+                        .ofType(CtFieldWrite.class)
+                        .nestedIn(CtConstructor.class).hasAny();
 
                 // we need to check if the field is explicitly initialized, because this is not allowed:
                 //

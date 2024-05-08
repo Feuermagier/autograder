@@ -5,9 +5,10 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.Uses;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtConstructor;
@@ -38,8 +39,6 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
      * @return
      */
     public static boolean isConsideredUnused(CtNamedElement element, CodeModel model) {
-        Uses uses = model.getUses();
-
         // ignore exception constructors and params in those constructors
         var parentConstructor = SpoonUtil.getParentOrSelf(element, CtConstructor.class);
         if (parentConstructor != null && SpoonUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
@@ -60,28 +59,28 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
         }
 
         if (element instanceof CtVariable<?> variable) {
-            if (uses.hasAnyUses(variable)) {
+            if (UsesFinder.variableUses(variable).hasAny()) {
                 return false;
             } else if (variable instanceof CtParameter<?> parameter && parameter.getParent() instanceof CtMethod<?> method) {
                 // For method parameters, also look in overriding methods
                 int parameterIndex = SpoonUtil.getParameterIndex(parameter, method);
-                return model.getMethodHierarchy()
+                return MethodHierarchy
                         .streamAllOverridingMethods(method)
                         .allMatch(m -> isConsideredUnused(m.getExecutable().getParameters().get(parameterIndex), model));
             }
             return true;
 
         } else if (element instanceof CtTypeParameter typeParameter) {
-            return !uses.hasAnyUses(typeParameter);
+            return UsesFinder.typeParameterUses(typeParameter).hasNone();
         } else if (element instanceof CtType<?> type) {
-            return !uses.hasAnyUses(type);
+            return UsesFinder.typeUses(type).hasNone();
         } else if (element instanceof CtExecutable<?> executable) {
             // Ignore recursive calls
-            if (uses.hasAnyUses(executable, reference -> reference.getParent(CtMethod.class) != executable)) {
+            if (UsesFinder.executableUses(executable).filterParent(CtMethod.class, m -> m != executable).hasAny()) {
                 return false;
             } else if (executable instanceof CtMethod<?> method) {
                 // For methods, also look for used overriding methods
-                return model.getMethodHierarchy()
+                return MethodHierarchy
                         .streamAllOverridingMethods(method)
                         .allMatch(m -> isConsideredUnused(m.getExecutable(), model));
             }
@@ -132,7 +131,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtMethod(CtMethod<T> ctMethod) {
-                if (model.getMethodHierarchy().isOverridingMethod(ctMethod)
+                if (MethodHierarchy.isOverridingMethod(ctMethod)
                     || SpoonUtil.isMainMethod(ctMethod)) {
                     super.visitCtMethod(ctMethod);
                     return;

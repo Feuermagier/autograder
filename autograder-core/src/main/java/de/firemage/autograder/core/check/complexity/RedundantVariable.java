@@ -7,6 +7,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
@@ -43,7 +44,7 @@ public class RedundantVariable extends IntegratedCheck {
             // it should not have any annotations (e.g. @SuppressWarnings("unchecked"))
             || !ctLocalVariable.getAnnotations().isEmpty()
             // the variable must only be used in the return statement
-            || model.getUses().hasAnyUses(ctLocalVariable, ctElement -> ctElement.getParent(CtStatement.class) != ctStatement)) {
+            || UsesFinder.variableUses(ctLocalVariable).filterParent(CtStatement.class, s -> s != ctStatement).hasAny()) {
             return;
         }
 

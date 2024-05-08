@@ -8,6 +8,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -72,7 +73,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
 
     private <T> void checkCtMethod(CtMethod<T> ctMethod, CodeModel model) {
         // to avoid duplicate reports, only report the first method declaration
-        if (model.getMethodHierarchy().isOverridingMethod(ctMethod)) {
+        if (MethodHierarchy.isOverridingMethod(ctMethod)) {
             return;
         }
 

@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.integrated;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.integrated.effects.AssignmentStatement;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -10,6 +9,7 @@ import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -40,6 +40,7 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
+import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
@@ -852,7 +853,7 @@ public final class SpoonUtil {
         if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
             return true;
         }
-        return !CodeModel.getFor(ctVariable).getUses().hasAnyUses(ctVariable, use -> use instanceof CtVariableWrite<?>);
+        return UsesFinder.variableUses(ctVariable).ofType(CtVariableWrite.class).hasNone();
     }
 
     public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariable<T> ctVariable) {
@@ -1076,7 +1077,7 @@ public final class SpoonUtil {
             return false;
         }
 
-        return CodeModel.getFor(ctElement).getMethodHierarchy().isOverridingMethod(ctMethod);
+        return MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
     /**
@@ -1319,5 +1320,13 @@ public final class SpoonUtil {
             }
         }
         throw new IllegalArgumentException("Parameter not found in executable");
+    }
+
+    public static CtPackage getRootPackage(CtElement element) {
+        return element.getFactory().getModel().getRootPackage();
+    }
+
+    public static boolean isNestedOrSame(CtElement element, CtElement parent) {
+        return element == parent || element.hasParent(parent);
     }
 }

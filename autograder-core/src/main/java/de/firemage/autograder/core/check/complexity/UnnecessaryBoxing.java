@@ -7,10 +7,10 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtExpression;
-import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtTypeReference;
@@ -40,13 +40,13 @@ public class UnnecessaryBoxing extends IntegratedCheck {
             return;
         }
 
-        boolean hasNullAssigned = isLikelyNull(ctVariable.getDefaultExpression()) || model.getUses().hasAnyUses(
-            ctVariable,
-                ctElement -> ctElement instanceof CtVariableWrite<?>
-                && ctElement.getParent() instanceof CtAssignment<?,?> ctAssignment
-                && ctAssignment.getAssignment() != null
-                && isLikelyNull(ctAssignment.getAssignment())
-        );
+        boolean hasNullAssigned = isLikelyNull(ctVariable.getDefaultExpression()) || UsesFinder.variableUses(ctVariable)
+                .ofType(CtVariableWrite.class)
+                .filter(use ->
+                        use.getParent() instanceof CtAssignment<?,?> assignment
+                                && assignment.getAssignment() != null
+                                && isLikelyNull(assignment.getAssignment())
+                ).hasAny();
 
         if (!hasNullAssigned) {
             addLocalProblem(

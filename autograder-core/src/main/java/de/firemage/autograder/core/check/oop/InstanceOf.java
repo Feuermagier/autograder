@@ -5,7 +5,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -21,7 +21,7 @@ import spoon.reflect.visitor.CtScanner;
 public class InstanceOf extends IntegratedCheck {
     private static boolean isInAllowedContext(CtElement ctElement, CodeModel model) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
-        return ctMethod != null && model.getMethodHierarchy().isOverridingMethod(ctMethod);
+        return ctMethod != null && MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
     @Override

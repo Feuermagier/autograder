@@ -1,9 +1,8 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.core.integrated.uses;
 
-import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.stream.CtElementStream;
 import spoon.reflect.CtModel;
-import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExecutableReferenceExpression;
@@ -15,15 +14,10 @@ import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
-import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
-import spoon.reflect.declaration.CtFormalTypeDeclarer;
-import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
-import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtArrayTypeReference;
@@ -32,11 +26,9 @@ import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.reference.CtWildcardReference;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
@@ -49,83 +41,71 @@ import java.util.function.Predicate;
  * The graph is built once at construction time with a single pass over the model for all elements,
  * so that all subsequent queries are fast.
  */
-public class Uses {
+public class UsesFinder {
+    private static final String METADATA_KEY = "autograder_uses";
+
     private final UsesScanner scanner;
 
-    public Uses(CtModel model) {
+    private UsesFinder(CtModel model) {
         this.scanner = new UsesScanner();
         model.getRootPackage().accept(this.scanner);
     }
 
-    public boolean variableHasAnyUses(CtVariable<?> variable, Predicate<? super CtVariableAccess> filter) {
-        return this.hasAnyUses(this.scanner.variableUses.get(variable), filter);
+    public static void buildFor(CtModel model) {
+        UsesFinder uses = new UsesFinder(model);
+        model.getRootPackage().putMetadata(METADATA_KEY, uses);
     }
 
-    public boolean typeParameterHasAnyUses(CtTypeParameter typeParameter, Predicate<? super CtTypeParameterReference> filter) {
-        return this.hasAnyUses(this.scanner.typeParameterUses.get(typeParameter), filter);
+    public static UsesFinder getFor(CtElement element) {
+        var uses = (UsesFinder) SpoonUtil.getRootPackage(element).getMetadata(METADATA_KEY);
+        if (uses == null) {
+            throw new IllegalArgumentException("No uses information available for this model");
+        }
+        return uses;
     }
 
-    public boolean executableHasAnyUses(CtExecutable executable, Predicate<? super CtElement> filter) {
-        return this.hasAnyUses(this.scanner.executableUses.get(executable), filter);
-    }
-
-    public boolean typeHasAnyUses(CtType type, Predicate<? super CtTypeReference> filter) {
-        return this.hasAnyUses(this.scanner.typeUses.get(type), filter);
-    }
-
-    public boolean hasAnyUses(CtElement element, Predicate<CtElement> filter) {
+    /**
+     * Find all uses of the given element within the model.
+     * This is an (untyped) alternative to the more specific methods (variableUses, typeParameterUses, executableUses, typeUses).
+     * @param element
+     * @return
+     */
+    @SuppressWarnings("rawtypes")
+    public static CtElementStream<CtElement> getAllUses(CtNamedElement element) {
         if (element instanceof CtVariable<?> variable) {
-            return this.variableHasAnyUses(variable, filter);
+            return UsesFinder.variableUses(variable).asUntypedStream();
         } else if (element instanceof CtTypeParameter typeParameter) {
-            return this.typeParameterHasAnyUses(typeParameter, filter);
+            return UsesFinder.typeParameterUses(typeParameter).asUntypedStream();
         } else if (element instanceof CtExecutable executable) {
-            return this.executableHasAnyUses(executable, filter);
+            return UsesFinder.executableUses(executable).asUntypedStream();
         } else if (element instanceof CtType type) {
-            return this.typeHasAnyUses(type, filter);
+            return UsesFinder.typeUses(type).asUntypedStream();
         } else {
             throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
         }
     }
 
-    public boolean hasAnyUses(CtElement element) {
-        return this.hasAnyUses(element, e -> true);
+    public static CtElementStream<CtVariableAccess<?>> variableUses(CtVariable<?> variable) {
+        return CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType();
     }
 
-    public boolean hasAnyUsesIn(CtElement element, CtElement parent, Predicate<CtElement> filter) {
-        // this can be slow if the parent chain is very long
-        return this.hasAnyUses(element, filter.and(e -> (e == parent || e.hasParent(parent))));
+    public static CtElementStream<CtTypeParameterReference> typeParameterUses(CtTypeParameter typeParameter) {
+        return CtElementStream.of(UsesFinder.getFor(typeParameter).scanner.typeParameterUses.getOrDefault(typeParameter, List.of()));
     }
 
-    public boolean hasAnyUsesIn(CtElement element, CtElement parent) {
-        return this.hasAnyUsesIn(element, parent, e -> true);
+    public static CtElementStream<CtElement> executableUses(CtExecutable<?> executable) {
+        return CtElementStream.of(UsesFinder.getFor(executable).scanner.executableUses.getOrDefault(executable, List.of()));
     }
 
-    public List<? extends CtElement> getAllUses(CtNamedElement element) {
-        if (element instanceof CtVariable<?> variable) {
-            return Collections.unmodifiableList(this.scanner.variableUses.getOrDefault(variable, List.of()));
-        } else if (element instanceof CtTypeParameter typeParameter) {
-            return Collections.unmodifiableList(this.scanner.typeParameterUses.getOrDefault(typeParameter, List.of()));
-        } else if (element instanceof CtExecutable executable) {
-            return Collections.unmodifiableList(this.scanner.executableUses.getOrDefault(executable, List.of()));
-        } else if (element instanceof CtType type) {
-            return Collections.unmodifiableList(this.scanner.typeUses.getOrDefault(type, List.of()));
-        } else {
-            throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
-        }
-    }
-
-    private <T> boolean hasAnyUses(List<T> uses, Predicate<? super T> filter) {
-        if (uses == null || uses.isEmpty()) {
-            return false;
-        } else {
-            return uses.stream().anyMatch(filter);
-        }
+    public static CtElementStream<CtTypeReference<?>> typeUses(CtType<?> type) {
+        return CtElementStream.of(UsesFinder.getFor(type).scanner.typeUses.getOrDefault(type, List.of())).assumeElementType();
     }
 
     /**
      * The scanner searches for uses of supported code elements in a single pass over the entire model.
      * Since inserting into the hash map requires (amortized) constant time, usage search runs in O(n) time.
      */
+    @SuppressWarnings("rawtypes")
     private static class UsesScanner extends CtScanner {
         // The IdentityHashMaps are very important here, since
         // E.g. CtVariable's equals method considers locals with the same name to be equal

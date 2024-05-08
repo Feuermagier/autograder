@@ -2,6 +2,7 @@ package de.firemage.autograder.core.integrated;
 
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtLambda;
+import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -19,10 +20,11 @@ import java.util.stream.Stream;
  * The hierarchy is built once at construction time for all methods, so that all subsequent queries are fast.
  */
 public class MethodHierarchy {
+    private static final String METADATA_KEY = "autograder_method_hierarchy";
 
     private final IdentityHashMap<CtMethod<?>, SurroundingMethods> methodHierarchy;
 
-    public MethodHierarchy(CtModel model) {
+    private MethodHierarchy(CtModel model) {
         this.methodHierarchy = new IdentityHashMap<>();
 
         // Using a scanner instead of queries/filters so that we traverse the model only once
@@ -47,6 +49,19 @@ public class MethodHierarchy {
         });
     }
 
+    public static void buildFor(CtModel model) {
+        MethodHierarchy methodHierarchy = new MethodHierarchy(model);
+        model.getRootPackage().putMetadata(METADATA_KEY, methodHierarchy);
+    }
+
+    public static MethodHierarchy getFor(CtElement element) {
+        var methodHierarchy = (MethodHierarchy) element.getFactory().getModel().getRootPackage().getMetadata(METADATA_KEY);
+        if (methodHierarchy == null) {
+            throw new IllegalStateException("MethodHierarchy not built for this model");
+        }
+        return methodHierarchy;
+    }
+
     /**
      * Finds all methods that are *direct* super methods of the given method.
      * In the following example, when calling {@code getDirectSuperMethods(C.m)}, only {@code B.m} is returned:
@@ -55,11 +70,12 @@ public class MethodHierarchy {
      *     class B extends A { void m() {} }
      *     class C extends B { void m() {} }
      * </pre>
+     *
      * @param method
      * @return
      */
-    public Set<MethodOrLambda<?>> getDirectSuperMethods(CtMethod<?> method) {
-        var surroundingMethods = this.methodHierarchy.get(method);
+    public static Set<MethodOrLambda<?>> getDirectSuperMethods(CtMethod<?> method) {
+        var surroundingMethods = MethodHierarchy.getFor(method).methodHierarchy.get(method);
         if (surroundingMethods == null) {
             return Set.of();
         } else {
@@ -75,11 +91,12 @@ public class MethodHierarchy {
      *     class B extends A { void m() {} }
      *     class C extends B { void m() {} }
      * </pre>
+     *
      * @param method
      * @return
      */
-    public Set<MethodOrLambda<?>> getDirectOverridingMethods(CtMethod<?> method) {
-        var surroundingMethods = this.methodHierarchy.get(method);
+    public static Set<MethodOrLambda<?>> getDirectOverridingMethods(CtMethod<?> method) {
+        var surroundingMethods = MethodHierarchy.getFor(method).methodHierarchy.get(method);
         if (surroundingMethods == null) {
             return Set.of();
         } else {
@@ -96,17 +113,18 @@ public class MethodHierarchy {
      *     class B extends A { void m() {} }
      *     class C extends B { void m() {} }
      * </pre>
+     *
      * @param method
      * @return
      */
-    public Stream<MethodOrLambda<?>> streamAllOverridingMethods(CtMethod<?> method) {
-        var surroundingMethods = this.methodHierarchy.get(method);
+    public static Stream<MethodOrLambda<?>> streamAllOverridingMethods(CtMethod<?> method) {
+        var surroundingMethods = MethodHierarchy.getFor(method).methodHierarchy.get(method);
         if (surroundingMethods == null) {
             return Stream.of();
         } else {
             return surroundingMethods.overridingMethods
                     .stream()
-                    .flatMap(m -> Stream.concat(Stream.of(m), this.streamAllOverridingMethods(m.getMethod())));
+                    .flatMap(m -> Stream.concat(Stream.of(m), MethodHierarchy.streamAllOverridingMethods(m.getMethod())));
         }
     }
 
@@ -117,11 +135,12 @@ public class MethodHierarchy {
      *     class A { void m() {} }
      *     class B extends A { void m() {} }
      * </pre>
+     *
      * @param method
      * @return
      */
-    public boolean isOverridingMethod(CtMethod<?> method) {
-        var surroundingMethods = this.methodHierarchy.get(method);
+    public static boolean isOverridingMethod(CtMethod<?> method) {
+        var surroundingMethods = MethodHierarchy.getFor(method).methodHierarchy.get(method);
         return surroundingMethods != null && !surroundingMethods.superMethods.isEmpty();
     }
 
@@ -132,11 +151,12 @@ public class MethodHierarchy {
      *     class A { void m() {} }
      *     class B extends A { void m() {} }
      * </pre>
+     *
      * @param method
      * @return
      */
-    public boolean isOverriddenMethod(CtMethod<?> method) {
-        var surroundingMethods = this.methodHierarchy.get(method);
+    public static boolean isOverriddenMethod(CtMethod<?> method) {
+        var surroundingMethods = MethodHierarchy.getFor(method).methodHierarchy.get(method);
         return surroundingMethods != null && !surroundingMethods.overridingMethods.isEmpty();
     }
 

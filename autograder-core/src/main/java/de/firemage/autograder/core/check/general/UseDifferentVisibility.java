@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check.general;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -8,6 +7,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
@@ -19,11 +19,10 @@ import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
@@ -60,20 +59,17 @@ public class UseDifferentVisibility extends IntegratedCheck {
         }
     }
 
-    private static Visibility getVisibility(CtTypeMember ctTypeMember, CodeModel model) {
+    private static Visibility getVisibility(CtTypeMember ctTypeMember) {
         CtModel ctModel = ctTypeMember.getFactory().getModel();
 
-        // List<CtElement> references = SpoonUtil.findUsesOf(ctTypeMember);
-        @SuppressWarnings("unchecked") // yeah, that covariant assignment is unsafe, but fine for us here
-        List<CtElement> references = (List<CtElement>) model.getUses().getAllUses(ctTypeMember);
+        Stream<CtElement> referencesStream = UsesFinder.getAllUses(ctTypeMember);
         if (ctTypeMember instanceof CtMethod<?> method) {
             // For methods, we also consider overriding methods
-            references = new ArrayList<>(references);
-            references.addAll(model.getMethodHierarchy()
+            referencesStream = Stream.concat(referencesStream, MethodHierarchy
                     .streamAllOverridingMethods(method)
-                    .map(MethodHierarchy.MethodOrLambda::getExecutable)
-                    .toList());
+                    .map(MethodHierarchy.MethodOrLambda::getExecutable));
         }
+        List<CtElement> references = referencesStream.toList();
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
@@ -116,7 +112,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 }
 
                 Visibility currentVisibility = Visibility.of(ctTypeMember);
-                if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || staticAnalysis.getCodeModel().getMethodHierarchy().isOverridingMethod(ctMethod))) {
+                if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || MethodHierarchy.isOverridingMethod(ctMethod))) {
                     return;
                 }
 
@@ -128,9 +124,9 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 // only check methods and fields
                 Visibility visibility;
                 if (ctTypeMember instanceof CtMethod<?> ctMethod) {
-                    visibility = getVisibility(ctMethod, staticAnalysis.getCodeModel());
+                    visibility = getVisibility(ctMethod);
                 } else if (ctTypeMember instanceof CtField<?> ctField) {
-                    visibility = getVisibility(ctField, staticAnalysis.getCodeModel());
+                    visibility = getVisibility(ctField);
 
                     // special case for fields that are referenced by other fields in the same class
                     // For more details see the test case TestUseDifferentVisibility#testBackwardReference
@@ -138,8 +134,8 @@ public class UseDifferentVisibility extends IntegratedCheck {
                         .getFields()
                         .stream()
                         // filter out the field itself and those that do not reference the field
-                        .filter(field -> field != ctField && staticAnalysis.getCodeModel().getUses().hasAnyUsesIn(ctField, field))
-                        .map(f -> getVisibility(f, staticAnalysis.getCodeModel()))
+                        .filter(field -> field != ctField && UsesFinder.variableUses(ctField).nestedIn(field).hasAny())
+                        .map(UseDifferentVisibility::getVisibility)
                         .max(Visibility::compareTo);
 
                     if (referencingVisibility.isPresent() && visibility.isMoreRestrictiveThan(referencingVisibility.get())) {

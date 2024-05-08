@@ -2,16 +2,15 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Uses;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtLoop;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtVariableRead;
@@ -51,11 +50,9 @@ public class RedundantAssignment extends IntegratedCheck {
                     return;
                 }
 
-                if (followingStatements.stream().noneMatch(statement -> staticAnalysis.getCodeModel().getUses().hasAnyUsesIn(
-                    ctLocalVariable,
-                    statement,
-                    element -> element instanceof CtVariableRead<?>
-                ))) {
+                if (followingStatements.stream().noneMatch(statement ->
+                        UsesFinder.variableUses(ctLocalVariable).ofType(CtVariableRead.class).nestedIn(statement).hasAny())
+                ) {
                     addLocalProblem(
                         ctAssignment,
                         new LocalizedMessage(
