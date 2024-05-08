@@ -19,18 +19,17 @@ import spoon.reflect.visitor.CtScanner;
 
 @ExecutableCheck(reportedProblems = { ProblemType.INSTANCEOF, ProblemType.INSTANCEOF_EMULATION })
 public class InstanceOf extends IntegratedCheck {
-    private static boolean isInAllowedContext(CtElement ctElement, CodeModel model) {
+    private static boolean isInAllowedContext(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         return ctMethod != null && MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
-        CodeModel model = staticAnalysis.getCodeModel();
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public void visitCtTry(CtTry ctTry) {
-                if (ctTry.isImplicit() || !ctTry.getPosition().isValidPosition() || isInAllowedContext(ctTry, model)) {
+                if (ctTry.isImplicit() || !ctTry.getPosition().isValidPosition() || isInAllowedContext(ctTry)) {
                     super.visitCtTry(ctTry);
                     return;
                 }
@@ -50,7 +49,7 @@ public class InstanceOf extends IntegratedCheck {
 
             @Override
             public <T> void visitCtInvocation(CtInvocation<T> ctInvocation) {
-                if (ctInvocation.isImplicit() || !ctInvocation.getPosition().isValidPosition() || isInAllowedContext(ctInvocation, model)) {
+                if (ctInvocation.isImplicit() || !ctInvocation.getPosition().isValidPosition() || isInAllowedContext(ctInvocation)) {
                     super.visitCtInvocation(ctInvocation);
                     return;
                 }
@@ -71,7 +70,7 @@ public class InstanceOf extends IntegratedCheck {
 
             @Override
             public <T> void visitCtBinaryOperator(CtBinaryOperator<T> ctBinaryOperator) {
-                if (ctBinaryOperator.isImplicit() || !ctBinaryOperator.getPosition().isValidPosition() || isInAllowedContext(ctBinaryOperator, model)) {
+                if (ctBinaryOperator.isImplicit() || !ctBinaryOperator.getPosition().isValidPosition() || isInAllowedContext(ctBinaryOperator)) {
                     super.visitCtBinaryOperator(ctBinaryOperator);
                     return;
                 }
