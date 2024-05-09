@@ -7,7 +7,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.javadoc.api.elements.JavadocReference;
 import spoon.javadoc.api.elements.JavadocVisitor;
 import spoon.javadoc.api.parsing.JavadocParser;
@@ -22,7 +22,6 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -38,7 +37,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
-import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNUSED_IMPORT })

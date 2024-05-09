@@ -4,7 +4,7 @@ import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import de.firemage.autograder.core.integrated.SpoonUtil;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.Launcher;
 import spoon.compiler.Environment;
 import spoon.compiler.ModelBuildingException;

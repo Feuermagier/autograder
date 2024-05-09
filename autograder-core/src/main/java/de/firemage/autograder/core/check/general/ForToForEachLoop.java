@@ -8,7 +8,7 @@ import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayRead;
 import spoon.reflect.code.CtBodyHolder;

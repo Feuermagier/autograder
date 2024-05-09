@@ -1,6 +1,5 @@
-package de.firemage.autograder.core.integrated.stream;
+package de.firemage.autograder.core.integrated;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import spoon.reflect.declaration.CtElement;
 
 import java.util.Comparator;
@@ -109,7 +108,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      */
     @SuppressWarnings("unchecked")
     public CtElementStream<CtElement> asUntypedStream() {
-        return (CtElementStream<CtElement>) ((CtElementStream<?>) this);
+        return (CtElementStream<CtElement>) this;
     }
 
     /**
@@ -154,7 +153,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      * @return
      */
     public CtElementStream<T> notNestedIn(Class<? extends CtElement> parentType) {
-        return this.filter(e -> !parentType.isInstance(e) & e.getParent(parentType) == null);
+        return this.filter(e -> !parentType.isInstance(e) && e.getParent(parentType) == null);
     }
 
     /**

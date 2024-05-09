@@ -1,13 +1,10 @@
 package de.firemage.autograder.core.integrated;
 
-import de.firemage.autograder.core.CodeModel;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;

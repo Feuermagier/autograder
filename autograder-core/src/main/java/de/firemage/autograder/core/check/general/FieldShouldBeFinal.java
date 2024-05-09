@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;

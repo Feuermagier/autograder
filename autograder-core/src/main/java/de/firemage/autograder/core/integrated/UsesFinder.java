@@ -1,7 +1,5 @@
-package de.firemage.autograder.core.integrated.uses;
+package de.firemage.autograder.core.integrated;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
-import de.firemage.autograder.core.integrated.stream.CtElementStream;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConstructorCall;
@@ -33,7 +31,6 @@ import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Stack;
-import java.util.function.Predicate;
 
 /**
  * Provides usage-relationships between code elements in the code model.

@@ -1,15 +1,13 @@
 package de.firemage.autograder.core.check.general;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;

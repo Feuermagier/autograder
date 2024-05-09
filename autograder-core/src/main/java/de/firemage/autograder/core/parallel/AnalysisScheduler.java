@@ -24,7 +24,7 @@ public class AnalysisScheduler {
         this.waitingAndRunningTaskCount = new AtomicInteger(0);
 
         this.analysisThreads = new ArrayList<>();
-        int actualThreads = threads > 0 ? threads : Math.max(Runtime.getRuntime().availableProcessors() - 2, 1);
+        int actualThreads = threads > 0 ? threads : Math.max(Runtime.getRuntime().availableProcessors() - 2, 1);zz
 
         if (actualThreads == 1) {
             return;

@@ -9,7 +9,6 @@ import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;

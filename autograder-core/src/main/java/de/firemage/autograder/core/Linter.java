@@ -193,7 +193,7 @@ public final class Linter {
             }
         }
 
-        AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
+        AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);z
 
         if (!pmdChecks.isEmpty()) {
             scheduler.submitTask((s, reporter) -> {
