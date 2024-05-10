@@ -8,6 +8,7 @@ import de.firemage.autograder.core.ArtemisUtil;
 import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.Linter;
+import de.firemage.autograder.core.LinterConfigurationException;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
@@ -213,7 +214,7 @@ public class Application implements Callable<Integer> {
             } else {
                 checkConfiguration = CheckConfiguration.fromConfigFile(Path.of(checkConfig));
             }
-        } catch (IOException e) {
+        } catch (IOException | LinterConfigurationException e) {
             e.printStackTrace();
             return IO_EXIT_CODE;
         }

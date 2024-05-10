@@ -33,7 +33,7 @@ class TestSampleConfig {
     }
 
     @Test
-    void hasAllProblemTypes() throws IOException {
+    void hasAllProblemTypes() throws IOException, LinterConfigurationException {
         // the `System.getProperty("user.dir")` is the path to the autograder-core directory
         Path path = Path.of(System.getProperty("user.dir"), "..", "sample_config.yaml");
         List<ProblemType> present = CheckConfiguration.fromConfigFile(path).problemsToReport();
