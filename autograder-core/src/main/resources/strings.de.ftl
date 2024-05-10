@@ -255,8 +255,8 @@ mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflo
 
 should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein. Alternativ sollte man eine Map verwenden.
 
-closed-set-of-values-switch = Ein switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte.
-closed-set-of-values-list = Eine Auflistung von endlich vielen Werten sollte als enum modelliert werden.
+closed-set-of-values-switch = Der Switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte. Die Werte sind: '{$values}'.
+closed-set-of-values-list = Die Auflistung hat nur endlich viele Werte und sollte deswegen als enum modelliert werden. Die Werte sind: '{$values}'.
 closed-set-of-values-method = Die Methode gibt nur die Konstanten Werte '{$values}' zurück. Dabei handelt es sich um endlich viele, weswegen man das als enum modellieren sollte.
 
 do-not-use-instanceof = instanceof sollte nicht verwendet werden. Siehe Ilias Wiki.

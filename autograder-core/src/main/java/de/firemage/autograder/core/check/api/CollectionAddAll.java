@@ -76,7 +76,7 @@ public class CollectionAddAll extends IntegratedCheck {
 
     private void reportProblem(CtVariable<?> ctVariable, List<? extends CtExpression<?>> addedValues) {
         String values = "List.of(%s)".formatted(addedValues.stream()
-            .map(CtElement::prettyprint)
+            .map(CtElement::toString)
             .collect(Collectors.joining(", "))
         );
 

@@ -6,7 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.effects.Effect;
+import de.firemage.autograder.core.integrated.effects.AssignmentEffect;
+import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
@@ -27,11 +28,10 @@ import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-@ExecutableCheck(reportedProblems = {ProblemType.CLOSED_SET_OF_VALUES})
+@ExecutableCheck(reportedProblems = { ProblemType.CLOSED_SET_OF_VALUES })
 public class ClosedSetOfValues extends IntegratedCheck {
     private static final int MIN_SET_SIZE = 3;
     private static final int MAX_SET_SIZE = 12;
@@ -42,40 +42,39 @@ public class ClosedSetOfValues extends IntegratedCheck {
     );
 
     private static boolean isSupportedType(CtTypeReference<?> ctTypeReference) {
-        return SUPPORTED_TYPES
-            .stream()
-            .map((Class<?> e) -> ctTypeReference.getFactory().Type().createReference(e))
-            .anyMatch(ctTypeReference::equals);
+        return SpoonUtil.isTypeEqualTo(ctTypeReference, SUPPORTED_TYPES.toArray(new Class[0]));
     }
 
-    private boolean isEnumMapping(CtAbstractSwitch<?> ctSwitch) {
-        List<Effect> effects = SpoonUtil.getCasesEffects(ctSwitch.getCases());
-        if (effects.isEmpty()) {
-            return false;
-        }
-
-        Effect firstEffect = effects.get(0);
-        for (Effect effect : effects) {
-            if (!firstEffect.isSameEffect(effect)) {
-                return false;
+    private boolean shouldSwitchOverEnum(CtAbstractSwitch<?> ctSwitch) {
+        for (CtCase<?> ctCase : ctSwitch.getCases()) {
+            // skip default case
+            if (ctCase.getCaseExpressions().isEmpty()) {
+                continue;
             }
 
-            CtExpression<?> ctExpression = effect.value().orElse(null);
-            if (ctExpression == null) {
-                return false;
-            }
+            var effect = SpoonUtil.getSingleEffect(ctCase.getStatements()).orElse(null);
 
-            // this is a workaround for https://github.com/INRIA/spoon/issues/5412
-            if (ctExpression.getType().equals(ctExpression.getFactory().Type().nullType())) {
-                return false;
-            }
-
-            if (!ctExpression.getType().isEnum()) {
-                return false;
+            if (!(effect instanceof TerminalEffect || effect instanceof AssignmentEffect)) {
+                return true;
             }
         }
 
-        return true;
+        return false;
+    }
+
+    @SuppressWarnings("unchecked")
+    private static Set<CtLiteral<?>> getDistinctElementsFromSwitch(CtAbstractSwitch<?> ctSwitch) {
+        List<? extends CtExpression<?>> elements = ctSwitch.getCases()
+            .stream()
+            .flatMap((CtCase<?> e) -> e.getCaseExpressions().stream())
+            .map(SpoonUtil::resolveCtExpression)
+            .toList();
+
+        if (elements.stream().anyMatch(e -> !(e instanceof CtLiteral<?>))) {
+            return Set.of();
+        }
+
+        return distinctElements((List<CtLiteral<?>>) elements);
     }
 
     private void checkSwitch(CtAbstractSwitch<?> ctSwitch) {
@@ -85,21 +84,23 @@ public class ClosedSetOfValues extends IntegratedCheck {
             return;
         }
 
-        int numberOfCases = ctSwitch.getCases().size();
-        if (numberOfCases < MIN_SET_SIZE || numberOfCases > MAX_SET_SIZE) {
+        Set<CtLiteral<?>> distinctElements = getDistinctElementsFromSwitch(ctSwitch);
+        if (distinctElements.size() < MIN_SET_SIZE || distinctElements.size() > MAX_SET_SIZE) {
             return;
         }
 
-        boolean areKnown = ctSwitch.getCases()
-            .stream()
-            .flatMap((CtCase<?> e) -> e.getCaseExpressions().stream())
-            .map(SpoonUtil::resolveCtExpression)
-            .allMatch(e -> e instanceof CtLiteral<?>);
-
-        if (areKnown && !this.isEnumMapping(ctSwitch)) {
+        if (this.shouldSwitchOverEnum(ctSwitch)) {
             addLocalProblem(
                 ctSwitch,
-                new LocalizedMessage("closed-set-of-values-switch"),
+                new LocalizedMessage(
+                    "closed-set-of-values-switch",
+                    Map.of(
+                        "values",
+                        distinctElements.stream()
+                            .map(CtLiteral::toString)
+                            .collect(Collectors.joining(", "))
+                    )
+                ),
                 ProblemType.CLOSED_SET_OF_VALUES
             );
         }
@@ -142,7 +143,15 @@ public class ClosedSetOfValues extends IntegratedCheck {
 
         this.addLocalProblem(
             ctExpression,
-            new LocalizedMessage("closed-set-of-values-list"),
+            new LocalizedMessage(
+                "closed-set-of-values-list",
+                Map.of(
+                    "values",
+                    distinctElements.stream()
+                        .map(CtLiteral::toString)
+                        .collect(Collectors.joining(", "))
+                )
+            ),
             ProblemType.CLOSED_SET_OF_VALUES
         );
     }
@@ -172,7 +181,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
                 Map.of(
                     "values",
                     distinctElements.stream()
-                        .map(CtLiteral::prettyprint)
+                        .map(CtLiteral::toString)
                         .collect(Collectors.joining(", "))
                 )
             ),
@@ -197,16 +206,16 @@ public class ClosedSetOfValues extends IntegratedCheck {
 
             @Override
             public <T> void visitCtField(CtField<T> ctField) {
-                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
-                    return;
-                }
-
                 CtExpression<?> ctExpression = ctField.getDefaultExpression();
                 if (ctExpression == null) {
                     return;
                 }
 
                 if (ctExpression.isImplicit()) {
+                    return;
+                }
+
+                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
                     return;
                 }
 
@@ -221,16 +230,16 @@ public class ClosedSetOfValues extends IntegratedCheck {
 
             @Override
             public <T> void visitCtLocalVariable(CtLocalVariable<T> ctLocalVariable) {
-                if (!SpoonUtil.isEffectivelyFinal(ctLocalVariable)) {
-                    return;
-                }
-
                 CtExpression<?> ctExpression = ctLocalVariable.getDefaultExpression();
                 if (ctExpression == null) {
                     return;
                 }
 
                 if (ctExpression.isImplicit()) {
+                    return;
+                }
+
+                if (!SpoonUtil.isEffectivelyFinal(ctLocalVariable)) {
                     return;
                 }
 

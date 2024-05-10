@@ -254,8 +254,8 @@ mutable-enum = Enums should be immutable. See https://stackoverflow.com/a/411997
 
 should-be-enum-attribute = The values of the switch should be associated attributes of the enum. Alternatively, one should use a Map.
 
-closed-set-of-values-switch = A switch has only finitely many cases. This is a closed set, which should be modeled as an enum.
-closed-set-of-values-list = A list of finitely many values should be modeled as an enum.
+closed-set-of-values-switch = The switch has only finitely many cases. This is a closed set, which should be modeled as an enum. The values are: '{$values}'.
+closed-set-of-values-list = The listing only has finitely many values and should therefore be modeled as an enum. The values are: '{$values}'.
 closed-set-of-values-method = The method only returns the constant values '{$values}'. There are only finitely many, which is why one should model it as an enum.
 
 do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.
