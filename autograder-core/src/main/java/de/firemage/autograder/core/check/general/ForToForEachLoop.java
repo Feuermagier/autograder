@@ -62,9 +62,9 @@ public class ForToForEachLoop extends IntegratedCheck {
     };
 
     public static Optional<CtVariable<?>> getForEachLoopVariable(
-            CtBodyHolder ctBodyHolder,
-            ForLoopRange forLoopRange,
-            Function<? super CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess
+        CtBodyHolder ctBodyHolder,
+        ForLoopRange forLoopRange,
+        Function<? super CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess
     ) {
         CtVariable<?> loopVariable = forLoopRange.loopVariable().getDeclaration();
 

@@ -6,7 +6,11 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+<<<<<<< HEAD
 import de.firemage.autograder.core.integrated.UsesFinder;
+=======
+import de.firemage.autograder.core.integrated.uses.UsesFinder;
+>>>>>>> main
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -76,7 +80,9 @@ public class AvoidShadowing extends IntegratedCheck {
                 Collection<CtFieldReference<?>> visibleFields = getAllVisibleFields(parent);
 
                 List<CtFieldReference<?>> hiddenFields = visibleFields.stream()
+                    // ignore fields that are allowed to be hidden
                     .filter(ctFieldReference -> !ALLOWED_FIELDS.contains(ctFieldReference.getSimpleName()))
+                    // only keep fields that have the same name as the variable, but are not the same field
                     .filter(ctFieldReference -> ctFieldReference.getSimpleName().equals(ctVariable.getSimpleName())
                         && !ctFieldReference.equals(ctVariable.getReference()))
                     .toList();

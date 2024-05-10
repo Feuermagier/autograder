@@ -1099,7 +1099,6 @@ public final class SpoonUtil {
         return isMainMethod(ctMethod);
     }
 
-
     public static CtElement getReferenceDeclaration(CtReference ctReference) {
         // this might be null if the reference is not in the source path
         // for example, when the reference points to a java.lang type
@@ -1270,6 +1269,14 @@ public final class SpoonUtil {
         }
 
         return null;
+    }
+
+    public static CtElement findValidPosition(CtElement ctElement) {
+        CtElement result = ctElement;
+        while (result != null && !result.getPosition().isValidPosition()) {
+            result = result.getParent();
+        }
+        return result;
     }
 
     /**
