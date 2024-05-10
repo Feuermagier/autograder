@@ -4,6 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -20,6 +21,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.visitor.Filter;
 
+import java.lang.reflect.Method;
 import java.util.Map;
 
 
@@ -67,7 +69,7 @@ public class MethodShouldBeStatic extends IntegratedCheck {
         }
 
         if (ctTypeMember instanceof CtMethod<?> ctMethod) {
-            if (SpoonUtil.isOverriddenMethod(ctMethod) || SpoonUtil.isOverridden(ctMethod)) {
+            if (MethodHierarchy.isOverridingMethod(ctMethod) || MethodHierarchy.isOverriddenMethod(ctMethod)) {
                 return false;
             }
 

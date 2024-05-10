@@ -76,7 +76,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             return UsesFinder.typeUses(type).hasNone();
         } else if (element instanceof CtExecutable<?> executable) {
             // Ignore recursive calls
-            if (UsesFinder.executableUses(executable).filterParent(CtMethod.class, m -> m != executable).hasAny()) {
+            if (UsesFinder.executableUses(executable).filterIndirectParent(CtMethod.class, m -> m != executable).hasAny()) {
                 return false;
             } else if (executable instanceof CtMethod<?> method) {
                 // For methods, also look for used overriding methods

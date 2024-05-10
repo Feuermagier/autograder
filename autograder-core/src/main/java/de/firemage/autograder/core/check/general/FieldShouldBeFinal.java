@@ -6,7 +6,6 @@ import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.declaration.CtConstructor;

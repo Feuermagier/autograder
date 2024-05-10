@@ -6,7 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConstructorCall;
@@ -20,6 +20,7 @@ import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableRead;
+import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtAnonymousExecutable;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -90,9 +91,10 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         // (e.g. List.of(), Set.of(), Map.of(), Collections.unmodifiableList(), ...)
 
         // we check if there is a write to the field with a value that is guaranteed to be mutable
-        return UsesFinder.ofVariableWrite(ctField)
-            .hasAnyMatch(ctFieldWrite -> ctFieldWrite.getParent() instanceof CtAssignment<?, ?> ctAssignment
-                && isMutableAssignee(ctAssignment.getAssignment()));
+        return UsesFinder.variableUses(ctField)
+                .ofType(CtVariableWrite.class)
+                .filterDirectParent(CtAssignment.class, a -> isMutableAssignee(a.getAssignment()))
+                .hasAny();
     }
 
     private static boolean isMutableAssignee(CtExpression<?> ctExpression) {
@@ -108,9 +110,10 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             && ctVariableRead.getVariable() instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
             CtLocalVariable<?> ctVariable = ctLocalVariableReference.getDeclaration();
             return (ctVariable.getDefaultExpression() != null && isMutableAssignee(ctVariable.getDefaultExpression()))
-                || UsesFinder.ofVariableWrite(ctVariable)
-                .hasAnyMatch(ctVariableWrite -> ctVariableWrite.getParent() instanceof CtAssignment<?,?> ctAssignment
-                    && isMutableAssignee(ctAssignment.getAssignment()));
+                || UsesFinder.variableUses(ctVariable)
+                    .ofType(CtVariableWrite.class)
+                    .filterDirectParent(CtAssignment.class, a -> isMutableAssignee(a.getAssignment()))
+                    .hasAny();
         }
 
         // if a public method assigns a parameter to a field that parameter can be mutated from the outside

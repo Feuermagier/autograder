@@ -6,11 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-<<<<<<< HEAD
 import de.firemage.autograder.core.integrated.UsesFinder;
-=======
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
->>>>>>> main
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;

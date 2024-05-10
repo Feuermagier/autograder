@@ -116,7 +116,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      * @param parent
      * @return
      */
-    public CtElementStream<T> withParent(CtElement parent) {
+    public CtElementStream<T> withDirectParent(CtElement parent) {
         return new CtElementStream<>(baseStream.filter(e -> e.getParent() == parent));
     }
 
@@ -125,7 +125,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      * @param parent
      * @return
      */
-    public CtElementStream<T> withParent(Class<? extends CtElement> parent) {
+    public CtElementStream<T> withDirectParent(Class<? extends CtElement> parent) {
         return new CtElementStream<>(baseStream.filter(e -> parent.isInstance(e.getParent())));
     }
 
@@ -177,8 +177,18 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      * @param filter
      * @return
      */
-    public CtElementStream<T> filterParent(Predicate<? super CtElement> filter) {
+    public CtElementStream<T> filterDirectParent(Predicate<? super CtElement> filter) {
         return new CtElementStream<>(baseStream.filter(e -> filter.test(e.getParent())));
+    }
+
+    /**
+     * Filters the stream's elements by their direct parent's type and the given filter.
+     * @param filter
+     * @return
+     */
+    @SuppressWarnings("unchecked")
+    public <P extends CtElement> CtElementStream<T> filterDirectParent(Class<P> parentType, Predicate<P> filter) {
+        return new CtElementStream<>(baseStream.filter(e -> parentType.isInstance(e.getParent()) && filter.test((P) e.getParent())));
     }
 
     /**
@@ -189,7 +199,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      * @return
      * @param <P>
      */
-    public <P extends CtElement> CtElementStream<T> filterParent(Class<P> parentType, Predicate<? super CtElement> filter) {
+    public <P extends CtElement> CtElementStream<T> filterIndirectParent(Class<P> parentType, Predicate<? super CtElement> filter) {
         return new CtElementStream<>(baseStream.filter(e -> filter.test(e.getParent(parentType))));
     }
 

@@ -44,7 +44,7 @@ public class RedundantVariable extends IntegratedCheck {
             // it should not have any annotations (e.g. @SuppressWarnings("unchecked"))
             || !ctLocalVariable.getAnnotations().isEmpty()
             // the variable must only be used in the return statement
-            || UsesFinder.variableUses(ctLocalVariable).filterParent(CtStatement.class, s -> s != ctStatement).hasAny()) {
+            || UsesFinder.variableUses(ctLocalVariable).filterIndirectParent(CtStatement.class, s -> s != ctStatement).hasAny()) {
             return;
         }
 
