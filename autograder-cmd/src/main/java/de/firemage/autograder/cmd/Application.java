@@ -63,9 +63,6 @@ public class Application implements Callable<Integer> {
     @Parameters(index = "1", description = "The root folder which contains the files to check.")
     private Path file;
 
-    @Parameters(index = "2", defaultValue = "", description = "The root folder which contains the tests to run. If not provided or empty, no tests will be run.")
-    private Path tests;
-
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
 
@@ -136,7 +133,7 @@ public class Application implements Callable<Integer> {
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         if (outputJson) {
-            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+            List<Problem> problems = linter.checkFile(uploadedFile, checks, statusConsumer);
             System.out.println(">> Problems <<");
             printProblemsAsJson(problems, linter);
             return;
@@ -146,7 +143,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+            List<Problem> problems = linter.checkFile(uploadedFile, checks, statusConsumer);
             progress.finish("Completed checks");
 
             if (problems.isEmpty()) {
@@ -181,7 +178,7 @@ public class Application implements Callable<Integer> {
         CmdUtil.beginSection("Checks");
         ProgressAnimation progress = new ProgressAnimation("Checking...");
         progress.start();
-        List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+        List<Problem> problems = linter.checkFile(uploadedFile, checks, statusConsumer);
         progress.finish("Completed checks");
 
         printProblems(problems, linter);

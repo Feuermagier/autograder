@@ -73,7 +73,6 @@ public class TestFramework {
 
             var problems = linter.checkFile(
                     file,
-                    testInput.path().resolve("tests"),
                     List.of(),
                     List.of(check),
                     status -> {

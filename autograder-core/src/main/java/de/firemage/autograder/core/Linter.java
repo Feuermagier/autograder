@@ -145,13 +145,12 @@ public final class Linter {
     }
 
     public List<Problem> checkFile(
-        UploadedFile file, Path tests,
+        UploadedFile file,
         List<ProblemType> problemsToReport,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         return this.checkFile(
             file,
-            tests,
             problemsToReport,
             findChecksForProblemTypes(problemsToReport),
             statusConsumer
@@ -160,7 +159,6 @@ public final class Linter {
 
     public List<Problem> checkFile(
         UploadedFile file,
-        Path tests,
         Collection<ProblemType> problemsToReport,
         Iterable<? extends Check> checks,
         Consumer<LinterStatus> statusConsumer

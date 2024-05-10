@@ -46,7 +46,6 @@ public abstract class AbstractCheckTest {
         return this.linter.checkFile(
             UploadedFile.build(sourceInfo, this.tempLocation, status -> {
             }, null),
-            null,
             new ArrayList<>(problemTypes),
             status -> {
             }
