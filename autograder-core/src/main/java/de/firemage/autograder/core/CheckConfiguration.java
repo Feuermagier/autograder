@@ -9,11 +9,19 @@ import java.nio.file.Path;
 import java.util.List;
 
 public record CheckConfiguration(List<ProblemType> problemsToReport, List<String> excludedClasses) {
+    public static CheckConfiguration empty() {
+        return new CheckConfiguration(List.of(), List.of());
+    }
+
     public static CheckConfiguration fromConfigFile(Path configFile) throws IOException {
         return CheckConfiguration.fromConfigString(Files.readString(configFile));
     }
 
     public static CheckConfiguration fromConfigString(String configString) throws IOException {
         return new ObjectMapper(new YAMLFactory()).readValue(configString, CheckConfiguration.class);
+    }
+
+    public static CheckConfiguration fromProblemTypes(List<ProblemType> problemsToReport) {
+        return new CheckConfiguration(problemsToReport, List.of());
     }
 }

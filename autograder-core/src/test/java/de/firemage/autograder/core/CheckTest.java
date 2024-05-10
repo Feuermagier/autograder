@@ -115,7 +115,7 @@ public class CheckTest {
 
                     var problems = linter.checkFile(
                         file,
-                        List.of(),
+                        CheckConfiguration.empty(),
                         List.of(check),
                         status -> {
                         }

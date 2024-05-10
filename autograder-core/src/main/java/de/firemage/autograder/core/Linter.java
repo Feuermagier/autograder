@@ -45,15 +45,13 @@ public final class Linter {
     private final FluentBundle fluentBundle;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
-    private final Predicate<Problem> isExcluded;
 
     private Linter(
         Locale locale,
         TempLocation tempLocation,
         int threads,
         ClassLoader classLoader,
-        int maxProblemsPerCheck,
-        Predicate<Problem> isExcluded
+        int maxProblemsPerCheck
     ) {
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
@@ -73,7 +71,6 @@ public final class Linter {
         this.threads = threads;
         this.classLoader = classLoader;
         this.maxProblemsPerCheck = maxProblemsPerCheck;
-        this.isExcluded = isExcluded;
     }
 
     public static class Builder {
@@ -82,11 +79,9 @@ public final class Linter {
         private int threads;
         private ClassLoader classLoader;
         private int maxProblemsPerCheck = -1;
-        private Predicate<Problem> isExcluded;
 
         private Builder(Locale locale) {
             this.locale = locale;
-            this.isExcluded = problem -> false;
         }
 
         public Builder tempLocation(TempLocation tempLocation) {
@@ -109,11 +104,6 @@ public final class Linter {
             return this;
         }
 
-        public Builder exclude(Predicate<Problem> isExcluded) {
-            this.isExcluded = isExcluded;
-            return this;
-        }
-
         public Linter build() {
             TempLocation tempLocation = this.tempLocation;
 
@@ -126,8 +116,7 @@ public final class Linter {
                 tempLocation,
                 this.threads,
                 this.classLoader,
-                this.maxProblemsPerCheck,
-                this.isExcluded
+                this.maxProblemsPerCheck
             );
         }
     }
@@ -146,21 +135,17 @@ public final class Linter {
 
     public List<Problem> checkFile(
         UploadedFile file,
-        List<ProblemType> problemsToReport,
+        CheckConfiguration checkConfiguration,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
-        return this.checkFile(
-            file,
-            problemsToReport,
-            findChecksForProblemTypes(problemsToReport),
-            statusConsumer
-        );
+        var checks = this.findChecksForProblemTypes(checkConfiguration.problemsToReport());
+        return this.checkFile(file, checkConfiguration, checks, statusConsumer);
     }
 
     public List<Problem> checkFile(
         UploadedFile file,
-        Collection<ProblemType> problemsToReport,
-        Iterable<? extends Check> checks,
+        CheckConfiguration checkConfiguration,
+        List<? extends Check> checks,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         // the file is null if the student did not upload source code
@@ -239,18 +224,22 @@ public final class Linter {
         }
 
         List<Problem> unreducedProblems = result.problems();
-        if (!problemsToReport.isEmpty()) {
+        if (!checkConfiguration.problemsToReport().isEmpty()) {
             unreducedProblems = result
                 .problems()
                 .stream()
-                .filter(problem -> problemsToReport.contains(problem.getProblemType()))
+                .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getProblemType()))
                 .toList();
         }
 
-        // filter out excluded problems:
-        unreducedProblems = unreducedProblems.stream()
-            .filter(this.isExcluded.negate())
-            .toList();
+        // filter out problems in excluded classes
+        var excludedClasses = checkConfiguration.excludedClasses();
+        if (excludedClasses != null && !excludedClasses.isEmpty()) {
+            unreducedProblems = unreducedProblems.stream()
+                    .filter(problem -> !checkConfiguration.excludedClasses()
+                            .contains(problem.getPosition().file().getName().replace(".java", "")))
+                    .toList();
+        }
 
         return this.mergeProblems(unreducedProblems);
     }
