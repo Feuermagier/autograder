@@ -52,4 +52,17 @@ public class Test {
     public static void c() {
         throw new IllegalArgumentException("Error"); /*# ok #*/
     }
+
+    /**
+     * Does some things
+     */
+    public static void doesSomething(String foo) {
+        switch (foo) {
+            case "a":
+                System.out.println("a");
+                break;
+            default:
+                throw new IllegalArgumentException("Error"); /*# ok #*/
+        }
+    }
 }

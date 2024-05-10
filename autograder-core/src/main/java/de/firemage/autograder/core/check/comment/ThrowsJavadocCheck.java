@@ -6,6 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import spoon.reflect.code.CtAbstractSwitch;
+import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtJavaDocTag;
@@ -39,6 +41,12 @@ public class ThrowsJavadocCheck extends IntegratedCheck {
         List<CtThrow> ctThrows = ctExecutable.filterChildren(CtThrow.class::isInstance)
                 .map(CtThrow.class::cast).list();
         for (CtThrow ctThrow : ctThrows) {
+            CtCase<?> ctParentCase = ctThrow.getParent(CtCase.class);
+            // skip default cases in switch statements
+            if (ctParentCase != null && ctParentCase.getCaseExpressions().isEmpty()) {
+                continue;
+            }
+
             if (ctThrow.getThrownExpression() instanceof CtConstructorCall<?> ctConstructorCall) {
                 String name = ctConstructorCall.getType().getSimpleName();
 
