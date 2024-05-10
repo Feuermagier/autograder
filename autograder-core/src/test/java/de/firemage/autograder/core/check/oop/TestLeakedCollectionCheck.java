@@ -836,4 +836,76 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testCompactConstructorImmutable() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.List;
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public record Zoo(String name, Collection<String> animals) {
+                    public Zoo {
+                        animals = List.copyOf(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCompactConstructorLeakedAssign() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.List;
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public record Zoo(String name, Collection<String> animals) {
+                    public Zoo {
+                        animals = animals;
+                    }
+
+                    public Collection<String> animals() {
+                        return new ArrayList<>(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedAssign(problems.next(), "Zoo", "animals");
+
+        problems.assertExhausted();
+    }
+
+
+    @Test
+    void testCompactConstructorCopied() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.List;
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public record Zoo(String name, Collection<String> animals) {
+                    public Zoo {
+                        animals = new ArrayList<>(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedReturn(problems.next(), "animals", "animals");
+
+        problems.assertExhausted();
+    }
 }

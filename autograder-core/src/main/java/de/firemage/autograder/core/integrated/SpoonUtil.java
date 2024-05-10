@@ -56,6 +56,8 @@ import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -877,6 +879,7 @@ public final class SpoonUtil {
         if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
             return true;
         }
+
         return UsesFinder.variableUses(ctVariable).ofType(CtVariableWrite.class).hasNone();
     }
 
@@ -1112,7 +1115,7 @@ public final class SpoonUtil {
      */
     public static boolean isInvocation(CtStatement statement) {
         return statement instanceof CtInvocation<?> || statement instanceof CtConstructorCall<?> ||
-                statement instanceof CtLambda<?>;
+            statement instanceof CtLambda<?>;
     }
 
     public static boolean isInMainMethod(CtElement ctElement) {
@@ -1137,11 +1140,23 @@ public final class SpoonUtil {
             target = ctExecutableReference.getExecutableDeclaration();
         }
 
-        if (target == null && ctReference instanceof CtFieldReference<?> ctFieldReference) {
+        if (target == null && ctReference instanceof CtVariableReference<?> ctVariableReference) {
+            target = getVariableDeclaration(ctVariableReference);
+        }
+
+        return target;
+    }
+
+    public static CtVariable<?> getVariableDeclaration(CtVariableReference<?> ctVariableReference) {
+        // this might be null if the reference is not in the source path
+        // for example, when the reference points to a java.lang type
+        CtVariable<?> target = ctVariableReference.getDeclaration();
+
+        if (target == null && ctVariableReference instanceof CtFieldReference<?> ctFieldReference) {
             target = ctFieldReference.getFieldDeclaration();
         }
 
-        if (target == null && ctReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
+        if (target == null && ctVariableReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
             target = getLocalVariableDeclaration(ctLocalVariableReference);
         }
 
