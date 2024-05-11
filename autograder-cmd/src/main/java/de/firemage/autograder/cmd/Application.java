@@ -4,8 +4,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.firemage.autograder.cmd.output.Annotation;
+import de.firemage.autograder.core.ArtemisUtil;
+import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.Linter;
+import de.firemage.autograder.core.LinterConfigurationException;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
@@ -63,9 +66,6 @@ public class Application implements Callable<Integer> {
     @Parameters(index = "1", description = "The root folder which contains the files to check.")
     private Path file;
 
-    @Parameters(index = "2", defaultValue = "", description = "The root folder which contains the tests to run. If not provided or empty, no tests will be run.")
-    private Path tests;
-
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
 
@@ -91,11 +91,9 @@ public class Application implements Callable<Integer> {
     private CommandSpec spec;
 
     private final TempLocation tempLocation;
-    private final Set<String> exludedClasses;
 
     public Application(TempLocation tempLocation) {
         this.tempLocation = tempLocation;
-        this.exludedClasses = new HashSet<>();
     }
 
     private static Charset getConsoleCharset() {
@@ -131,12 +129,12 @@ public class Application implements Callable<Integer> {
 
     private void execute(
         Linter linter,
-        List<ProblemType> checks,
+        CheckConfiguration checkConfiguration,
         UploadedFile uploadedFile,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         if (outputJson) {
-            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+            List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
             System.out.println(">> Problems <<");
             printProblemsAsJson(problems, linter);
             return;
@@ -146,7 +144,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+            List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
             progress.finish("Completed checks");
 
             if (problems.isEmpty()) {
@@ -181,39 +179,12 @@ public class Application implements Callable<Integer> {
         CmdUtil.beginSection("Checks");
         ProgressAnimation progress = new ProgressAnimation("Checking...");
         progress.start();
-        List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
+        List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
         progress.finish("Completed checks");
 
         printProblems(problems, linter);
 
         CmdUtil.endSection();
-    }
-
-    private List<ProblemType> getChecks() throws IOException {
-        List<String> checks;
-        if (passConfig) {
-            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig, String[].class));
-        } else {
-            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(new File(checkConfig), String[].class));
-        }
-
-        List<ProblemType> result = new ArrayList<>();
-
-        // HACK: EXCLUDE is used to ignore some classes, blame the config format for the hacky solution
-        for (String check : checks) {
-            if (check.startsWith("EXCLUDE")) {
-                this.exludedClasses.addAll(List.of(check.substring("EXCLUDE".length() + 1).split(" ")));
-                continue;
-            }
-
-            try {
-                result.add(ProblemType.valueOf(check));
-            } catch (IllegalArgumentException e) {
-                throw new IllegalArgumentException("Unknown check '%s'".formatted(check), e);
-            }
-        }
-
-        return result;
     }
 
     @Override
@@ -223,13 +194,8 @@ public class Application implements Callable<Integer> {
         }
 
         if (this.artemisFolders) {
-            try (Stream<Path> files = Files.list(this.file)) {
-                this.file = files
-                        .filter(child -> !child.endsWith(".metadata"))
-                        .findAny()
-                        .orElseThrow(() -> new IllegalStateException("No student code found"))
-                        .resolve("assignment")
-                        .resolve("src");
+            try {
+                this.file = ArtemisUtil.resolveCodePathEclipseGradingTool(this.file);
             } catch (IOException e) {
                 e.printStackTrace();
                 return IO_EXIT_CODE;
@@ -240,10 +206,15 @@ public class Application implements Callable<Integer> {
             System.out.println("Student source code directory is " + file);
         }
 
-        List<ProblemType> checks;
+        // Create the check configuration
+        CheckConfiguration checkConfiguration;
         try {
-            checks = this.getChecks();
-        } catch (IOException e) {
+            if (passConfig) {
+                checkConfiguration = CheckConfiguration.fromConfigString(checkConfig);
+            } else {
+                checkConfiguration = CheckConfiguration.fromConfigFile(Path.of(checkConfig));
+            }
+        } catch (IOException | LinterConfigurationException e) {
             e.printStackTrace();
             return IO_EXIT_CODE;
         }
@@ -252,7 +223,6 @@ public class Application implements Callable<Integer> {
             .threads(0)
             .tempLocation(this.tempLocation)
             .maxProblemsPerCheck(this.maxProblemsPerCheck)
-            .exclude(problem -> this.exludedClasses.contains(problem.getPosition().file().getName().replace(".java", "")))
             .build();
 
         Consumer<LinterStatus> statusConsumer = status ->
@@ -269,7 +239,7 @@ public class Application implements Callable<Integer> {
                 this.tempLocation,
                 statusConsumer,
             null)) {
-            this.execute(linter, checks, uploadedFile, statusConsumer);
+            this.execute(linter, checkConfiguration, uploadedFile, statusConsumer);
         } catch (CompilationFailureException e) {
             CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
             return COMPILATION_EXIT_CODE;
