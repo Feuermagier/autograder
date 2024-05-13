@@ -4,9 +4,10 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.declaration.CtElement;
@@ -21,6 +22,7 @@ import spoon.reflect.declaration.CtTypeMember;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {
     ProblemType.USE_DIFFERENT_VISIBILITY,
@@ -60,7 +62,14 @@ public class UseDifferentVisibility extends IntegratedCheck {
     private static Visibility getVisibility(CtTypeMember ctTypeMember) {
         CtModel ctModel = ctTypeMember.getFactory().getModel();
 
-        List<CtElement> references = UsesFinder.of(ctTypeMember).all();
+        Stream<CtElement> referencesStream = UsesFinder.getAllUses(ctTypeMember);
+        if (ctTypeMember instanceof CtMethod<?> method) {
+            // For methods, we also consider overriding methods
+            referencesStream = Stream.concat(referencesStream, MethodHierarchy
+                    .streamAllOverridingMethods(method)
+                    .map(MethodHierarchy.MethodOrLambda::getExecutable));
+        }
+        List<CtElement> references = referencesStream.toList();
 
         CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
@@ -103,7 +112,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 }
 
                 Visibility currentVisibility = Visibility.of(ctTypeMember);
-                if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || SpoonUtil.isOverriddenMethod(ctMethod))) {
+                if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || MethodHierarchy.isOverridingMethod(ctMethod))) {
                     return;
                 }
 
@@ -125,7 +134,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                         .getFields()
                         .stream()
                         // filter out the field itself and those that do not reference the field
-                        .filter(field -> field != ctField && SpoonUtil.hasAnyUsesIn(ctField, field))
+                        .filter(field -> field != ctField && UsesFinder.variableUses(ctField).nestedIn(field).hasAny())
                         .map(UseDifferentVisibility::getVisibility)
                         .max(Visibility::compareTo);
 

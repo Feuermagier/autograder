@@ -280,7 +280,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isInOverriddenMethod(ctVariable)) {
+                if (SpoonUtil.isInOverridingMethod(ctVariable)) {
                     // The parameter of the equals and compareTo methods may be named "o", "obj", ...
                     //
                     // skip all overridden methods for consistency

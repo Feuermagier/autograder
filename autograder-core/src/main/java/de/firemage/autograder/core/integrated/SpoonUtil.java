@@ -9,18 +9,15 @@ import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
 import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
-import spoon.reflect.code.CtAbstractInvocation;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtConstructorCall;
-import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
@@ -32,44 +29,35 @@ import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtUnaryOperator;
-import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.CompoundSourcePosition;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtCompilationUnit;
-import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
+import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.declaration.CtTypeMember;
-import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
-import spoon.reflect.reference.CtArrayTypeReference;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
-import spoon.reflect.visitor.filter.DirectReferenceFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
-import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
-import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -84,6 +72,7 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
@@ -863,8 +852,7 @@ public final class SpoonUtil {
         if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
             return true;
         }
-
-        return !UsesFinder.of(ctVariable).filterType(CtVariableWrite.class).hasAny();
+        return UsesFinder.variableUses(ctVariable).ofType(CtVariableWrite.class).hasNone();
     }
 
     public static <T> Optional<CtExpression<T>> getEffectivelyFinalExpression(CtVariable<T> ctVariable) {
@@ -1082,41 +1070,17 @@ public final class SpoonUtil {
         return type.getDeclaringType() != null;
     }
 
-    /**
-     * Checks if the given method is overriding another method.
-     * <p>
-     * This implies that there is another method in a super class or interface that has the same signature.
-     *
-     * @param ctMethod the method to check, must not be null
-     * @return true if the given method is overriding another method, false otherwise
-     */
-    public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
-        Collection<CtMethod<?>> topDefinitions = ctMethod.getTopDefinitions();
-        // if the method is defined for the first time, this should return an empty collection
-        return !topDefinitions.isEmpty();
-    }
-
-    /**
-     * Checks if the given method is overridden by another method.
-     *
-     * @param ctMethod the method to check, must not be null
-     * @return true if the given method is overridden by another method, false otherwise
-     */
-    public static boolean isOverridden(CtMethod<?> ctMethod) {
-        return ctMethod.getFactory().getModel().filterChildren(new OverridingMethodFilter(ctMethod)).first() != null;
-    }
-
-    public static boolean isInOverriddenMethod(CtElement ctElement) {
+    public static boolean isInOverridingMethod(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         if (ctMethod == null) {
             return false;
         }
 
-        return isOverriddenMethod(ctMethod);
+        return MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
     /**
-     * Checks if the given method is overriding another method.
+     * Checks if the given method is an invocation.
      * @param statement which is checked
      * @return true if the statement is an invocation (instance of CtInvocation, CtConstructorCall or CtLambda),
      * false otherwise
@@ -1134,26 +1098,6 @@ public final class SpoonUtil {
 
         return isMainMethod(ctMethod);
     }
-
-    public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn) {
-        return UsesFinder.ofElement(ctElement).in(toSearchIn).hasAny();
-    }
-
-    public static boolean hasAnyUses(CtElement ctElement, Predicate<? super CtElement> predicate) {
-        return UsesFinder.ofElement(ctElement).preFilter(predicate::test).hasAny();
-    }
-
-    public record FilterAdapter<T extends CtElement, U extends CtElement>(Filter<T> filter, Class<? extends T> type) implements Filter<U> {
-        @Override
-        public boolean matches(U element) {
-            if (this.type.isInstance(element)) {
-                return this.filter.matches(this.type.cast(element));
-            }
-
-            return false;
-        }
-    }
-
 
     public static CtElement getReferenceDeclaration(CtReference ctReference) {
         // this might be null if the reference is not in the source path
@@ -1199,232 +1143,6 @@ public final class SpoonUtil {
         }
 
         return null;
-    }
-
-    private static final Filter<CtElement> EXPLICIT_ELEMENT_FILTER = ctElement -> !ctElement.isImplicit();
-
-    /**
-     * This class is like {@link VariableAccessFilter}, but does work with generics.
-     *
-     * @param ctVariable the variable to find accesses to
-     * @param <T> the type of accesses to find
-     * @see <a href="https://github.com/INRIA/spoon/issues/5391">INRIA/spoon/issues/5391</a>
-     */
-    private record BetterVariableAccessFilter<T extends CtVariableAccess<?>>(CtVariable<?> ctVariable) implements Filter<T> {
-        @Override
-        public boolean matches(T element) {
-            return getReferenceDeclaration(element.getVariable()) != null && getReferenceDeclaration(element.getVariable()) == this.ctVariable;
-        }
-    }
-
-    private record BetterInvocationFilter(CtExecutable<?> executable) implements Filter<CtAbstractInvocation<?>> {
-        @Override
-        public boolean matches(CtAbstractInvocation<?> invocation) {
-            CtExecutableReference<?> invocationExecutable = invocation.getExecutable();
-            return invocationExecutable.equals(this.executable.getReference())
-                || this.executable.equals(invocationExecutable.getExecutableDeclaration())
-                || invocationExecutable.isOverriding(this.executable.getReference());
-        }
-    }
-
-    private record ExecutableReferenceExpressionFilter(CtExecutable<?> executable) implements Filter<CtExecutableReferenceExpression<?, ?>> {
-        @Override
-        public boolean matches(CtExecutableReferenceExpression<?, ?> expression) {
-            CtExecutableReference<?> invocationExecutable = expression.getExecutable();
-            return invocationExecutable.equals(this.executable.getReference())
-                || this.executable.equals(invocationExecutable.getExecutableDeclaration())
-                || invocationExecutable.isOverriding(this.executable.getReference());
-        }
-    }
-
-    /**
-     * This filter finds all {@code CtElement} in the model that use the specified type.
-     *
-     * @param ctType the type to find all uses of
-     */
-    private record TypeUsesFilter(CtType<?> ctType) implements Filter<CtElement> {
-        private boolean isType(CtTypeReference<?> ctTypeReference) {
-            return this.ctType.getReference() == ctTypeReference
-                || this.ctType == ctTypeReference.getTypeDeclaration();
-        }
-
-        @Override
-        public boolean matches(CtElement ctElement) {
-            if (ctElement instanceof CtArrayTypeReference<?> ctArrayTypeReference) {
-                return this.isType(ctArrayTypeReference.getArrayType());
-            }
-
-            if (ctElement instanceof CtTypeReference<?> ctTypeReference) {
-                return this.isType(ctTypeReference);
-            }
-
-            return false;
-        }
-    }
-
-    public static class UsesFilter implements Filter<CtElement> {
-        private final Filter<CtElement> filter;
-
-        @SuppressWarnings("unchecked")
-        public UsesFilter(CtElement ctElement) {
-            Filter<CtElement> filter;
-
-            if (ctElement instanceof CtVariable<?> ctVariable) {
-                filter = new FilterAdapter<>(new BetterVariableAccessFilter<>(ctVariable), CtVariableAccess.class);
-
-                // parameters might be declared in a super class, but not used in the method itself, but only in overrides
-                // therefore we consider uses in overriding methods as well
-                if (ctVariable instanceof CtParameter<?> ctParameter
-                    && ctParameter.getParent() instanceof CtMethod<?> ctMethod) {
-                    filter = ctMethod.getFactory().getModel().getElements(new OverridingMethodFilter(ctMethod))
-                        .stream()
-                        .flatMap(method -> method.getParameters().stream().filter(ctParameter::equals).findAny().stream())
-                        .map(parameter -> (Filter<CtElement>) new FilterAdapter<>(new BetterVariableAccessFilter<>(parameter), CtVariableAccess.class))
-                        .reduce(filter, (currentFilter, parameterFilter) -> new CompositeFilter<>(
-                            FilteringOperator.UNION,
-                            currentFilter,
-                            parameterFilter
-                        ));
-                }
-            } else if (ctElement instanceof CtExecutable<?> ctExecutable) {
-                filter = buildExecutableFilter(ctExecutable);
-            } else if (ctElement instanceof CtTypeParameter ctTypeParameter) {
-                filter = new FilterAdapter<>(
-                    new DirectReferenceFilter<>(ctTypeParameter.getReference()),
-                    CtReference.class
-                );
-            } else if (ctElement instanceof CtType<?> ctType) {
-                filter = new FilterAdapter<>(new TypeUsesFilter(ctType), CtElement.class);
-            } else if (ctElement instanceof CtTypeMember ctTypeMember) {
-                // CtTypeMember that are not executable or variables are:
-                // - CtType (CtClass, CtEnum, CtInterface, CtRecord)
-                // - CtFormalTypeDeclarer (CtTypeParameter)
-                filter = new FilterAdapter<>(
-                    new DirectReferenceFilter<>(ctTypeMember.getReference()),
-                    CtReference.class
-                );
-            } else {
-                throw new IllegalArgumentException("Unsupported element: " + ctElement.getClass().getName());
-            }
-
-            // only consider explicit elements
-            this.filter = new CompositeFilter<>(FilteringOperator.INTERSECTION, EXPLICIT_ELEMENT_FILTER, filter);
-        }
-
-        @Override
-        public boolean matches(CtElement element) {
-            return this.filter.matches(element);
-        }
-
-        @SuppressWarnings("unchecked")
-        private static Filter<CtElement> buildExecutableFilter(CtExecutable<?> ctExecutable) {
-            Filter<CtElement> filter = new FilterAdapter<>(
-                new BetterInvocationFilter(ctExecutable),
-                // CtAbstractInvocation.class => Class<CtAbstractInvocation>, but Class<CtAbstractInvocation<?>> is needed
-                (Class<CtAbstractInvocation<?>>) (Object) CtAbstractInvocation.class
-            );
-
-            filter = new CompositeFilter<>(
-                FilteringOperator.UNION,
-                filter,
-                new FilterAdapter<>(
-                    // this filter finds all lambdas that reference the executable:
-                    // someMethod(MyClass::executableName)
-                    new ExecutableReferenceExpressionFilter(ctExecutable),
-                    (Class<CtExecutableReferenceExpression<?, ?>>) (Object) CtExecutableReferenceExpression.class
-                )
-            );
-
-            if (ctExecutable instanceof CtMethod<?> ctMethod) {
-                // implementing an abstract method is considered a use:
-                filter = new CompositeFilter<>(
-                    FilteringOperator.UNION,
-                    filter,
-                    new FilterAdapter<>(
-                        // this filter finds all methods that override the given method
-                        new OverridingMethodFilter(ctMethod),
-                        (Class<CtMethod<?>>) (Object) CtMethod.class
-                    )
-                );
-            }
-
-            // constructors can be called implicitly
-            if (ctExecutable instanceof CtConstructor<?> ctConstructor && ctConstructor.getParameters().isEmpty()) {
-                // constructors of subclasses must use the no-arg constructor of the super class
-                // (this is not true, only if the subclass constructor calls the super class constructor explicitly or does not)
-                filter = new CompositeFilter<>(
-                    FilteringOperator.UNION,
-                    filter,
-                    new FilterAdapter<>(
-                        otherConstructor -> otherConstructor.getParameters().isEmpty()
-                            && otherConstructor != ctConstructor
-                            && SpoonUtil.callsParentConstructor(otherConstructor, ctConstructor),
-                        (Class<CtConstructor<?>>) (Object) CtConstructor.class
-                    )
-                );
-
-                // if the subclass does not have an explicit constructor, it still uses the super class constructor
-                if (ctConstructor.getDeclaringType() instanceof CtClass<?> ctClass) {
-                    for (CtType<?> ctType : SpoonUtil.getDirectSubtypes(ctClass)) {
-                        if (ctType instanceof CtClass<?> subclass) {
-                            var ctConstructors = subclass.getConstructors();
-                            if (ctConstructors.size() == 1 && ctConstructors.iterator().next().isImplicit()) {
-                                filter = new CompositeFilter<>(
-                                    FilteringOperator.UNION,
-                                    filter,
-                                    new FilterAdapter<>(
-                                        element -> element == subclass,
-                                        (Class<CtType<?>>) (Object) CtType.class
-                                    )
-                                );
-                            }
-
-                        }
-                    }
-                }
-            }
-
-            return filter;
-        }
-    }
-
-    private static List<CtType<?>> getDirectSubtypes(CtType<?> ctType) {
-        return ctType.getFactory().getModel().getElements(new TypeFilter<CtType<?>>(CtType.class))
-            .stream()
-            .filter(type -> SpoonUtil.isDirectSubtypeOf(type, ctType))
-            .toList();
-
-    }
-
-    private static boolean callsParentConstructor(CtConstructor<?> child, CtConstructor<?> parent) {
-        CtType<?> childType = child.getDeclaringType();
-        CtType<?> parentType = parent.getDeclaringType();
-
-        if (!SpoonUtil.isDirectSubtypeOf(childType, parentType)) {
-            return false;
-        }
-
-        for (CtStatement ctStatement : SpoonUtil.getEffectiveStatements(child.getBody())) {
-            if (!(ctStatement instanceof CtInvocation<?> ctInvocation) || ctInvocation.getTarget() != null) {
-                continue;
-            }
-
-            if (ctInvocation.getExecutable().equals(parent.getReference())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean isDirectSubtypeOf(CtTypeInformation ctType, CtType<?> superType) {
-        if (ctType.getSuperclass() == null) {
-            return SpoonUtil.isTypeEqualTo(superType.getReference(), java.lang.Object.class);
-        }
-
-        return ctType.getSuperclass().equals(superType.getReference())
-            || superType.equals(SpoonUtil.getReferenceDeclaration(ctType.getSuperclass()))
-            || ctType.getSuperInterfaces().contains(superType.getReference());
     }
 
     private static <T> int referenceIndexOf(List<T> list, T element) {
@@ -1591,5 +1309,30 @@ public final class SpoonUtil {
         }
 
         return position;
+    }
+
+    public static <P extends CtElement> P getParentOrSelf(CtElement element, Class<P> parentType) {
+        Objects.requireNonNull(element);
+        if (parentType.isAssignableFrom(element.getClass())) {
+            return (P) element;
+        }
+        return element.getParent(parentType);
+    }
+
+    public static int getParameterIndex(CtParameter<?> parameter, CtExecutable<?> executable) {
+        for (int i = 0; i < executable.getParameters().size(); i++) {
+            if (executable.getParameters().get(i) == parameter) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Parameter not found in executable");
+    }
+
+    public static CtPackage getRootPackage(CtElement element) {
+        return element.getFactory().getModel().getRootPackage();
+    }
+
+    public static boolean isNestedOrSame(CtElement element, CtElement parent) {
+        return element == parent || element.hasParent(parent);
     }
 }

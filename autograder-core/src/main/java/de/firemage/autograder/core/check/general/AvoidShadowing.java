@@ -6,7 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
@@ -58,7 +58,7 @@ public class AvoidShadowing extends IntegratedCheck {
                 }
 
                 // skip fields inside overridden methods
-                if (SpoonUtil.isInOverriddenMethod(ctVariable) || SpoonUtil.isInSetter(ctVariable)) {
+                if (SpoonUtil.isInOverridingMethod(ctVariable) || SpoonUtil.isInSetter(ctVariable)) {
                     return;
                 }
 
@@ -91,11 +91,11 @@ public class AvoidShadowing extends IntegratedCheck {
                 CtElement variableParent = ctVariable.getParent();
 
                 // there might be multiple fields hidden by the variable (e.g. subclass hides superclass field)
-                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> UsesFinder.ofVariableRead(ctFieldReference.getFieldDeclaration()).in(variableParent).hasAny());
+                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> UsesFinder.variableUses(ctFieldReference.getFieldDeclaration()).nestedIn(variableParent).hasAny());
 
                 // to reduce the number of annotations, we only report a problem if the variable AND the hidden field are read in
                 // the same context
-                if (UsesFinder.ofVariableRead(ctVariable).in(variableParent).hasAny() && isFieldRead) {
+                if (UsesFinder.variableUses(ctVariable).nestedIn(variableParent).hasAny() && isFieldRead) {
                     addLocalProblem(
                         ctVariable,
                         new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),
