@@ -1,16 +1,63 @@
 package de.firemage.autograder.core;
 
 public enum ProblemType {
+    /**
+     * If the code is split into multiple packages, all input must happen in one package. Otherwise, one class must do all input.
+     * <br/>
+     * Has false positives.
+     */
+    @HasFalsePositives
     UI_INPUT_SEPARATION,
+
+    /**
+     * If the code is split into multiple packages, all output must happen in one package. Otherwise, one class must do all output.
+     * <br/>
+     * Has false positives.
+     */
+    @HasFalsePositives
     UI_OUTPUT_SEPARATION,
+
+    /**
+     * Checks for non-private inner types (static classes, interfaces, enums, local types)
+     */
     AVOID_INNER_CLASSES,
+
+    /**
+     * Advises to use String.formatted instead of String.format for simple format strings
+     */
+    @HasFalsePositives
     USE_STRING_FORMATTED,
+
+    /**
+     * Reports all java.util.Optional<Boolean> types
+     */
     OPTIONAL_TRI_STATE,
+
+    /**
+     * Reports all java.util.Optional types that are used as function parameters
+     */
     OPTIONAL_ARGUMENT,
+
+    /**
+     * Reports all uses of labels
+     */
     AVOID_LABELS,
+
+    /**
+     * Advises to use Arrays.fill(array, val) instead of Arrays.fill(array, val, 0, array.length)
+     */
     SIMPLIFY_ARRAYS_FILL,
+
+    /**
+     * Reports unused assignments
+     */
     REDUNDANT_ASSIGNMENT,
+
+    /**
+     * Reports local variables & fields that shadow files in parent classes, skipping constructors and simple setters
+     */
     AVOID_SHADOWING,
+
     COLLECTIONS_N_COPIES,
     DO_NOT_USE_SYSTEM_EXIT,
     SCANNER_MUST_BE_CLOSED,
