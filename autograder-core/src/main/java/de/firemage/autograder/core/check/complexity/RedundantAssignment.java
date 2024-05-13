@@ -7,11 +7,10 @@ import de.firemage.autograder.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.uses.UsesFinder;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtLocalVariable;
-import spoon.reflect.code.CtLoop;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtVariableRead;
@@ -47,11 +46,13 @@ public class RedundantAssignment extends IntegratedCheck {
 
                 CtLocalVariable<?> ctLocalVariable = ctLocalVariableReference.getDeclaration();
 
-                if (UnusedCodeElementCheck.isUnused(ctLocalVariable, true)) {
+                if (UnusedCodeElementCheck.isConsideredUnused(ctLocalVariable, staticAnalysis.getCodeModel())) {
                     return;
                 }
 
-                if (followingStatements.stream().noneMatch(statement -> UsesFinder.ofVariableRead(ctLocalVariable).in(statement).hasAny())) {
+                if (followingStatements.stream().noneMatch(statement ->
+                        UsesFinder.variableUses(ctLocalVariable).ofType(CtVariableRead.class).nestedIn(statement).hasAny())
+                ) {
                     addLocalProblem(
                         ctAssignment,
                         new LocalizedMessage(

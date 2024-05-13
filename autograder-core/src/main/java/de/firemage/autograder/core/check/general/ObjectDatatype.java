@@ -28,7 +28,7 @@ public class ObjectDatatype extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isInOverriddenMethod(ctVariable) || ctVariable.getType().isArray()) {
+                if (SpoonUtil.isInOverridingMethod(ctVariable) || ctVariable.getType().isArray()) {
                     return;
                 }
 

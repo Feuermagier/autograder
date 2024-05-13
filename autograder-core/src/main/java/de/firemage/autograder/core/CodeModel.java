@@ -1,24 +1,21 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.file.SourceInfo;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.Launcher;
 import spoon.compiler.Environment;
 import spoon.compiler.ModelBuildingException;
 import spoon.processing.AbstractProcessor;
 import spoon.processing.Processor;
 import spoon.reflect.CtModel;
-import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtPackage;
-import spoon.reflect.declaration.CtType;
+import spoon.reflect.code.CtTargetedExpression;
+import spoon.reflect.declaration.*;
 import spoon.reflect.factory.Factory;
-import spoon.reflect.visitor.DefaultImportComparator;
-import spoon.reflect.visitor.DefaultJavaPrettyPrinter;
-import spoon.reflect.visitor.ForceImportProcessor;
-import spoon.reflect.visitor.ImportCleaner;
-import spoon.reflect.visitor.ImportConflictDetector;
+import spoon.reflect.reference.CtReference;
+import spoon.reflect.visitor.*;
 import spoon.reflect.visitor.filter.NamedElementFilter;
 
 import java.io.IOException;
@@ -41,6 +38,7 @@ public final class CodeModel implements AutoCloseable {
     private Factory factory;
     private CtModel model;
     private CtPackage basePackage;
+    private MethodHierarchy methodHierarchy;
     private Optional<CtMethod<Void>> mainMethod;
 
     private CodeModel(SourceInfo file, Path jar, ClassLoader classLoader) {
@@ -114,6 +112,11 @@ public final class CodeModel implements AutoCloseable {
     public CtPackage getBasePackage() {
         this.buildModelMaybe();
         return basePackage;
+    }
+
+    public void visualize() {
+        this.buildModelMaybe();
+        this.model.getRootPackage().accept(new ModelVisualizer());
     }
 
     @Override
@@ -209,8 +212,40 @@ public final class CodeModel implements AutoCloseable {
                 }
             });
 
+            MethodHierarchy.buildFor(model);
+            UsesFinder.buildFor(model);
+
             // Only set the model at the end when everything has been initialized
             this.model = model;
+        }
+    }
+
+    private static class ModelVisualizer extends CtScanner {
+        private int level = 0;
+
+        @Override
+        public void scan(CtElement element) {
+            if (!(element instanceof CtReference)) {
+                super.scan(element);
+            }
+        }
+
+        @Override
+        protected void enter(CtElement e) {
+            String label = e.getClass().getSimpleName().replaceAll("Impl$", "");
+            if (e instanceof CtNamedElement namedElement) {
+                label += ": " + namedElement.getSimpleName();
+            } else if (e instanceof CtTargetedExpression<?,?> targetedExpression) {
+                label += " -> " + targetedExpression.getTarget();
+            }
+            System.out.println("  ".repeat(level) + label + " (" + e.getRoleInParent() + ")");
+            this.level++;
+        }
+
+        @Override
+        protected void exit(CtElement e) {
+            super.exit(e);
+            this.level--;
         }
     }
 }

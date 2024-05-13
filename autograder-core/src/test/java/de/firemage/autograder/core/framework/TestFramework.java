@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.framework;
 
+import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.errorprone.TempLocation;
@@ -73,8 +74,7 @@ public class TestFramework {
 
             var problems = linter.checkFile(
                     file,
-                    testInput.path().resolve("tests"),
-                    List.of(),
+                    CheckConfiguration.empty(),
                     List.of(check),
                     status -> {
                     }

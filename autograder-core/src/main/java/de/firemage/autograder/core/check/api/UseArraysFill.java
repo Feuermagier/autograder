@@ -3,11 +3,11 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayWrite;
 import spoon.reflect.code.CtAssignment;
@@ -19,7 +19,7 @@ import spoon.reflect.code.CtNewArray;
 import spoon.reflect.code.CtNewClass;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableRead;
-import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtVariable;
 
 import java.util.List;
 import java.util.Map;
@@ -41,9 +41,9 @@ public class UseArraysFill extends IntegratedCheck {
             return;
         }
 
-        CtElement loopVariable = SpoonUtil.getReferenceDeclaration(forLoopRange.loopVariable());
+        CtVariable<?> loopVariable = (CtVariable<?>) SpoonUtil.getReferenceDeclaration(forLoopRange.loopVariable());
         // return if the for loop uses the loop variable (would not be a simple repetition)
-        if (SpoonUtil.hasAnyUsesIn(loopVariable, ctAssignment.getAssignment())) {
+        if (UsesFinder.variableUses(loopVariable).nestedIn(ctAssignment.getAssignment()).hasAny()) {
             return;
         }
 
