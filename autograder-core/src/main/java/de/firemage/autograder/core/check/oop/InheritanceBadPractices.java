@@ -3,7 +3,7 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
 })
 public class InheritanceBadPractices extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
             public void process(CtClass<?> ctClass) {

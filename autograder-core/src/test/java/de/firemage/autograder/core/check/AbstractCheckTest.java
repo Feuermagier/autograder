@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.Problem;
@@ -10,6 +9,7 @@ import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Locale;
@@ -46,7 +46,8 @@ public abstract class AbstractCheckTest {
         return this.linter.checkFile(
             UploadedFile.build(sourceInfo, this.tempLocation, status -> {
             }, null),
-            CheckConfiguration.fromProblemTypes(problemTypes),
+            null,
+            new ArrayList<>(problemTypes),
             status -> {
             }
         );

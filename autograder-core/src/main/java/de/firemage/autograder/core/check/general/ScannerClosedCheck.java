@@ -3,6 +3,7 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -14,7 +15,7 @@ import spoon.reflect.reference.CtTypeReference;
 @ExecutableCheck(reportedProblems = {ProblemType.SCANNER_MUST_BE_CLOSED})
 public class ScannerClosedCheck extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtConstructorCall<?>>() {
             @Override
             public void process(CtConstructorCall<?> ctConstructorCall) {

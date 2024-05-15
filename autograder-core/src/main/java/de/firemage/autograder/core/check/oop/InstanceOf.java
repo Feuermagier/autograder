@@ -1,11 +1,11 @@
 package de.firemage.autograder.core.check.oop;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.MethodHierarchy;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -21,11 +21,11 @@ import spoon.reflect.visitor.CtScanner;
 public class InstanceOf extends IntegratedCheck {
     private static boolean isInAllowedContext(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
-        return ctMethod != null && MethodHierarchy.isOverridingMethod(ctMethod);
+        return ctMethod != null && SpoonUtil.isOverriddenMethod(ctMethod);
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public void visitCtTry(CtTry ctTry) {

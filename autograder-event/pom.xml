@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>autograder-parent</artifactId>
+        <groupId>de.firemage.autograder</groupId>
+        <version>0.5.35</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <artifactId>autograder-event</artifactId>
+    <name>autograder-event</name>
+    <description>Event tracing for the Autograder</description>
+    <url>https://github.com/Feuermagier/autograder/autograder-event</url>
+</project>

@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.framework;
 
-import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.errorprone.TempLocation;
@@ -35,6 +34,8 @@ public class TestFramework {
      */
     private static final List<String> ONLY_TEST = List.of();
 
+    private static final boolean ENABLE_DYNAMIC = false;
+
     @TestFactory
     // @Execution(ExecutionMode.CONCURRENT)
     Stream<DynamicTest> createCheckTests() throws URISyntaxException, IOException {
@@ -47,7 +48,7 @@ public class TestFramework {
 
         try (TempLocation tempLocation = TempLocation.random()) {
             return DynamicTest.stream(
-                    folders.stream().map(TestInput::new)
+                    folders.stream().map(TestInput::new).filter(testInput -> !testInput.isDynamic() || ENABLE_DYNAMIC)
                             .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
                     TestInput::testName,
                     testInput -> {
@@ -68,13 +69,15 @@ public class TestFramework {
                     }, null
             );
             var linter = Linter.builder(Locale.US)
+                    .enableDynamicAnalysis(ENABLE_DYNAMIC && testInput.isDynamic())
                     .threads(1) // Use a single thread for performance reasons
                     .tempLocation(tmpDirectory)
                     .build();
 
             var problems = linter.checkFile(
                     file,
-                    CheckConfiguration.empty(),
+                    testInput.path().resolve("tests"),
+                    List.of(),
                     List.of(check),
                     status -> {
                     }

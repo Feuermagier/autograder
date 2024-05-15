@@ -3,7 +3,7 @@ package de.firemage.autograder.core.check.naming;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -267,7 +267,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
             public void process(CtVariable<?> ctVariable) {
@@ -280,7 +280,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isInOverridingMethod(ctVariable)) {
+                if (SpoonUtil.isInOverriddenMethod(ctVariable)) {
                     // The parameter of the equals and compareTo methods may be named "o", "obj", ...
                     //
                     // skip all overridden methods for consistency

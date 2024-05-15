@@ -5,6 +5,8 @@ status-pmd = Running PMD
 status-cpd = Running Copy/Paste-Detection
 status-error-prone = Running error-prone
 status-model = Building the code model
+status-docker = Building the Docker image
+status-tests = Executing tests
 status-integrated = Running integrated analysis
 
 # Linters
@@ -68,6 +70,8 @@ javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter 
 javadoc-unexpected-tag = Der JavaDoc-Kommentar sollte keinen '@{$tag}'-Tag haben.
 
 javadoc-type-exp-invalid-author = Im @author-Tag sollte dein u-Kürzel stehen: {$authors}
+
+javadoc-return-null-exp = Die Methode {$method} kann null zurückgeben, der @return-Tag erwähnt das aber nicht
 
 javadoc-stub-exp-desc = Die Beschreibung des Javadoc-Kommentars ist leer
 javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}'
@@ -155,6 +159,8 @@ reassigned-parameter = Dem Parameter '{$name}' sollte kein neuer Wert zugewiesen
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
 
+field-local-exp = Das Attribut '{$field}' der Klasse {$class} sollte eine lokale Variable sein, da sie in jeder Methode vor dem ersten Lesen überschrieben wird
+
 missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe https://stackoverflow.com/a/94411/7766117.
 
 system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
@@ -226,12 +232,9 @@ variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redund
 # OOP
 concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
 
-leaked-collection-return = Die Methode '{$method}' gibt eine Referenz zu dem Feld '{$field}' zurück. Dadurch ist es möglich das Feld von außerhalb zu verändern. Gebe stattdessen eine Kopie zurück.
-leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu. Dadurch ist es möglich das Feld von außerhalb zu verändern. Weiße stattdessen eine Kopie dem Feld zu.
+list-getter-exp = Kopiere diese veränderbare Collection bevor du sie zurückgibst, um unbeabsichtigte Veränderungen durch andere Klassen zu verhindern
 
 method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
-
-method-should-be-static = Die Methode '{$name}' sollte statisch sein, da sie auf keine Instanzattribute oder Methoden zugreift.
 
 utility-exp-final = Utility-Klasse ist nicht final
 utility-exp-constructor = Utility-Klassen müssen genau einen privaten und parameterlosen Konstruktor haben

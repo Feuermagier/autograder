@@ -43,15 +43,19 @@ public final class Linter {
     private final int threads;
     private final TempLocation tempLocation;
     private final FluentBundle fluentBundle;
+    private final boolean disableDynamicAnalysis;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
+    private final Predicate<Problem> isExcluded;
 
     private Linter(
         Locale locale,
         TempLocation tempLocation,
         int threads,
+        boolean disableDynamicAnalysis,
         ClassLoader classLoader,
-        int maxProblemsPerCheck
+        int maxProblemsPerCheck,
+        Predicate<Problem> isExcluded
     ) {
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
@@ -69,19 +73,24 @@ public final class Linter {
 
         this.tempLocation = tempLocation;
         this.threads = threads;
+        this.disableDynamicAnalysis = disableDynamicAnalysis;
         this.classLoader = classLoader;
         this.maxProblemsPerCheck = maxProblemsPerCheck;
+        this.isExcluded = isExcluded;
     }
 
     public static class Builder {
         private final Locale locale;
         private TempLocation tempLocation;
         private int threads;
+        private boolean disableDynamicAnalysis = true;
         private ClassLoader classLoader;
         private int maxProblemsPerCheck = -1;
+        private Predicate<Problem> isExcluded;
 
         private Builder(Locale locale) {
             this.locale = locale;
+            this.isExcluded = problem -> false;
         }
 
         public Builder tempLocation(TempLocation tempLocation) {
@@ -99,8 +108,22 @@ public final class Linter {
             return this;
         }
 
+        public Builder enableDynamicAnalysis() {
+            return this.enableDynamicAnalysis(true);
+        }
+
+        public Builder enableDynamicAnalysis(boolean shouldEnable) {
+            this.disableDynamicAnalysis = !shouldEnable;
+            return this;
+        }
+
         public Builder classLoader(ClassLoader classLoader) {
             this.classLoader = classLoader;
+            return this;
+        }
+
+        public Builder exclude(Predicate<Problem> isExcluded) {
+            this.isExcluded = isExcluded;
             return this;
         }
 
@@ -115,8 +138,10 @@ public final class Linter {
                 this.locale,
                 tempLocation,
                 this.threads,
+                this.disableDynamicAnalysis,
                 this.classLoader,
-                this.maxProblemsPerCheck
+                this.maxProblemsPerCheck,
+                this.isExcluded
             );
         }
     }
@@ -134,18 +159,24 @@ public final class Linter {
     }
 
     public List<Problem> checkFile(
-        UploadedFile file,
-        CheckConfiguration checkConfiguration,
+        UploadedFile file, Path tests,
+        List<ProblemType> problemsToReport,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
-        var checks = this.findChecksForProblemTypes(checkConfiguration.problemsToReport());
-        return this.checkFile(file, checkConfiguration, checks, statusConsumer);
+        return this.checkFile(
+            file,
+            tests,
+            problemsToReport,
+            findChecksForProblemTypes(problemsToReport),
+            statusConsumer
+        );
     }
 
     public List<Problem> checkFile(
         UploadedFile file,
-        CheckConfiguration checkConfiguration,
-        List<? extends Check> checks,
+        Path tests,
+        Collection<ProblemType> problemsToReport,
+        Iterable<? extends Check> checks,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         // the file is null if the student did not upload source code
@@ -206,6 +237,9 @@ public final class Linter {
             if (!integratedChecks.isEmpty()) {
                 scheduler.submitTask((s, reporter) -> {
                     IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
+                    if (!this.disableDynamicAnalysis) {
+                        analysis.runDynamicAnalysis(tests, statusConsumer);
+                    }
                     analysis.lint(integratedChecks, statusConsumer, s);
                 });
             }
@@ -224,22 +258,18 @@ public final class Linter {
         }
 
         List<Problem> unreducedProblems = result.problems();
-        if (!checkConfiguration.problemsToReport().isEmpty()) {
+        if (!problemsToReport.isEmpty()) {
             unreducedProblems = result
                 .problems()
                 .stream()
-                .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getProblemType()))
+                .filter(problem -> problemsToReport.contains(problem.getProblemType()))
                 .toList();
         }
 
-        // filter out problems in excluded classes
-        var excludedClasses = checkConfiguration.excludedClasses();
-        if (excludedClasses != null && !excludedClasses.isEmpty()) {
-            unreducedProblems = unreducedProblems.stream()
-                    .filter(problem -> !checkConfiguration.excludedClasses()
-                            .contains(problem.getPosition().file().getName().replace(".java", "")))
-                    .toList();
-        }
+        // filter out excluded problems:
+        unreducedProblems = unreducedProblems.stream()
+            .filter(this.isExcluded.negate())
+            .toList();
 
         return this.mergeProblems(unreducedProblems);
     }

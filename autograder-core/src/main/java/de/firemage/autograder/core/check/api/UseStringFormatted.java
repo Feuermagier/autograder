@@ -3,6 +3,7 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -37,11 +38,6 @@ public class UseStringFormatted extends IntegratedCheck {
         }
 
         CtExpression<?> format = args.remove(0);
-        // skip if the format string is not a string literal (e.g. a complex concatenation)
-        if (SpoonUtil.tryGetStringLiteral(SpoonUtil.resolveConstant(format)).isEmpty()) {
-            return;
-        }
-
         String output = "%s.formatted(%s)".formatted(
             format,
             args.stream().map(CtExpression::toString).reduce((a, b) -> a + ", " + b).orElse("")
@@ -55,7 +51,7 @@ public class UseStringFormatted extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {
             @Override
             public void process(CtInvocation<?> ctInvocation) {

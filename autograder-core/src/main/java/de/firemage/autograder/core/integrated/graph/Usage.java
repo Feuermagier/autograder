@@ -1,25 +1,19 @@
 package de.firemage.autograder.core.integrated.graph;
 
+import lombok.Getter;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Objects;
 
 public sealed class Usage permits UsageAccessField, UsageCallMethod, UsageCreateInstance, UsageField {
-
+    @Getter
     private final CtTypeReference<?> start;
+    @Getter
     private final CtTypeReference<?> end;
 
     public Usage(CtTypeReference<?> start, CtTypeReference<?> end) {
         this.start = start;
         this.end = end;
-    }
-
-    public CtTypeReference<?> getStart() {
-        return start;
-    }
-
-    public CtTypeReference<?> getEnd() {
-        return end;
     }
 
     @Override

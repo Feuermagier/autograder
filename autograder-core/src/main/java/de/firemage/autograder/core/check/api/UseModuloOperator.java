@@ -3,6 +3,7 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -70,15 +71,9 @@ public class UseModuloOperator extends IntegratedCheck {
         // is equal to
         //
         // variable %= 3;
-        CtExpression<?> checkedValue = condition.getRightHandOperand();
-
-        // for boxed types, one could check if the value is null,
-        // for which the suggestion `a %= null` would not make sense
-        if (SpoonUtil.isNullLiteral(checkedValue)) {
-            return;
-        }
-
         if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
+            CtExpression<?> right = condition.getRightHandOperand();
+
             addLocalProblem(
                 ctIf,
                 new LocalizedMessage(
@@ -86,7 +81,7 @@ public class UseModuloOperator extends IntegratedCheck {
                     Map.of(
                         "suggestion", "%s %%= %s".formatted(
                             assignedVariable,
-                            checkedValue
+                            right
                         )
                     )
                 ),
@@ -96,7 +91,7 @@ public class UseModuloOperator extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtIf>() {
             @Override
             public void process(CtIf ctIf) {

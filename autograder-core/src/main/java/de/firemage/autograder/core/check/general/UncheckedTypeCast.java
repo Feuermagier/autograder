@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.compiler.CompilationDiagnostic;
 import de.firemage.autograder.core.compiler.CompilationResult;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 
@@ -18,7 +19,7 @@ public class UncheckedTypeCast extends IntegratedCheck {
     );
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         CompilationResult result = staticAnalysis.getCompilationResult();
         List<CompilationDiagnostic> diagnostics = result.diagnostics()
               .stream()

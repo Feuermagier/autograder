@@ -1,13 +1,12 @@
 package de.firemage.autograder.core.check.complexity;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
@@ -38,13 +37,13 @@ public class RedundantVariable extends IntegratedCheck {
         return ctExpression instanceof CtSwitchExpression<?,?> || ctExpression.toString().length() > MAX_EXPRESSION_SIZE;
     }
 
-    private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead, CodeModel model) {
+    private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead) {
         if (// the variable must be a local variable
             !(ctVariableRead.getVariable().getDeclaration() instanceof CtLocalVariable<?> ctLocalVariable)
             // it should not have any annotations (e.g. @SuppressWarnings("unchecked"))
             || !ctLocalVariable.getAnnotations().isEmpty()
             // the variable must only be used in the return statement
-            || UsesFinder.variableUses(ctLocalVariable).filterIndirectParent(CtStatement.class, s -> s != ctStatement).hasAny()) {
+            || SpoonUtil.hasAnyUses(ctLocalVariable, ctElement -> ctElement.getParent(CtStatement.class) != ctStatement)) {
             return;
         }
 
@@ -79,7 +78,7 @@ public class RedundantVariable extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtInvocation(CtInvocation<T> ctInvocation) {
@@ -92,7 +91,7 @@ public class RedundantVariable extends IntegratedCheck {
                     return;
                 }
 
-                checkVariableRead(ctInvocation, ctVariableRead, staticAnalysis.getCodeModel());
+                checkVariableRead(ctInvocation, ctVariableRead);
 
                 super.visitCtInvocation(ctInvocation);
             }
@@ -107,7 +106,7 @@ public class RedundantVariable extends IntegratedCheck {
                     return;
                 }
 
-                checkVariableRead(ctReturn, ctVariableRead, staticAnalysis.getCodeModel());
+                checkVariableRead(ctReturn, ctVariableRead);
 
                 super.visitCtReturn(ctReturn);
             }

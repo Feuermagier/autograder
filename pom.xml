@@ -8,7 +8,7 @@
     <groupId>de.firemage.autograder</groupId>
     <artifactId>autograder-parent</artifactId>
     <packaging>pom</packaging>
-    <version>0.5.38</version>
+    <version>0.5.35</version>
     <name>Autograder</name>
     <description>Automatic assessment of student code submissions</description>
     <url>https://github.com/Feuermagier/autograder</url>
@@ -38,7 +38,7 @@
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <java.version>21</java.version>
+        <java.version>17</java.version>
         <maven.compiler.source>${java.version}</maven.compiler.source>
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
@@ -51,6 +51,13 @@
     </properties>
 
     <dependencies>
+        <!-- Lombok -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok</artifactId>
+            <version>1.18.32</version>
+            <scope>provided</scope>
+        </dependency>
         <dependency>
             <groupId>org.junit.jupiter</groupId>
             <artifactId>junit-jupiter-engine</artifactId>
@@ -76,23 +83,38 @@
         <dependencies>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-event</artifactId>
+                <version>0.5.35</version>
+            </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-agent</artifactId>
+                <version>0.5.35</version>
+            </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-executor</artifactId>
+                <version>0.5.35</version>
+            </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-core</artifactId>
-                <version>0.5.38</version>
+                <version>0.5.35</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-cmd</artifactId>
-                <version>0.5.38</version>
+                <version>0.5.35</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-treeg</artifactId>
-                <version>0.5.38</version>
+                <version>0.5.35</version>
             </dependency>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-span</artifactId>
-                <version>0.5.38</version>
+                <version>0.5.35</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -145,7 +167,7 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-jar-plugin</artifactId>
-                    <version>3.4.1</version>
+                    <version>3.4.0</version>
                 </plugin>
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
@@ -216,9 +238,6 @@
                                 <goals>
                                     <goal>jar</goal>
                                 </goals>
-                                <configuration> <!-- add this to disable checking -->
-                                    <doclint>none</doclint>
-                                </configuration>
                             </execution>
                         </executions>
                     </plugin>
@@ -227,6 +246,9 @@
             <modules>
                 <module>autograder-core</module>
                 <module>autograder-cmd</module>
+                <module>autograder-executor</module>
+                <module>autograder-event</module>
+                <module>autograder-agent</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
             </modules>
@@ -240,6 +262,9 @@
             <modules>
                 <module>autograder-core</module>
                 <module>autograder-cmd</module>
+                <module>autograder-executor</module>
+                <module>autograder-event</module>
+                <module>autograder-agent</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
             </modules>

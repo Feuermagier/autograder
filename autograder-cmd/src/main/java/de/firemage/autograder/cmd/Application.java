@@ -4,11 +4,8 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.firemage.autograder.cmd.output.Annotation;
-import de.firemage.autograder.core.ArtemisUtil;
-import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.Linter;
-import de.firemage.autograder.core.LinterConfigurationException;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
@@ -66,8 +63,15 @@ public class Application implements Callable<Integer> {
     @Parameters(index = "1", description = "The root folder which contains the files to check.")
     private Path file;
 
+    @Parameters(index = "2", defaultValue = "", description = "The root folder which contains the tests to run. If not provided or empty, no tests will be run.")
+    private Path tests;
+
     @Option(names = {"-j", "--java", "--java-version"}, defaultValue = "17", description = "Set the Java version.")
     private String javaVersion;
+
+    @Option(names = {"-s",
+            "--static-only"}, description = "Only run static analysis, therefore disabling dynamic analysis.")
+    private boolean staticOnly;
 
     @Option(names = {
             "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
@@ -76,11 +80,6 @@ public class Application implements Callable<Integer> {
     @Option(names = {
             "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
     private boolean outputJson;
-
-    // TODO: remove this
-    @Option(names = {
-        "--static-only"}, description = "Only kept here so the grading tool keeps working, does nothing.")
-    private boolean staticOnly;
 
     @Option(names = {
             "--pass-config"}, description = "Interpret the first parameter not as the path to a config file, but as the contents of the config file")
@@ -96,9 +95,11 @@ public class Application implements Callable<Integer> {
     private CommandSpec spec;
 
     private final TempLocation tempLocation;
+    private final Set<String> exludedClasses;
 
     public Application(TempLocation tempLocation) {
         this.tempLocation = tempLocation;
+        this.exludedClasses = new HashSet<>();
     }
 
     private static Charset getConsoleCharset() {
@@ -134,12 +135,12 @@ public class Application implements Callable<Integer> {
 
     private void execute(
         Linter linter,
-        CheckConfiguration checkConfiguration,
+        List<ProblemType> checks,
         UploadedFile uploadedFile,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         if (outputJson) {
-            List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
             System.out.println(">> Problems <<");
             printProblemsAsJson(problems, linter);
             return;
@@ -149,7 +150,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+            List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
             progress.finish("Completed checks");
 
             if (problems.isEmpty()) {
@@ -184,12 +185,39 @@ public class Application implements Callable<Integer> {
         CmdUtil.beginSection("Checks");
         ProgressAnimation progress = new ProgressAnimation("Checking...");
         progress.start();
-        List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+        List<Problem> problems = linter.checkFile(uploadedFile, tests, checks, statusConsumer);
         progress.finish("Completed checks");
 
         printProblems(problems, linter);
 
         CmdUtil.endSection();
+    }
+
+    private List<ProblemType> getChecks() throws IOException {
+        List<String> checks;
+        if (passConfig) {
+            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(checkConfig, String[].class));
+        } else {
+            checks = List.of(new ObjectMapper(new YAMLFactory()).readValue(new File(checkConfig), String[].class));
+        }
+
+        List<ProblemType> result = new ArrayList<>();
+
+        // HACK: EXCLUDE is used to ignore some classes, blame the config format for the hacky solution
+        for (String check : checks) {
+            if (check.startsWith("EXCLUDE")) {
+                this.exludedClasses.addAll(List.of(check.substring("EXCLUDE".length() + 1).split(" ")));
+                continue;
+            }
+
+            try {
+                result.add(ProblemType.valueOf(check));
+            } catch (IllegalArgumentException e) {
+                throw new IllegalArgumentException("Unknown check '%s'".formatted(check), e);
+            }
+        }
+
+        return result;
     }
 
     @Override
@@ -199,8 +227,13 @@ public class Application implements Callable<Integer> {
         }
 
         if (this.artemisFolders) {
-            try {
-                this.file = ArtemisUtil.resolveCodePathEclipseGradingTool(this.file);
+            try (Stream<Path> files = Files.list(this.file)) {
+                this.file = files
+                        .filter(child -> !child.endsWith(".metadata"))
+                        .findAny()
+                        .orElseThrow(() -> new IllegalStateException("No student code found"))
+                        .resolve("assignment")
+                        .resolve("src");
             } catch (IOException e) {
                 e.printStackTrace();
                 return IO_EXIT_CODE;
@@ -211,15 +244,16 @@ public class Application implements Callable<Integer> {
             System.out.println("Student source code directory is " + file);
         }
 
-        // Create the check configuration
-        CheckConfiguration checkConfiguration;
+        boolean isDynamicAnalysisEnabled = !this.staticOnly && !this.tests.toString().equals("");
+        if (!isDynamicAnalysisEnabled && !outputJson) {
+            CmdUtil.println("Note: Dynamic analysis is disabled.");
+            CmdUtil.println();
+        }
+
+        List<ProblemType> checks;
         try {
-            if (passConfig) {
-                checkConfiguration = CheckConfiguration.fromConfigString(checkConfig);
-            } else {
-                checkConfiguration = CheckConfiguration.fromConfigFile(Path.of(checkConfig));
-            }
-        } catch (IOException | LinterConfigurationException e) {
+            checks = this.getChecks();
+        } catch (IOException e) {
             e.printStackTrace();
             return IO_EXIT_CODE;
         }
@@ -227,7 +261,9 @@ public class Application implements Callable<Integer> {
         Linter linter = Linter.builder(Locale.GERMANY)
             .threads(0)
             .tempLocation(this.tempLocation)
+            .enableDynamicAnalysis(isDynamicAnalysisEnabled)
             .maxProblemsPerCheck(this.maxProblemsPerCheck)
+            .exclude(problem -> this.exludedClasses.contains(problem.getPosition().file().getName().replace(".java", "")))
             .build();
 
         Consumer<LinterStatus> statusConsumer = status ->
@@ -244,7 +280,7 @@ public class Application implements Callable<Integer> {
                 this.tempLocation,
                 statusConsumer,
             null)) {
-            this.execute(linter, checkConfiguration, uploadedFile, statusConsumer);
+            this.execute(linter, checks, uploadedFile, statusConsumer);
         } catch (CompilationFailureException e) {
             CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
             return COMPILATION_EXIT_CODE;

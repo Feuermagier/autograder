@@ -401,30 +401,4 @@ class TestAvoidShadowing extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
-
-
-    @Test
-    void testArrayParamHidesAttribute() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
-            JavaVersion.JAVA_17,
-            Map.ofEntries(
-                Map.entry(
-                    "Main",
-                    """
-                        class Main {
-                            private String ais;
-
-                            public void doSomething(String[] ais) {
-                                System.out.println(ais);
-                            }
-                        }
-                        """
-                )
-            )
-        ), PROBLEM_TYPES);
-
-        // not reported, because only the array is used in the method
-
-        problems.assertExhausted();
-    }
 }

@@ -4,6 +4,7 @@ import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.CtSynchronized;
@@ -16,7 +17,7 @@ import spoon.support.reflect.CtExtendedModifier;
 @ExecutableCheck(reportedProblems = { ProblemType.MULTI_THREADING })
 public class MultiThreading extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public void visitCtSynchronized(CtSynchronized ctSynchronized) {

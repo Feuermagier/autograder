@@ -5,6 +5,7 @@ import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
@@ -38,7 +39,7 @@ public record ForLoopRange(
                     && ctVariable.getReference().equals(ctVariableAccess.getVariable()))
                 .orElse(false)
             // the loop variable must not be used after the loop
-            && SpoonUtil.getNextStatements(ctFor).stream().noneMatch(statement -> UsesFinder.variableUses(localVariable).nestedIn(statement).hasAny())
+            && SpoonUtil.getNextStatements(ctFor).stream().allMatch(statement -> SpoonUtil.findUsesIn(localVariable, statement).isEmpty())
         ) {
             potentialLoopVariable = localVariable;
         } else if (ctFor.getForInit().size() == 1 && ctFor.getForInit().get(0) instanceof CtLocalVariable<?> ctLocalVariable) {

@@ -1,24 +1,20 @@
 package de.firemage.autograder.core.pmd;
 
 import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.file.FileSourceInfo;
 import de.firemage.autograder.core.file.SourceInfo;
+import lombok.extern.slf4j.Slf4j;
 import net.sourceforge.pmd.Report;
 import net.sourceforge.pmd.RuleViolation;
 import net.sourceforge.pmd.renderers.AbstractIncrementingRenderer;
 import org.apache.commons.io.output.NullWriter;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
+@Slf4j
 public class ProblemRenderer extends AbstractIncrementingRenderer {
-    private static final Logger LOG = LoggerFactory.getLogger(FileSourceInfo.class);
-
     private final SourceInfo sourceInfo;
     private final Map<String, PMDCheck> checks;
     private final List<Problem> problems = new ArrayList<>();
@@ -55,7 +51,7 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
         //TODO Don't ignore processing errors (via Report.ProcessingError)
 
         for (Report.ConfigurationError error : configErrors) {
-            LOG.error("PMD config error: " + error.issue());
+            log.error("PMD config error: " + error.issue());
         }
     }
 

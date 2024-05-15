@@ -640,7 +640,6 @@ class TestUnusedImport extends AbstractCheckTest {
     }
 
     @Test
-    @Disabled("Some spoon bug that I can't be bothered to report, debug or fix. Who writes code like this anyway?")
     void testUsedStaticJavaLangImport() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,

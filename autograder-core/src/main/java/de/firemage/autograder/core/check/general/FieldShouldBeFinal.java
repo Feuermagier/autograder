@@ -2,9 +2,10 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFieldWrite;
@@ -17,7 +18,7 @@ import java.util.Optional;
 @ExecutableCheck(reportedProblems = {ProblemType.FIELD_SHOULD_BE_FINAL})
 public class FieldShouldBeFinal extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
             public void process(CtField<?> ctField) {
@@ -26,9 +27,11 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 }
 
                 // check if the field is written to outside of constructors
-                boolean hasWrite = UsesFinder.variableUses(ctField)
-                        .ofType(CtFieldWrite.class)
-                        .notNestedIn(CtConstructor.class).hasAny();
+                boolean hasWrite = SpoonUtil.hasAnyUses(
+                    ctField,
+                    ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
+                        && ctFieldWrite.getParent(CtConstructor.class) == null
+                );
 
                 // a field can not be final if it is written to from outside of constructors
                 if (hasWrite) {
@@ -36,9 +39,11 @@ public class FieldShouldBeFinal extends IntegratedCheck {
                 }
 
                 // check if the field is written to in constructors, which is fine if it does not have an explicit value
-                boolean hasWriteInConstructor = UsesFinder.variableUses(ctField)
-                        .ofType(CtFieldWrite.class)
-                        .nestedIn(CtConstructor.class).hasAny();
+                boolean hasWriteInConstructor = SpoonUtil.hasAnyUses(
+                    ctField,
+                    ctElement -> ctElement instanceof CtFieldWrite<?> ctFieldWrite
+                        && ctFieldWrite.getParent(CtConstructor.class) != null
+                );
 
                 // we need to check if the field is explicitly initialized, because this is not allowed:
                 //

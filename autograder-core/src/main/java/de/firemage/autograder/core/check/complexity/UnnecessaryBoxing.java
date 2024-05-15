@@ -1,13 +1,12 @@
 package de.firemage.autograder.core.check.complexity;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtExpression;
@@ -30,7 +29,7 @@ public class UnnecessaryBoxing extends IntegratedCheck {
             || isBoxedType(ctExpression.getType());
     }
 
-    private <T> void checkVariable(CtVariable<T> ctVariable, CodeModel model) {
+    private <T> void checkVariable(CtVariable<T> ctVariable) {
         if (ctVariable.isImplicit() || !ctVariable.getPosition().isValidPosition()) {
             return;
         }
@@ -40,13 +39,13 @@ public class UnnecessaryBoxing extends IntegratedCheck {
             return;
         }
 
-        boolean hasNullAssigned = isLikelyNull(ctVariable.getDefaultExpression()) || UsesFinder.variableUses(ctVariable)
-                .ofType(CtVariableWrite.class)
-                .filter(use ->
-                        use.getParent() instanceof CtAssignment<?,?> assignment
-                                && assignment.getAssignment() != null
-                                && isLikelyNull(assignment.getAssignment())
-                ).hasAny();
+        boolean hasNullAssigned = isLikelyNull(ctVariable.getDefaultExpression()) || SpoonUtil.hasAnyUses(
+            ctVariable,
+            ctElement -> ctElement instanceof CtVariableWrite<?>
+                && ctElement.getParent() instanceof CtAssignment<?,?> ctAssignment
+                && ctAssignment.getAssignment() != null
+                && isLikelyNull(ctAssignment.getAssignment())
+        );
 
         if (!hasNullAssigned) {
             addLocalProblem(
@@ -64,11 +63,11 @@ public class UnnecessaryBoxing extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtVariable<?>>() {
             @Override
             public void process(CtVariable<?> ctVariable) {
-                checkVariable(ctVariable, staticAnalysis.getCodeModel());
+                checkVariable(ctVariable);
             }
         });
     }

@@ -4,13 +4,14 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.unnecessary.UnusedCodeElementCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.code.CtLoop;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtVariableRead;
@@ -25,7 +26,7 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = { ProblemType.REDUNDANT_ASSIGNMENT })
 public class RedundantAssignment extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtAssignment<?, ?>>() {
             @Override
             public void process(CtAssignment<?, ?> ctAssignment) {
@@ -46,13 +47,16 @@ public class RedundantAssignment extends IntegratedCheck {
 
                 CtLocalVariable<?> ctLocalVariable = ctLocalVariableReference.getDeclaration();
 
-                if (UnusedCodeElementCheck.isConsideredUnused(ctLocalVariable, staticAnalysis.getCodeModel())) {
+                if (UnusedCodeElementCheck.isUnused(ctLocalVariable, true)) {
                     return;
                 }
 
-                if (followingStatements.stream().noneMatch(statement ->
-                        UsesFinder.variableUses(ctLocalVariable).ofType(CtVariableRead.class).nestedIn(statement).hasAny())
-                ) {
+
+                if (followingStatements.stream().noneMatch(statement -> SpoonUtil.hasAnyUsesIn(
+                    ctLocalVariable,
+                    statement,
+                    element -> element instanceof CtVariableRead<?>
+                ))) {
                     addLocalProblem(
                         ctAssignment,
                         new LocalizedMessage(

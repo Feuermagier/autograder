@@ -1,7 +1,10 @@
 package de.firemage.autograder.core;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import org.junit.jupiter.api.Test;
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -33,10 +36,11 @@ class TestSampleConfig {
     }
 
     @Test
-    void hasAllProblemTypes() throws IOException, LinterConfigurationException {
+    void hasAllProblemTypes() throws IOException {
         // the `System.getProperty("user.dir")` is the path to the autograder-core directory
         Path path = Path.of(System.getProperty("user.dir"), "..", "sample_config.yaml");
-        List<ProblemType> present = CheckConfiguration.fromConfigFile(path).problemsToReport();
+        List<ProblemType> present = List.of(
+            new ObjectMapper(new YAMLFactory()).readValue(new File(path.toUri()), ProblemType[].class));
 
         assertProblemTypes(Arrays.asList(ProblemType.values()), present);
     }

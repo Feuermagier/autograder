@@ -1,14 +1,12 @@
 package de.firemage.autograder.core.check.naming;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -71,9 +69,9 @@ public class LinguisticNamingCheck extends IntegratedCheck {
         }
     }
 
-    private <T> void checkCtMethod(CtMethod<T> ctMethod, CodeModel model) {
+    private <T> void checkCtMethod(CtMethod<T> ctMethod) {
         // to avoid duplicate reports, only report the first method declaration
-        if (MethodHierarchy.isOverridingMethod(ctMethod)) {
+        if (SpoonUtil.isOverriddenMethod(ctMethod)) {
             return;
         }
 
@@ -137,7 +135,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtNamedElement>() {
             @Override
             public void process(CtNamedElement ctNamedElement) {
@@ -146,7 +144,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
                 }
 
                 if (ctNamedElement instanceof CtMethod<?> ctMethod) {
-                    checkCtMethod(ctMethod, staticAnalysis.getCodeModel());
+                    checkCtMethod(ctMethod);
                 }
 
                 if (ctNamedElement instanceof CtField<?> ctVariable) {

@@ -3,12 +3,14 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.FactoryAccessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
+import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExecutableReferenceExpression;
@@ -157,7 +159,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             return true;
         }
 
-        if (SpoonUtil.isInOverridingMethod(ctTypeReference)
+        if (SpoonUtil.isInOverriddenMethod(ctTypeReference)
             || this.isInAllowedContext(ctTypeReference)
             || this.isAllowedType(ctTypeReference)) {
             return false;
@@ -200,7 +202,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         // Checks for fields, parameters and return types
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override

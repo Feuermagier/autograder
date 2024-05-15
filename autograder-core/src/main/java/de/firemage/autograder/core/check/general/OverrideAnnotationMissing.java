@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
@@ -15,7 +15,7 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = { ProblemType.OVERRIDE_ANNOTATION_MISSING })
 public class OverrideAnnotationMissing extends IntegratedCheck {
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtMethod<?>>() {
             @Override
             public void process(CtMethod<?> ctMethod) {
@@ -25,7 +25,7 @@ public class OverrideAnnotationMissing extends IntegratedCheck {
                     return;
                 }
 
-                if (MethodHierarchy.isOverridingMethod(ctMethod)) {
+                if (SpoonUtil.isOverriddenMethod(ctMethod)) {
                     addLocalProblem(
                         ctMethod,
                         new LocalizedMessage(

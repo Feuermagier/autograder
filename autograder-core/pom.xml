@@ -5,7 +5,7 @@
     <parent>
         <artifactId>autograder-parent</artifactId>
         <groupId>de.firemage.autograder</groupId>
-        <version>0.5.38</version>
+        <version>0.5.35</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -18,15 +18,63 @@
         <spoon.version>11.0.0</spoon.version>
         <pmd.version>7.0.0-rc3</pmd.version>
         <spotbugs.version>6.45.0</spotbugs.version>
+
+        <docker.version>3.3.6</docker.version>
         <jgraph.version>1.5.2</jgraph.version>
         <fluent.version>0.70</fluent.version>
     </properties>
+
+    <build>
+        <plugins>
+            <plugin>
+                <artifactId>maven-antrun-plugin</artifactId>
+                <version>3.1.0</version>
+                <executions>
+                    <execution>
+                        <phase>generate-sources</phase>
+                        <goals>
+                            <goal>run</goal>
+                        </goals>
+                        <configuration>
+                            <target>
+                                <copy todir="${basedir}/target/classes">
+                                    <fileset dir="${basedir}/../autograder-executor/target/"
+                                        includes="executor-jar-with-dependencies.jar" />
+                                    <fileset dir="${basedir}/../autograder-agent/target/"
+                                        includes="agent-jar-with-dependencies.jar" />
+                                </copy>
+                                <move file="${basedir}/target/classes/agent-jar-with-dependencies.jar" tofile="${basedir}/target/classes/agent.jar"/>
+                                <move file="${basedir}/target/classes/executor-jar-with-dependencies.jar" tofile="${basedir}/target/classes/executor.jar"/>
+                            </target>
+                        </configuration>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 
     <dependencies>
         <!-- Internal -->
         <dependency>
             <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-event</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-treeg</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-agent</artifactId>
+            <!-- This dependency is needed to copy jars to resources -->
+            <scope>test</scope>
+        </dependency>
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-executor</artifactId>
+            <!-- This dependency is needed to copy jars to resources -->
+            <scope>test</scope>
         </dependency>
 
         <!-- Spoon -->
@@ -79,7 +127,7 @@
         <dependency>
             <groupId>com.google.errorprone</groupId>
             <artifactId>error_prone_core</artifactId>
-            <version>2.27.0</version>
+            <version>2.26.1</version>
         </dependency>
 
         <!-- ASM -->
@@ -109,6 +157,30 @@
             <version>${jackson.version}</version>
         </dependency>
 
+        <!-- Docker -->
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java</artifactId>
+            <version>${docker.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
+
+        <dependency>
+            <groupId>com.github.docker-java</groupId>
+            <artifactId>docker-java-transport-httpclient5</artifactId>
+            <version>${docker.version}</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>jcl-over-slf4j</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>

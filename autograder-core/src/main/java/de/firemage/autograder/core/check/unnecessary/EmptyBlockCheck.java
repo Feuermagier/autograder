@@ -3,6 +3,7 @@ package de.firemage.autograder.core.check.unnecessary;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.dynamic.DynamicAnalysis;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -22,7 +23,7 @@ public class EmptyBlockCheck extends IntegratedCheck {
     }
 
     @Override
-    protected void check(StaticAnalysis staticAnalysis) {
+    protected void check(StaticAnalysis staticAnalysis, DynamicAnalysis dynamicAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
             public <T> void visitCtBlock(CtBlock<T> ctBlock) {
@@ -33,7 +34,7 @@ public class EmptyBlockCheck extends IntegratedCheck {
 
                 if (ctBlock.getParent() instanceof CtMethod<?> ctMethod
                     && ctMethod.getBody().equals(ctBlock)
-                    && SpoonUtil.isInOverridingMethod(ctBlock)) {
+                    && SpoonUtil.isInOverriddenMethod(ctBlock)) {
                     return;
                 }
 

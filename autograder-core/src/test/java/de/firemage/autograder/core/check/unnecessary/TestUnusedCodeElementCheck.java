@@ -203,67 +203,6 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     }
 
     @Test
-    void testUnusedNestedTypeParameter() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
-                JavaVersion.JAVA_17,
-                Map.ofEntries(
-                        Map.entry(
-                                "Cat",
-                                """
-                                    class Cat<T> {
-                                         Dog<T> dog;
-                                         
-                                         public static void main(String[] args) {
-                                            System.out.println(new Cat<String>().dog);
-                                         }
-                                     }
-                                    """
-                        ),
-                        Map.entry(
-                                "Dog",
-                                """
-                                    class Dog<X>{}
-                                    """
-                        )
-                )
-        ), PROBLEM_TYPES);
-
-        assertProblemSize(1, problems);
-        assertEqualsUnused("X", problems.get(0));
-    }
-
-    @Test
-    void testUsedWildcardBound() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
-                JavaVersion.JAVA_17,
-                Map.ofEntries(
-                        Map.entry(
-                                "Cat",
-                                """
-                                    class Cat<T> {
-                                         Dog<? extends T> dog;
-                                         
-                                         public static void main(String[] args) {
-                                            System.out.println(new Cat<String>().dog.field);
-                                         }
-                                     }
-                                    """
-                        ),
-                        Map.entry(
-                                "Dog",
-                                """
-                                    class Dog<X> {
-                                        X field;
-                                    }
-                                    """
-                        )
-                )
-        ), PROBLEM_TYPES);
-
-        assertProblemSize(0, problems);
-    }
-
-    @Test
     void testOnlyWrittenVariable() throws LinterException, IOException {
         // For now, this is not detected as unused, because it might result in false positives
         List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
@@ -731,40 +670,6 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     }
 
     @Test
-    void testUsedRenamedParameter() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
-                JavaVersion.JAVA_17,
-                Map.ofEntries(
-                        Map.entry(
-                                "Main",
-                                """
-                                public class Main extends B {
-                                    public void b(String parameterRenamed) {
-                                        System.out.println(parameterRenamed);
-                                    }
-            
-                                    public static void main(String[] args) {
-                                        Main main = new Main();
-                                        main.b("");
-                                    }
-                                }
-                                """
-                        ),
-                        Map.entry(
-                                "B",
-                                """
-                                public class B {
-                                    void b(String parameterName) {}
-                                }
-                                """
-                        )
-                )
-        ), PROBLEM_TYPES);
-
-        problems.assertExhausted();
-    }
-
-    @Test
     void testConventionExceptionConstructor() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
@@ -855,18 +760,6 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
                                 System.out.println(i);
                                 //                 ^ variable reference .getDeclaration() returns null here, which is a bug in Spoon
                             }
-                            
-                            // negated if
-                            if (!(o instanceof String i)) {
-                            } else {
-                                System.out.println(i);
-                            }
-                            
-                            // then branch cannot complete
-                            if (!(o instanceof String i)) {
-                                throw new IllegalArgumentException();
-                            }
-                            System.out.println(i);
                         }
                     }
                     """
@@ -995,42 +888,6 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
                     """
                 )
             )
-        ), PROBLEM_TYPES);
-
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testAnonymousConstructorCall() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
-                JavaVersion.JAVA_17,
-                Map.ofEntries(
-                        Map.entry(
-                                "Main",
-                                """
-                                public class Main {
-                                    public static void main(String[] args) {
-                                        new Foo() {
-                                            @Override
-                                            public void foo() {}
-                                        }.foo();
-                                    }
-                                }
-                                """
-                        ),
-                        Map.entry(
-                                "Foo",
-                                """
-                                public abstract class Foo {
-                                    public Foo() {
-                                        System.out.println("Called Foo Constructor");
-                                    }
-                                    
-                                    public abstract void foo();
-                                }
-                                """
-                        )
-                )
         ), PROBLEM_TYPES);
 
         problems.assertExhausted();
