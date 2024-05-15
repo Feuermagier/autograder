@@ -66,8 +66,7 @@ public class FileSourceInfo implements SourceInfo, Serializable {
         Set<Charset> supportedCharsets = Set.of(
             StandardCharsets.UTF_8,
             StandardCharsets.US_ASCII,
-            StandardCharsets.ISO_8859_1,
-            Charset.forName("windows-1252")
+            StandardCharsets.ISO_8859_1
         );
 
         try {

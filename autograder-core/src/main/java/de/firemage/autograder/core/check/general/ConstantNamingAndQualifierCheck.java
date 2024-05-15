@@ -47,7 +47,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
             getVisibilityString(ctVariable),
             ctVariableType.getSimpleName(),
             IdentifierNameUtils.toUpperSnakeCase(ctVariable.getSimpleName()),
-            ctVariable.getDefaultExpression()
+            ctVariable.getDefaultExpression().prettyprint()
         );
     }
 

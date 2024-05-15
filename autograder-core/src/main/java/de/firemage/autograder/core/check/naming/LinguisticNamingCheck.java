@@ -64,7 +64,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
             this.reportProblem(
                 "linguistic-naming-boolean",
                 ctVariable,
-                Map.of("type", ctVariable.getType().toString())
+                Map.of("type", ctVariable.getType().prettyprint())
             );
         }
     }
@@ -79,7 +79,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
             this.reportProblem(
                 "linguistic-naming-boolean",
                 ctMethod,
-                Map.of("type", ctMethod.getType().toString())
+                Map.of("type", ctMethod.getType().prettyprint())
             );
 
             return;
@@ -96,10 +96,6 @@ public class LinguisticNamingCheck extends IntegratedCheck {
                 ctMethod
             );
 
-            return;
-        }
-
-        if (ctMethod.getBody() == null) {
             return;
         }
 

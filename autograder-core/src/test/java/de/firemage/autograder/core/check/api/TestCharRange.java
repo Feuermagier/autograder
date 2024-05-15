@@ -98,7 +98,7 @@ public class TestCharRange extends AbstractCheckTest {
                 new LocalizedMessage(
                     LOCALIZED_MESSAGE_KEY,
                     Map.of(
-                        "suggestion", "!Character.isAlphabetic(c) || !Character.isLowerCase(c)"
+                        "suggestion", "(!Character.isAlphabetic(c)) || (!Character.isLowerCase(c))"
                     )
                 )),
             this.linter.translateMessage(problems.get(0).getExplanation())

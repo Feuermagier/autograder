@@ -61,7 +61,7 @@ class TestUseModuloOperator extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         List<String> expectedSuggestions = List.of(
-            "result %= limit + 1",
+            "result %= (limit + 1)",
             "result %= limit",
             "result %= limit"
         );

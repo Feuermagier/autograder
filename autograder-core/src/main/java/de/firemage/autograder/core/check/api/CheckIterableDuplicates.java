@@ -30,12 +30,12 @@ public class CheckIterableDuplicates extends IntegratedCheck {
     private static String buildSuggestion(CtExpression<?> ctExpression, boolean isNegated) {
         CtTypeReference<?> type = ctExpression.getType();
 
-        String leftSide = ctExpression.toString();
+        String leftSide = ctExpression.prettyprint();
         String rightSide = "%s.size()".formatted(leftSide);
 
         if (type.isArray()) {
             leftSide = "Arrays.asList(%s)".formatted(leftSide);
-            rightSide = "%s.length".formatted(ctExpression);
+            rightSide = "%s.length".formatted(ctExpression.prettyprint());
         }
 
         if (isNegated) {

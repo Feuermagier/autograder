@@ -44,8 +44,8 @@ class TestWrapperInstantiationCheck extends AbstractCheckTest {
             " Float         | 1.0F          | 1.0F                        ",
             " Long          | 1L            | 1L                          ",
             " Integer       | 1             | 1                           ",
-            " Short         | (short) 1     | (short) 1                   ",
-            " Byte          | (byte) 1      | (byte) 1                    ",
+            " Short         | ((short) (1)) | ((short) (1))               ",
+            " Byte          | ((byte) (1))  | ((byte) (1))                ",
             " Character     | 'a'           | 'a'                         ",
             " Boolean       | true          | true                        ",
             //

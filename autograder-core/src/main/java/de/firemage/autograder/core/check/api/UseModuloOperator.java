@@ -80,8 +80,8 @@ public class UseModuloOperator extends IntegratedCheck {
                     "common-reimplementation",
                     Map.of(
                         "suggestion", "%s %%= %s".formatted(
-                            assignedVariable,
-                            right
+                            assignedVariable.prettyprint(),
+                            right.prettyprint()
                         )
                     )
                 ),

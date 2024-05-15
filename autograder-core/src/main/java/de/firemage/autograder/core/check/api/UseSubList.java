@@ -58,10 +58,10 @@ public class UseSubList extends IntegratedCheck {
                 "common-reimplementation",
                 Map.of(
                     "suggestion", "for (%s value : %s.subList(%s, %s)) { ... }".formatted(
-                        listElementType.unbox(),
+                        listElementType.unbox().prettyprint(),
                         ctListVariable.getSimpleName(),
-                        forLoopRange.start(),
-                        forLoopRange.end()
+                        forLoopRange.start().prettyprint(),
+                        forLoopRange.end().prettyprint()
                     )
                 )
             ),

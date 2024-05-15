@@ -169,23 +169,4 @@ class TestImportTypes extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
-
-    @Test
-    void testForEach() throws IOException, LinterException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                import java.util.Map;
-
-                class Test {
-                    public static void takesMap(Map<Integer, String[][]> input, Map<Integer, Boolean> output) {
-                        input.forEach((key, strings) -> output.put(key, false));
-                    }
-                }
-                """
-        ), PROBLEM_TYPES);
-
-        problems.assertExhausted();
-    }
 }

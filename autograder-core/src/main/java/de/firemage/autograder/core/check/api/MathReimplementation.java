@@ -88,7 +88,7 @@ public class MathReimplementation extends IntegratedCheck {
                 ctExpression,
                 new LocalizedMessage(
                     "common-reimplementation",
-                    Map.of("suggestion", "Math.hypot(%s, %s)".formatted(left.get(), right.get()))
+                    Map.of("suggestion", "Math.hypot(%s, %s)".formatted(left.get().prettyprint(), right.get().prettyprint()))
                 ),
                 ProblemType.COMMON_REIMPLEMENTATION_HYPOT
             );
@@ -109,7 +109,7 @@ public class MathReimplementation extends IntegratedCheck {
                 ctExpression,
                 new LocalizedMessage(
                     "common-reimplementation",
-                    Map.of("suggestion", "Math.sqrt(%s)".formatted(ctInvocation.getArguments().get(0)))
+                    Map.of("suggestion", "Math.sqrt(%s)".formatted(ctInvocation.getArguments().get(0).prettyprint()))
                 ),
                 ProblemType.COMMON_REIMPLEMENTATION_SQRT
             );
@@ -191,9 +191,9 @@ public class MathReimplementation extends IntegratedCheck {
                     "common-reimplementation",
                     Map.of(
                         "suggestion", "%s = Math.max(%s, %s)".formatted(
-                            ctVariableWrite,
-                            elseValue,
-                            condition.getRightHandOperand()
+                            ctVariableWrite.prettyprint(),
+                            elseValue.prettyprint(),
+                            condition.getRightHandOperand().prettyprint()
                         )
                     )
                 ),
@@ -214,9 +214,9 @@ public class MathReimplementation extends IntegratedCheck {
                     "common-reimplementation",
                     Map.of(
                         "suggestion", "%s = Math.min(%s, %s)".formatted(
-                            ctVariableWrite,
-                            elseValue,
-                            condition.getRightHandOperand()
+                            ctVariableWrite.prettyprint(),
+                            elseValue.prettyprint(),
+                            condition.getRightHandOperand().prettyprint()
                         )
                     )
                 ),

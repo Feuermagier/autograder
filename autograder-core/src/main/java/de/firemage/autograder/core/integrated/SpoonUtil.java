@@ -10,7 +10,6 @@ import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
 import org.apache.commons.compress.utils.FileNameUtils;
-import org.apache.commons.io.FilenameUtils;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAbstractInvocation;
@@ -22,6 +21,7 @@ import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldWrite;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLambda;
@@ -38,16 +38,15 @@ import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.cu.position.CompoundSourcePosition;
-import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtCompilationUnit;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtImport;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypeParameter;
 import spoon.reflect.declaration.CtTypedElement;
@@ -72,7 +71,6 @@ import spoon.reflect.visitor.filter.OverridingMethodFilter;
 import spoon.reflect.visitor.filter.TypeFilter;
 import spoon.reflect.visitor.filter.VariableAccessFilter;
 
-import java.io.File;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -87,7 +85,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
 import java.util.function.Function;
@@ -622,10 +619,6 @@ public final class SpoonUtil {
     }
 
     public static List<CtStatement> getEffectiveStatements(CtStatement ctStatement) {
-        if (ctStatement == null) {
-            return List.of();
-        }
-
         if (ctStatement instanceof CtStatementList ctStatementList) {
             return getEffectiveStatements(ctStatementList.getStatements());
         }
@@ -1345,83 +1338,8 @@ public final class SpoonUtil {
                 );
             }
 
-            // constructors can be called implicitly
-            if (ctExecutable instanceof CtConstructor<?> ctConstructor && ctConstructor.getParameters().isEmpty()) {
-                // constructors of subclasses must use the no-arg constructor of the super class
-                // (this is not true, only if the subclass constructor calls the super class constructor explicitly or does not)
-                filter = new CompositeFilter<>(
-                    FilteringOperator.UNION,
-                    filter,
-                    new FilterAdapter<>(
-                        otherConstructor -> otherConstructor.getParameters().isEmpty()
-                            && otherConstructor != ctConstructor
-                            && SpoonUtil.callsParentConstructor(otherConstructor, ctConstructor),
-                        (Class<CtConstructor<?>>) (Object) CtConstructor.class
-                    )
-                );
-
-                // if the subclass does not have an explicit constructor, it still uses the super class constructor
-                if (ctConstructor.getDeclaringType() instanceof CtClass<?> ctClass) {
-                    for (CtType<?> ctType : SpoonUtil.getDirectSubtypes(ctClass)) {
-                        if (ctType instanceof CtClass<?> subclass) {
-                            var ctConstructors = subclass.getConstructors();
-                            if (ctConstructors.size() == 1 && ctConstructors.iterator().next().isImplicit()) {
-                                filter = new CompositeFilter<>(
-                                    FilteringOperator.UNION,
-                                    filter,
-                                    new FilterAdapter<>(
-                                        element -> element == subclass,
-                                        (Class<CtType<?>>) (Object) CtType.class
-                                    )
-                                );
-                            }
-
-                        }
-                    }
-                }
-            }
-
             return filter;
         }
-    }
-
-    private static List<CtType<?>> getDirectSubtypes(CtType<?> ctType) {
-        return ctType.getFactory().getModel().getElements(new TypeFilter<CtType<?>>(CtType.class))
-            .stream()
-            .filter(type -> SpoonUtil.isDirectSubtypeOf(type, ctType))
-            .toList();
-
-    }
-
-    private static boolean callsParentConstructor(CtConstructor<?> child, CtConstructor<?> parent) {
-        CtType<?> childType = child.getDeclaringType();
-        CtType<?> parentType = parent.getDeclaringType();
-
-        if (!SpoonUtil.isDirectSubtypeOf(childType, parentType)) {
-            return false;
-        }
-
-        for (CtStatement ctStatement : SpoonUtil.getEffectiveStatements(child.getBody())) {
-            if (!(ctStatement instanceof CtInvocation<?> ctInvocation) || ctInvocation.getTarget() != null) {
-                continue;
-            }
-
-            if (ctInvocation.getExecutable().equals(parent.getReference())) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    private static boolean isDirectSubtypeOf(CtTypeInformation ctType, CtType<?> superType) {
-        if (ctType.getSuperclass() == null) {
-            return SpoonUtil.isTypeEqualTo(superType.getReference(), java.lang.Object.class);
-        }
-
-        return ctType.getSuperclass().equals(superType.getReference())
-            || superType.equals(SpoonUtil.getReferenceDeclaration(ctType.getSuperclass()))
-            || ctType.getSuperInterfaces().contains(superType.getReference());
     }
 
     // Supported CtElement subtypes:
@@ -1465,7 +1383,7 @@ public final class SpoonUtil {
     }
 
     public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn) {
-        return hasAnyUsesIn(ctElement, toSearchIn, element -> true);
+        return hasAnyUsesIn(toSearchIn, ctElement, element -> true);
     }
 
     public static boolean hasAnyUsesIn(CtElement ctElement, CtElement toSearchIn, Predicate<? super CtElement> predicate) {
@@ -1474,16 +1392,6 @@ public final class SpoonUtil {
 
     private static List<CtElement> findUses(CtElement ctElement) {
         return new ArrayList<>(ctElement.getFactory().getModel().getElements(new UsesFilter(ctElement)));
-    }
-
-    private static <T> int referenceIndexOf(List<T> list, T element) {
-        for (int i = 0; i < list.size(); i++) {
-            if (list.get(i) == element) {
-                return i;
-            }
-        }
-
-        return -1;
     }
 
     /**
@@ -1495,7 +1403,7 @@ public final class SpoonUtil {
     public static Optional<CtStatement> getPreviousStatement(CtStatement ctStatement) {
         if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
             List<CtStatement> statements = ctStatementList.getStatements();
-            int index = referenceIndexOf(statements, ctStatement);
+            int index = statements.indexOf(ctStatement);
 
             if (index > 0) {
                 return Optional.of(statements.get(index - 1));
@@ -1509,7 +1417,7 @@ public final class SpoonUtil {
         List<CtStatement> result = new ArrayList<>();
         if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
             List<CtStatement> statements = ctStatementList.getStatements();
-            int index = referenceIndexOf(statements, ctStatement);
+            int index = statements.indexOf(ctStatement);
 
             if (index > 0) {
                 result.addAll(statements.subList(index + 1, statements.size()));
@@ -1517,37 +1425,6 @@ public final class SpoonUtil {
         }
 
         return result;
-    }
-
-    public static String truncatedSuggestion(CtElement ctElement) {
-        StringJoiner result = new StringJoiner(System.lineSeparator());
-
-        for (String line : ctElement.toString().split("\\r?\\n")) {
-            int newLineLength = 0;
-
-            // this ensures that the truncation is the same on linux and windows
-            if (!result.toString().contains("\r\n")) {
-                newLineLength += (int) result.toString().chars().filter(ch -> ch == '\n').count();
-            }
-
-            if (result.length() + newLineLength > 150) {
-                if (line.startsWith(" ")) {
-                    result.add("...".indent(line.length() - line.stripIndent().length()).stripTrailing());
-                } else {
-                    result.add("...");
-                }
-
-                if (result.toString().startsWith("{")) {
-                    result.add("}");
-                }
-
-                break;
-            }
-
-            result.add(line);
-        }
-
-        return result.toString();
     }
 
     public static Optional<Effect> tryMakeEffect(CtStatement ctStatement) {
@@ -1609,14 +1486,7 @@ public final class SpoonUtil {
      * @return a human-readable string representation of the source position
      */
     public static String formatSourcePosition(SourcePosition sourcePosition) {
-        return String.format("%s:L%d", getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
-    }
-
-    private static String getBaseName(String fileName) {
-        if (fileName == null) {
-            return null;
-        }
-        return FilenameUtils.removeExtension(new File(fileName).getName());
+        return String.format("%s:L%d", FileNameUtils.getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
     }
 
     public static SourcePosition getNamePosition(CtNamedElement ctNamedElement) {

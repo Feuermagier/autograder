@@ -78,7 +78,7 @@ public class CompareCharValue extends IntegratedCheck {
                     new LocalizedMessage(
                         "compare-char-value",
                         Map.of(
-                            "expression", charExpression,
+                            "expression", charExpression.prettyprint(),
                             "intValue", asciiValue,
                             "charValue", "" + (char) asciiValue
                         )

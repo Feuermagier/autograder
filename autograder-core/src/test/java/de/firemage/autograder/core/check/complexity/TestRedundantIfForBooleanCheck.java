@@ -267,10 +267,10 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "return a == 0 && a == 1 || a != 0");
-        assertEqualsRedundant(problems.next(), "return a == 2 || a == 3");
-        assertEqualsRedundant(problems.next(), "return a != 4 && a == 5");
-        assertEqualsRedundant(problems.next(), "return a == 6 && a == 7");
+        assertEqualsRedundant(problems.next(), "return ((a == 0) && (a == 1)) || (a != 0)");
+        assertEqualsRedundant(problems.next(), "return (a == 2) || (a == 3)");
+        assertEqualsRedundant(problems.next(), "return (a != 4) && (a == 5)");
+        assertEqualsRedundant(problems.next(), "return (a == 6) && (a == 7)");
 
         problems.assertExhausted();
     }
@@ -301,8 +301,8 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "return a == 0 && a == 1 || a == 2");
-        assertEqualsRedundant(problems.next(), "return a == 3 && a == 4 || a == 5");
+        assertEqualsRedundant(problems.next(), "return ((a == 0) && (a == 1)) || (a == 2)");
+        assertEqualsRedundant(problems.next(), "return ((a == 3) && (a == 4)) || (a == 5)");
 
         problems.assertExhausted();
     }

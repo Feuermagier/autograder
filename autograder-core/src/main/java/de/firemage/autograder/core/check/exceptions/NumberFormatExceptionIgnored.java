@@ -17,7 +17,6 @@ import spoon.reflect.visitor.filter.TypeFilter;
 
 @ExecutableCheck(reportedProblems = { ProblemType.NUMBER_FORMAT_EXCEPTION_IGNORED })
 public class NumberFormatExceptionIgnored extends IntegratedCheck {
-    @SuppressWarnings("unchecked")
     private static boolean isNFECaught(CtInvocation<?> ctInvocation) {
         return ctInvocation.getParent(new CompositeFilter<>(
             FilteringOperator.INTERSECTION,

@@ -59,9 +59,9 @@ public class CollectionsNCopies extends IntegratedCheck {
                     new LocalizedMessage(
                         "common-reimplementation",
                         Map.of("suggestion", "%s.addAll(Collections.nCopies(%s, %s))".formatted(
-                            ctVariableRead,
-                            forLoopRange.length(),
-                            rhs
+                            ctVariableRead.prettyprint(),
+                            forLoopRange.length().prettyprint(),
+                            rhs.prettyprint()
                         ))
                     ),
                     ProblemType.COLLECTIONS_N_COPIES

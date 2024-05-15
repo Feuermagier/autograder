@@ -69,7 +69,7 @@ public class RedundantVariable extends IntegratedCheck {
                     "redundant-variable",
                     Map.of(
                         "name", ctLocalVariable.getSimpleName(),
-                        "suggestion", ctStatement.toString().replace(ctLocalVariable.getSimpleName(), ctLocalVariable.getDefaultExpression().toString())
+                        "suggestion", ctStatement.prettyprint().replace(ctLocalVariable.getSimpleName(), ctLocalVariable.getDefaultExpression().prettyprint())
                     )
                 ),
                 ProblemType.REDUNDANT_VARIABLE

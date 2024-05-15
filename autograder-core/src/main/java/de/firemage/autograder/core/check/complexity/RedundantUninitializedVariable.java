@@ -29,7 +29,7 @@ public class RedundantUninitializedVariable extends IntegratedCheck {
 
         return "%s%s %s = %s".formatted(
             modifier,
-            ctLocalVariable.getType(),
+            ctLocalVariable.getType().prettyprint(),
             ctLocalVariable.getSimpleName(),
             ctValue
         );
@@ -66,7 +66,7 @@ public class RedundantUninitializedVariable extends IntegratedCheck {
                     ctLocalVariable,
                     new LocalizedMessage("redundant-uninitialized-variable", Map.of(
                         "variable", ctLocalVariable.getSimpleName(),
-                        "value", ctValue,
+                        "value", ctValue.prettyprint(),
                         "suggestion", makeSuggestion(ctLocalVariable, ctValue)
                     )),
                     ProblemType.REDUNDANT_UNINITIALIZED_VARIABLE

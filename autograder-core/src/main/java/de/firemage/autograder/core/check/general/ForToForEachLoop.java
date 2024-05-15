@@ -216,7 +216,7 @@ public class ForToForEachLoop extends IntegratedCheck {
                         "common-reimplementation",
                         Map.of(
                             "suggestion", "for (%s value : %s) { ... }".formatted(
-                                elementType,
+                                elementType.prettyprint(),
                                 iterableExpression
                             )
                         )

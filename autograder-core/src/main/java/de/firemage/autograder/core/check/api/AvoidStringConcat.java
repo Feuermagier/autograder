@@ -46,8 +46,8 @@ public class AvoidStringConcat extends IntegratedCheck {
                         "common-reimplementation",
                         Map.of(
                             "suggestion", "%s + %s".formatted(
-                                ctInvocation.getTarget(),
-                                ctInvocation.getArguments().get(0)
+                                ctInvocation.getTarget().prettyprint(),
+                                ctInvocation.getArguments().get(0).prettyprint()
                             )
                         )
                     ),

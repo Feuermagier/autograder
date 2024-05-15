@@ -69,7 +69,7 @@ public class UnusedImport extends IntegratedCheck {
             ctImport,
             new LocalizedMessage(
                 "unused-import",
-                Map.of("import", ctImport)
+                Map.of("import", ctImport.prettyprint())
             ),
             ProblemType.UNUSED_IMPORT
         );
