@@ -1,6 +1,6 @@
 oop.ShouldBeEnumAttribute
 Switch value should be enum attribute.
-Test.java:15-19
-Test.java:23-28
-Test.java:33-41
-Test.java:46-62
+Test.java:15
+Test.java:23
+Test.java:33
+Test.java:46
