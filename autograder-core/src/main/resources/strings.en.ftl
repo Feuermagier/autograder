@@ -226,6 +226,7 @@ variable-redundant-number-suffix = The identifier '{$name}' has a redundant numb
 concrete-collection = The type '{$type}' should be replaced by an interface like 'List' or 'Set'.
 
 leaked-collection-return = The method '{$method}' returns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be returned.
+leaked-collection-constructor = The constructor '{$signature}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 leaked-collection-assign = The method '{$method}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 
 method-abstract-exp = {$type}::{$method} should be abstract and not provide a default implementation
