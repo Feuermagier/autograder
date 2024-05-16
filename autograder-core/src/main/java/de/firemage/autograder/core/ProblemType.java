@@ -73,6 +73,10 @@ public enum ProblemType {
      */
     @HasFalsePositives
     DO_NOT_USE_SYSTEM_EXIT,
+    /**
+     * Checks if a `Scanner` is closed anywhere in the project or closed through a try-with.
+     */
+    @HasFalsePositives
     SCANNER_MUST_BE_CLOSED,
     EQUALS_HASHCODE_COMPARABLE_CONTRACT,
     UNCHECKED_TYPE_CAST,
