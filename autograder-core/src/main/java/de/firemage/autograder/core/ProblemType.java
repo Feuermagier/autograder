@@ -42,7 +42,9 @@ public enum ProblemType {
     OPTIONAL_ARGUMENT,
 
     /**
-     * Reports all uses of labels
+     * Reports all uses of labels.
+     * <br>
+     * For example `label: while (true) { ... }` 
      */
     AVOID_LABELS,
 
