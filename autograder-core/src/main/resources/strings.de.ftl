@@ -148,8 +148,6 @@ compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und
 
 variable-should-be = Die Variable '{$variable}' sollte '{$suggestion}' sein.
 
-constants-interfaces-exp = Interfaces sollten keine Attribute haben
-
 reassigned-parameter = Dem Parameter '{$name}' sollte kein neuer Wert zugewiesen werden.
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
@@ -239,8 +237,6 @@ utility-exp-constructor = Utility-Klassen müssen genau einen privaten und param
 static-field-should-be-instance = Das statische Attribut '{$name}' sollte ein Instanzattribut sein.
 
 constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
-
-interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 
