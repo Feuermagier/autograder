@@ -19,6 +19,9 @@ public enum ProblemType {
 
     /**
      * Checks for non-private inner types (static classes, interfaces, enums, local types)
+     * <br>
+     * This check ignores inner classes that are not static, because there are cases where
+     * that can be useful.
      */
     AVOID_INNER_CLASSES,
 
