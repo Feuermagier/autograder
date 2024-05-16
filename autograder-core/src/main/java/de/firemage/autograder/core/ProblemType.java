@@ -68,6 +68,10 @@ public enum ProblemType {
      */
     @HasFalsePositives
     COLLECTIONS_N_COPIES,
+    /**
+     * Reports all calls to `System.exit`
+     */
+    @HasFalsePositives
     DO_NOT_USE_SYSTEM_EXIT,
     SCANNER_MUST_BE_CLOSED,
     EQUALS_HASHCODE_COMPARABLE_CONTRACT,
