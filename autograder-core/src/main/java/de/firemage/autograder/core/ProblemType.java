@@ -63,6 +63,10 @@ public enum ProblemType {
      */
     AVOID_SHADOWING,
 
+    /**
+     * Suggests to use the `Collections.nCopies` method when applicable.
+     */
+    @HasFalsePositives
     COLLECTIONS_N_COPIES,
     DO_NOT_USE_SYSTEM_EXIT,
     SCANNER_MUST_BE_CLOSED,
