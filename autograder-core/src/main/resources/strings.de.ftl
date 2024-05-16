@@ -27,7 +27,6 @@ common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 use-string-formatted = '{$formatted}' ist schöner zu lesen.
 use-format-string = '{$formatted}' ist schöner zu lesen.
 
-optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
 
 equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.

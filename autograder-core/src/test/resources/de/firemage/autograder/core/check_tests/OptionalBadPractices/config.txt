@@ -1,6 +1,4 @@
 api.OptionalBadPractices
 Check for bad practices in Optional usage.
-Test.java:8
-Test.java:14
-Test.java:21
-Test.java:25
+Test.java:10
+Test.java:17
