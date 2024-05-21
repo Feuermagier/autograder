@@ -4,7 +4,6 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
-import de.firemage.autograder.core.integrated.ExceptionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -12,33 +11,50 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtThrow;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 
-import java.util.List;
-
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
-        return expression instanceof CtConstructorCall<?> ctorCall
-            && ExceptionUtil.isRuntimeException(ctorCall.getType())
-            && !hasMessage(ctorCall.getArguments());
-    }
-
-    private static boolean hasMessage(List<? extends CtExpression<?>> arguments) {
-        if (arguments.isEmpty()) {
+        if (!(expression instanceof CtConstructorCall<?> ctConstructorCall) ||
+            !(SpoonUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class))) {
             return false;
         }
 
-        CtExpression<?> ctExpression = arguments.get(0);
-        String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
-
-        if (literal != null) {
-            return !literal.isBlank();
+        // check if the invoked constructor passes a message to the exception
+        if (ctConstructorCall.getExecutable().getExecutableDeclaration() instanceof CtConstructor<?> ctConstructor
+            && ctConstructor.getBody().filterChildren(ctElement -> ctElement instanceof CtInvocation<?> ctInvocation
+                // we just check if there is any invocation with a message, because this is easier and might be enough
+                // for most cases.
+                //
+                // this way will not result in false positives, only in false negatives
+                && ctInvocation.getExecutable().isConstructor()
+                && hasMessage(ctInvocation.getArguments())
+            ).first() != null) {
+            return false;
         }
 
-        return true;
+        return !hasMessage(ctConstructorCall.getArguments());
+    }
+
+    private static boolean hasMessage(Iterable<? extends CtExpression<?>> arguments) {
+        for (CtExpression<?> ctExpression : arguments) {
+            // consider a passed throwable as having message
+            if (SpoonUtil.isSubtypeOf(ctExpression.getType(), java.lang.Throwable.class)) {
+                return true;
+            }
+
+            String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
+
+            if (literal != null) {
+                return !literal.isBlank();
+            }
+        }
+
+        return false;
     }
 
     private static boolean isInAllowedContext(CtElement ctElement) {
