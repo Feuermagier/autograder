@@ -2,6 +2,7 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
+import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtLoop;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
@@ -33,7 +34,7 @@ public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine
         // Instead of highlighting all lines of a class or method, only highlight the first line.
         //
         // Someone might explicitly specify a source position, in which case it will differ from the element's position.
-        if ((ctElement instanceof CtType<?> || ctElement instanceof CtMethod<?> || ctElement instanceof CtLoop) && ctElement.getPosition().equals(sourcePosition)) {
+        if ((ctElement instanceof CtType<?> || ctElement instanceof CtMethod<?> || ctElement instanceof CtLoop || ctElement instanceof CtAbstractSwitch<?>) && ctElement.getPosition().equals(sourcePosition)) {
             return new CodePosition(
                 sourceInfo,
                 relativePath,

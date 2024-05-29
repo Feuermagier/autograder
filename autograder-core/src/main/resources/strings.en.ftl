@@ -27,7 +27,6 @@ common-reimplementation = The code can be simplified to '{$suggestion}'.
 use-string-formatted = '{$formatted}' is easier to read.
 use-format-string = '{$formatted}' is easier to read.
 
-optional-argument = Optional should not be used as an argument, because it has 3 states: null, Optional.empty() and Optional.of(..). See https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Instead of an Optional boolean, one should use an enum.
 
 equals-hashcode-comparable-contract = Equals and hashCode must always be overridden together. Similarly for Comparable, both equals and hashCode must be overwritten.
@@ -151,8 +150,6 @@ compare-objects-exp = Implement an equals method for type {$type} and use it for
 
 variable-should-be = The variable '{$variable}' should be '{$suggestion}'.
 
-constants-interfaces-exp = Interfaces must not have fields
-
 reassigned-parameter = The parameter '{$name}' should not be assigned a new value.
 
 double-brace-init = Don't use the obscure 'double brace initialization' syntax
@@ -226,6 +223,7 @@ variable-redundant-number-suffix = The identifier '{$name}' has a redundant numb
 concrete-collection = The type '{$type}' should be replaced by an interface like 'List' or 'Set'.
 
 leaked-collection-return = The method '{$method}' returns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be returned.
+leaked-collection-constructor = The constructor '{$signature}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 leaked-collection-assign = The method '{$method}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 
 method-abstract-exp = {$type}::{$method} should be abstract and not provide a default implementation
@@ -238,8 +236,6 @@ utility-exp-constructor = Utility classes must have a single private no-arg cons
 static-field-should-be-instance = The static field '{$name}' must not be static.
 
 constants-class-exp = Constants should be saved in the class they are used in and not in a separate class. See https://stackoverflow.com/a/15056462/7766117
-
-interface-static-method-exp = Interfaces should not have static methods, because they can not be overwritten.
 
 empty-interface-exp = Interfaces should not be empty.
 
@@ -254,8 +250,8 @@ mutable-enum = Enums should be immutable. See https://stackoverflow.com/a/411997
 
 should-be-enum-attribute = The values of the switch should be associated attributes of the enum. Alternatively, one should use a Map.
 
-closed-set-of-values-switch = A switch has only finitely many cases. This is a closed set, which should be modeled as an enum.
-closed-set-of-values-list = A list of finitely many values should be modeled as an enum.
+closed-set-of-values-switch = The switch has only finitely many cases. This is a closed set, which should be modeled as an enum. The values are: '{$values}'.
+closed-set-of-values-list = The listing only has finitely many values and should therefore be modeled as an enum. The values are: '{$values}'.
 closed-set-of-values-method = The method only returns the constant values '{$values}'. There are only finitely many, which is why one should model it as an enum.
 
 do-not-use-instanceof = instanceof should not be used. See Ilias Wiki.

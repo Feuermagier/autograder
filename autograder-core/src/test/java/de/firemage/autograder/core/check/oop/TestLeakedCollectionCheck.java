@@ -7,6 +7,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;
@@ -42,6 +43,19 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
                 "leaked-collection-assign",
                 Map.of(
                     "method", method,
+                    "field", field
+                )
+            )),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
+
+    void assertEqualsLeakedConstructor(Problem problem, String signature, String field) {
+        assertEquals(
+            this.linter.translateMessage(new LocalizedMessage(
+                "leaked-collection-constructor",
+                Map.of(
+                    "signature", signature,
                     "field", field
                 )
             )),
@@ -352,6 +366,40 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
+
+    @Test
+    void testEnumMutableList() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "FieldKind",
+            """
+                import java.util.List;
+                import java.util.ArrayList;
+
+                enum Vegetable { CARROT, SALAD; }
+
+                public enum FieldKind {
+                    FIELD(new ArrayList<>(List.of(Vegetable.CARROT, Vegetable.SALAD)));
+
+                    private final List<Vegetable> possibleVegetables;
+
+                    FieldKind(List<Vegetable> possibleVegetables) {
+                        this.possibleVegetables = possibleVegetables;
+                    }
+
+                    public List<Vegetable> getPossibleVegetables() {
+                        return this.possibleVegetables;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedReturn(problems.next(), "getPossibleVegetables", "possibleVegetables");
+
+        problems.assertExhausted();
+    }
+
+
     @Test
     void testAssignPublicConstructor() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
@@ -371,7 +419,7 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsLeakedAssign(problems.next(), "Test", "list");
+        assertEqualsLeakedConstructor(problems.next(), "Test(List<String>)", "list");
 
         problems.assertExhausted();
     }
@@ -397,8 +445,8 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsLeakedAssign(problems.next(), "Test", "listA");
-        assertEqualsLeakedAssign(problems.next(), "Test", "listB");
+        assertEqualsLeakedConstructor(problems.next(), "Test(List<String>, List<String>)", "listA");
+        assertEqualsLeakedConstructor(problems.next(), "Test(List<String>, List<String>)", "listB");
 
         problems.assertExhausted();
     }
@@ -579,11 +627,11 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
+        assertEqualsLeakedConstructor(problems.next(), "Forest(List<String>, List<String>)", "trees");
+        assertEqualsLeakedConstructor(problems.next(), "Forest(List<String>, List<String>)", "animals");
+
         assertEqualsLeakedReturn(problems.next(), "animals", "animals");
         assertEqualsLeakedReturn(problems.next(), "trees", "trees");
-
-        assertEqualsLeakedAssign(problems.next(), "Forest", "trees");
-        assertEqualsLeakedAssign(problems.next(), "Forest", "animals");
 
         problems.assertExhausted();
     }
@@ -694,8 +742,8 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
 
         assertEqualsLeakedReturn(problems.next(), "animals", "animals");
         assertEqualsLeakedReturn(problems.next(), "trees", "trees");
+        assertEqualsLeakedConstructor(problems.next(), "Forest(List<String>, List<String>)", "animals");
 
-        assertEqualsLeakedAssign(problems.next(), "Forest", "animals");
 
         problems.assertExhausted();
     }
@@ -773,8 +821,8 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
+        assertEqualsLeakedConstructor(problems.next(), "Zoo(String, Collection<String>)", "animals");
         assertEqualsLeakedReturn(problems.next(), "animals", "animals");
-        assertEqualsLeakedAssign(problems.next(), "Zoo", "animals");
 
         problems.assertExhausted();
     }
@@ -833,6 +881,107 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         ), PROBLEM_TYPES);
 
         assertEqualsLeakedReturn(problems.next(), "get", "list");
+
+        problems.assertExhausted();
+    }
+
+
+    @Test
+    @Disabled("Not implemented")
+    void testUnusedDefaultValue() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+                import java.util.ArrayList;
+                
+                class Test {
+                    private List<String> list = new ArrayList<>(); // mutable, but always overwritten
+                    
+                    public Test() {
+                        this.list = List.of();
+                    }
+                    
+                    public List<String> get() {
+                        return list;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+
+    @Test
+    void testCompactConstructorImmutable() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.List;
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public record Zoo(String name, Collection<String> animals) {
+                    public Zoo {
+                        animals = List.copyOf(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCompactConstructorLeakedAssign() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.List;
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public record Zoo(String name, Collection<String> animals) {
+                    public Zoo {
+                        animals = animals;
+                    }
+
+                    public Collection<String> animals() {
+                        return new ArrayList<>(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedConstructor(problems.next(), "Zoo(String, Collection<String>)", "animals");
+
+        problems.assertExhausted();
+    }
+
+
+    @Test
+    void testCompactConstructorCopied() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.List;
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public record Zoo(String name, Collection<String> animals) {
+                    public Zoo {
+                        animals = new ArrayList<>(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedReturn(problems.next(), "animals", "animals");
 
         problems.assertExhausted();
     }

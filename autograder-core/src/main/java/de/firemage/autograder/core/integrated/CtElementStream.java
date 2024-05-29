@@ -164,6 +164,10 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
         return baseStream.findAny().isPresent();
     }
 
+    public boolean hasAnyMatch(Predicate<? super T> predicate) {
+        return new CtElementStream<>(baseStream.filter(predicate)).hasAny();
+    }
+
     /**
      * Checks whether the stream contains no elements.
      * @return
