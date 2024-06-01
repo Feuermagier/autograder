@@ -7,12 +7,11 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtTypeReference;
 
-@ExecutableCheck(reportedProblems = { ProblemType.OPTIONAL_TRI_STATE, ProblemType.OPTIONAL_ARGUMENT })
+@ExecutableCheck(reportedProblems = { ProblemType.OPTIONAL_TRI_STATE })
 public class OptionalBadPractices extends IntegratedCheck {
     private void checkCtVariable(CtTypedElement<?> ctTypedElement) {
         CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
@@ -22,15 +21,6 @@ public class OptionalBadPractices extends IntegratedCheck {
 
         if (!ctTypeReference.getQualifiedName().equals("java.util.Optional")) {
             return;
-        }
-
-        // Check if the variable is a function parameter:
-        if (ctTypedElement instanceof CtParameter<?>) {
-            this.addLocalProblem(
-                ctTypeReference,
-                new LocalizedMessage("optional-argument"),
-                ProblemType.OPTIONAL_ARGUMENT
-            );
         }
 
         // Check if the Optional is used as a tri-state:

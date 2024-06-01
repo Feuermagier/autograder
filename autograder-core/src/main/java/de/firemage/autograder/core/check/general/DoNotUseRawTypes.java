@@ -10,6 +10,8 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.path.CtRole;
 import spoon.reflect.reference.CtTypeReference;
 
+import java.util.Optional;
+
 @ExecutableCheck(reportedProblems = { ProblemType.DO_NOT_USE_RAW_TYPES })
 public class DoNotUseRawTypes extends IntegratedCheck {
     private boolean isRawType(CtTypeReference<?> ctTypeReference) {
@@ -47,5 +49,10 @@ public class DoNotUseRawTypes extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(4);
     }
 }

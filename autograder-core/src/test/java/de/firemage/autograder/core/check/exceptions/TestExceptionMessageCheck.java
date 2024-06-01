@@ -11,6 +11,7 @@ import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
@@ -160,6 +161,134 @@ class TestExceptionMessageCheck extends AbstractCheckTest {
                     }
                 }
             """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testExceptionFactoryMethod() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "MyException",
+                    """
+                        public class MyException extends Exception {
+                            public static Exception create() {
+                                return new MyException();
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) throws Exception {
+                                throw MyException.create(); /*# ok #*/
+                            }
+                        }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCustomExceptionNoMessage() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "MyException",
+                    """
+                        public class MyException extends Exception {
+                            public MyException() {
+                                super();
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) throws Exception {
+                                throw new MyException(); /*# not ok #*/
+                            }
+                        }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertMissingMessage(problems.next());
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCustomExceptionInvalidMessage() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "MyException",
+                    """
+                        public class MyException extends Exception {
+                            public MyException() {
+                                super(" ");
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) throws Exception {
+                                throw new MyException(); /*# not ok #*/
+                            }
+                        }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertMissingMessage(problems.next());
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCustomExceptionValidMessage() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "MyException",
+                    """
+                        public class MyException extends Exception {
+                            public MyException() {
+                                super("failed to start the application");
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) throws Exception {
+                                throw new MyException(); /*# ok #*/
+                            }
+                        }
+                    """
+                )
+            )
         ), PROBLEM_TYPES);
 
         problems.assertExhausted();

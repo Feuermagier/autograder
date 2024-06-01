@@ -37,11 +37,6 @@ public enum ProblemType {
     OPTIONAL_TRI_STATE,
 
     /**
-     * Reports all java.util.Optional types that are used as function parameters
-     */
-    OPTIONAL_ARGUMENT,
-
-    /**
      * Reports all uses of labels.
      * <br>
      * For example `label: while (true) { ... }`
@@ -431,12 +426,6 @@ public enum ProblemType {
     FIELD_SHOULD_BE_CONSTANT,
 
     /**
-     * This one will be removed by my PR.
-     */
-    @HasFalsePositives
-    CONSTANT_IN_INTERFACE,
-
-    /**
      * Tries to find classes that are exclusively used for constants.
      * <br>
      * Difficult to detect reliably and everyone has a different opinion on what a constant class is.
@@ -444,12 +433,6 @@ public enum ProblemType {
      */
     @HasFalsePositives
     DO_NOT_HAVE_CONSTANTS_CLASS,
-
-    /**
-     * This one will be removed by my PR.
-     */
-    @HasFalsePositives
-    STATIC_METHOD_IN_INTERFACE,
 
     /**
      * Reports code where the type parameter of a generic class are omitted. For example new ArrayList() instead of new ArrayList<String>().

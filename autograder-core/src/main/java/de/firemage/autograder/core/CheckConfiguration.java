@@ -18,6 +18,9 @@ public record CheckConfiguration(List<ProblemType> problemsToReport, List<String
     }
 
     public static CheckConfiguration fromConfigString(String configString) throws IOException, LinterConfigurationException {
+        if (!configString.contains("problemsToReport") && configString.startsWith("[")) {
+            configString = "problemsToReport: " + configString;
+        }
         var config =  new ObjectMapper(new YAMLFactory()).readValue(configString, CheckConfiguration.class);
         config.validate();
         return config;

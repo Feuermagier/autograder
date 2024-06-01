@@ -14,6 +14,7 @@ import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtBlock;
+import spoon.reflect.code.CtBodyHolder;
 import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
@@ -55,6 +56,8 @@ import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.reference.CtVariableReference;
+import spoon.reflect.visitor.Filter;
 import spoon.reflect.visitor.filter.CompositeFilter;
 import spoon.reflect.visitor.filter.FilteringOperator;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -620,6 +623,19 @@ public final class SpoonUtil {
         return getEffectiveStatements(List.of(ctStatement));
     }
 
+    public static List<CtStatement> getEffectiveStatementsOf(CtBodyHolder ctBodyHolder) {
+        if (ctBodyHolder == null) {
+            return List.of();
+        }
+
+        CtStatement body = ctBodyHolder.getBody();
+        if (body == null) {
+            return List.of();
+        }
+
+        return getEffectiveStatements(body);
+    }
+
     public static <T> CtExpression<T> resolveCtExpression(CtExpression<T> ctExpression) {
         if (ctExpression == null) return null;
 
@@ -720,6 +736,17 @@ public final class SpoonUtil {
         }
 
         return true;
+    }
+
+    private record SubtypeFilter(CtTypeReference<?> ctTypeReference) implements Filter<CtType<?>> {
+        @Override
+        public boolean matches(CtType<?> element) {
+            return element != this.ctTypeReference.getTypeDeclaration() && element.isSubtypeOf(this.ctTypeReference);
+        }
+    }
+
+    public static boolean hasSubtype(CtType<?> ctType) {
+        return ctType.getFactory().getModel().filterChildren(new SubtypeFilter(ctType.getReference())).first() != null;
     }
 
     /**
@@ -852,6 +879,7 @@ public final class SpoonUtil {
         if (ctVariable.getModifiers().contains(ModifierKind.FINAL)) {
             return true;
         }
+
         return UsesFinder.variableUses(ctVariable).ofType(CtVariableWrite.class).hasNone();
     }
 
@@ -1087,7 +1115,7 @@ public final class SpoonUtil {
      */
     public static boolean isInvocation(CtStatement statement) {
         return statement instanceof CtInvocation<?> || statement instanceof CtConstructorCall<?> ||
-                statement instanceof CtLambda<?>;
+            statement instanceof CtLambda<?>;
     }
 
     public static boolean isInMainMethod(CtElement ctElement) {
@@ -1112,11 +1140,23 @@ public final class SpoonUtil {
             target = ctExecutableReference.getExecutableDeclaration();
         }
 
-        if (target == null && ctReference instanceof CtFieldReference<?> ctFieldReference) {
+        if (target == null && ctReference instanceof CtVariableReference<?> ctVariableReference) {
+            target = getVariableDeclaration(ctVariableReference);
+        }
+
+        return target;
+    }
+
+    public static CtVariable<?> getVariableDeclaration(CtVariableReference<?> ctVariableReference) {
+        // this might be null if the reference is not in the source path
+        // for example, when the reference points to a java.lang type
+        CtVariable<?> target = ctVariableReference.getDeclaration();
+
+        if (target == null && ctVariableReference instanceof CtFieldReference<?> ctFieldReference) {
             target = ctFieldReference.getFieldDeclaration();
         }
 
-        if (target == null && ctReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
+        if (target == null && ctVariableReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
             target = getLocalVariableDeclaration(ctLocalVariableReference);
         }
 

@@ -11,6 +11,7 @@ import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.Map;
+import java.util.Optional;
 
 @ExecutableCheck(reportedProblems = { ProblemType.OBJECT_DATATYPE })
 public class ObjectDatatype extends IntegratedCheck {
@@ -44,5 +45,10 @@ public class ObjectDatatype extends IntegratedCheck {
                 }
             }
         });
+    }
+
+    @Override
+    public Optional<Integer> maximumProblems() {
+        return Optional.of(4);
     }
 }

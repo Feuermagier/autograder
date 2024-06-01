@@ -27,7 +27,6 @@ common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 use-string-formatted = '{$formatted}' ist schöner zu lesen.
 use-format-string = '{$formatted}' ist schöner zu lesen.
 
-optional-argument = Optional sollte nicht als Argument verwendet werden, da man dann 3 Zustände hat: null, Optional.empty() und Optional.of(..). Siehe https://stackoverflow.com/a/31924845/7766117
 optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
 
 equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.
@@ -149,8 +148,6 @@ compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und
 
 variable-should-be = Die Variable '{$variable}' sollte '{$suggestion}' sein.
 
-constants-interfaces-exp = Interfaces sollten keine Attribute haben
-
 reassigned-parameter = Dem Parameter '{$name}' sollte kein neuer Wert zugewiesen werden.
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
@@ -227,7 +224,8 @@ variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redund
 concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
 
 leaked-collection-return = Die Methode '{$method}' gibt eine Referenz zu dem Feld '{$field}' zurück. Dadurch ist es möglich das Feld von außerhalb zu verändern. Gebe stattdessen eine Kopie zurück.
-leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu. Dadurch ist es möglich das Feld von außerhalb zu verändern. Weiße stattdessen eine Kopie dem Feld zu.
+leaked-collection-constructor = Der Konstruktor '{$signature}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
+leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
 
 method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
 
@@ -239,8 +237,6 @@ utility-exp-constructor = Utility-Klassen müssen genau einen privaten und param
 static-field-should-be-instance = Das statische Attribut '{$name}' sollte ein Instanzattribut sein.
 
 constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
-
-interface-static-method-exp = Interfaces sollte keine statischen Methoden haben, da sie nicht überschrieben werden können.
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 
@@ -255,8 +251,8 @@ mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflo
 
 should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein. Alternativ sollte man eine Map verwenden.
 
-closed-set-of-values-switch = Ein switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte.
-closed-set-of-values-list = Eine Auflistung von endlich vielen Werten sollte als enum modelliert werden.
+closed-set-of-values-switch = Der Switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte. Die Werte sind: '{$values}'.
+closed-set-of-values-list = Die Auflistung hat nur endlich viele Werte und sollte deswegen als enum modelliert werden. Die Werte sind: '{$values}'.
 closed-set-of-values-method = Die Methode gibt nur die Konstanten Werte '{$values}' zurück. Dabei handelt es sich um endlich viele, weswegen man das als enum modellieren sollte.
 
 do-not-use-instanceof = instanceof sollte nicht verwendet werden. Siehe Ilias Wiki.

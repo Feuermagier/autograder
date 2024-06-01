@@ -77,6 +77,11 @@ public class Application implements Callable<Integer> {
             "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
     private boolean outputJson;
 
+    // TODO: remove this
+    @Option(names = {
+        "--static-only"}, description = "Only kept here so the grading tool keeps working, does nothing.")
+    private boolean staticOnly;
+
     @Option(names = {
             "--pass-config"}, description = "Interpret the first parameter not as the path to a config file, but as the contents of the config file")
     private boolean passConfig;

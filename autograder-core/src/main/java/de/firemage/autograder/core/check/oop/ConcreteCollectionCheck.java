@@ -44,14 +44,15 @@ import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = { ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE })
 public class ConcreteCollectionCheck extends IntegratedCheck {
-    private static final List<Class<?>> ALLOWED_TYPES = List.of(java.util.Properties.class);
+    private static final List<Class<?>> ALLOWED_TYPES = List.of(
+        java.util.Properties.class,
+        java.util.LinkedHashSet.class,
+        java.util.LinkedHashMap.class,
+        java.util.EnumMap.class,
+        java.util.EnumSet.class
+    );
 
     private <T extends CtTypeInformation & FactoryAccessor> boolean isConcreteCollectionType(T ctType) {
-        // NOTE: workaround for https://github.com/INRIA/spoon/issues/5462
-        if (ctType instanceof CtArrayTypeReference<?>) {
-            return false;
-        }
-
         return Stream.of(java.util.Collection.class, java.util.Map.class)
                      .map(ty -> ctType.getFactory().Type().createReference(ty, false))
                      .anyMatch(ctType::isSubtypeOf) && !ctType.isInterface();

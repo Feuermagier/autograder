@@ -13,8 +13,8 @@ import spoon.reflect.declaration.CtMethod;
 import java.util.List;
 import java.util.Set;
 
-@ExecutableCheck(reportedProblems = { ProblemType.CONSTANT_IN_INTERFACE, ProblemType.DO_NOT_HAVE_CONSTANTS_CLASS,
-                                      ProblemType.STATIC_METHOD_IN_INTERFACE, ProblemType.EMPTY_INTERFACE })
+@ExecutableCheck(reportedProblems = { ProblemType.DO_NOT_HAVE_CONSTANTS_CLASS,
+                                      ProblemType.EMPTY_INTERFACE })
 public class InterfaceBadPractices extends IntegratedCheck {
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
@@ -43,26 +43,6 @@ public class InterfaceBadPractices extends IntegratedCheck {
                         new LocalizedMessage("constants-class-exp"),
                         ProblemType.DO_NOT_HAVE_CONSTANTS_CLASS
                     );
-                } else if (!fields.isEmpty()) {
-                    // interfaces should not have fields:
-                    for (CtField<?> field : fields) {
-                        addLocalProblem(
-                            field,
-                            new LocalizedMessage("constants-interfaces-exp"),
-                            ProblemType.CONSTANT_IN_INTERFACE
-                        );
-                    }
-                }
-
-                for (CtMethod<?> method : methods) {
-                    // static methods in interfaces should be avoided
-                    if (method.isStatic()) {
-                        addLocalProblem(
-                            method,
-                            new LocalizedMessage("interface-static-method-exp"),
-                            ProblemType.STATIC_METHOD_IN_INTERFACE
-                        );
-                    }
                 }
             }
         });

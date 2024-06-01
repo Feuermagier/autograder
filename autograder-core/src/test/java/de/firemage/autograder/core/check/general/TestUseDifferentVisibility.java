@@ -658,4 +658,45 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
-}
+
+    @Test
+    void testPublicConstructorAbstractClass() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) {
+                                Parent parent = new Child();
+                                System.out.println(parent);
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Parent",
+                    """
+                    public abstract class Parent {
+                        public Parent() {
+                        }
+                    }
+                    """
+                ),
+                Map.entry(
+                    "Child",
+                    """
+                    public class Child extends Parent {
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        Problem problem = problems.next();
+        assertDifferentVisibility(problem, "Parent", "protected");
+        assertEquals(ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC, problem.getProblemType());
+
+        problems.assertExhausted();
+    }}

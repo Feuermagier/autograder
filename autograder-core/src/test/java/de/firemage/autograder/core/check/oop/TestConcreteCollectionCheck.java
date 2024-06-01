@@ -8,6 +8,8 @@ import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.util.List;
@@ -353,6 +355,34 @@ class TestConcreteCollectionCheck extends AbstractCheckTest {
         assertEqualsConcrete(problems.next(), "HashSet");
         assertEqualsConcrete(problems.next(), "HashSet");
         assertEqualsConcrete(problems.next(), "HashSet");
+
+        problems.assertExhausted();
+    }
+
+    @ParameterizedTest
+    @CsvSource(
+        delimiter = '|',
+        useHeadersInDisplayName = true,
+        value = {
+            " Type              ",
+            " LinkedHashSet     ",
+            " LinkedHashMap     ",
+            " EnumMap           ",
+            " EnumSet           ",
+        }
+    )
+    void testSequencedCollection(String type) throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.*;
+
+                public class Test {
+                    private %s collection;
+                }
+                """.formatted(type)
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }
