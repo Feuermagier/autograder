@@ -15,7 +15,6 @@ import spoon.reflect.declaration.CtModifiable;
 @ExecutableCheck(reportedProblems = {
     ProblemType.UTILITY_CLASS_NOT_FINAL,
     ProblemType.UTILITY_CLASS_INVALID_CONSTRUCTOR,
-    ProblemType.UTILITY_CLASS_ABSTRACT
 })
 public class UtilityClassCheck extends IntegratedCheck {
     public static boolean isUtilityClass(CtClass<?> ctClass) {
