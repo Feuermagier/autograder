@@ -169,6 +169,20 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
     }
 
     /**
+     * Checks whether all elements in the stream match the given predicate AND the stream is not empty.
+     *
+     * @param predicate the predicate to test the elements against
+     * @return true if all elements match the predicate and the stream is not empty
+     */
+    public boolean hasAnyAndAllMatch(Predicate<? super T> predicate) {
+        boolean[] isEmpty = { true };
+        return this.allMatch(element -> {
+            isEmpty[0] = false;
+            return predicate.test(element);
+        }) && !isEmpty[0];
+    }
+
+    /**
      * Checks whether the stream contains no elements.
      * @return
      */

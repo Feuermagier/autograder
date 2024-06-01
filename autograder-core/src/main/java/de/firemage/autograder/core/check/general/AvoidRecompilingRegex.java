@@ -6,14 +6,13 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtField;
-import spoon.reflect.reference.CtReference;
-import spoon.reflect.visitor.filter.DirectReferenceFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -45,19 +44,9 @@ public class AvoidRecompilingRegex extends IntegratedCheck {
                     return;
                 }
 
-                List<CtReference> references = staticAnalysis.getModel()
-                    .getElements(new DirectReferenceFilter<>(ctField.getReference()));
-
-                boolean isPattern = false;
-
-                for (CtReference ctReference : references) {
-                    CtInvocation<?> ctInvocation = ctReference.getParent(CtInvocation.class);
-                    if (ctInvocation == null || !isPatternInvocation(ctInvocation)) {
-                        return;
-                    }
-
-                    isPattern = true;
-                }
+                boolean isPattern = UsesFinder.variableUses(ctField)
+                    .hasAnyAndAllMatch(ctVariableAccess -> ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
+                        && isPatternInvocation(ctInvocation));
 
                 if (isPattern) {
                     addLocalProblem(

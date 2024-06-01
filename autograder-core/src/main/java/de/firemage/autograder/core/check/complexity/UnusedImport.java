@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check.complexity;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -126,7 +125,7 @@ public class UnusedImport extends IntegratedCheck {
         return Objects.equals(declaredPackage, ctCompilationUnit.getDeclaredPackage());
     }
 
-    private void checkImport(CtImport ctImport, CtCompilationUnit ctCompilationUnit, Collection<? super CtElement> importedElements, CodeModel model) {
+    private void checkImport(CtImport ctImport, CtCompilationUnit ctCompilationUnit, Collection<? super CtElement> importedElements) {
         // check if the import is from the java.lang package, which is redundant
 
         // inner class imports might not be redundant, therefore, they are skipped here
@@ -220,7 +219,7 @@ public class UnusedImport extends IntegratedCheck {
                     continue;
                 }
 
-                this.checkImport(ctImport, ctCompilationUnit, importedElements, staticAnalysis.getCodeModel());
+                this.checkImport(ctImport, ctCompilationUnit, importedElements);
             }
         });
     }
