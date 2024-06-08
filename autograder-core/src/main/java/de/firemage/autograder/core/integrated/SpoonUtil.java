@@ -1202,16 +1202,22 @@ public final class SpoonUtil {
      * @return the previous statement or an empty optional if there is no previous statement
      */
     public static Optional<CtStatement> getPreviousStatement(CtStatement ctStatement) {
+        List<CtStatement> previousStatements = getPreviousStatements(ctStatement);
+        return previousStatements.isEmpty() ? Optional.empty() : Optional.of(previousStatements.getLast());
+    }
+
+    public static List<CtStatement> getPreviousStatements(CtStatement ctStatement) {
+        List<CtStatement> result = new ArrayList<>();
         if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
             List<CtStatement> statements = ctStatementList.getStatements();
             int index = referenceIndexOf(statements, ctStatement);
 
-            if (index > 0) {
-                return Optional.of(statements.get(index - 1));
+            if (index >= 0) {
+                result.addAll(statements.subList(0, index));
             }
         }
 
-        return Optional.empty();
+        return result;
     }
 
     public static List<CtStatement> getNextStatements(CtStatement ctStatement) {
@@ -1220,7 +1226,7 @@ public final class SpoonUtil {
             List<CtStatement> statements = ctStatementList.getStatements();
             int index = referenceIndexOf(statements, ctStatement);
 
-            if (index > 0) {
+            if (index >= 0) {
                 result.addAll(statements.subList(index + 1, statements.size()));
             }
         }
@@ -1329,7 +1335,7 @@ public final class SpoonUtil {
         return String.format("%s:L%d", getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
     }
 
-    private static String getBaseName(String fileName) {
+    public static String getBaseName(String fileName) {
         if (fileName == null) {
             return null;
         }

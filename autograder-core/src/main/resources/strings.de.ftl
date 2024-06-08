@@ -17,7 +17,7 @@ linter-error-prone = error-prone
 merged-problems = {$message} Weitere Probleme in {$locations}.
 
 # CPD
-duplicate-code = Duplizierter Code ({$lines}): {$first-path}:{$first-start}-{$first-end} und {$second-path}:{$second-start}-{$second-end}
+duplicate-code = Duplizierter Code: {$left} und {$right}.
 
 # API
 
