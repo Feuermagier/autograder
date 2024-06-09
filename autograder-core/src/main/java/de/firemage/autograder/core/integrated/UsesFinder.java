@@ -12,8 +12,10 @@ import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeParameter;
@@ -27,10 +29,18 @@ import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
+import java.util.SequencedSet;
 import java.util.Stack;
+import java.util.stream.Stream;
 
 /**
  * Provides usage-relationships between code elements in the code model.
@@ -108,6 +118,14 @@ public class UsesFinder {
         return CtElementStream.of(UsesFinder.getFor(type).scanner.typeUses.getOrDefault(type, List.of())).assumeElementType();
     }
 
+    public static CtElementStream<CtType<?>> subtypesOf(CtType<?> type, boolean includeSelf) {
+        Stream<CtType<?>> selfStream = includeSelf ? Stream.of(type) : Stream.empty();
+        return CtElementStream.concat(
+            selfStream,
+            CtElementStream.of(UsesFinder.getFor(type).scanner.subtypes.getOrDefault(type, new LinkedHashSet<>())).assumeElementType()
+        );
+    }
+
     /**
      * The scanner searches for uses of supported code elements in a single pass over the entire model.
      * Since inserting into the hash map requires (amortized) constant time, usage search runs in O(n) time.
@@ -120,6 +138,7 @@ public class UsesFinder {
         public final IdentityHashMap<CtTypeParameter, List<CtTypeParameterReference>> typeParameterUses = new IdentityHashMap<>();
         public final IdentityHashMap<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
         public final IdentityHashMap<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
+        public final Map<CtType, SequencedSet<CtType>> subtypes = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block
@@ -197,6 +216,28 @@ public class UsesFinder {
             this.instanceofPatternVariables.pop();
         }
 
+        @Override
+        public <T> void visitCtClass(CtClass<T> ctClass) {
+            // CtType:
+            // - CtClass
+            // - CtEnum
+            // - CtInterface
+            // - CtRecord
+            // - CtTypeParameter
+            //
+            // CtClass:
+            // - CtEnum
+            // - CtRecord
+            this.recordCtType(ctClass);
+            super.visitCtClass(ctClass);
+        }
+
+        @Override
+        public <T> void visitCtInterface(CtInterface<T> ctInterface) {
+            this.recordCtType(ctInterface);
+            super.visitCtInterface(ctInterface);
+        }
+
         private void recordVariableAccess(CtVariableAccess<?> variableAccess) {
             var variable = variableAccess.getVariable().getDeclaration();
 
@@ -247,6 +288,30 @@ public class UsesFinder {
             if (type != null) {
                 var uses = this.typeUses.computeIfAbsent(type, k -> new ArrayList<>());
                 uses.add(reference);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private void recordCtType(CtType<?> ctType) {
+            CtTypeReference<?> superType = ctType.getSuperclass();
+            while (superType != null && superType.getTypeDeclaration() != null) {
+                this.subtypes.computeIfAbsent(superType.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
+                superType = superType.getSuperclass();
+            }
+
+            Collection<CtTypeReference> visited = new HashSet<>();
+            Deque<CtTypeReference> superInterfaces = new LinkedList<>(ctType.getSuperInterfaces());
+            while (!superInterfaces.isEmpty()) {
+                CtTypeReference superInterface = superInterfaces.poll();
+                // skip already visited interfaces
+                if (!visited.add(superInterface)) {
+                    continue;
+                }
+
+                if (superInterface.getTypeDeclaration() != null) {
+                    this.subtypes.computeIfAbsent(superInterface.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
+                }
+                superInterfaces.addAll(superInterface.getSuperInterfaces());
             }
         }
     }

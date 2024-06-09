@@ -38,7 +38,19 @@ public class Evaluator extends CtScanner implements PartialEvaluator {
         // the clone detaches the element from the model
         //
         // any modifications must not affect the model
-        CtElement result = ctElement.clone();
+        return this.evaluateUnsafe((R) ctElement.clone());
+    }
+
+    /**
+     * Works like {@link #evaluate(CtElement)} but does not clone the input element.
+     *
+     * @param ctElement the element to evaluate
+     * @return the evaluated element
+     * @param <R> the type of the element
+     */
+    @SuppressWarnings("unchecked")
+    public <R extends CtElement> R evaluateUnsafe(R ctElement) {
+        CtElement result = ctElement;
         this.root = result;
 
         result.accept(this);

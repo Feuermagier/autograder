@@ -116,11 +116,11 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
 
 
         CtBinaryOperator<?> result = SpoonUtil.normalizeBy(
-            (left, right) -> isLiteral.test(left) && !isLiteral.test(right),
+            (left, right) -> isLiteral.test(SpoonUtil.resolveConstant(left)) && !isLiteral.test(SpoonUtil.resolveConstant(right)),
             ctBinaryOperator
         );
 
-        if (!(result.getRightHandOperand() instanceof CtLiteral<?> ctLiteral) || !(ctLiteral.getValue() instanceof Number number)) {
+        if (!(result.getRightHandOperand() instanceof CtLiteral<?> ctLiteral) || !(ctLiteral.getValue() instanceof Number number) || SpoonUtil.isNullLiteral(ctLiteral)) {
             return;
         }
 
@@ -154,8 +154,14 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
 
     private void checkEqualsCall(CtExpression<?> target, CtInvocation<?> ctInvocation, ProblemType problemType) {
         CtExpression<?> argument = ctInvocation.getArguments().get(0);
+
+        if (SpoonUtil.isNullLiteral(argument)) {
+            return;
+        }
+
         if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(argument), "")) {
             this.reportProblem(ctInvocation, ctInvocation.toString(), buildIsEmptySuggestion(target).toString(), problemType);
+            return;
         }
 
         // detect "".equals(s)
