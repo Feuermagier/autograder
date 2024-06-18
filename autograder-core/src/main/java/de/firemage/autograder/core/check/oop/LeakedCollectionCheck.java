@@ -294,7 +294,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             CtField<?> field = ctFieldRead.getVariable().getFieldDeclaration();
 
             // if the field is not private, it can be mutated anyway.
-            if (!field.isPrivate()) {
+            if (field == null || !field.isPrivate()) {
                 continue;
             }
 
