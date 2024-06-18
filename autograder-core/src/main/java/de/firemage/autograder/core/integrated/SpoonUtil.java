@@ -9,6 +9,7 @@ import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
 import org.apache.commons.io.FilenameUtils;
+import spoon.processing.FactoryAccessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -53,6 +54,7 @@ import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
+import spoon.support.reflect.declaration.CtElementImpl;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -62,6 +64,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -1329,11 +1332,32 @@ public final class SpoonUtil {
         throw new IllegalArgumentException("Parameter not found in executable");
     }
 
-    public static CtPackage getRootPackage(CtElement element) {
+    public static CtPackage getRootPackage(FactoryAccessor element) {
         return element.getFactory().getModel().getRootPackage();
     }
 
+
+    public static boolean isAnyNestedOrSame(CtElement ctElement, Set<? extends CtElement> potentialParents) {
+        // CtElement::hasParent will recursively call itself until it reaches the root
+        // => inefficient and might cause a stack overflow
+
+        if (potentialParents.contains(ctElement)) {
+            return true;
+        }
+
+        for (CtElement parent : parents(ctElement)) {
+            if (potentialParents.contains(parent)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static boolean isNestedOrSame(CtElement element, CtElement parent) {
-        return element == parent || element.hasParent(parent);
+        Set<CtElement> set = Collections.newSetFromMap(new IdentityHashMap<>());
+        set.add(parent);
+
+        return element == parent || SpoonUtil.isAnyNestedOrSame(element, set);
     }
 }

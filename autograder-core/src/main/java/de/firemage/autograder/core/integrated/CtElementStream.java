@@ -2,10 +2,15 @@ package de.firemage.autograder.core.integrated;
 
 import spoon.reflect.declaration.CtElement;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Comparator;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Optional;
+import java.util.Set;
 import java.util.Spliterator;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -69,6 +74,10 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
     /////////////////////////////////////////////////////////////////////////////
     ////////////////////////////// New Methods //////////////////////////////////
     /////////////////////////////////////////////////////////////////////////////
+
+    public Stream<T> toStream() {
+        return this;
+    }
 
     /**
      * Like Stream::map, but returns a CtElementStream instead of a Stream.
@@ -136,6 +145,21 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      */
     public CtElementStream<T> nestedIn(CtElement parent) {
         return this.filter(e -> SpoonUtil.isNestedOrSame(e, parent));
+    }
+
+    public CtElementStream<T> nestedInAny(CtElement... parents) {
+        return this.nestedInAny(Arrays.asList(parents));
+    }
+
+    public CtElementStream<T> nestedInAny(Collection<? extends CtElement> parents) {
+        if (parents.isEmpty()) {
+            return CtElementStream.empty();
+        }
+
+        Set<CtElement> potentialParents = Collections.newSetFromMap(new IdentityHashMap<>());
+        potentialParents.addAll(parents);
+
+        return this.filter(e -> SpoonUtil.isAnyNestedOrSame(e, potentialParents));
     }
 
     /**

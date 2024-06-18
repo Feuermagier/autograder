@@ -6,24 +6,38 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.integrated.structure.StructuralElement;
 import de.firemage.autograder.core.integrated.structure.StructuralEqualsVisitor;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
+import spoon.reflect.code.CtVariableAccess;
+import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.visitor.CtScanner;
+import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedSet;
 import java.util.Set;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = { ProblemType.DUPLICATE_CODE })
 public class DuplicateCode extends IntegratedCheck {
@@ -69,6 +83,85 @@ public class DuplicateCode extends IntegratedCheck {
         };
     }
 
+    private record CodeSegment(List<CtStatement> statements) implements Iterable<CtStatement> {
+        public CodeSegment {
+            statements = new ArrayList<>(statements);
+        }
+
+        public static CodeSegment of(CtStatement... statement) {
+            return new CodeSegment(Arrays.asList(statement));
+        }
+
+        public void add(CtStatement ctStatement) {
+            this.statements.add(ctStatement);
+        }
+
+        public CtStatement getFirst() {
+            return this.statements.getFirst();
+        }
+
+        public CtStatement getLast() {
+            return this.statements.getLast();
+        }
+
+        public List<CtStatement> statements() {
+            return new ArrayList<>(this.statements);
+        }
+
+        @Override
+        public Iterator<CtStatement> iterator() {
+            return this.statements().iterator();
+        }
+
+        private SequencedSet<CtVariable<?>> declaredVariables() {
+            SequencedSet<CtVariable<?>> declaredVariables = new LinkedHashSet<>();
+
+            for (CtStatement ctStatement : this) {
+                if (ctStatement instanceof CtVariable<?> ctVariable) {
+                    declaredVariables.add(ctVariable);
+                }
+            }
+
+            return declaredVariables;
+        }
+
+        public int countExposedVariables() {
+            Set<CtVariable<?>> declaredVariables = this.declaredVariables();
+            if (declaredVariables.isEmpty()) {
+                return 0;
+            }
+
+            int count = 0;
+            for (CtStatement ctStatement : SpoonUtil.getNextStatements(this.getLast())) {
+                for (CtVariable<?> declaredVariable : declaredVariables) {
+                    if (UsesFinder.variableUses(declaredVariable).nestedIn(ctStatement).hasAny()) {
+                        count += 1;
+                    }
+                }
+            }
+            return count;
+        }
+
+        public int countDependencies(Predicate<? super CtVariable<?>> isDependency, Predicate<? super CtVariableAccess<?>> isDependencyAccess) {
+            if (this.statements().isEmpty()) {
+                return 0;
+            }
+
+            Set<CtVariable<?>> codeSegmentVariables = this.statements.stream()
+                .flatMap(ctStatement -> ctStatement.getElements(new TypeFilter<CtVariable<?>>(CtVariable.class)).stream())
+                .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new IdentityHashMap<>())));
+
+            return (int) this.statements.stream()
+                .flatMap(ctStatement -> ctStatement.getElements(new TypeFilter<CtVariableAccess<?>>(CtVariableAccess.class)).stream())
+                .filter(isDependencyAccess)
+                .map(UsesFinder::getDeclaredVariable)
+                .unordered()
+                .distinct()
+                .filter(ctVariable -> !codeSegmentVariables.contains(ctVariable) && isDependency.test(ctVariable))
+                .count();
+        }
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
         Map<StructuralElement<CtStatement>, List<CtStatement>> occurrences = new HashMap<>();
@@ -101,13 +194,6 @@ public class DuplicateCode extends IntegratedCheck {
                     return;
                 }
 
-                // TODO: use a debug mode to compare that this implementation yields the same results as the occurrences map
-                /*List<CtStatement> duplicates = ctStatement.getFactory()
-                    .getModel()
-                    .filterChildren(ctElement -> ctElement instanceof CtStatement otherStatement
-                        && otherStatement != ctStatement
-                        && StructuralEqualsVisitor.equals(ctStatement, otherStatement)
-                    ).list(CtStatement.class);*/
                 List<CtStatement> duplicates = occurrences.get(new StructuralElement<>(ctStatement));
 
                 int initialSize = countStatements(ctStatement);
@@ -118,8 +204,8 @@ public class DuplicateCode extends IntegratedCheck {
 
                     int duplicateStatementSize = initialSize;
 
-                    List<CtStatement> leftCode = new ArrayList<>(List.of(ctStatement));
-                    List<CtStatement> rightCode = new ArrayList<>(List.of(duplicate));
+                    CodeSegment leftCode = CodeSegment.of(ctStatement);
+                    CodeSegment rightCode = CodeSegment.of(duplicate);
 
                     for (var entry : zip(SpoonUtil.getNextStatements(ctStatement), SpoonUtil.getNextStatements(duplicate))) {
                         if (!StructuralEqualsVisitor.equals(entry.getKey(), entry.getValue())) {
@@ -131,25 +217,51 @@ public class DuplicateCode extends IntegratedCheck {
                         duplicateStatementSize += countStatements(entry.getKey());
                     }
 
-                    if (duplicateStatementSize >= MINIMUM_DUPLICATE_STATEMENT_SIZE) {
-                        // prevent duplicate reporting of the same code segments
-                        reported.addAll(leftCode);
-                        reported.addAll(rightCode);
-
-                        addLocalProblem(
-                            ctStatement,
-                            new LocalizedMessage(
-                                "duplicate-code",
-                                Map.of(
-                                    "left", formatSourceRange(leftCode.getFirst(), leftCode.getLast()),
-                                    "right", formatSourceRange(rightCode.getFirst(), rightCode.getLast())
-                                )
-                            ),
-                            ProblemType.DUPLICATE_CODE
-                        );
-
-                        break;
+                    if (duplicateStatementSize < MINIMUM_DUPLICATE_STATEMENT_SIZE) {
+                        continue;
                     }
+
+                    // The duplicate code might access variables that are not declared in the code segment.
+                    // The variables would have to be passed as parameters of a helper method.
+                    //
+                    // The problem is that when a variable is reassigned, it can not be passed as a parameter
+                    // -> we would have to ignore the duplicate code segment
+                    int numberOfReassignedVariables = leftCode.countDependencies(
+                        ctVariable -> !(ctVariable instanceof CtField<?>) && !ctVariable.isStatic(),
+                        ctVariableAccess -> ctVariableAccess instanceof CtVariableWrite<?> && ctVariableAccess.getParent() instanceof CtAssignment<?,?>
+                    );
+
+                    if (numberOfReassignedVariables > 1) {
+                        continue;
+                    }
+
+                    // Another problem is that the duplicate code segment might declare variables that are used
+                    // after the code segment.
+                    //
+                    // A method can at most return one value (ignoring more complicated solutions like returning a custom object)
+                    int numberOfUsedVariables = Math.max(leftCode.countExposedVariables(), rightCode.countExposedVariables());
+
+                    if (numberOfReassignedVariables + numberOfUsedVariables > 1) {
+                        continue;
+                    }
+
+                    // prevent duplicate reporting of the same code segments
+                    reported.addAll(leftCode.statements());
+                    reported.addAll(rightCode.statements());
+
+                    addLocalProblem(
+                        ctStatement,
+                        new LocalizedMessage(
+                            "duplicate-code",
+                            Map.of(
+                                "left", formatSourceRange(leftCode.getFirst(), leftCode.getLast()),
+                                "right", formatSourceRange(rightCode.getFirst(), rightCode.getLast())
+                            )
+                        ),
+                        ProblemType.DUPLICATE_CODE
+                    );
+
+                    break;
                 }
             }
 

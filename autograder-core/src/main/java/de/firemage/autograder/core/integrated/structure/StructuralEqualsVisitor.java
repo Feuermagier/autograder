@@ -184,7 +184,7 @@ public final class StructuralEqualsVisitor extends EqualsVisitor {
             return true;
         }
 
-        // TODO: element can be collections???
+        // NOTE: element might be a collection of CtElements
 
         if (role == CtRole.NAME && isInstanceOfAny(element, CtLocalVariable.class, CtField.class, CtParameter.class)) {
             return true;
