@@ -2,13 +2,11 @@
 status-compiling = Compiling
 status-spotbugs = Running SpotBugs
 status-pmd = Running PMD
-status-cpd = Running Copy/Paste-Detection
 status-error-prone = Running error-prone
 status-model = Building the code model
 status-integrated = Running integrated analysis
 
 # Linters
-linter-cpd = Copy/Paste-Detection
 linter-spotbugs = SpotBugs
 linter-pmd = PMD
 linter-integrated = Integrated Analysis
@@ -17,7 +15,7 @@ linter-error-prone = error-prone
 merged-problems = {$message} Other problems in {$locations}.
 
 # CPD
-duplicate-code = Duplicated code ({$lines}): {$first-path}:{$first-start}-{$first-end} and {$second-path}:{$second-start}-{$second-end}
+duplicate-code = Duplicate code: {$left} and {$right}.
 
 # API
 

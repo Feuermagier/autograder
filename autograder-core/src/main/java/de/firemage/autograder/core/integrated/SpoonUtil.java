@@ -6,10 +6,10 @@ import de.firemage.autograder.core.integrated.effects.TerminalEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalStatement;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
-import de.firemage.autograder.core.integrated.evaluator.fold.InferOperatorTypes;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
 import org.apache.commons.io.FilenameUtils;
+import spoon.processing.FactoryAccessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -24,11 +24,9 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
 import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.LiteralBase;
@@ -52,15 +50,11 @@ import spoon.reflect.factory.Factory;
 import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
-import spoon.reflect.reference.CtLocalVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
-import spoon.reflect.visitor.Filter;
-import spoon.reflect.visitor.filter.CompositeFilter;
-import spoon.reflect.visitor.filter.FilteringOperator;
-import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.support.reflect.declaration.CtElementImpl;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -70,6 +64,7 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -484,8 +479,6 @@ public final class SpoonUtil {
     /**
      * Replaces {@link spoon.reflect.code.CtVariableRead} in the provided expression if they are effectively final
      * and their value is known.
-     * <p>
-     * Additionally, it will fix broken operators that do not have a type.
      *
      * @param ctExpression the expression to resolve. If it is {@code null}, then {@code null} is returned
      * @return the resolved expression. It will be cloned and detached from the {@link CtModel}
@@ -494,12 +487,9 @@ public final class SpoonUtil {
     public static <T> CtExpression<T> resolveConstant(CtExpression<T> ctExpression) {
         if (ctExpression == null) return null;
 
-        PartialEvaluator evaluator = new Evaluator(
-            InferOperatorTypes.create(),
-            InlineVariableRead.create()
-        );
+        Evaluator evaluator = new Evaluator(InlineVariableRead.create(true));
 
-        return evaluator.evaluate(ctExpression);
+        return evaluator.evaluateUnsafe(ctExpression);
     }
 
     /**
@@ -517,8 +507,9 @@ public final class SpoonUtil {
         BiPredicate<? super CtExpression<?>, ? super CtExpression<?>> shouldSwap,
         CtBinaryOperator<T> ctBinaryOperator
     ) {
-        CtExpression<?> left = SpoonUtil.resolveConstant(ctBinaryOperator.getLeftHandOperand());
-        CtExpression<?> right = SpoonUtil.resolveConstant(ctBinaryOperator.getRightHandOperand());
+        CtExpression<?> left = ctBinaryOperator.getLeftHandOperand();
+        CtExpression<?> right = ctBinaryOperator.getRightHandOperand();
+
         BinaryOperatorKind operator = ctBinaryOperator.getKind();
 
         CtBinaryOperator<T> result = ctBinaryOperator.clone();
@@ -738,15 +729,8 @@ public final class SpoonUtil {
         return true;
     }
 
-    private record SubtypeFilter(CtTypeReference<?> ctTypeReference) implements Filter<CtType<?>> {
-        @Override
-        public boolean matches(CtType<?> element) {
-            return element != this.ctTypeReference.getTypeDeclaration() && element.isSubtypeOf(this.ctTypeReference);
-        }
-    }
-
     public static boolean hasSubtype(CtType<?> ctType) {
-        return ctType.getFactory().getModel().filterChildren(new SubtypeFilter(ctType.getReference())).first() != null;
+        return UsesFinder.subtypesOf(ctType, false).hasAny();
     }
 
     /**
@@ -1156,33 +1140,7 @@ public final class SpoonUtil {
             target = ctFieldReference.getFieldDeclaration();
         }
 
-        if (target == null && ctVariableReference instanceof CtLocalVariableReference<?> ctLocalVariableReference) {
-            target = getLocalVariableDeclaration(ctLocalVariableReference);
-        }
-
         return target;
-    }
-
-    @SuppressWarnings("unchecked")
-    private static <T> CtLocalVariable<T> getLocalVariableDeclaration(CtLocalVariableReference<T> ctLocalVariableReference) {
-        if (ctLocalVariableReference.getDeclaration() != null) {
-            return ctLocalVariableReference.getDeclaration();
-        }
-
-        // handle the special case, where we have an instanceof Pattern:
-        for (CtElement parent : parents(ctLocalVariableReference)) {
-            CtLocalVariable<?> candidate = parent.filterChildren(new TypeFilter<>(CtTypePattern.class)).filterChildren(new CompositeFilter<>(
-                FilteringOperator.INTERSECTION,
-                new TypeFilter<>(CtLocalVariable.class),
-                element -> element.getReference().equals(ctLocalVariableReference)
-            )).first();
-
-            if (candidate != null) {
-                return (CtLocalVariable<T>) candidate;
-            }
-        }
-
-        return null;
     }
 
     private static <T> int referenceIndexOf(List<T> list, T element) {
@@ -1202,16 +1160,22 @@ public final class SpoonUtil {
      * @return the previous statement or an empty optional if there is no previous statement
      */
     public static Optional<CtStatement> getPreviousStatement(CtStatement ctStatement) {
+        List<CtStatement> previousStatements = getPreviousStatements(ctStatement);
+        return previousStatements.isEmpty() ? Optional.empty() : Optional.of(previousStatements.getLast());
+    }
+
+    public static List<CtStatement> getPreviousStatements(CtStatement ctStatement) {
+        List<CtStatement> result = new ArrayList<>();
         if (ctStatement.getParent() instanceof CtStatementList ctStatementList) {
             List<CtStatement> statements = ctStatementList.getStatements();
             int index = referenceIndexOf(statements, ctStatement);
 
-            if (index > 0) {
-                return Optional.of(statements.get(index - 1));
+            if (index >= 0) {
+                result.addAll(statements.subList(0, index));
             }
         }
 
-        return Optional.empty();
+        return result;
     }
 
     public static List<CtStatement> getNextStatements(CtStatement ctStatement) {
@@ -1220,7 +1184,7 @@ public final class SpoonUtil {
             List<CtStatement> statements = ctStatementList.getStatements();
             int index = referenceIndexOf(statements, ctStatement);
 
-            if (index > 0) {
+            if (index >= 0) {
                 result.addAll(statements.subList(index + 1, statements.size()));
             }
         }
@@ -1329,7 +1293,7 @@ public final class SpoonUtil {
         return String.format("%s:L%d", getBaseName(sourcePosition.getFile().getName()), sourcePosition.getLine());
     }
 
-    private static String getBaseName(String fileName) {
+    public static String getBaseName(String fileName) {
         if (fileName == null) {
             return null;
         }
@@ -1368,11 +1332,32 @@ public final class SpoonUtil {
         throw new IllegalArgumentException("Parameter not found in executable");
     }
 
-    public static CtPackage getRootPackage(CtElement element) {
+    public static CtPackage getRootPackage(FactoryAccessor element) {
         return element.getFactory().getModel().getRootPackage();
     }
 
+
+    public static boolean isAnyNestedOrSame(CtElement ctElement, Set<? extends CtElement> potentialParents) {
+        // CtElement::hasParent will recursively call itself until it reaches the root
+        // => inefficient and might cause a stack overflow
+
+        if (potentialParents.contains(ctElement)) {
+            return true;
+        }
+
+        for (CtElement parent : parents(ctElement)) {
+            if (potentialParents.contains(parent)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     public static boolean isNestedOrSame(CtElement element, CtElement parent) {
-        return element == parent || element.hasParent(parent);
+        Set<CtElement> set = Collections.newSetFromMap(new IdentityHashMap<>());
+        set.add(parent);
+
+        return element == parent || SpoonUtil.isAnyNestedOrSame(element, set);
     }
 }

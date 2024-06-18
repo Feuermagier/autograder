@@ -446,7 +446,7 @@ public enum ProblemType {
     /**
      * Reports duplicate code.
      * <br>
-     * There was a time when this check worked, now it is likely broken.
+     * Very experimental at the moment.
      */
     @HasFalsePositives
     DUPLICATE_CODE,

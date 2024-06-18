@@ -3,6 +3,7 @@ package de.firemage.autograder.core.integrated.evaluator.fold;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtVariable;
 
@@ -12,11 +13,18 @@ import java.util.Optional;
  * Inline reads of constant variables with its value.
  */
 public final class InlineVariableRead implements Fold {
-    private InlineVariableRead() {
+    private final boolean ignoreLocalVariables;
+
+    private InlineVariableRead(boolean ignoreLocalVariables) {
+        this.ignoreLocalVariables = ignoreLocalVariables;
     }
 
     public static Fold create() {
-        return new InlineVariableRead();
+        return new InlineVariableRead(false);
+    }
+
+    public static Fold create(boolean ignoreLocalVariables) {
+        return new InlineVariableRead(ignoreLocalVariables);
     }
 
     @Override
@@ -24,7 +32,7 @@ public final class InlineVariableRead implements Fold {
     public <T> CtExpression<T> foldCtVariableRead(CtVariableRead<T> ctVariableRead) {
         CtVariable<T> ctVariable = ctVariableRead.getVariable().getDeclaration();
 
-        if (ctVariable == null) {
+        if (ctVariable == null || this.ignoreLocalVariables && ctVariable instanceof CtLocalVariable<T>) {
             return ctVariableRead;
         }
 

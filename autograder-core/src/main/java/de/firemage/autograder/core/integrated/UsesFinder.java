@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import spoon.processing.FactoryAccessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtConstructorCall;
@@ -12,8 +13,10 @@ import spoon.reflect.code.CtTypePattern;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.CtVariableWrite;
+import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
+import spoon.reflect.declaration.CtInterface;
 import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeParameter;
@@ -26,11 +29,19 @@ import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 
+import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Deque;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.IdentityHashMap;
+import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.List;
-import java.util.Stack;
+import java.util.Map;
+import java.util.SequencedSet;
+import java.util.stream.Stream;
 
 /**
  * Provides usage-relationships between code elements in the code model.
@@ -53,8 +64,8 @@ public class UsesFinder {
         model.getRootPackage().putMetadata(METADATA_KEY, uses);
     }
 
-    public static UsesFinder getFor(CtElement element) {
-        var uses = (UsesFinder) SpoonUtil.getRootPackage(element).getMetadata(METADATA_KEY);
+    private static UsesFinder getFor(FactoryAccessor factoryAccessor) {
+        var uses = (UsesFinder) SpoonUtil.getRootPackage(factoryAccessor).getMetadata(METADATA_KEY);
         if (uses == null) {
             throw new IllegalArgumentException("No uses information available for this model");
         }
@@ -69,17 +80,13 @@ public class UsesFinder {
      */
     @SuppressWarnings("rawtypes")
     public static CtElementStream<CtElement> getAllUses(CtNamedElement element) {
-        if (element instanceof CtVariable<?> variable) {
-            return UsesFinder.variableUses(variable).asUntypedStream();
-        } else if (element instanceof CtTypeParameter typeParameter) {
-            return UsesFinder.typeParameterUses(typeParameter).asUntypedStream();
-        } else if (element instanceof CtExecutable executable) {
-            return UsesFinder.executableUses(executable).asUntypedStream();
-        } else if (element instanceof CtType type) {
-            return UsesFinder.typeUses(type).asUntypedStream();
-        } else {
-            throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
-        }
+        return switch (element) {
+            case CtVariable variable -> UsesFinder.variableUses(variable).asUntypedStream();
+            case CtTypeParameter typeParameter -> UsesFinder.typeParameterUses(typeParameter).asUntypedStream();
+            case CtExecutable executable -> UsesFinder.executableUses(executable).asUntypedStream();
+            case CtType type -> UsesFinder.typeUses(type).asUntypedStream();
+            default -> throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
+        };
     }
 
     public static CtElementStream<CtVariableAccess<?>> variableUses(CtVariable<?> variable) {
@@ -108,6 +115,27 @@ public class UsesFinder {
         return CtElementStream.of(UsesFinder.getFor(type).scanner.typeUses.getOrDefault(type, List.of())).assumeElementType();
     }
 
+    public static CtElementStream<CtType<?>> subtypesOf(CtType<?> type, boolean includeSelf) {
+        Stream<CtType<?>> selfStream = includeSelf ? Stream.of(type) : Stream.empty();
+        return CtElementStream.concat(
+            selfStream,
+            CtElementStream.of(UsesFinder.getFor(type).scanner.subtypes.getOrDefault(type, new LinkedHashSet<>())).assumeElementType()
+        );
+    }
+
+    // It is difficult to determine whether a variable is being accessed by the variable access,
+    // because references to different variables might be equal or the CtVariable can not be obtained
+    // from the CtVariableAccess.
+    //
+    // This class keeps track of all variable accesses and their corresponding variables, which is why
+    // this method exists here.
+    public static boolean isAccessingVariable(CtVariable<?> ctVariable, CtVariableAccess<?> ctVariableAccess) {
+        return UsesFinder.getDeclaredVariable(ctVariableAccess) == ctVariable;
+    }
+
+    public static CtVariable<?> getDeclaredVariable(CtVariableAccess<?> ctVariableAccess) {
+        return UsesFinder.getFor(ctVariableAccess).scanner.variableAccessDeclarations.getOrDefault(ctVariableAccess, null);
+    }
     /**
      * The scanner searches for uses of supported code elements in a single pass over the entire model.
      * Since inserting into the hash map requires (amortized) constant time, usage search runs in O(n) time.
@@ -116,15 +144,17 @@ public class UsesFinder {
     private static class UsesScanner extends CtScanner {
         // The IdentityHashMaps are very important here, since
         // E.g. CtVariable's equals method considers locals with the same name to be equal
-        public final IdentityHashMap<CtVariable, List<CtVariableAccess>> variableUses = new IdentityHashMap<>();
-        public final IdentityHashMap<CtTypeParameter, List<CtTypeParameterReference>> typeParameterUses = new IdentityHashMap<>();
-        public final IdentityHashMap<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
-        public final IdentityHashMap<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
+        private final Map<CtVariable, List<CtVariableAccess>> variableUses = new IdentityHashMap<>();
+        private final Map<CtVariableAccess, CtVariable> variableAccessDeclarations = new IdentityHashMap<>();
+        private final Map<CtTypeParameter, List<CtTypeParameterReference>> typeParameterUses = new IdentityHashMap<>();
+        private final Map<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
+        private final Map<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
+        private final Map<CtType, SequencedSet<CtType>> subtypes = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block
         // (in reality, the scope is based on 'normal completion', see JLS, but the rules are way too complex for us)
-        private final Stack<HashMap<String, CtVariable>> instanceofPatternVariables = new Stack<>();
+        private final Deque<Map<String, CtVariable>> instanceofPatternVariables = new ArrayDeque<>();
 
         @Override
         public <T> void visitCtVariableRead(CtVariableRead<T> variableRead) {
@@ -197,6 +227,28 @@ public class UsesFinder {
             this.instanceofPatternVariables.pop();
         }
 
+        @Override
+        public <T> void visitCtClass(CtClass<T> ctClass) {
+            // CtType:
+            // - CtClass
+            // - CtEnum
+            // - CtInterface
+            // - CtRecord
+            // - CtTypeParameter
+            //
+            // CtClass:
+            // - CtEnum
+            // - CtRecord
+            this.recordCtType(ctClass);
+            super.visitCtClass(ctClass);
+        }
+
+        @Override
+        public <T> void visitCtInterface(CtInterface<T> ctInterface) {
+            this.recordCtType(ctInterface);
+            super.visitCtInterface(ctInterface);
+        }
+
         private void recordVariableAccess(CtVariableAccess<?> variableAccess) {
             var variable = variableAccess.getVariable().getDeclaration();
 
@@ -219,6 +271,7 @@ public class UsesFinder {
             if (variable != null) {
                 var accesses = this.variableUses.computeIfAbsent(variable, k -> new ArrayList<>());
                 accesses.add(variableAccess);
+                this.variableAccessDeclarations.put(variableAccess, variable);
             }
         }
 
@@ -247,6 +300,30 @@ public class UsesFinder {
             if (type != null) {
                 var uses = this.typeUses.computeIfAbsent(type, k -> new ArrayList<>());
                 uses.add(reference);
+            }
+        }
+
+        @SuppressWarnings("unchecked")
+        private void recordCtType(CtType<?> ctType) {
+            CtTypeReference<?> superType = ctType.getSuperclass();
+            while (superType != null && superType.getTypeDeclaration() != null) {
+                this.subtypes.computeIfAbsent(superType.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
+                superType = superType.getSuperclass();
+            }
+
+            Collection<CtTypeReference> visited = new HashSet<>();
+            Deque<CtTypeReference> superInterfaces = new LinkedList<>(ctType.getSuperInterfaces());
+            while (!superInterfaces.isEmpty()) {
+                CtTypeReference superInterface = superInterfaces.poll();
+                // skip already visited interfaces
+                if (!visited.add(superInterface)) {
+                    continue;
+                }
+
+                if (superInterface.getTypeDeclaration() != null) {
+                    this.subtypes.computeIfAbsent(superInterface.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
+                }
+                superInterfaces.addAll(superInterface.getSuperInterfaces());
             }
         }
     }

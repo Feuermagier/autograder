@@ -6,7 +6,9 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
@@ -30,6 +32,8 @@ import java.util.stream.Collectors;
     ProblemType.COMPOSITION_OVER_INHERITANCE
 })
 public class InheritanceBadPractices extends IntegratedCheck {
+    private static final boolean IS_IN_DEBUG_MODE = SpoonUtil.isInJunitTest();
+
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
@@ -38,8 +42,17 @@ public class InheritanceBadPractices extends IntegratedCheck {
                 List<CtField<?>> fields = ctClass.getFields();
                 Set<CtMethod<?>> methods = ctClass.getMethods();
 
-                List<CtType<?>> subtypes = staticAnalysis.getModel()
-                    .getElements(new SubtypeFilter(ctClass.getReference()).includingSelf(false));
+                List<CtType<?>> subtypes = UsesFinder.subtypesOf(ctClass, false).toList();
+
+                // I do not trust my UsesFinder implementation, so in debug mode it will be checked against the slower
+                // implementation
+                if (IS_IN_DEBUG_MODE) {
+                    List<CtType<?>> otherSubtypes = staticAnalysis.getModel()
+                        .getElements(new SubtypeFilter(ctClass.getReference()).includingSelf(false));
+                    if (!subtypes.equals(otherSubtypes)) {
+                        throw new IllegalStateException("Subtypes for %s are not equal".formatted(ctClass.getQualifiedName()));
+                    }
+                }
 
                 // skip if the class is not inherited from:
                 if (subtypes.isEmpty()) {

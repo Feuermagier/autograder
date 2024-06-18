@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.compiler;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 public enum JavaVersion {
     JAVA_7("7", 7),
@@ -13,7 +14,8 @@ public enum JavaVersion {
     JAVA_14("14", 14),
     JAVA_15("15", 15),
     JAVA_16("16", 16),
-    JAVA_17("17", 17);
+    JAVA_17("17", 17),
+    JAVA_21("21", 21);
 
     private final String versionString;
     private final int versionNumber;
@@ -28,6 +30,10 @@ public enum JavaVersion {
                 .filter(v -> v.getVersionString().equals(s))
                 .findAny()
                 .orElseThrow(() -> new IllegalArgumentException("Unknown java version"));
+    }
+
+    public static JavaVersion latest() {
+        return Arrays.stream(JavaVersion.values()).max(Comparator.comparingInt(JavaVersion::getVersionNumber)).orElseThrow();
     }
 
     public static boolean isValidJavaVersion(String s) {

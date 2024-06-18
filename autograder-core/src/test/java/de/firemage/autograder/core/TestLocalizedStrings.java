@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import fluent.bundle.FluentBundle;
 import fluent.bundle.FluentResource;
@@ -63,10 +64,8 @@ class TestLocalizedStrings {
         "status-compiling",
         "status-spotbugs",
         "status-pmd",
-        "status-cpd",
         "status-model",
         "status-integrated",
-        "linter-cpd",
         "linter-spotbugs",
         "linter-pmd",
         "linter-integrated",
@@ -185,7 +184,7 @@ class TestLocalizedStrings {
 
         SpoonAPI launcher = new Launcher();
         launcher.addInputResource(path.toString());
-        launcher.getEnvironment().setComplianceLevel(17);
+        launcher.getEnvironment().setComplianceLevel(JavaVersion.latest().getVersionNumber());
 
         launcher.buildModel();
         CtModel ctModel = launcher.getModel();

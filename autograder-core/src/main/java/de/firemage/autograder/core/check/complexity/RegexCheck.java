@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.treeg.InvalidRegExSyntaxException;
 import de.firemage.autograder.treeg.RegExParser;
 import de.firemage.autograder.treeg.RegularExpression;
@@ -26,11 +27,9 @@ import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtExecutableReference;
-import spoon.reflect.visitor.filter.VariableAccessFilter;
 
 import java.util.List;
 import java.util.Map;
@@ -77,12 +76,10 @@ public class RegexCheck extends IntegratedCheck {
         CtElement parent = ctLiteral.getParent();
         if (parent instanceof CtVariable<?> ctVariable
             && SpoonUtil.isEffectivelyFinal(ctVariable)) {
-            List<CtVariableAccess<?>> invocations = parent.getFactory().getModel().getElements(new VariableAccessFilter<>(ctVariable.getReference()));
-
-            return !invocations.isEmpty() &&
-                invocations
-                    .stream()
-                    .allMatch(ctVariableAccess -> ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation && isRegexInvocation(ctInvocation));
+            // Check if the variable is only used in a regex invocation (e.g. Pattern.compile)
+            return UsesFinder.variableUses(ctVariable)
+                .hasAnyAndAllMatch(ctVariableAccess -> ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
+                    && isRegexInvocation(ctInvocation));
         }
 
         return parent instanceof CtInvocation<?> ctInvocation && isRegexInvocation(ctInvocation);
