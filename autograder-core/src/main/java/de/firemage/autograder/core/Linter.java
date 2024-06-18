@@ -2,9 +2,6 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.check.general.CopyPasteCheck;
-import de.firemage.autograder.core.check.general.MagicString;
-import de.firemage.autograder.core.cpd.CPDLinter;
 import de.firemage.autograder.core.errorprone.ErrorProneCheck;
 import de.firemage.autograder.core.errorprone.ErrorProneLinter;
 import de.firemage.autograder.core.errorprone.TempLocation;
@@ -36,7 +33,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Consumer;
-import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class Linter {
@@ -155,15 +151,12 @@ public final class Linter {
 
         List<PMDCheck> pmdChecks = new ArrayList<>();
         List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
-        List<CopyPasteCheck> cpdChecks = new ArrayList<>();
         List<IntegratedCheck> integratedChecks = new ArrayList<>();
         List<ErrorProneCheck> errorProneChecks = new ArrayList<>();
 
         for (Check check : checks) {
             if (check instanceof PMDCheck pmdCheck) {
                 pmdChecks.add(pmdCheck);
-            } else if (check instanceof CopyPasteCheck cpdCheck) {
-                cpdChecks.add(cpdCheck);
             } else if (check instanceof SpotbugsCheck spotbugsCheck) {
                 spotbugsChecks.add(spotbugsCheck);
             } else if (check instanceof IntegratedCheck integratedCheck) {
@@ -182,13 +175,6 @@ public final class Linter {
             scheduler.submitTask((s, reporter) -> {
                 statusConsumer.accept(LinterStatus.RUNNING_PMD);
                 reporter.reportProblems(new PMDLinter().lint(file, pmdChecks, this.classLoader));
-            });
-        }
-
-        if (!cpdChecks.isEmpty()) {
-            scheduler.submitTask((s, reporter) -> {
-                statusConsumer.accept(LinterStatus.RUNNING_CPD);
-                reporter.reportProblems(new CPDLinter().lint(file, cpdChecks));
             });
         }
 

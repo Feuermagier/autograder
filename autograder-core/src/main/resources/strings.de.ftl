@@ -2,13 +2,11 @@
 status-compiling = Compiling
 status-spotbugs = Running SpotBugs
 status-pmd = Running PMD
-status-cpd = Running Copy/Paste-Detection
 status-error-prone = Running error-prone
 status-model = Building the code model
 status-integrated = Running integrated analysis
 
 # Linters
-linter-cpd = Copy/Paste-Detection
 linter-spotbugs = SpotBugs
 linter-pmd = PMD
 linter-integrated = Integrated Analysis
