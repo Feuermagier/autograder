@@ -43,7 +43,8 @@ public class RedundantConstructorCheck extends IntegratedCheck {
                         .toArray(CtTypeReference<?>[]::new);
                     var canonicalCtor = record.getConstructor(types);
 
-                    if (!canonicalCtor.isImplicit()
+                    if (canonicalCtor != null
+                        && !canonicalCtor.isImplicit()
                         && hasEffectivelyDefaultVisibility(record, canonicalCtor)
                         && isDefaultBodyRecord(record, canonicalCtor)) {
                         redundantCtor = canonicalCtor;
