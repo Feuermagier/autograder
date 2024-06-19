@@ -5,7 +5,6 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExecutableReferenceExpression;
@@ -21,11 +20,10 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.visitor.Filter;
 
-import java.lang.reflect.Method;
 import java.util.Map;
 
 
-@ExecutableCheck(reportedProblems = { ProblemType.METHOD_SHOULD_BE_STATIC })
+@ExecutableCheck(reportedProblems = { ProblemType.METHOD_SHOULD_BE_STATIC, ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC})
 public class MethodShouldBeStatic extends IntegratedCheck {
     /**
      * Finds elements that access the given type through this. Accessing the same type through a different object is ok.
@@ -100,7 +98,7 @@ public class MethodShouldBeStatic extends IntegratedCheck {
                             "method-should-be-static",
                             Map.of("name", ctMethod.getSimpleName())
                         ),
-                        ProblemType.METHOD_SHOULD_BE_STATIC
+                        ctMethod.isPublic() ? ProblemType.METHOD_SHOULD_BE_STATIC : ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC
                     );
                 }
             }

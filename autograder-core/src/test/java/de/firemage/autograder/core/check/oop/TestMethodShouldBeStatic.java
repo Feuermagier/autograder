@@ -16,7 +16,10 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestMethodShouldBeStatic extends AbstractCheckTest {
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.METHOD_SHOULD_BE_STATIC);
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(
+        ProblemType.METHOD_SHOULD_BE_STATIC,
+        ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC
+    );
 
     void assertEqualsStatic(Problem problem, String name) {
         assertEquals(

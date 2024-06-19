@@ -483,6 +483,14 @@ public enum ProblemType {
     METHOD_SHOULD_BE_STATIC,
 
     /**
+     * Reports if a private method can be static.
+     * <br>
+     * The implementation is tricky, therefore it likely has false-positives.
+     */
+    @HasFalsePositives
+    METHOD_SHOULD_BE_STATIC_NOT_PUBLIC,
+
+    /**
      * Reports if a parameter is reassigned.
      * <br>
      * Variables can hide each other, maybe has false-positives.
