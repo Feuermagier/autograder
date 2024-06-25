@@ -11,12 +11,18 @@ import spoon.compiler.ModelBuildingException;
 import spoon.processing.AbstractProcessor;
 import spoon.processing.Processor;
 import spoon.reflect.CtModel;
+import spoon.reflect.code.CtCatchVariable;
 import spoon.reflect.code.CtTargetedExpression;
 import spoon.reflect.declaration.*;
+import spoon.reflect.factory.CodeFactory;
 import spoon.reflect.factory.Factory;
+import spoon.reflect.factory.FactoryImpl;
+import spoon.reflect.reference.CtCatchVariableReference;
 import spoon.reflect.reference.CtReference;
 import spoon.reflect.visitor.*;
 import spoon.reflect.visitor.filter.NamedElementFilter;
+import spoon.support.DefaultCoreFactory;
+import spoon.support.StandardEnvironment;
 
 import java.io.IOException;
 import java.net.MalformedURLException;
@@ -139,7 +145,36 @@ public final class CodeModel implements AutoCloseable {
                 return;
             }
 
-            Launcher launcher = new Launcher();
+
+            // Fix for something similar to https://github.com/INRIA/spoon/issues/5868
+            Factory baseFactory = new FactoryImpl(new DefaultCoreFactory(), new StandardEnvironment()) {
+                private transient CodeFactory code;
+
+                @Override
+                public CodeFactory Code() {
+                    if (this.code == null) {
+                        this.code = new CodeFactory(this) {
+                            @Override
+                            public <T> CtCatchVariableReference<T> createCatchVariableReference(CtCatchVariable<T> catchVariable) {
+                                // The implementation of the original method is broken, resulting in elements which point to the
+                                // wrong or an invalid parent.
+                                //
+                                // This is a workaround until the issue is fixed in spoon.
+                                CtCatchVariableReference<T> ref = this.factory.Core().createCatchVariableReference();
+
+                                ref.setType(catchVariable.getType() == null ? null : catchVariable.getType().clone());
+                                ref.setSimpleName(catchVariable.getSimpleName());
+                                ref.setParent(catchVariable);
+
+                                return ref;
+                            }
+                        };
+                    }
+                    return this.code;
+                }
+            };
+
+            Launcher launcher = new Launcher(baseFactory);
             launcher.addInputResource(file.getSpoonResource());
             launcher.getEnvironment().setShouldCompile(false);
             launcher.getEnvironment().setSourceClasspath(new String[]{jar.toAbsolutePath().toString()});

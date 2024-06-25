@@ -16,17 +16,29 @@ import java.nio.file.Path;
 import java.util.Optional;
 import java.util.function.Consumer;
 
-public class UploadedFile implements AutoCloseable {
+public final class UploadedFile implements AutoCloseable {
     private static final Logger LOG = LoggerFactory.getLogger(UploadedFile.class);
 
     private final CodeModel model;
     private final SourceInfo source;
     private final CompilationResult compilationResult;
+    private final ClassLoader classLoader;
+    private final TempLocation tempLocation;
 
-    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult) {
+    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult, ClassLoader classLoader, TempLocation tempLocation) {
         this.model = model;
         this.source = source;
         this.compilationResult = compilationResult;
+        this.classLoader = classLoader;
+        this.tempLocation = tempLocation;
+    }
+
+    public UploadedFile copy() {
+        try {
+            return UploadedFile.build(this.source, this.tempLocation.createTempDirectory("copy"), unused -> {}, this.classLoader);
+        } catch (IOException | CompilationFailureException exception) {
+            throw new IllegalStateException(exception);
+        }
     }
 
     public static UploadedFile build(
@@ -54,7 +66,7 @@ public class UploadedFile implements AutoCloseable {
 
         var model = CodeModel.buildFor(source, compilationResult.get().jar(), classLoader);
 
-        return new UploadedFile(model, source, compilationResult.get());
+        return new UploadedFile(model, source, compilationResult.get(), classLoader, tmpLocation);
     }
 
     public SourceInfo getSource() {

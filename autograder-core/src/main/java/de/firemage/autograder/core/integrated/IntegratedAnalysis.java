@@ -1,101 +1,61 @@
 package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.integrated.graph.GraphAnalysis;
 import de.firemage.autograder.core.parallel.AnalysisScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtNamedElement;
 import spoon.reflect.reference.CtPackageReference;
 import spoon.reflect.reference.CtTypeReference;
-import spoon.reflect.visitor.filter.TypeFilter;
+import spoon.reflect.visitor.CtScanner;
 
-import java.io.IOException;
-import java.net.URI;
-import java.net.URISyntaxException;
-import java.net.URL;
-import java.nio.file.FileSystem;
-import java.nio.file.FileSystems;
-import java.nio.file.Path;
-import java.util.HashMap;
-import java.util.HashSet;
+import java.util.ArrayDeque;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Deque;
+import java.util.IdentityHashMap;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 import java.util.Set;
 import java.util.function.Consumer;
+import java.util.stream.Collectors;
 
 public class IntegratedAnalysis {
+    private static final String INITIAL_INTEGRITY_CHECK_NAME = "StaticAnalysis-Constructor";
     private static final boolean ENSURE_NO_ORPHANS = false;
     private static final boolean ENSURE_NO_MODEL_CHANGES = false;
     private static final Logger logger = LoggerFactory.getLogger(IntegratedAnalysis.class);
 
     private final UploadedFile file;
-    private final Path tmpPath;
-    private final Map<String, FileSystem> openFileSystems = new HashMap<>();
     private final CtModel originalModel;
     private final StaticAnalysis staticAnalysis;
-    private final GraphAnalysis graphAnalysis;
 
-    public IntegratedAnalysis(UploadedFile file, Path tmpPath) {
+    public IntegratedAnalysis(UploadedFile file) {
         this.file = file;
-        this.tmpPath = tmpPath;
 
-        StaticAnalysis temporaryAnalysis = new StaticAnalysis(file.getModel(), file.getCompilationResult());
-        this.originalModel = temporaryAnalysis.getModel();
+        // create a copy of the model to later check if a check changed the model
+        this.originalModel = file.copy().getModel().getModel();
 
         this.staticAnalysis = new StaticAnalysis(file.getModel(), file.getCompilationResult());
-        //this.graphAnalysis = new GraphAnalysis(this.staticAnalysis.getCodeModel());
-        this.graphAnalysis = null; //TODO
-
-    }
-
-    private Path toPath(URL resource) throws URISyntaxException, IOException {
-        if (resource == null) {
-            throw new IllegalArgumentException("URL is null");
-        }
-        URI uri = resource.toURI();
-        if (!uri.toString().contains("!")) {
-            return Path.of(uri);
-        }
-        // See https://stackoverflow.com/questions/22605666/java-access-files-in-jar-causes-java-nio-file-filesystemnotfoundexception
-        String[] path = uri.toString().split("!", 2);
-        @SuppressWarnings("resource") FileSystem fs = createFileSystem(path[0]);
-        return fs.getPath(path[1]);
-    }
-
-    private FileSystem createFileSystem(String path) throws IOException {
-        FileSystem existingFileSystem = openFileSystems.get(path);
-        if (existingFileSystem != null) {
-            return existingFileSystem;
+        if (this.originalModel == this.staticAnalysis.getModel()) {
+            throw new IllegalStateException("The model was not cloned");
         }
 
-        FileSystem newFileSystem = FileSystems.newFileSystem(URI.create(path), new HashMap<>());
-        openFileSystems.put(path, newFileSystem);
-        return newFileSystem;
+        this.assertModelIntegrity(INITIAL_INTEGRITY_CHECK_NAME);
     }
 
-    private void closeOpenFileSystems() {
-        for (FileSystem openFileSystem : openFileSystems.values()) {
-            try {
-                openFileSystem.close();
-            } catch (IOException e) {
-                logger.error(e.getMessage(), e);
-            }
-        }
-        openFileSystems.clear();
-    }
-
-    public void lint(List<IntegratedCheck> checks, Consumer<LinterStatus> statusConsumer, AnalysisScheduler scheduler) {
+    public void lint(Iterable<? extends IntegratedCheck> checks, Consumer<? super LinterStatus> statusConsumer, AnalysisScheduler scheduler) {
         statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
         this.staticAnalysis.getCodeModel().ensureModelBuild();
 
         statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
 
-        scheduler.submitTask((s, reporter) -> {
+        scheduler.submitTask((analysisScheduler, reporter) -> {
             for (IntegratedCheck check : checks) {
                 long beforeTime = System.nanoTime();
                 reporter.reportProblems(check.run(
@@ -104,54 +64,135 @@ public class IntegratedAnalysis {
                 ));
                 long afterTime = System.nanoTime();
                 logger.info("Completed check " + check.getClass().getSimpleName() + " in " + ((afterTime - beforeTime) / 1_000_000 + "ms"));
-                this.assertModelIntegrity(check);
+                this.assertModelIntegrity(check.getClass().getSimpleName());
             }
         });
     }
 
+    // sometimes spoon creates invalid elements, which are not the fault of this project or any check
+    private static final Set<CtElement> alreadyInvalidElements = Collections.newSetFromMap(new IdentityHashMap<>());
     /**
      * This method checks that a check did not change the model in a way that would influence other checks.
      *
-     * @param currentCheck the check that was just executed
+     * @param checkName the check that was just executed
      */
-    private void assertModelIntegrity(Check currentCheck) {
+    private void assertModelIntegrity(String checkName) {
         CtModel linterModel = this.staticAnalysis.getModel();
 
-        String checkName = currentCheck.getClass().getSimpleName();
+        if ((ENSURE_NO_MODEL_CHANGES || SpoonUtil.isInJunitTest())) {
+            Collection<ParentChecker.InvalidElement> invalidElements = ParentChecker.checkConsistency(linterModel.getUnnamedModule());
 
-        if ((ENSURE_NO_MODEL_CHANGES || SpoonUtil.isInJunitTest()) && !isModelEqualTo(originalModel, linterModel)) {
+            if (checkName.equals(INITIAL_INTEGRITY_CHECK_NAME)) {
+                alreadyInvalidElements.addAll(invalidElements.stream().map(ParentChecker.InvalidElement::element).toList());
+            }
+
+            invalidElements.removeIf(elem -> alreadyInvalidElements.contains(elem.element()));
+            if (!invalidElements.isEmpty()) {
+                throw new IllegalStateException("The model was modified by %s, %d elements have invalid parents:%n%s".formatted(
+                    checkName,
+                    invalidElements.size(),
+                    invalidElements.stream().map(ParentChecker.InvalidElement::toString).limit(5).collect(Collectors.joining(System.lineSeparator()))
+                ));
+            }
+        }
+
+        if ((ENSURE_NO_MODEL_CHANGES || SpoonUtil.isInJunitTest()) && !this.isModelEqualTo(this.originalModel, linterModel)) {
             throw new IllegalStateException("The model was changed by the check: %s".formatted(checkName));
         }
 
         if (ENSURE_NO_ORPHANS || SpoonUtil.isInJunitTest()) {
             List<CtElement> orphans = findOrphans(linterModel);
             if (!orphans.isEmpty()) {
-                throw new IllegalStateException("The check %s introduced new elements into the model without parents (did you forget to clone before passing the element to a setter?): %s".formatted(
-                    checkName,
-                    orphans.stream().map(element -> "%s(\"%s\")".formatted(element.getClass().getSimpleName(), element)).toList()
-                ));
+                throw new IllegalStateException(
+                    "The check %s introduced new elements into the model without parents (did you forget to clone before passing the element to a setter?): %s".formatted(
+                        checkName,
+                        orphans.stream().map(element -> "%s(\"%s\")".formatted(element.getClass().getSimpleName(), element)).toList()
+                    ));
             }
         }
     }
 
-    private Set<CtElement> cachedOriginalElements = null;
-    private boolean isModelEqualTo(CtModel original, CtModel toCheck) {
-        if (this.cachedOriginalElements == null) {
-            this.cachedOriginalElements = new HashSet<>(original.getElements(new TypeFilter<>(CtElement.class)));
+    private static final class ParentChecker extends CtScanner {
+        private final List<InvalidElement> invalidElements;
+        private final Deque<CtElement> stack;
+
+        private ParentChecker() {
+            this.invalidElements = new ArrayList<>();
+            this.stack = new ArrayDeque<>();
         }
 
-        // TODO: this is very slow (~8s with a large model)
+        public static List<InvalidElement> checkConsistency(CtElement ctElement) {
+            ParentChecker parentChecker = new ParentChecker();
+            parentChecker.scan(ctElement);
+            return parentChecker.invalidElements;
+        }
 
-        // long beforeTime = System.nanoTime();
-        Set<CtElement> originalElements = this.cachedOriginalElements;
+        @Override
+        public void enter(CtElement element) {
+            if (!this.stack.isEmpty() && (!element.isParentInitialized() || element.getParent() != this.stack.peek())) {
+                this.invalidElements.add(new InvalidElement(element, this.stack));
+            }
 
-        List<CtElement> changedElements = toCheck.getElements(element -> !originalElements.contains(element));
 
-        /*System.out.println("Finished comparing models (%dms). Changed elements: %s".formatted(
-            ((System.nanoTime() - beforeTime) / 1_000_000), changedElements.size())
-        );*/
+            this.stack.push(element);
+        }
 
-        return changedElements.isEmpty();
+        @Override
+        protected void exit(CtElement e) {
+            this.stack.pop();
+        }
+
+        public record InvalidElement(CtElement element, Deque<CtElement> stack) {
+            public InvalidElement {
+                stack = new ArrayDeque<>(stack);
+            }
+
+            public String reason() {
+                String name = this.element instanceof CtNamedElement ctNamedElement ? "-" + ctNamedElement.getSimpleName() : "";
+                return (this.element.isParentInitialized() ? "inconsistent" : "null")
+                    + " parent for " + this.element.getClass() + name
+                    + " - " + this.element.getPosition()
+                    + " - " + this.stack.peek();
+            }
+
+            public String dumpStack() {
+                List<String> output = new ArrayList<>();
+
+                for (CtElement ctElement : this.stack) {
+                    output.add("    " + ctElement.getClass().getSimpleName()
+                        + " " + (ctElement.getPosition().isValidPosition() ? String.valueOf(ctElement.getPosition()) : "(?)")
+                    );
+                }
+
+                return String.join(System.lineSeparator(), output);
+            }
+
+            @Override
+            public String toString() {
+                return "%s%n%s".formatted(this.reason(), this.dumpStack());
+            }
+
+            @Override
+            public boolean equals(Object object) {
+                if (this == object) {
+                    return true;
+                }
+                if (!(object instanceof InvalidElement that)) {
+                    return false;
+                }
+
+                return this.element == that.element();
+            }
+
+            @Override
+            public int hashCode() {
+                return System.identityHashCode(this.element);
+            }
+        }
+    }
+
+    private boolean isModelEqualTo(CtModel original, CtModel toCheck) {
+        return original.getUnnamedModule().equals(toCheck.getUnnamedModule());
     }
 
     private static boolean isOrphan(CtElement ctElement) {
@@ -165,16 +206,14 @@ public class IntegratedAnalysis {
             return false;
         }
 
-        // TODO: could be replaced with SpoonUtil.parents()
         CtElement root = ctElement.getFactory().getModel().getUnnamedModule();
         if (root == ctElement) {
             return false;
         }
 
-        CtElement parent = ctElement.getParent();
-        while (parent.isParentInitialized() && parent != root) {
-            parent = parent.getParent();
-        }
+        CtElement parent = ctElement;
+        Iterator<CtElement> iterator = SpoonUtil.parents(ctElement).iterator();
+        for (; iterator.hasNext(); parent = iterator.next()) ;
 
         return parent != root;
     }

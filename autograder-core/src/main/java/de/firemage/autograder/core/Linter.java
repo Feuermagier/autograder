@@ -187,11 +187,9 @@ public final class Linter {
 
         AnalysisResult result;
         try (TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
-            Path tmpLocation = tempLinterLocation.toPath();
-
             if (!integratedChecks.isEmpty()) {
                 scheduler.submitTask((s, reporter) -> {
-                    IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
+                    IntegratedAnalysis analysis = new IntegratedAnalysis(file);
                     analysis.lint(integratedChecks, statusConsumer, s);
                 });
             }
