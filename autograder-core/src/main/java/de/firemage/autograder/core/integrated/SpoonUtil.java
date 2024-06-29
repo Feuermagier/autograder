@@ -785,7 +785,7 @@ public final class SpoonUtil {
         CtTypeReference<?> targetType = type.unbox();
         if (targetType.isPrimitive()) {
             // the FoldUtils.convert method only works for Number -> Number conversions
-            if (targetType.box().isSubtypeOf(type.getFactory().createCtTypeReference(Number.class))) {
+            if (SpoonUtil.isSubtypeOf(targetType.box(), Number.class)) {
                 // for instances of Number, one can use the convert method:
                 if (literal.getValue() instanceof Number number) {
                     result.setValue(FoldUtils.convert(type, number));
@@ -960,8 +960,19 @@ public final class SpoonUtil {
 
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
         // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
-        return !(ctTypeReference instanceof CtTypeParameterReference)
-            && ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().get(expected).getReference());
+        CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
+
+        boolean result = !(ctTypeReference instanceof CtTypeParameterReference)
+            && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
+
+        if (SpoonUtil.isInJunitTest() && result != ctTypeReference.isSubtypeOf(expectedType.getReference())) {
+            throw new IllegalStateException("UsesFinder.isSubtypeOf(%s, %s) does not match spoon implementation".formatted(
+                ctTypeReference.getQualifiedName(),
+                expectedType.getQualifiedName()
+            ));
+        }
+
+        return result;
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {

@@ -6,7 +6,6 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import spoon.processing.FactoryAccessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBinaryOperator;
@@ -28,7 +27,6 @@ import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtRecord;
-import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.path.CtRole;
 import spoon.reflect.reference.CtArrayTypeReference;
@@ -52,10 +50,9 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         java.util.EnumSet.class
     );
 
-    private <T extends CtTypeInformation & FactoryAccessor> boolean isConcreteCollectionType(T ctType) {
-        return Stream.of(java.util.Collection.class, java.util.Map.class)
-                     .map(ty -> ctType.getFactory().Type().createReference(ty, false))
-                     .anyMatch(ctType::isSubtypeOf) && !ctType.isInterface();
+    private boolean isConcreteCollectionType(CtTypeReference<?> ctType) {
+        return !ctType.isInterface() && Stream.of(java.util.Collection.class, java.util.Map.class)
+            .anyMatch(ctClass -> SpoonUtil.isSubtypeOf(ctType, ctClass));
     }
 
     private boolean isAllowedType(CtTypeReference<?> ctTypeReference) {
@@ -116,6 +113,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         if (ctFieldRead != null) {
             CtFieldReference<?> ctFieldReference = ctFieldRead.getVariable();
             return ctFieldReference.getDeclaringType().equals(ctTypeReference)
+                    // TODO: use SpoonUtil.isTypeEqualTo
                    && ctFieldReference.getType()
                                       .equals(ctTypeReference.getFactory().Type().createReference(Class.class, false));
         }

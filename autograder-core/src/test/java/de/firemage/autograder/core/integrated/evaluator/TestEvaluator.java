@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.evaluator;
 
 import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.integrated.evaluator.fold.ApplyCasts;
 import de.firemage.autograder.core.integrated.evaluator.fold.ChainedFold;
 import de.firemage.autograder.core.integrated.evaluator.fold.DeduplicateOperatorApplication;
@@ -71,6 +72,7 @@ class TestEvaluator {
         environment.setIgnoreSyntaxErrors(false);
 
         CtModel ctModel = launcher.buildModel();
+        UsesFinder.buildFor(ctModel);
 
         CtMethod<?> ctMethod = new ArrayList<>(ctModel.getAllTypes()).get(0).getMethodsByName("t").get(0);
         CtAbstractInvocation<?> ctInvocation = (CtInvocation<?>) ctMethod.getBody().getStatements().get(0);

@@ -26,6 +26,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class IntegratedAnalysis {
+    private static final boolean IS_IN_DEBUG_MODE = SpoonUtil.isInJunitTest();
     private static final String INITIAL_INTEGRITY_CHECK_NAME = "StaticAnalysis-Constructor";
     private static final boolean ENSURE_NO_ORPHANS = false;
     private static final boolean ENSURE_NO_MODEL_CHANGES = false;
@@ -39,10 +40,14 @@ public class IntegratedAnalysis {
         this.file = file;
 
         // create a copy of the model to later check if a check changed the model
-        this.originalModel = file.copy().getModel().getModel();
+        if (IS_IN_DEBUG_MODE || ENSURE_NO_MODEL_CHANGES || ENSURE_NO_ORPHANS) {
+            this.originalModel = file.copy().getModel().getModel();
+        } else {
+            this.originalModel = null;
+        }
 
         this.staticAnalysis = new StaticAnalysis(file.getModel(), file.getCompilationResult());
-        if (this.originalModel == this.staticAnalysis.getModel()) {
+        if (IS_IN_DEBUG_MODE && this.originalModel == this.staticAnalysis.getModel()) {
             throw new IllegalStateException("The model was not cloned");
         }
 
@@ -79,11 +84,11 @@ public class IntegratedAnalysis {
     private void assertModelIntegrity(String checkName) {
         CtModel linterModel = this.staticAnalysis.getModel();
 
-        if ((ENSURE_NO_MODEL_CHANGES || SpoonUtil.isInJunitTest())) {
+        if (ENSURE_NO_MODEL_CHANGES || IS_IN_DEBUG_MODE) {
             Collection<ParentChecker.InvalidElement> invalidElements = ParentChecker.checkConsistency(linterModel.getUnnamedModule());
 
             if (checkName.equals(INITIAL_INTEGRITY_CHECK_NAME)) {
-                alreadyInvalidElements.addAll(invalidElements.stream().map(ParentChecker.InvalidElement::element).toList());
+                invalidElements.stream().map(ParentChecker.InvalidElement::element).forEach(alreadyInvalidElements::add);
             }
 
             invalidElements.removeIf(elem -> alreadyInvalidElements.contains(elem.element()));
@@ -96,11 +101,11 @@ public class IntegratedAnalysis {
             }
         }
 
-        if ((ENSURE_NO_MODEL_CHANGES || SpoonUtil.isInJunitTest()) && !this.isModelEqualTo(this.originalModel, linterModel)) {
+        if ((ENSURE_NO_MODEL_CHANGES || IS_IN_DEBUG_MODE) && !this.isModelEqualTo(this.originalModel, linterModel)) {
             throw new IllegalStateException("The model was changed by the check: %s".formatted(checkName));
         }
 
-        if (ENSURE_NO_ORPHANS || SpoonUtil.isInJunitTest()) {
+        if (ENSURE_NO_ORPHANS || IS_IN_DEBUG_MODE) {
             List<CtElement> orphans = findOrphans(linterModel);
             if (!orphans.isEmpty()) {
                 throw new IllegalStateException(
