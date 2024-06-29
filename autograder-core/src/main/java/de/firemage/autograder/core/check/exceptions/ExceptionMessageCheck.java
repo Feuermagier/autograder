@@ -19,8 +19,8 @@ import spoon.reflect.declaration.CtElement;
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
-        if (!(expression instanceof CtConstructorCall<?> ctConstructorCall) ||
-            !(SpoonUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class))) {
+        if (!(expression instanceof CtConstructorCall<?> ctConstructorCall)
+            || !SpoonUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class)) {
             return false;
         }
 
@@ -50,9 +50,7 @@ public class ExceptionMessageCheck extends IntegratedCheck {
 
             String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
 
-            if (literal != null) {
-                return !literal.isBlank();
-            }
+            return literal == null || !literal.isBlank();
         }
 
         return false;

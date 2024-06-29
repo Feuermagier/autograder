@@ -293,4 +293,22 @@ class TestExceptionMessageCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testExceptionWithFunctionCall() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    private static final String MESSAGE = "message: %s";
+                    public static void main(String[] args) throws Exception {
+                        throw new IllegalStateException(MESSAGE.formatted(args));
+                    }
+                }
+            """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
