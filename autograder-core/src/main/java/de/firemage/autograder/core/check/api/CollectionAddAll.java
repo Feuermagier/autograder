@@ -198,6 +198,12 @@ public class CollectionAddAll extends IntegratedCheck {
                 return;
             }
 
+            // handle edge case where the variable is implicitly cast in the invocation (Character in List, but char in iterable)
+            List<CtTypeReference<?>> actualTypeArguments = ctInvocation.getTarget().getType().getActualTypeArguments();
+            if (!actualTypeArguments.isEmpty() && !ctFor.getVariable().getType().equals(actualTypeArguments.getFirst())) {
+                return;
+            }
+
             String addAllArg = ctFor.getExpression().toString();
             if (ctFor.getExpression().getType().isArray()) {
                 addAllArg = "Arrays.asList(%s)".formatted(addAllArg);

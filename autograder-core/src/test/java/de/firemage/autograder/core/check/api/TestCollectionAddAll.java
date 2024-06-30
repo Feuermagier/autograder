@@ -256,4 +256,29 @@ class TestCollectionAddAll extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
-}
+
+    @Test
+    void testAddAllImplicitCast() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.Collection;
+                import java.util.ArrayList;
+
+                public class Main {
+                    public static Collection<Character> toCollection(char[] input) {
+                        Collection<Character> result = new ArrayList<>();
+                        
+                        for (char element : input) {
+                            result.add(element);
+                        }
+
+                        return result;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }}

@@ -90,7 +90,6 @@ public class MethodShouldBeStatic extends IntegratedCheck {
                     return;
                 }
 
-
                 if (!ctMethod.isStatic() && isEffectivelyStatic(ctMethod)) {
                     addLocalProblem(
                         ctMethod,
