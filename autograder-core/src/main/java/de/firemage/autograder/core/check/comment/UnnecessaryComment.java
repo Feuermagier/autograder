@@ -8,32 +8,77 @@ import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtComment;
-import spoon.reflect.code.CtStatement;
+import spoon.reflect.declaration.CtElement;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = { ProblemType.UNNECESSARY_COMMENT })
 public class UnnecessaryComment extends IntegratedCheck {
+    private final Set<CtComment> visitedComments = Collections.newSetFromMap(new IdentityHashMap<>());
+
+    private void checkComments(Collection<? extends CtComment> comments) {
+        this.visitedComments.addAll(comments);
+
+        if (comments.size() != 1) {
+            return;
+        }
+
+        for (CtComment ctComment : comments) {
+            if (ctComment.getContent().isBlank()) {
+                addLocalProblem(
+                    ctComment,
+                    new LocalizedMessage("unnecessary-comment-empty"),
+                    ProblemType.UNNECESSARY_COMMENT
+                );
+                break;
+            }
+        }
+    }
+
+    private static boolean isStandaloneComment(CtComment ctComment) {
+        return ctComment.getParent() instanceof CtElement ctElement && !ctElement.getComments().contains(ctComment);
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
-        staticAnalysis.processWith(new AbstractProcessor<CtComment>() {
+        staticAnalysis.processWith(new AbstractProcessor<>() {
             @Override
-            public void process(CtComment ctComment) {
-                if (ctComment.isImplicit()
-                    || !ctComment.getPosition().isValidPosition()
-                    || ctComment.getCommentType() != CtComment.CommentType.INLINE) {
+            public void process(CtElement element) {
+                if (element.isImplicit() || !element.getPosition().isValidPosition()) {
                     return;
                 }
 
-                CtStatement previous = SpoonUtil.getPreviousStatement(ctComment).orElse(null);
-                if (previous instanceof CtComment) {
+                // The main problem is that one can use empty comments as spacers in larger comments.
+                //
+                // ^ like this.
+                //
+                // And to detect this correctly, we need to check the context of the comment as well
+                // (if there are other comments around it).
+
+                // Comments can appear either attached to a CtElement or as a standalone comment.
+                //
+                // Here the comments without an attached CtElement are processed:
+                if (element instanceof CtComment ctComment && isStandaloneComment(ctComment) && !visitedComments.contains(ctComment)) {
+                    List<CtComment> followingComments = SpoonUtil.getNextStatements(ctComment)
+                        .stream()
+                        .takeWhile(CtComment.class::isInstance)
+                        .map(CtComment.class::cast)
+                        .collect(Collectors.toCollection(ArrayList::new));
+
+                    followingComments.addFirst(ctComment);
+
+                    checkComments(followingComments);
                     return;
                 }
 
-                if (ctComment.getContent().isBlank()) {
-                    addLocalProblem(
-                        ctComment,
-                        new LocalizedMessage("unnecessary-comment-empty"),
-                        ProblemType.UNNECESSARY_COMMENT
-                    );
+                if (!element.getComments().isEmpty()) {
+                    checkComments(element.getComments());
                 }
             }
         });
