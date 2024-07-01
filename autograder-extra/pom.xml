@@ -69,6 +69,13 @@
             <version>${pmd.version}</version>
         </dependency>
 
+        <!-- (necessary for PMD) -->
+        <dependency>
+            <groupId>org.ow2.asm</groupId>
+            <artifactId>asm</artifactId>
+            <version>9.7</version>
+        </dependency>
+
         <!-- Error Prone -->
         <dependency>
             <groupId>com.google.errorprone</groupId>
