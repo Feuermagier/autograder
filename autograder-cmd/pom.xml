@@ -27,6 +27,11 @@
 
         <dependency>
             <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-extra</artifactId>
+        </dependency>
+
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-span</artifactId>
         </dependency>
 

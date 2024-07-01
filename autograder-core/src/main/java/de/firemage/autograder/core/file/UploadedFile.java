@@ -6,7 +6,6 @@ import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.CompilationResult;
 import de.firemage.autograder.core.compiler.Compiler;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.errorprone.TempLocation;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,7 +1,6 @@
 package de.firemage.autograder.core.file;
 
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.errorprone.TempLocation;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

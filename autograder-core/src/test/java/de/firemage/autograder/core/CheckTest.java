@@ -2,7 +2,7 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;

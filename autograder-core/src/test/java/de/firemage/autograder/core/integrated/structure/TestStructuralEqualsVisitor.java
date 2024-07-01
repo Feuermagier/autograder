@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.integrated.structure;
 
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.params.ParameterizedTest;

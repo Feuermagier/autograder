@@ -962,6 +962,10 @@ public final class SpoonUtil {
         // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
         CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
 
+        if (ctTypeReference.getTypeDeclaration() == null) {
+            return ctTypeReference.isSubtypeOf(expectedType.getReference());
+        }
+
         boolean result = !(ctTypeReference instanceof CtTypeParameterReference)
             && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
 

@@ -1,6 +1,9 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.parallel.AnalysisScheduler;
 import org.slf4j.Logger;
@@ -25,18 +28,18 @@ import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public class IntegratedAnalysis {
+public class IntegratedAnalysis implements CodeLinter<IntegratedCheck> {
     private static final boolean IS_IN_DEBUG_MODE = SpoonUtil.isInJunitTest();
     private static final String INITIAL_INTEGRITY_CHECK_NAME = "StaticAnalysis-Constructor";
     private static final boolean ENSURE_NO_ORPHANS = false;
     private static final boolean ENSURE_NO_MODEL_CHANGES = false;
     private static final Logger logger = LoggerFactory.getLogger(IntegratedAnalysis.class);
 
-    private final UploadedFile file;
-    private final CtModel originalModel;
-    private final StaticAnalysis staticAnalysis;
+    private UploadedFile file;
+    private CtModel originalModel;
+    private StaticAnalysis staticAnalysis;
 
-    public IntegratedAnalysis(UploadedFile file) {
+    private void init(UploadedFile file) {
         this.file = file;
 
         // create a copy of the model to later check if a check changed the model
@@ -54,24 +57,39 @@ public class IntegratedAnalysis {
         this.assertModelIntegrity(INITIAL_INTEGRITY_CHECK_NAME);
     }
 
-    public void lint(Iterable<? extends IntegratedCheck> checks, Consumer<? super LinterStatus> statusConsumer, AnalysisScheduler scheduler) {
+    @Override
+    public Class<IntegratedCheck> supportedCheckType() {
+        return IntegratedCheck.class;
+    }
+
+    @Override
+    public List<Problem> lint(
+        UploadedFile submission,
+        TempLocation tempLocation,
+        ClassLoader classLoader,
+        List<IntegratedCheck> checks,
+        Consumer<? super LinterStatus> statusConsumer
+    ) {
+        this.init(submission);
+
         statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
         this.staticAnalysis.getCodeModel().ensureModelBuild();
 
         statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
 
-        scheduler.submitTask((analysisScheduler, reporter) -> {
-            for (IntegratedCheck check : checks) {
-                long beforeTime = System.nanoTime();
-                reporter.reportProblems(check.run(
-                    this.staticAnalysis,
-                    this.file.getSource()
-                ));
-                long afterTime = System.nanoTime();
-                logger.info("Completed check " + check.getClass().getSimpleName() + " in " + ((afterTime - beforeTime) / 1_000_000 + "ms"));
-                this.assertModelIntegrity(check.getClass().getSimpleName());
-            }
-        });
+        List<Problem> result = new ArrayList<>();
+        for (IntegratedCheck check : checks) {
+            long beforeTime = System.nanoTime();
+            result.addAll(check.run(
+                this.staticAnalysis,
+                this.file.getSource()
+            ));
+            long afterTime = System.nanoTime();
+            logger.info("Completed check " + check.getClass().getSimpleName() + " in " + ((afterTime - beforeTime) / 1_000_000 + "ms"));
+            this.assertModelIntegrity(check.getClass().getSimpleName());
+        }
+
+        return result;
     }
 
     // sometimes spoon creates invalid elements, which are not the fault of this project or any check

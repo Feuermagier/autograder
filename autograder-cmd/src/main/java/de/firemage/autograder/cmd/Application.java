@@ -2,7 +2,6 @@ package de.firemage.autograder.cmd;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
 import de.firemage.autograder.cmd.output.Annotation;
 import de.firemage.autograder.core.ArtemisUtil;
 import de.firemage.autograder.core.CheckConfiguration;
@@ -12,10 +11,9 @@ import de.firemage.autograder.core.LinterConfigurationException;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.span.Formatter;
 import de.firemage.autograder.span.Highlight;
@@ -31,7 +29,6 @@ import picocli.CommandLine.ParameterException;
 import picocli.CommandLine.Parameters;
 import picocli.CommandLine.Spec;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -40,16 +37,12 @@ import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.function.Consumer;
-import java.util.stream.Stream;
 
 @Command(mixinStandardHelpOptions = true, version = "codelinter-cmd 1.0",
         description = "Static code analysis for student java code")

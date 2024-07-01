@@ -3,7 +3,7 @@ package de.firemage.autograder.core.integrated;
 import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.file.UploadedFile;

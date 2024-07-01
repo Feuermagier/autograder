@@ -7,7 +7,6 @@ status-model = Building the code model
 status-integrated = Running integrated analysis
 
 # Linters
-linter-spotbugs = SpotBugs
 linter-pmd = PMD
 linter-integrated = Integrated Analysis
 linter-error-prone = error-prone
