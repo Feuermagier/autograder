@@ -38,7 +38,13 @@ public class Evaluator extends CtScanner implements PartialEvaluator {
         // the clone detaches the element from the model
         //
         // any modifications must not affect the model
-        return this.evaluateUnsafe((R) ctElement.clone());
+        R result = this.evaluateUnsafe((R) ctElement.clone());
+
+        if (result.isParentInitialized() && result.getParent() != null) {
+            throw new IllegalStateException("The parent of the root node has not been detached");
+        }
+
+        return result;
     }
 
     /**
@@ -49,11 +55,10 @@ public class Evaluator extends CtScanner implements PartialEvaluator {
      * @param <R> the type of the element
      */
     @SuppressWarnings("unchecked")
-    public <R extends CtElement> R evaluateUnsafe(R ctElement) {
-        CtElement result = ctElement;
-        this.root = result;
+    private <R extends CtElement> R evaluateUnsafe(R ctElement) {
+        this.root = ctElement;
 
-        result.accept(this);
+        ctElement.accept(this);
 
         return (R) this.root;
     }
@@ -62,14 +67,21 @@ public class Evaluator extends CtScanner implements PartialEvaluator {
         // do not replace the node if it has not been changed
         if (result == ctElement) return;
 
+        // To preserve the integrity of the model, where each element points to the correct parent,
+        // we have to clone the result before replacing the original element.
+        CtElement replacement = result.clone();
+
         // to replace a node in the tree, the parent must be initialized
         //
         // the root node is detached from the model, so it has no parent
         // if the root node has been updated, it will be replaced:
         if (ctElement == this.root) {
-            this.root = result;
+            // the node that will replace the root, might have a parent that is below the root
+            // so we need to detach the new root from its parent to prevent weird cycles
+            replacement.setParent(null);
+            this.root = replacement;
         } else {
-            ctElement.replace(result);
+            ctElement.replace(replacement);
         }
     }
 

@@ -2,7 +2,7 @@ package de.firemage.autograder.core.compiler;
 
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;

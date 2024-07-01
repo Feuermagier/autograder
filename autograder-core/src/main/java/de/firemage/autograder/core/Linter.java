@@ -2,18 +2,10 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.errorprone.ErrorProneCheck;
-import de.firemage.autograder.core.errorprone.ErrorProneLinter;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.integrated.IntegratedAnalysis;
-import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.parallel.AnalysisResult;
 import de.firemage.autograder.core.parallel.AnalysisScheduler;
-import de.firemage.autograder.core.pmd.PMDCheck;
-import de.firemage.autograder.core.pmd.PMDLinter;
-import de.firemage.autograder.core.spotbugs.SpotbugsCheck;
-import de.firemage.autograder.core.spotbugs.SpotbugsLinter;
 import fluent.bundle.FluentBundle;
 import fluent.bundle.FluentResource;
 import fluent.functions.icu.ICUFunctionFactory;
@@ -24,9 +16,9 @@ import org.reflections.scanners.Scanners;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -138,10 +130,20 @@ public final class Linter {
         return this.checkFile(file, checkConfiguration, checks, statusConsumer);
     }
 
+    private static <T> List<T> castUnsafe(Iterable<?> list, Class<? extends T> clazz) {
+        List<T> result = new ArrayList<>();
+
+        for (Object object : list) {
+            result.add(clazz.cast(object));
+        }
+
+        return result;
+    }
+
     public List<Problem> checkFile(
         UploadedFile file,
         CheckConfiguration checkConfiguration,
-        List<? extends Check> checks,
+        Iterable<? extends Check> checks,
         Consumer<LinterStatus> statusConsumer
     ) throws LinterException, IOException {
         // the file is null if the student did not upload source code
@@ -149,57 +151,42 @@ public final class Linter {
             return new ArrayList<>();
         }
 
-        List<PMDCheck> pmdChecks = new ArrayList<>();
-        List<SpotbugsCheck> spotbugsChecks = new ArrayList<>();
-        List<IntegratedCheck> integratedChecks = new ArrayList<>();
-        List<ErrorProneCheck> errorProneChecks = new ArrayList<>();
+        Map<CodeLinter<?>, List<Check>> linterChecks = new IdentityHashMap<>();
 
+        List<? extends CodeLinter<?>> codeLinters = this.findCodeLinter();
         for (Check check : checks) {
-            if (check instanceof PMDCheck pmdCheck) {
-                pmdChecks.add(pmdCheck);
-            } else if (check instanceof SpotbugsCheck spotbugsCheck) {
-                spotbugsChecks.add(spotbugsCheck);
-            } else if (check instanceof IntegratedCheck integratedCheck) {
-                integratedChecks.add(integratedCheck);
-            }
-
-            // allow checks to implement ErrorProneCheck in addition to extending a parent class
-            if (check instanceof ErrorProneCheck errorProneCheck) {
-                errorProneChecks.add(errorProneCheck);
+            for (CodeLinter<?> linter : codeLinters) {
+                if (linter.supportedCheckType().isInstance(check)) {
+                    linterChecks.computeIfAbsent(linter, key -> new ArrayList<>()).add(check);
+                    // only add each check to one linter
+                    break;
+                }
             }
         }
 
         AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
 
-        if (!pmdChecks.isEmpty()) {
-            scheduler.submitTask((s, reporter) -> {
-                statusConsumer.accept(LinterStatus.RUNNING_PMD);
-                reporter.reportProblems(new PMDLinter().lint(file, pmdChecks, this.classLoader));
-            });
-        }
-
-        if (!spotbugsChecks.isEmpty()) {
-            scheduler.submitTask((s, reporter) -> {
-                statusConsumer.accept(LinterStatus.RUNNING_SPOTBUGS);
-                reporter.reportProblems(new SpotbugsLinter().lint(file, file.getCompilationResult().jar(), spotbugsChecks));
-            });
-        }
-
         AnalysisResult result;
         try (TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
-            Path tmpLocation = tempLinterLocation.toPath();
+            for (var entry : linterChecks.entrySet()) {
+                CodeLinter linter = entry.getKey();
+                var targetCheckType = linter.supportedCheckType();
+                var associatedChecks = castUnsafe(entry.getValue(), targetCheckType);
 
-            if (!integratedChecks.isEmpty()) {
-                scheduler.submitTask((s, reporter) -> {
-                    IntegratedAnalysis analysis = new IntegratedAnalysis(file, tmpLocation);
-                    analysis.lint(integratedChecks, statusConsumer, s);
-                });
-            }
+                // skip linting if there are no checks for this linter
+                // some linters might do stuff even if there are no checks
+                if (associatedChecks.isEmpty()) {
+                    continue;
+                }
 
-            if (!errorProneChecks.isEmpty()) {
                 scheduler.submitTask((s, reporter) -> {
-                    statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
-                    reporter.reportProblems(new ErrorProneLinter().lint(file, tempLinterLocation, errorProneChecks));
+                    reporter.reportProblems(linter.lint(
+                        file,
+                        tempLinterLocation,
+                        this.classLoader,
+                        associatedChecks,
+                        statusConsumer
+                    ));
                 });
             }
 
@@ -280,25 +267,46 @@ public final class Linter {
     }
 
     private static final Collection<Class<?>> CHECKS = new LinkedHashSet<>(
-        new Reflections("de.firemage.autograder.core.check", Scanners.TypesAnnotated)
+        new Reflections("de.firemage.autograder.", Scanners.TypesAnnotated)
             .getTypesAnnotatedWith(ExecutableCheck.class)
     );
 
     public List<Check> findChecksForProblemTypes(Collection<ProblemType> problems) {
         return CHECKS
             .stream()
-            .filter(c -> isRequiredCheck(c.getAnnotation(ExecutableCheck.class), problems))
-            .map(c -> {
+            .filter(check -> isRequiredCheck(check.getAnnotation(ExecutableCheck.class), problems))
+            .map(check -> {
                 try {
-                    return (Check) c.getConstructor().newInstance();
+                    return (Check) check.getConstructor().newInstance();
                 } catch (ReflectiveOperationException e) {
-                    throw new IllegalStateException("Failed to instantiate check " + c.getName(), e);
+                    throw new IllegalStateException("Failed to instantiate check " + check.getName(), e);
                 } catch (ClassCastException e) {
-                    throw new IllegalStateException(c.getName() + " does not inherit from Check");
+                    throw new IllegalStateException(check.getName() + " does not inherit from Check");
                 }
             })
             .toList();
     }
+
+    private static final Collection<Class<?>> CODE_LINTER = new LinkedHashSet<>(
+        new Reflections("de.firemage.autograder.", Scanners.SubTypes)
+            .getSubTypesOf(CodeLinter.class)
+    );
+
+    public List<? extends CodeLinter<?>> findCodeLinter() {
+        return CODE_LINTER
+            .stream()
+            .map(linter -> {
+                try {
+                    return (CodeLinter<?>) linter.getConstructor().newInstance();
+                } catch (ReflectiveOperationException e) {
+                    throw new IllegalStateException("Failed to instantiate check " + linter.getName(), e);
+                } catch (ClassCastException e) {
+                    throw new IllegalStateException(linter.getName() + " does not inherit from Check");
+                }
+            })
+            .toList();
+    }
+
 
     private boolean isRequiredCheck(ExecutableCheck check, Collection<ProblemType> problems) {
         return check.enabled() && problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));

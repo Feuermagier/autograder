@@ -1,8 +1,0 @@
-general.ConstantNamingAndQualifierCheck
-Constants should be static final and have an upper camel case name
-Test.java:7
-Test.java:8
-Test.java:9
-Test.java:10
-Test.java:13
-Test.java:23

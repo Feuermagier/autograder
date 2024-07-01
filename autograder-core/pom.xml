@@ -15,20 +15,10 @@
     <url>https://github.com/Feuermagier/autograder/autograder-core</url>
 
     <properties>
-        <spoon.version>11.0.0</spoon.version>
-        <pmd.version>7.0.0-rc3</pmd.version>
-        <spotbugs.version>6.45.0</spotbugs.version>
-        <jgraph.version>1.5.2</jgraph.version>
         <fluent.version>0.70</fluent.version>
     </properties>
 
     <dependencies>
-        <!-- Internal -->
-        <dependency>
-            <groupId>de.firemage.autograder</groupId>
-            <artifactId>autograder-treeg</artifactId>
-        </dependency>
-
         <!-- Spoon -->
         <dependency>
             <groupId>fr.inria.gforge.spoon</groupId>
@@ -54,49 +44,6 @@
             </exclusions>
         </dependency>
 
-
-        <!-- PMD -->
-        <dependency>
-            <groupId>net.sourceforge.pmd</groupId>
-            <artifactId>pmd-java</artifactId>
-            <version>${pmd.version}</version>
-        </dependency>
-
-        <!-- Spotbugs -->
-        <dependency>
-            <groupId>com.github.spotbugs</groupId>
-            <artifactId>spotbugs</artifactId>
-            <version>4.8.6</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
-
-        <!-- Error Prone -->
-        <dependency>
-            <groupId>com.google.errorprone</groupId>
-            <artifactId>error_prone_core</artifactId>
-            <version>2.28.0</version>
-        </dependency>
-
-        <!-- ASM -->
-        <dependency>
-            <groupId>org.ow2.asm</groupId>
-            <artifactId>asm</artifactId>
-            <version>${asm.version}</version>
-        </dependency>
-
-        <!-- Apache Commons -->
-        <dependency>
-            <groupId>commons-io</groupId>
-            <artifactId>commons-io</artifactId>
-            <version>2.16.1</version>
-        </dependency>
-
-
         <!-- Config -->
         <dependency>
             <groupId>com.fasterxml.jackson.dataformat</groupId>
@@ -113,39 +60,6 @@
             <groupId>org.slf4j</groupId>
             <artifactId>jcl-over-slf4j</artifactId>
             <version>${slf4j.version}</version>
-        </dependency>
-
-        <!-- Compression - to unpack tar files extracted from docker containers -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-compress</artifactId>
-            <version>1.26.2</version>
-        </dependency>
-
-        <!-- Language detection -->
-        <dependency>
-            <groupId>com.github.pemistahl</groupId>
-            <artifactId>lingua</artifactId>
-            <version>1.2.2</version>
-        </dependency>
-
-        <!-- Commons -->
-        <dependency>
-            <groupId>org.apache.commons</groupId>
-            <artifactId>commons-lang3</artifactId>
-            <version>3.14.0</version>
-        </dependency>
-
-        <!-- Graphs -->
-        <dependency>
-            <groupId>org.jgrapht</groupId>
-            <artifactId>jgrapht-core</artifactId>
-            <version>${jgraph.version}</version>
-        </dependency>
-        <dependency>
-            <groupId>org.jgrapht</groupId>
-            <artifactId>jgrapht-io</artifactId>
-            <version>${jgraph.version}</version>
         </dependency>
 
         <!-- Charsets -->
@@ -174,4 +88,20 @@
             <version>0.10.2</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <executions>
+                    <execution>
+                        <goals>
+                            <goal>test-jar</goal>
+                        </goals>
+                    </execution>
+                </executions>
+            </plugin>
+        </plugins>
+    </build>
 </project>

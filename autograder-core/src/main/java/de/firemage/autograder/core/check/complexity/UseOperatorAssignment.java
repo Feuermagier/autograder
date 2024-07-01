@@ -16,12 +16,24 @@ import spoon.reflect.declaration.CtTypedElement;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @ExecutableCheck(reportedProblems = {ProblemType.USE_OPERATOR_ASSIGNMENT})
 
 public class UseOperatorAssignment extends IntegratedCheck {
     private static final List<Class<?>> NON_COMMUTATIVE_TYPES = List.of(
         java.lang.String.class
+    );
+    private static final Set<BinaryOperatorKind> NON_ASSIGNABLE_OPERATORS = Set.of(
+        BinaryOperatorKind.AND,
+        BinaryOperatorKind.EQ,
+        BinaryOperatorKind.GE,
+        BinaryOperatorKind.GT,
+        BinaryOperatorKind.INSTANCEOF,
+        BinaryOperatorKind.LE,
+        BinaryOperatorKind.LT,
+        BinaryOperatorKind.NE,
+        BinaryOperatorKind.OR
     );
 
     private boolean isCommutativeType(CtTypedElement<?> ctTypedElement) {
@@ -42,13 +54,13 @@ public class UseOperatorAssignment extends IntegratedCheck {
     }
 
     private boolean isAssignable(BinaryOperatorKind binaryOperatorKind) {
-        return this.isCommutative(binaryOperatorKind) || List.of(
+        return !NON_ASSIGNABLE_OPERATORS.contains(binaryOperatorKind) && (this.isCommutative(binaryOperatorKind) || List.of(
             BinaryOperatorKind.MOD,
             BinaryOperatorKind.MINUS,
             BinaryOperatorKind.DIV,
             BinaryOperatorKind.SL,
             BinaryOperatorKind.SR
-        ).contains(binaryOperatorKind);
+        ).contains(binaryOperatorKind));
     }
 
     @Override

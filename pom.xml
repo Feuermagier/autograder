@@ -43,9 +43,9 @@
         <maven.compiler.target>${java.version}</maven.compiler.target>
         <maven.compiler.release>${java.version}</maven.compiler.release>
 
-        <asm.version>9.7</asm.version>
         <slf4j.version>2.0.13</slf4j.version>
         <jackson.version>2.17.0</jackson.version>
+        <spoon.version>11.0.0</spoon.version>
 
         <revision>0.5.13</revision>
     </properties>
@@ -92,6 +92,11 @@
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-span</artifactId>
+                <version>0.5.41</version>
+            </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-extra</artifactId>
                 <version>0.5.41</version>
             </dependency>
         </dependencies>
@@ -229,6 +234,7 @@
                 <module>autograder-cmd</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
+                <module>autograder-extra</module>
             </modules>
         </profile>
 
@@ -242,6 +248,7 @@
                 <module>autograder-cmd</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
+                <module>autograder-extra</module>
             </modules>
         </profile>
     </profiles>

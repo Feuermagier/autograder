@@ -177,7 +177,7 @@ public enum ProblemType {
     CHAR_RANGE,
 
     /**
-     * Similar to {@link ProblemType.INCONSISTENT_COMMENT_LANGUAGE}, but reports comments where the AI thinks that the comment is neither german nor english.
+     * Similar to {@link ProblemType#INCONSISTENT_COMMENT_LANGUAGE}, but reports comments where the AI thinks that the comment is neither german nor english.
      * <br>
      * Not very reliable and does not detect the obvious cases like japanese characters.
      */

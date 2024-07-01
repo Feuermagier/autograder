@@ -115,6 +115,18 @@ public class UsesFinder {
         return CtElementStream.of(UsesFinder.getFor(type).scanner.typeUses.getOrDefault(type, List.of())).assumeElementType();
     }
 
+    private static CtElementStream<CtType<?>> supertypesOf(CtType<?> type) {
+        return CtElementStream.of(UsesFinder.getFor(type).scanner.supertypes.getOrDefault(type, new LinkedHashSet<>())).assumeElementType();
+    }
+
+    public static boolean isSubtypeOf(CtType<?> parentType, CtType<?> potentialSubtype) {
+        return parentType == potentialSubtype
+            // this only caches classes declared in the model
+            || UsesFinder.supertypesOf(parentType).anyMatch(type -> potentialSubtype == type)
+            // that is why we have to call the original method
+            || parentType.isSubtypeOf(potentialSubtype.getReference());
+    }
+
     public static CtElementStream<CtType<?>> subtypesOf(CtType<?> type, boolean includeSelf) {
         Stream<CtType<?>> selfStream = includeSelf ? Stream.of(type) : Stream.empty();
         return CtElementStream.concat(
@@ -150,6 +162,7 @@ public class UsesFinder {
         private final Map<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
         private final Map<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
         private final Map<CtType, SequencedSet<CtType>> subtypes = new IdentityHashMap<>();
+        private final Map<CtType, SequencedSet<CtType>> supertypes = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block
@@ -308,6 +321,7 @@ public class UsesFinder {
             CtTypeReference<?> superType = ctType.getSuperclass();
             while (superType != null && superType.getTypeDeclaration() != null) {
                 this.subtypes.computeIfAbsent(superType.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
+                this.supertypes.computeIfAbsent(ctType, k -> new LinkedHashSet<>()).add(superType.getTypeDeclaration());
                 superType = superType.getSuperclass();
             }
 

@@ -19,12 +19,13 @@ import spoon.reflect.declaration.CtElement;
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
-        if (!(expression instanceof CtConstructorCall<?> ctConstructorCall) ||
-            !(SpoonUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class))) {
+        if (!(expression instanceof CtConstructorCall<?> ctConstructorCall)
+            || !SpoonUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class)) {
             return false;
         }
 
-        // check if the invoked constructor passes a message to the exception
+        // check if the invoked constructor passes a message to the parent exception like this:
+        // class MyException extends Exception { MyException() { super("here is the message"); } }
         if (ctConstructorCall.getExecutable().getExecutableDeclaration() instanceof CtConstructor<?> ctConstructor
             && ctConstructor.getBody().filterChildren(ctElement -> ctElement instanceof CtInvocation<?> ctInvocation
                 // we just check if there is any invocation with a message, because this is easier and might be enough
@@ -49,9 +50,7 @@ public class ExceptionMessageCheck extends IntegratedCheck {
 
             String literal = SpoonUtil.tryGetStringLiteral(ctExpression).orElse(null);
 
-            if (literal != null) {
-                return !literal.isBlank();
-            }
+            return literal == null || !literal.isBlank();
         }
 
         return false;

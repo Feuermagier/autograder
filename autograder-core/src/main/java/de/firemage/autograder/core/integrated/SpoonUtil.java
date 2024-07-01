@@ -54,7 +54,6 @@ import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
-import spoon.support.reflect.declaration.CtElementImpl;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -489,7 +488,7 @@ public final class SpoonUtil {
 
         Evaluator evaluator = new Evaluator(InlineVariableRead.create(true));
 
-        return evaluator.evaluateUnsafe(ctExpression);
+        return evaluator.evaluate(ctExpression);
     }
 
     /**
@@ -786,7 +785,7 @@ public final class SpoonUtil {
         CtTypeReference<?> targetType = type.unbox();
         if (targetType.isPrimitive()) {
             // the FoldUtils.convert method only works for Number -> Number conversions
-            if (targetType.box().isSubtypeOf(type.getFactory().createCtTypeReference(Number.class))) {
+            if (SpoonUtil.isSubtypeOf(targetType.box(), Number.class)) {
                 // for instances of Number, one can use the convert method:
                 if (literal.getValue() instanceof Number number) {
                     result.setValue(FoldUtils.convert(type, number));
@@ -942,7 +941,8 @@ public final class SpoonUtil {
         return SpoonUtil.isTypeEqualTo(
             ctType,
             Arrays.stream(expected)
-                .map(factory::createReference)
+                .map(factory::get)
+                .map(CtType::getReference)
                 .toArray(CtTypeReference[]::new)
         );
     }
@@ -960,8 +960,23 @@ public final class SpoonUtil {
 
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
         // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
-        return !(ctTypeReference instanceof CtTypeParameterReference)
-            && ctTypeReference.isSubtypeOf(ctTypeReference.getFactory().Type().createReference(expected));
+        CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
+
+        if (ctTypeReference.getTypeDeclaration() == null) {
+            return ctTypeReference.isSubtypeOf(expectedType.getReference());
+        }
+
+        boolean result = !(ctTypeReference instanceof CtTypeParameterReference)
+            && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
+
+        if (SpoonUtil.isInJunitTest() && result != ctTypeReference.isSubtypeOf(expectedType.getReference())) {
+            throw new IllegalStateException("UsesFinder.isSubtypeOf(%s, %s) does not match spoon implementation".formatted(
+                ctTypeReference.getQualifiedName(),
+                expectedType.getQualifiedName()
+            ));
+        }
+
+        return result;
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
@@ -981,7 +996,7 @@ public final class SpoonUtil {
      * @param ctElement the element to get the parents of
      * @return an iterable over all parents, the given element is not included
      */
-    private static Iterable<CtElement> parents(CtElement ctElement) {
+    static Iterable<CtElement> parents(CtElement ctElement) {
         return () -> new Iterator<>() {
             private CtElement current = ctElement;
 

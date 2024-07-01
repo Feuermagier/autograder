@@ -6,7 +6,7 @@ import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;

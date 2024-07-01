@@ -17,14 +17,14 @@ import java.util.stream.Stream;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestMergedProblems extends AbstractCheckTest {
-    private static final String VARIABLE_FORMAT_STRING = "intField%d";
+    private static final String VARIABLE_FORMAT_STRING = "stringField%d";
     TestMergedProblems() {
         super(5);
     }
 
     private static Stream<String> generateViolations(int count) {
         return IntStream.range(0, count)
-            .mapToObj(i -> "private int %s;".formatted(VARIABLE_FORMAT_STRING.formatted(i)));
+            .mapToObj(i -> "private String %s = \"a\".concat(\"b\");".formatted(VARIABLE_FORMAT_STRING.formatted(i)));
     }
 
     @Test
@@ -44,16 +44,16 @@ class TestMergedProblems extends AbstractCheckTest {
                     """.formatted(String.join("\n", fields))
                 )
             )
-        ), List.of(ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME));
+        ), List.of(ProblemType.AVOID_STRING_CONCAT));
 
         assertEquals(5, problems.size());
 
         for (int i = 0; i < 4; i++) {
-            assertEquals(ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME, problems.get(i).getProblemType());
+            assertEquals(ProblemType.AVOID_STRING_CONCAT, problems.get(i).getProblemType());
             assertEquals(
                 this.linter.translateMessage(new LocalizedMessage(
-                    "variable-name-type-in-name",
-                    Map.of("name", VARIABLE_FORMAT_STRING.formatted(i))
+                    "common-reimplementation",
+                    Map.of("suggestion", "\"a\" + \"b\"")
                 )),
                 this.linter.translateMessage(problems.get(i).getExplanation())
             );
@@ -64,8 +64,8 @@ class TestMergedProblems extends AbstractCheckTest {
                 "merged-problems",
                 Map.of(
                     "message", this.linter.translateMessage(new LocalizedMessage(
-                        "variable-name-type-in-name",
-                        Map.of("name", VARIABLE_FORMAT_STRING.formatted(4))
+                        "common-reimplementation",
+                        Map.of("suggestion", "\"a\" + \"b\"")
                     )),
                     "locations", "L7, L8, L9, L10, L11"
                 )
@@ -99,16 +99,16 @@ class TestMergedProblems extends AbstractCheckTest {
                     """.formatted(String.join("\n", fields.subList(0, 3)))
                 )
             )
-        ), List.of(ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME));
+        ), List.of(ProblemType.AVOID_STRING_CONCAT));
 
         assertEquals(5, problems.size());
 
         for (int i = 0; i < 4; i++) {
-            assertEquals(ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME, problems.get(i).getProblemType());
+            assertEquals(ProblemType.AVOID_STRING_CONCAT, problems.get(i).getProblemType());
             assertEquals(
                 this.linter.translateMessage(new LocalizedMessage(
-                    "variable-name-type-in-name",
-                    Map.of("name", VARIABLE_FORMAT_STRING.formatted(i))
+                    "common-reimplementation",
+                    Map.of("suggestion", "\"a\" + \"b\"")
                 )),
                 this.linter.translateMessage(problems.get(i).getExplanation())
             );
@@ -119,8 +119,8 @@ class TestMergedProblems extends AbstractCheckTest {
                 "merged-problems",
                 Map.of(
                     "message", this.linter.translateMessage(new LocalizedMessage(
-                        "variable-name-type-in-name",
-                        Map.of("name", VARIABLE_FORMAT_STRING.formatted(4))
+                        "common-reimplementation",
+                        Map.of("suggestion", "\"a\" + \"b\"")
                     )),
                     "locations", "Test:(L7, L8, L9, L10, L11), Vector:(L2, L3, L4)"
                 )
@@ -157,7 +157,7 @@ class TestMergedProblems extends AbstractCheckTest {
                     """.formatted(fields.get(0))
                 )
             )
-        ), List.of(ProblemType.IDENTIFIER_CONTAINS_TYPE_NAME));
+        ), List.of(ProblemType.AVOID_STRING_CONCAT));
 
         assertEquals(5, problems.size());
 
@@ -166,8 +166,8 @@ class TestMergedProblems extends AbstractCheckTest {
                 "merged-problems",
                 Map.of(
                     "message", this.linter.translateMessage(new LocalizedMessage(
-                        "variable-name-type-in-name",
-                        Map.of("name", VARIABLE_FORMAT_STRING.formatted(4))
+                        "common-reimplementation",
+                        Map.of("suggestion", "\"a\" + \"b\"")
                     )),
                     "locations", "Test:(L7, L8, L9, L10, L11), Vector:L2"
                 )

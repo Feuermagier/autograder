@@ -19,7 +19,7 @@ import java.util.stream.Stream;
  * Provides a hierarchy of overwritten methods within the code model.
  * The hierarchy is built once at construction time for all methods, so that all subsequent queries are fast.
  */
-public class MethodHierarchy {
+public final class MethodHierarchy {
     private static final String METADATA_KEY = "autograder_method_hierarchy";
 
     private final IdentityHashMap<CtMethod<?>, SurroundingMethods> methodHierarchy;

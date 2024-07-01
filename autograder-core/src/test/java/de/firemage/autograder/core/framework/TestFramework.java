@@ -3,7 +3,7 @@ package de.firemage.autograder.core.framework;
 import de.firemage.autograder.core.CheckConfiguration;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.LinterException;
-import de.firemage.autograder.core.errorprone.TempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.SourcePath;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;

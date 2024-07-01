@@ -1,5 +1,0 @@
-oop.InheritanceBadPractices
-Bad uses of inheritance
-Test.java:6
-Test.java:8-10
-Test.java:20
