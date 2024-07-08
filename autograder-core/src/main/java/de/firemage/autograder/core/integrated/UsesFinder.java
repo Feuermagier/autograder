@@ -31,13 +31,10 @@ import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Collection;
 import java.util.Deque;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
-import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -118,24 +115,60 @@ public class UsesFinder {
         return CtElementStream.of(UsesFinder.getFor(type).scanner.typeUses.getOrDefault(type, List.of())).assumeElementType();
     }
 
-    private static CtElementStream<CtType<?>> supertypesOf(CtType<?> type) {
-        return CtElementStream.of(UsesFinder.getFor(type).scanner.supertypes.getOrDefault(type, new LinkedHashSet<>())).assumeElementType();
+    public static boolean isSubtypeOf(CtType<?> potentialSubtype, CtType<?> parentType) {
+        if (parentType == potentialSubtype
+            || potentialSubtype.isPrimitive()
+            || parentType.isPrimitive()) {
+            return true;
+        }
+
+        Set<CtType> knownSubtypes = UsesFinder.getFor(potentialSubtype).scanner.subtypes.getOrDefault(parentType, new LinkedHashSet<>());
+
+        // all types that are not shadow types, should be present
+        // in the source code and therefore in the set of known subtypes
+        if (!potentialSubtype.isShadow()) {
+            return knownSubtypes.contains(potentialSubtype);
+        }
+
+        // for shadow types we can't rely on the set of known subtypes (they might be incomplete)
+        //
+        // but if the potential subtype is already known to be a subtype of the parent type,
+        // we can return true immediately
+        if (knownSubtypes.contains(potentialSubtype)) {
+            return true;
+        }
+
+        boolean result = TypeUtil.streamAllSuperTypes(potentialSubtype).anyMatch(type -> parentType == type);
+
+        // this is just a sanity check to ensure that our implementation is correct
+        if (SpoonUtil.isInJunitTest() && result != potentialSubtype.isSubtypeOf(parentType.getReference())) {
+            throw new IllegalStateException("Inconsistent subtype information for %s and %s".formatted(
+                potentialSubtype.getQualifiedName(),
+                parentType.getQualifiedName()
+            ));
+        }
+
+        // keep track of the result for future queries
+        if (result) {
+            knownSubtypes.add(potentialSubtype);
+        }
+
+        return result;
     }
 
-    public static boolean isSubtypeOf(CtType<?> parentType, CtType<?> potentialSubtype) {
-        return parentType == potentialSubtype
-            // this only caches classes declared in the model
-            || UsesFinder.supertypesOf(parentType).anyMatch(type -> potentialSubtype == type)
-            // that is why we have to call the original method
-            || parentType.isSubtypeOf(potentialSubtype.getReference());
-    }
-
+    /**
+     * Returns the subtypes in the model of the given type.
+     *
+     * @param type the type should be declared in the source code and not a shadow type like java.util.List, for these types the result will be empty
+     * @param includeSelf whether the given type should be included in the result
+     * @return a stream of subtypes of the given type
+     */
     public static CtElementStream<CtType<?>> subtypesOf(CtType<?> type, boolean includeSelf) {
         Stream<CtType<?>> selfStream = includeSelf ? Stream.of(type) : Stream.empty();
         return CtElementStream.concat(
             selfStream,
             CtElementStream.of(UsesFinder.getFor(type).scanner.subtypes.getOrDefault(type, new LinkedHashSet<>())).assumeElementType()
-        );
+        ).filter(ctType -> !ctType.isShadow());
     }
 
     // It is difficult to determine whether a variable is being accessed by the variable access,
@@ -165,7 +198,6 @@ public class UsesFinder {
         private final Map<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
         private final Map<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
         private final Map<CtType, Set<CtType>> subtypes = new IdentityHashMap<>();
-        private final Map<CtType, Set<CtType>> supertypes = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block
@@ -319,28 +351,9 @@ public class UsesFinder {
             }
         }
 
-        @SuppressWarnings("unchecked")
         private void recordCtType(CtType<?> ctType) {
-            CtTypeReference<?> superType = ctType.getSuperclass();
-            while (superType != null && superType.getTypeDeclaration() != null) {
-                this.subtypes.computeIfAbsent(superType.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
-                this.supertypes.computeIfAbsent(ctType, k -> new LinkedHashSet<>()).add(superType.getTypeDeclaration());
-                superType = superType.getSuperclass();
-            }
-
-            Collection<CtTypeReference> visited = new HashSet<>();
-            Deque<CtTypeReference> superInterfaces = new LinkedList<>(ctType.getSuperInterfaces());
-            while (!superInterfaces.isEmpty()) {
-                CtTypeReference superInterface = superInterfaces.poll();
-                // skip already visited interfaces
-                if (!visited.add(superInterface)) {
-                    continue;
-                }
-
-                if (superInterface.getTypeDeclaration() != null) {
-                    this.subtypes.computeIfAbsent(superInterface.getTypeDeclaration(), k -> new LinkedHashSet<>()).add(ctType);
-                }
-                superInterfaces.addAll(superInterface.getSuperInterfaces());
+            for (CtType<?> superType : TypeUtil.allSuperTypes(ctType)) {
+                this.subtypes.computeIfAbsent(superType, key -> new LinkedHashSet<>()).add(ctType);
             }
         }
     }

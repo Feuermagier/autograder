@@ -56,9 +56,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
     }
 
     private boolean isAllowedType(CtTypeReference<?> ctTypeReference) {
-        return ALLOWED_TYPES.stream()
-                            .map(ty -> ctTypeReference.getFactory().Type().createReference(ty, false))
-                            .anyMatch(ctTypeReference::equals);
+        return SpoonUtil.isTypeEqualTo(ctTypeReference, ALLOWED_TYPES);
     }
 
     private boolean isInAllowedContext(CtTypeReference<?> ctTypeReference) {
@@ -113,9 +111,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         if (ctFieldRead != null) {
             CtFieldReference<?> ctFieldReference = ctFieldRead.getVariable();
             return ctFieldReference.getDeclaringType().equals(ctTypeReference)
-                    // TODO: use SpoonUtil.isTypeEqualTo
-                   && ctFieldReference.getType()
-                                      .equals(ctTypeReference.getFactory().Type().createReference(Class.class, false));
+                && SpoonUtil.isTypeEqualTo(ctFieldReference.getType(), java.lang.Class.class);
         }
 
         // AbstractMap.SimpleEntry

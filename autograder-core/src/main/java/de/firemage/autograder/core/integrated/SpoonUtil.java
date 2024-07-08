@@ -81,13 +81,14 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
+    private static final boolean IS_IN_JUNIT_TEST = Arrays.stream(Thread.currentThread().getStackTrace())
+        .anyMatch(element -> element.getClassName().startsWith("org.junit."));
     private SpoonUtil() {
 
     }
 
     public static boolean isInJunitTest() {
-        return Arrays.stream(Thread.currentThread().getStackTrace())
-            .anyMatch(element -> element.getClassName().startsWith("org.junit."));
+        return IS_IN_JUNIT_TEST;
     }
 
     public static boolean isString(CtTypeReference<?> type) {
@@ -938,10 +939,14 @@ public final class SpoonUtil {
      * @return true if the given type is equal to any of the expected types, false otherwise
      */
     public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
+        return SpoonUtil.isTypeEqualTo(ctType, Arrays.asList(expected));
+    }
+
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Collection<Class<?>> expected) {
         TypeFactory factory = ctType.getFactory().Type();
         return SpoonUtil.isTypeEqualTo(
             ctType,
-            Arrays.stream(expected)
+            expected.stream()
                 .map(factory::get)
                 .map(CtType::getReference)
                 .toArray(CtTypeReference[]::new)
@@ -967,17 +972,8 @@ public final class SpoonUtil {
             return ctTypeReference.isSubtypeOf(expectedType.getReference());
         }
 
-        boolean result = !(ctTypeReference instanceof CtTypeParameterReference)
+        return !(ctTypeReference instanceof CtTypeParameterReference)
             && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
-
-        if (SpoonUtil.isInJunitTest() && result != ctTypeReference.isSubtypeOf(expectedType.getReference())) {
-            throw new IllegalStateException("UsesFinder.isSubtypeOf(%s, %s) does not match spoon implementation".formatted(
-                ctTypeReference.getQualifiedName(),
-                expectedType.getQualifiedName()
-            ));
-        }
-
-        return result;
     }
 
     public static boolean isMainMethod(CtMethod<?> method) {
