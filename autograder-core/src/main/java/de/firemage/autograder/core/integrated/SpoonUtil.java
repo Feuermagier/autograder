@@ -8,7 +8,6 @@ import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
-import org.apache.commons.io.FilenameUtils;
 import spoon.processing.FactoryAccessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -54,6 +53,8 @@ import spoon.reflect.reference.CtReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
+
+import org.apache.commons.io.FilenameUtils;
 
 import java.io.File;
 import java.util.ArrayDeque;
@@ -1176,7 +1177,7 @@ public final class SpoonUtil {
      */
     public static Optional<CtStatement> getPreviousStatement(CtStatement ctStatement) {
         List<CtStatement> previousStatements = getPreviousStatements(ctStatement);
-        return previousStatements.isEmpty() ? Optional.empty() : Optional.of(previousStatements.getLast());
+        return previousStatements.isEmpty() ? Optional.empty() : Optional.of(previousStatements.get(previousStatements.size() - 1));
     }
 
     public static List<CtStatement> getPreviousStatements(CtStatement ctStatement) {

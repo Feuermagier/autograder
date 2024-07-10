@@ -42,7 +42,11 @@ public class UnnecessaryComment extends IntegratedCheck {
     }
 
     private static boolean isStandaloneComment(CtComment ctComment) {
-        return ctComment.getParent() instanceof CtElement ctElement && !ctElement.getComments().contains(ctComment);
+        var parent = ctComment.getParent();
+        if (parent == null) {
+            return false;
+        }
+        return !parent.getComments().contains(ctComment);
     }
 
     @Override
@@ -71,7 +75,7 @@ public class UnnecessaryComment extends IntegratedCheck {
                         .map(CtComment.class::cast)
                         .collect(Collectors.toCollection(ArrayList::new));
 
-                    followingComments.addFirst(ctComment);
+                    followingComments.add(0, ctComment);
 
                     checkComments(followingComments);
                     return;
