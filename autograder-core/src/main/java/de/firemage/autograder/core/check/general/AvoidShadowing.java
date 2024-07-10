@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtConstructor;
@@ -58,7 +59,7 @@ public class AvoidShadowing extends IntegratedCheck {
                 }
 
                 // skip fields inside overridden methods
-                if (SpoonUtil.isInOverridingMethod(ctVariable) || SpoonUtil.isInSetter(ctVariable)) {
+                if (MethodUtil.isInOverridingMethod(ctVariable) || SpoonUtil.isInSetter(ctVariable)) {
                     return;
                 }
 

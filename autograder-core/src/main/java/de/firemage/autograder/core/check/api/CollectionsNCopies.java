@@ -7,6 +7,7 @@ import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
@@ -39,7 +40,7 @@ public class CollectionsNCopies extends IntegratedCheck {
                     || !(ctInvocation.getExecutable().getSimpleName().equals("add"))
                     || ctInvocation.getArguments().size() != 1
                     || !(ctInvocation.getTarget() instanceof CtVariableRead<?> ctVariableRead)
-                    || !SpoonUtil.isSubtypeOf(ctVariableRead.getType(), java.util.Collection.class)) {
+                    || !TypeUtil.isSubtypeOf(ctVariableRead.getType(), java.util.Collection.class)) {
                     return;
                 }
 

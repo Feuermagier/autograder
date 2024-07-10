@@ -7,6 +7,8 @@ import de.firemage.autograder.core.check.utils.Option;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.ElementUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtConstructorCall;
@@ -76,7 +78,7 @@ import java.util.stream.Collectors;
 })
 public class LeakedCollectionCheck extends IntegratedCheck {
     private static boolean isMutableType(CtTypedElement<?> ctTypedElement) {
-        return  ctTypedElement.getType().isArray() || SpoonUtil.isSubtypeOf(ctTypedElement.getType(), java.util.Collection.class);
+        return  ctTypedElement.getType().isArray() || TypeUtil.isSubtypeOf(ctTypedElement.getType(), java.util.Collection.class);
     }
 
     /**
@@ -93,7 +95,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             return true;
         }
 
-        if (!SpoonUtil.isSubtypeOf(ctVariable.getType(), java.util.Collection.class)) {
+        if (!TypeUtil.isSubtypeOf(ctVariable.getType(), java.util.Collection.class)) {
             // not a collection
             return false;
         }
@@ -125,7 +127,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         }
 
         // we only care about arrays and collections for now
-        if (!SpoonUtil.isSubtypeOf(ctExpression.getType(), java.util.Collection.class)) {
+        if (!TypeUtil.isSubtypeOf(ctExpression.getType(), java.util.Collection.class)) {
             // not a collection
             return false;
         }
@@ -164,7 +166,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                 && ctConstructor.getDeclaringType() instanceof CtEnum<?> ctEnum
                 && hasAssignedParameterReference(ctExpression, ctConstructor)) {
                 // figure out the index of the parameter reference:
-                CtParameter<?> ctParameterToFind = findParameterReference(ctExpression, ctConstructor).unwrap();
+                CtParameter<?> ctParameterToFind = findParameterReference(ctExpression, ctConstructor).orElseThrow();
                 int index = -1;
                 for (CtParameter<?> ctParameter : ctConstructor.getParameters()) {
                     index += 1;
@@ -303,7 +305,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
 
             if (canBeMutated(field)) {
                 addLocalProblem(
-                    SpoonUtil.findValidPosition(ctExecutable),
+                    ElementUtil.findValidPosition(ctExecutable),
                     new LocalizedMessage(
                         "leaked-collection-return",
                         Map.of(
@@ -352,7 +354,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                 && isMutableType(ctField)) {
                 if (ctExecutable instanceof CtConstructor<?> ctConstructor) {
                     addLocalProblem(
-                        SpoonUtil.findValidPosition(ctStatement),
+                        ElementUtil.findValidPosition(ctStatement),
                         new LocalizedMessage(
                             "leaked-collection-constructor",
                             Map.of(
@@ -364,7 +366,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                     );
                 } else {
                     addLocalProblem(
-                        SpoonUtil.findValidPosition(ctStatement),
+                        ElementUtil.findValidPosition(ctStatement),
                         new LocalizedMessage(
                             "leaked-collection-assign",
                             Map.of(

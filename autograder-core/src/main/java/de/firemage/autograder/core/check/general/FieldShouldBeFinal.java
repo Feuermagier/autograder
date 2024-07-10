@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
@@ -39,7 +40,7 @@ public class FieldShouldBeFinal extends IntegratedCheck {
             return false;
         }
 
-        if (ctField.isProtected() && SpoonUtil.hasSubtype(ctClass)) {
+        if (ctField.isProtected() && TypeUtil.hasSubtype(ctClass)) {
             return false;
         }
 

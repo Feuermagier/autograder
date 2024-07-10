@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.structure;
 
 import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtExpression;
@@ -24,7 +25,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public final class StructuralEqualsVisitor extends EqualsVisitor {
-    private static final boolean IS_IN_DEBUG_MODE = SpoonUtil.isInJunitTest();
+    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInJunitTest();
 
     private static final Set<CtRole> ALLOWED_MISMATCHING_ROLES = Set.of(
         // allow mismatching comments

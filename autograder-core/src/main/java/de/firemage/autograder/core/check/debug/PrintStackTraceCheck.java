@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtVariableRead;
@@ -17,7 +17,7 @@ public class PrintStackTraceCheck extends IntegratedCheck {
             // workaround for https://github.com/INRIA/spoon/issues/5414
             && ctVariableRead.getType().getTypeDeclaration() != null
             // ensure the method is called on the correct type
-            && SpoonUtil.isSubtypeOf(ctVariableRead.getType(), java.lang.Throwable.class)
+            && TypeUtil.isSubtypeOf(ctVariableRead.getType(), java.lang.Throwable.class)
             && ctInvocation.getExecutable().getSimpleName().equals("printStackTrace");
     }
 

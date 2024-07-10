@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 
@@ -28,7 +28,7 @@ public class TooManyExceptions extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isSubtypeOf(ctClass.getReference(), java.lang.Exception.class)) {
+                if (TypeUtil.isSubtypeOf(ctClass.getReference(), java.lang.Exception.class)) {
                     declaredExceptions.add(ctClass);
                 }
             }

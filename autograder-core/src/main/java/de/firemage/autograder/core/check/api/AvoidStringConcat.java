@@ -5,7 +5,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtInvocation;
@@ -26,7 +26,7 @@ public class AvoidStringConcat extends IntegratedCheck {
 
                 if (ctInvocation.getTarget() == null
                     || ctInvocation.getTarget().getType() == null
-                    || !SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "concat", String.class)) {
+                    || !MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "concat", String.class)) {
                     return;
                 }
 

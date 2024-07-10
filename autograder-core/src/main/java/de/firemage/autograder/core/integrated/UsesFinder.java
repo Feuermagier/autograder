@@ -62,7 +62,7 @@ public class UsesFinder {
     }
 
     private static UsesFinder getFor(FactoryAccessor factoryAccessor) {
-        var uses = (UsesFinder) SpoonUtil.getRootPackage(factoryAccessor).getMetadata(METADATA_KEY);
+        var uses = (UsesFinder) ElementUtil.getRootPackage(factoryAccessor).getMetadata(METADATA_KEY);
         if (uses == null) {
             throw new IllegalArgumentException("No uses information available for this model");
         }
@@ -141,7 +141,7 @@ public class UsesFinder {
         boolean result = TypeUtil.streamAllSuperTypes(potentialSubtype).anyMatch(type -> parentType == type);
 
         // this is just a sanity check to ensure that our implementation is correct
-        if (SpoonUtil.isInJunitTest() && result != potentialSubtype.isSubtypeOf(parentType.getReference())) {
+        if (CoreUtil.isInJunitTest() && result != potentialSubtype.isSubtypeOf(parentType.getReference())) {
             throw new IllegalStateException("Inconsistent subtype information for %s and %s".formatted(
                 potentialSubtype.getQualifiedName(),
                 parentType.getQualifiedName()

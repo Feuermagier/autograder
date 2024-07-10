@@ -2,8 +2,8 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.ModelBuildException;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.Launcher;
 import spoon.compiler.Environment;
@@ -98,7 +98,7 @@ public final class CodeModel implements AutoCloseable {
             this.mainMethod = this.getModel()
                 .getElements(new NamedElementFilter<>(CtMethod.class, "main"))
                 .stream()
-                .filter(SpoonUtil::isMainMethod)
+                .filter(MethodUtil::isMainMethod)
                 .findFirst()
                 .map(ctMethod -> (CtMethod<Void>) ctMethod);
         }

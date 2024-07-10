@@ -7,6 +7,8 @@ import de.firemage.autograder.core.check.api.UseEnumValues.CtEnumFieldRead;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtForEach;
@@ -56,7 +58,7 @@ public class CollectionAddAll extends IntegratedCheck {
 
             CtExecutableReference<?> executableReference = ctInvocation.getExecutable();
             CtVariableReference<?> collection = ctVariableAccess.getVariable();
-            if (!SpoonUtil.isSignatureEqualTo(
+            if (!MethodUtil.isSignatureEqualTo(
                 executableReference,
                 boolean.class,
                 "add",
@@ -183,8 +185,8 @@ public class CollectionAddAll extends IntegratedCheck {
         }
 
         if (statements.get(0) instanceof CtInvocation<?> ctInvocation
-            && SpoonUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Collection.class)
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), boolean.class, "add", Object.class)
+            && TypeUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Collection.class)
+            && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), boolean.class, "add", Object.class)
             && ctInvocation.getExecutable().getParameters().size() == 1
             // ensure that the add argument simply accesses the for variable:
             // for (T t : array) {

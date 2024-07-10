@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtComment;
@@ -33,7 +34,7 @@ public class EmptyBlockCheck extends IntegratedCheck {
 
                 if (ctBlock.getParent() instanceof CtMethod<?> ctMethod
                     && ctMethod.getBody().equals(ctBlock)
-                    && SpoonUtil.isInOverridingMethod(ctBlock)) {
+                    && MethodUtil.isInOverridingMethod(ctBlock)) {
                     return;
                 }
 

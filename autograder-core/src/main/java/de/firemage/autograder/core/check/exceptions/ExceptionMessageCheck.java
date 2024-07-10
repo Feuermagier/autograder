@@ -7,6 +7,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
@@ -20,7 +21,7 @@ import spoon.reflect.declaration.CtElement;
 public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
         if (!(expression instanceof CtConstructorCall<?> ctConstructorCall)
-            || !SpoonUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class)) {
+            || !TypeUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class)) {
             return false;
         }
 
@@ -44,7 +45,7 @@ public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean hasMessage(Iterable<? extends CtExpression<?>> arguments) {
         for (CtExpression<?> ctExpression : arguments) {
             // consider a passed throwable as having message
-            if (SpoonUtil.isSubtypeOf(ctExpression.getType(), java.lang.Throwable.class)) {
+            if (TypeUtil.isSubtypeOf(ctExpression.getType(), java.lang.Throwable.class)) {
                 return true;
             }
 

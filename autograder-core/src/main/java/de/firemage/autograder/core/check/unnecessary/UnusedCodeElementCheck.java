@@ -8,6 +8,8 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLocalVariable;
@@ -41,7 +43,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
     public static boolean isConsideredUnused(CtNamedElement element, CodeModel model) {
         // ignore exception constructors and params in those constructors
         var parentConstructor = SpoonUtil.getParentOrSelf(element, CtConstructor.class);
-        if (parentConstructor != null && SpoonUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
+        if (parentConstructor != null && TypeUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
             return false;
         }
 
@@ -132,7 +134,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
             @Override
             public <T> void visitCtMethod(CtMethod<T> ctMethod) {
                 if (MethodHierarchy.isOverridingMethod(ctMethod)
-                    || SpoonUtil.isMainMethod(ctMethod)) {
+                    || MethodUtil.isMainMethod(ctMethod)) {
                     super.visitCtMethod(ctMethod);
                     return;
                 }
@@ -154,8 +156,8 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
 
             @Override
             public <T> void visitCtParameter(CtParameter<T> ctParameter) {
-                if (SpoonUtil.isInOverridingMethod(ctParameter)
-                    || SpoonUtil.isInMainMethod(ctParameter)
+                if (MethodUtil.isInOverridingMethod(ctParameter)
+                    || MethodUtil.isInMainMethod(ctParameter)
                     || ctParameter.getParent() instanceof CtLambda<?>
                     || ctParameter.getParent(CtInterface.class) != null) {
                     super.visitCtParameter(ctParameter);

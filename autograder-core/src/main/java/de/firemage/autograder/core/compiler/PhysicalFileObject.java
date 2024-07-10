@@ -1,8 +1,8 @@
 package de.firemage.autograder.core.compiler;
 
-import de.firemage.autograder.core.SerializableCharset;
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.SourcePath;
+import de.firemage.autograder.core.SerializableCharset;
 
 import javax.lang.model.element.Modifier;
 import javax.lang.model.element.NestingKind;

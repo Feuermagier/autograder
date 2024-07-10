@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtArrayAccess;
 import spoon.reflect.code.CtBinaryOperator;
@@ -52,11 +53,11 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
 
     private boolean isConcreteCollectionType(CtTypeReference<?> ctType) {
         return !ctType.isInterface() && Stream.of(java.util.Collection.class, java.util.Map.class)
-            .anyMatch(ctClass -> SpoonUtil.isSubtypeOf(ctType, ctClass));
+            .anyMatch(ctClass -> TypeUtil.isSubtypeOf(ctType, ctClass));
     }
 
     private boolean isAllowedType(CtTypeReference<?> ctTypeReference) {
-        return SpoonUtil.isTypeEqualTo(ctTypeReference, ALLOWED_TYPES);
+        return TypeUtil.isTypeEqualTo(ctTypeReference, ALLOWED_TYPES);
     }
 
     private boolean isInAllowedContext(CtTypeReference<?> ctTypeReference) {
@@ -111,7 +112,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
         if (ctFieldRead != null) {
             CtFieldReference<?> ctFieldReference = ctFieldRead.getVariable();
             return ctFieldReference.getDeclaringType().equals(ctTypeReference)
-                && SpoonUtil.isTypeEqualTo(ctFieldReference.getType(), java.lang.Class.class);
+                && TypeUtil.isTypeEqualTo(ctFieldReference.getType(), java.lang.Class.class);
         }
 
         // AbstractMap.SimpleEntry
@@ -152,7 +153,7 @@ public class ConcreteCollectionCheck extends IntegratedCheck {
             return true;
         }
 
-        if (SpoonUtil.isInOverridingMethod(ctTypeReference)
+        if (MethodUtil.isInOverridingMethod(ctTypeReference)
             || this.isInAllowedContext(ctTypeReference)
             || this.isAllowedType(ctTypeReference)) {
             return false;

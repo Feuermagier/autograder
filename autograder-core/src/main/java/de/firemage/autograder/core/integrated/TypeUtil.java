@@ -2,9 +2,13 @@ package de.firemage.autograder.core.integrated;
 
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeInformation;
+import spoon.reflect.declaration.CtTypeMember;
+import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayDeque;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
@@ -16,6 +20,10 @@ import java.util.NoSuchElementException;
  */
 public final class TypeUtil {
     private TypeUtil() {
+    }
+
+    public static boolean hasSubtype(CtType<?> ctType) {
+        return UsesFinder.subtypesOf(ctType, false).hasAny();
     }
 
     /**
@@ -89,5 +97,60 @@ public final class TypeUtil {
                 return result.getTypeDeclaration();
             }
         };
+    }
+
+    /**
+     * Checks if the given type is equal to any of the expected types.
+     *
+     * @param ctType the type to check
+     * @param expected all allowed types
+     * @return true if the given type is equal to any of the expected types, false otherwise
+     */
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
+        return TypeUtil.isTypeEqualTo(ctType, Arrays.asList(expected));
+    }
+
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Collection<Class<?>> expected) {
+        TypeFactory factory = ctType.getFactory().Type();
+        return TypeUtil.isTypeEqualTo(
+            ctType,
+            expected.stream()
+                .map(factory::get)
+                .map(CtType::getReference)
+                .toArray(CtTypeReference[]::new)
+        );
+    }
+
+    /**
+     * Checks if the given type is equal to any of the expected types.
+     *
+     * @param ctType the type to check
+     * @param expected all allowed types
+     * @return true if the given type is equal to any of the expected types, false otherwise
+     */
+    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, CtTypeReference<?>... expected) {
+        return Arrays.asList(expected).contains(ctType);
+    }
+
+    public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
+        // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
+        CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
+
+        if (ctTypeReference.getTypeDeclaration() == null) {
+            return ctTypeReference.isSubtypeOf(expectedType.getReference());
+        }
+
+        return !(ctTypeReference instanceof CtTypeParameterReference)
+            && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
+    }
+
+    /**
+     * Checks if the given type is an inner class.
+     *
+     * @param type the type to check, not null
+     * @return true if the given type is an inner class, false otherwise
+     */
+    public static boolean isInnerClass(CtTypeMember type) {
+        return type.getDeclaringType() != null;
     }
 }

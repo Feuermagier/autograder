@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtForEach;
 import spoon.reflect.code.CtInvocation;
@@ -22,7 +23,7 @@ public class UseEntrySet extends IntegratedCheck {
     private static boolean hasInvokedKeySet(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() != null
             && ctInvocation.getExecutable() != null
-            && SpoonUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Map.class)
+            && TypeUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Map.class)
             && ctInvocation.getExecutable().getSimpleName().equals("keySet");
     }
 

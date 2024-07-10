@@ -6,6 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
@@ -30,7 +32,7 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
     }
 
     private static boolean isTargetTypeEqualTo(CtInvocation<?> ctInvocation, Class<?> ctClass) {
-        return ctInvocation.getTarget() != null && SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), ctClass);
+        return ctInvocation.getTarget() != null && TypeUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), ctClass);
     }
 
     private static boolean isSizeCall(CtInvocation<?> ctInvocation) {
@@ -42,17 +44,17 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
                 ctInvocation.getFactory().Type().booleanPrimitiveType(),
                 "isEmpty"
             ) != null
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size");
+            && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size");
     }
 
     private static boolean isLengthCall(CtInvocation<?> ctInvocation) {
         return isTargetTypeEqualTo(ctInvocation, java.lang.String.class)
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "length");
+            && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "length");
     }
 
     private static boolean isEqualsCall(CtInvocation<?> ctInvocation) {
         return isTargetTypeEqualTo(ctInvocation, java.lang.String.class)
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), boolean.class, "equals", Object.class);
+            && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), boolean.class, "equals", Object.class);
     }
 
     private static CtExpression<?> buildIsEmptySuggestion(CtExpression<?> target) {

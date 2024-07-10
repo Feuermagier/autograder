@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.declaration.CtField;
@@ -53,7 +53,7 @@ public class MagicString extends IntegratedCheck {
                 List<CtLiteral<String>> magicStrings = ctType.getElements(new CompositeFilter<>(
                     FilteringOperator.INTERSECTION,
                     new TypeFilter<>(CtLiteral.class),
-                    element -> element.getType() != null && SpoonUtil.isTypeEqualTo(element.getType(), String.class),
+                    element -> element.getType() != null && TypeUtil.isTypeEqualTo(element.getType(), String.class),
                     IS_MAGIC_STRING
                 ));
 

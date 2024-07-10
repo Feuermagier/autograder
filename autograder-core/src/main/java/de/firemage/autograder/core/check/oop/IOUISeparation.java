@@ -6,6 +6,9 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.ElementUtil;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtInvocation;
@@ -36,7 +39,7 @@ public class IOUISeparation extends IntegratedCheck {
             && ctFieldRead.getVariable().isStatic()
             && ctFieldRead.getVariable().isFinal()
             // check that the Attribute is accessed from the class System
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), System.class);
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), System.class);
     }
 
     /**
@@ -48,7 +51,7 @@ public class IOUISeparation extends IntegratedCheck {
     private boolean hasAccessedScanner(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() instanceof CtVariableRead<?> ctVariableRead
             && ctVariableRead.getVariable() != null // just to be sure
-            && SpoonUtil.isTypeEqualTo(ctVariableRead.getVariable().getType(), java.util.Scanner.class);
+            && TypeUtil.isTypeEqualTo(ctVariableRead.getVariable().getType(), java.util.Scanner.class);
     }
 
     private static boolean isAllowedLocation(boolean requireSameClass, List<? extends CtElement> uses) {
@@ -57,7 +60,7 @@ public class IOUISeparation extends IntegratedCheck {
         }
 
         CtElement firstElement = uses.get(0);
-        CtElement commonParent = SpoonUtil.findCommonParent(firstElement, uses.subList(1, uses.size()));
+        CtElement commonParent = ElementUtil.findCommonParent(firstElement, uses.subList(1, uses.size()));
 
         CtModel ctModel = commonParent.getFactory().getModel();
 
@@ -114,7 +117,7 @@ public class IOUISeparation extends IntegratedCheck {
             type = type.getDeclaringType();
         }
 
-        return type == null || type.getMethods().stream().noneMatch(SpoonUtil::isMainMethod);
+        return type == null || type.getMethods().stream().noneMatch(MethodUtil::isMainMethod);
     }
 
     @Override

@@ -6,8 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.extra.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
     ProblemType.COMPOSITION_OVER_INHERITANCE
 })
 public class InheritanceBadPractices extends IntegratedCheck {
-    private static final boolean IS_IN_DEBUG_MODE = SpoonUtil.isInJunitTest();
+    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInJunitTest();
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {

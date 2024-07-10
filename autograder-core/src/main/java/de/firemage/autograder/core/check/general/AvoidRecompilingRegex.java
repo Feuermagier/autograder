@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
@@ -21,7 +22,7 @@ import java.util.Map;
 public class AvoidRecompilingRegex extends IntegratedCheck {
     private boolean isPatternInvocation(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
             && List.of("matches", "compile").contains(ctInvocation.getExecutable().getSimpleName());
     }
 
@@ -32,7 +33,7 @@ public class AvoidRecompilingRegex extends IntegratedCheck {
             public void process(CtField<String> ctField) {
                 if (ctField.isImplicit()
                     || !ctField.getPosition().isValidPosition()
-                    || !SpoonUtil.isTypeEqualTo(ctField.getType(), String.class)
+                    || !TypeUtil.isTypeEqualTo(ctField.getType(), String.class)
                     || ctField.getDefaultExpression() == null) {
                     return;
                 }

@@ -46,7 +46,7 @@ public record ForLoopRange(
         }
 
         if (potentialLoopVariable == null
-            || !SpoonUtil.isTypeEqualTo(potentialLoopVariable.getType(), int.class, Integer.class)
+            || !TypeUtil.isTypeEqualTo(potentialLoopVariable.getType(), int.class, Integer.class)
             || potentialLoopVariable.getDefaultExpression() == null) {
             return Optional.empty();
         }
@@ -57,13 +57,13 @@ public record ForLoopRange(
         CtExpression<?> start = SpoonUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression());
 
         // ensure that it is initialized with some integer
-        if (!(SpoonUtil.isTypeEqualTo(start.getType(), int.class, Integer.class))
+        if (!(TypeUtil.isTypeEqualTo(start.getType(), int.class, Integer.class))
             // validate the for expression:
             || ctFor.getExpression() == null
             // must be i <= or i <
             || !(ctFor.getExpression() instanceof CtBinaryOperator<Boolean> loopExpression)
             || !Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE).contains(loopExpression.getKind())
-            || !(SpoonUtil.isTypeEqualTo(loopExpression.getRightHandOperand().getType(), int.class, Integer.class))
+            || !(TypeUtil.isTypeEqualTo(loopExpression.getRightHandOperand().getType(), int.class, Integer.class))
             // check that the left side is the loop variable
             || !(loopExpression.getLeftHandOperand() instanceof CtVariableAccess<?> ctVariableAccess)
             || !ctVariableAccess.getVariable().equals(ctLocalVariable.getReference())

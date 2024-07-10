@@ -8,7 +8,6 @@ import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
 import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCasts;
-import spoon.processing.FactoryAccessor;
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -17,11 +16,9 @@ import spoon.reflect.code.CtBodyHolder;
 import spoon.reflect.code.CtBreak;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtComment;
-import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtJavaDoc;
-import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
@@ -37,20 +34,16 @@ import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
-import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtParameter;
 import spoon.reflect.declaration.CtType;
-import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.declaration.ModifierKind;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.factory.Factory;
-import spoon.reflect.factory.TypeFactory;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtReference;
-import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.reference.CtVariableReference;
 
@@ -64,35 +57,23 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
-import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.BiPredicate;
 import java.util.function.Consumer;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
 public final class SpoonUtil {
-    private static final boolean IS_IN_JUNIT_TEST = Arrays.stream(Thread.currentThread().getStackTrace())
-        .anyMatch(element -> element.getClassName().startsWith("org.junit."));
     private SpoonUtil() {
-
-    }
-
-    public static boolean isInJunitTest() {
-        return IS_IN_JUNIT_TEST;
     }
 
     public static boolean isString(CtTypeReference<?> type) {
-        return isTypeEqualTo(type, java.lang.String.class);
+        return TypeUtil.isTypeEqualTo(type, java.lang.String.class);
     }
 
     public static Optional<CtTypeReference<?>> isToStringCall(CtExpression<?> expression) {
@@ -101,7 +82,7 @@ public final class SpoonUtil {
         }
 
         if (expression instanceof CtInvocation<?> invocation &&
-            SpoonUtil.isSignatureEqualTo(invocation.getExecutable(), java.lang.String.class, "toString")) {
+            MethodUtil.isSignatureEqualTo(invocation.getExecutable(), java.lang.String.class, "toString")) {
             return Optional.of(invocation.getTarget().getType());
         } else {
             return Optional.empty();
@@ -123,7 +104,7 @@ public final class SpoonUtil {
 
     public static boolean isBoolean(CtTypedElement<?> ctTypedElement) {
         CtTypeReference<?> ctTypeReference = ctTypedElement.getType();
-        return ctTypeReference != null && SpoonUtil.isTypeEqualTo(ctTypeReference, boolean.class, Boolean.class);
+        return ctTypeReference != null && TypeUtil.isTypeEqualTo(ctTypeReference, boolean.class, Boolean.class);
     }
 
     public static Optional<Boolean> tryGetBooleanLiteral(CtExpression<?> expression) {
@@ -140,7 +121,7 @@ public final class SpoonUtil {
     public static Optional<String> tryGetStringLiteral(CtExpression<?> expression) {
         if (SpoonUtil.resolveConstant(expression) instanceof CtLiteral<?> literal
             && literal.getValue() != null
-            && isTypeEqualTo(literal.getType(), java.lang.String.class)) {
+            && TypeUtil.isTypeEqualTo(literal.getType(), java.lang.String.class)) {
 
             return Optional.of((String) literal.getValue());
         } else {
@@ -355,7 +336,7 @@ public final class SpoonUtil {
         // 1 is of type int and the other side might for example be a double or float
         CtLiteral step = ctBinaryOperator.getFactory().Core().createLiteral();
 
-        Predicate<CtTypeReference<?>> isCharacter = ty -> SpoonUtil.isTypeEqualTo(ty, char.class, java.lang.Character.class);
+        Predicate<CtTypeReference<?>> isCharacter = ty -> TypeUtil.isTypeEqualTo(ty, char.class, java.lang.Character.class);
         if (isCharacter.test(ctBinaryOperator.getRightHandOperand().getType())) {
             // for character use an integer literal
             step.setValue((char) 1);
@@ -682,58 +663,6 @@ public final class SpoonUtil {
                && !type.getQualifiedName().equals("char");
     }
 
-    public static boolean isSignatureEqualTo(
-        CtExecutableReference<?> ctExecutableReference,
-        Class<?> returnType,
-        String methodName,
-        Class<?>... parameterTypes
-    ) {
-        TypeFactory factory = ctExecutableReference.getFactory().Type();
-        return SpoonUtil.isSignatureEqualTo(
-            ctExecutableReference,
-            factory.createReference(returnType),
-            methodName,
-            Arrays.stream(parameterTypes).map(factory::createReference).toArray(CtTypeReference[]::new)
-        );
-    }
-
-    public static boolean isSignatureEqualTo(
-        CtExecutableReference<?> ctExecutableReference,
-        CtTypeReference<?> returnType,
-        String methodName,
-        CtTypeReference<?>... parameterTypes
-    ) {
-        // check that they both return the same type
-        if (!SpoonUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)) {
-            return false;
-        }
-
-        // their names should match:
-        if (!ctExecutableReference.getSimpleName().equals(methodName)) {
-            return false;
-        }
-
-        List<CtTypeReference<?>> givenParameters = ctExecutableReference.getParameters();
-
-        // the number of parameters should match
-        if (givenParameters.size() != parameterTypes.length) {
-            return false;
-        }
-
-        for (int i = 0; i < parameterTypes.length; i++) {
-            // check if the type of the parameter is equal to the expected type
-            if (!SpoonUtil.isTypeEqualTo(givenParameters.get(i), parameterTypes[i])) {
-                return false;
-            }
-        }
-
-        return true;
-    }
-
-    public static boolean hasSubtype(CtType<?> ctType) {
-        return UsesFinder.subtypesOf(ctType, false).hasAny();
-    }
-
     /**
      * Creates a static invocation of the given method on the given target type.
      *
@@ -778,7 +707,7 @@ public final class SpoonUtil {
         result.setType(type.clone());
 
         // casting a primitive to a string:
-        if (SpoonUtil.isTypeEqualTo(type, String.class) && literal.getType().isPrimitive()) {
+        if (TypeUtil.isTypeEqualTo(type, String.class) && literal.getType().isPrimitive()) {
             result.setValue(literal.getValue().toString());
             return result;
         }
@@ -787,7 +716,7 @@ public final class SpoonUtil {
         CtTypeReference<?> targetType = type.unbox();
         if (targetType.isPrimitive()) {
             // the FoldUtils.convert method only works for Number -> Number conversions
-            if (SpoonUtil.isSubtypeOf(targetType.box(), Number.class)) {
+            if (TypeUtil.isSubtypeOf(targetType.box(), Number.class)) {
                 // for instances of Number, one can use the convert method:
                 if (literal.getValue() instanceof Number number) {
                     result.setValue(FoldUtils.convert(type, number));
@@ -802,13 +731,13 @@ public final class SpoonUtil {
                 }
             }
 
-            if (SpoonUtil.isTypeEqualTo(targetType, char.class)) {
+            if (TypeUtil.isTypeEqualTo(targetType, char.class)) {
                 if (literal.getValue() instanceof Number number) {
                     result.setValue((char) number.intValue());
                 } else {
                     result.setValue((char) literal.getValue());
                 }
-            } else if (SpoonUtil.isTypeEqualTo(targetType, boolean.class)) {
+            } else if (TypeUtil.isTypeEqualTo(targetType, boolean.class)) {
                 result.setValue((boolean) literal.getValue());
             }
         } else {
@@ -905,7 +834,7 @@ public final class SpoonUtil {
 
             // primitive types and strings are immutable as well:
             if (ctType.getReference().unbox().isPrimitive()
-                || SpoonUtil.isTypeEqualTo(ctType.getReference(), java.lang.String.class)) {
+                || TypeUtil.isTypeEqualTo(ctType.getReference(), java.lang.String.class)) {
                 continue;
             }
 
@@ -931,119 +860,6 @@ public final class SpoonUtil {
         return true;
     }
 
-    /**
-     * Checks if the given type is equal to any of the expected types.
-     *
-     * @param ctType the type to check
-     * @param expected all allowed types
-     * @return true if the given type is equal to any of the expected types, false otherwise
-     */
-    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Class<?>... expected) {
-        return SpoonUtil.isTypeEqualTo(ctType, Arrays.asList(expected));
-    }
-
-    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, Collection<Class<?>> expected) {
-        TypeFactory factory = ctType.getFactory().Type();
-        return SpoonUtil.isTypeEqualTo(
-            ctType,
-            expected.stream()
-                .map(factory::get)
-                .map(CtType::getReference)
-                .toArray(CtTypeReference[]::new)
-        );
-    }
-
-    /**
-     * Checks if the given type is equal to any of the expected types.
-     *
-     * @param ctType the type to check
-     * @param expected all allowed types
-     * @return true if the given type is equal to any of the expected types, false otherwise
-     */
-    public static boolean isTypeEqualTo(CtTypeReference<?> ctType, CtTypeReference<?>... expected) {
-        return Arrays.asList(expected).contains(ctType);
-    }
-
-    public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
-        // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
-        CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
-
-        if (ctTypeReference.getTypeDeclaration() == null) {
-            return ctTypeReference.isSubtypeOf(expectedType.getReference());
-        }
-
-        return !(ctTypeReference instanceof CtTypeParameterReference)
-            && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
-    }
-
-    public static boolean isMainMethod(CtMethod<?> method) {
-        return method.isStatic()
-            && method.isPublic()
-            && SpoonUtil.isSignatureEqualTo(
-                method.getReference(),
-                void.class,
-                "main",
-                java.lang.String[].class
-            );
-    }
-
-    /**
-     * Returns an iterable over all parents of the given element.
-     *
-     * @param ctElement the element to get the parents of
-     * @return an iterable over all parents, the given element is not included
-     */
-    static Iterable<CtElement> parents(CtElement ctElement) {
-        return () -> new Iterator<>() {
-            private CtElement current = ctElement;
-
-            @Override
-            public boolean hasNext() {
-                return this.current.isParentInitialized();
-            }
-
-            @Override
-            public CtElement next() throws NoSuchElementException {
-                if (!this.hasNext()) {
-                    throw new NoSuchElementException("No more parents");
-                }
-
-                CtElement result = this.current.getParent();
-                this.current = result;
-                return result;
-            }
-        };
-    }
-
-    private static <T, E> HashSet<T> newHashSet(Iterator<? extends E> elements, Function<E, ? extends T> mapper) {
-        HashSet<T> set = new HashSet<>();
-        for (; elements.hasNext(); set.add(mapper.apply(elements.next())));
-        return set;
-    }
-
-    private record IdentityKey<T>(T value) {
-        public static <T> IdentityKey<T> of(T value) {
-            return new IdentityKey<>(value);
-        }
-
-        @Override
-        public int hashCode() {
-            return System.identityHashCode(this.value);
-        }
-
-        @Override
-        public boolean equals(Object obj) {
-            if (this == obj) {
-                return true;
-            }
-            if (obj == null || this.getClass() != obj.getClass()) {
-                return false;
-            }
-            IdentityKey<?> that = (IdentityKey<?>) obj;
-            return this.value == that.value();
-        }
-    }
-
     public static void visitCtCompilationUnit(CtModel ctModel, Consumer<? super CtCompilationUnit> lambda) {
         // it is not possible to visit CtCompilationUnit through the processor API.
         //
@@ -1057,70 +873,6 @@ public final class SpoonUtil {
             // visit each compilation unit only once
             .distinct()
             .forEach(lambda);
-    }
-
-    /**
-     * Finds the closest common parent of the given elements.
-     *
-     * @param firstElement the first element to find the common parent of
-     * @param others any amount of other elements to find the common parent of
-     * @return the closest common parent of the given elements or the firstElement itself if others is empty
-     */
-    public static CtElement findCommonParent(CtElement firstElement, Iterable<? extends CtElement> others) {
-        // CtElement::hasParent will recursively call itself until it reaches the root
-        // => inefficient and might cause a stack overflow
-
-        // add all parents of the firstElement to a set sorted by distance to the firstElement:
-        Set<IdentityKey<CtElement>> ctParents = new LinkedHashSet<>();
-        ctParents.add(IdentityKey.of(firstElement));
-        parents(firstElement).forEach(element -> ctParents.add(IdentityKey.of(element)));
-
-        for (CtElement other : others) {
-            // only keep the parents that the firstElement and the other have in common
-            ctParents.retainAll(newHashSet(parents(other).iterator(), IdentityKey::of));
-        }
-
-        // the first element in the set is the closest common parent
-        return ctParents.iterator().next().value();
-    }
-
-    /**
-     * Checks if the given type is an inner class.
-     *
-     * @param type the type to check, not null
-     * @return true if the given type is an inner class, false otherwise
-     */
-    public static boolean isInnerClass(CtTypeMember type) {
-        return type.getDeclaringType() != null;
-    }
-
-    public static boolean isInOverridingMethod(CtElement ctElement) {
-        CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
-        if (ctMethod == null) {
-            return false;
-        }
-
-        return MethodHierarchy.isOverridingMethod(ctMethod);
-    }
-
-    /**
-     * Checks if the given method is an invocation.
-     * @param statement which is checked
-     * @return true if the statement is an invocation (instance of CtInvocation, CtConstructorCall or CtLambda),
-     * false otherwise
-     */
-    public static boolean isInvocation(CtStatement statement) {
-        return statement instanceof CtInvocation<?> || statement instanceof CtConstructorCall<?> ||
-            statement instanceof CtLambda<?>;
-    }
-
-    public static boolean isInMainMethod(CtElement ctElement) {
-        CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
-        if (ctMethod == null) {
-            return false;
-        }
-
-        return isMainMethod(ctMethod);
     }
 
     public static CtElement getReferenceDeclaration(CtReference ctReference) {
@@ -1273,28 +1025,6 @@ public final class SpoonUtil {
         return effects;
     }
 
-    public static SourcePosition findPosition(CtElement ctElement) {
-        if (ctElement.getPosition().isValidPosition()) {
-            return ctElement.getPosition();
-        }
-
-        for (CtElement element : parents(ctElement)) {
-            if (element.getPosition().isValidPosition()) {
-                return element.getPosition();
-            }
-        }
-
-        return null;
-    }
-
-    public static CtElement findValidPosition(CtElement ctElement) {
-        CtElement result = ctElement;
-        while (result != null && !result.getPosition().isValidPosition()) {
-            result = result.getParent();
-        }
-        return result;
-    }
-
     /**
      * Converts the provided source position into a human-readable string.
      *
@@ -1342,34 +1072,5 @@ public final class SpoonUtil {
             }
         }
         throw new IllegalArgumentException("Parameter not found in executable");
-    }
-
-    public static CtPackage getRootPackage(FactoryAccessor element) {
-        return element.getFactory().getModel().getRootPackage();
-    }
-
-
-    public static boolean isAnyNestedOrSame(CtElement ctElement, Set<? extends CtElement> potentialParents) {
-        // CtElement::hasParent will recursively call itself until it reaches the root
-        // => inefficient and might cause a stack overflow
-
-        if (potentialParents.contains(ctElement)) {
-            return true;
-        }
-
-        for (CtElement parent : parents(ctElement)) {
-            if (potentialParents.contains(parent)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    public static boolean isNestedOrSame(CtElement element, CtElement parent) {
-        Set<CtElement> set = Collections.newSetFromMap(new IdentityHashMap<>());
-        set.add(parent);
-
-        return element == parent || SpoonUtil.isAnyNestedOrSame(element, set);
     }
 }

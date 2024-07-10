@@ -6,6 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.treeg.InvalidRegExSyntaxException;
 import de.firemage.autograder.treeg.RegExParser;
@@ -60,15 +62,15 @@ public class RegexCheck extends IntegratedCheck {
         }
 
         return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
             && List.of("matches", "compile").contains(ctExecutable.getSimpleName())
-            || SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), java.lang.String.class)
+            || TypeUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), java.lang.String.class)
             && (
-            SpoonUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceAll", String.class, String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceFirst", String.class, String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class, int.class)
+            MethodUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceAll", String.class, String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceFirst", String.class, String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class, int.class)
         );
     }
 

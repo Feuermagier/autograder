@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldAccess;
@@ -29,7 +30,7 @@ public class SimplifyArraysFill extends IntegratedCheck {
                 }
 
                 if (!(ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess)
-                    || !SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.Arrays.class)
+                    || !TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.Arrays.class)
                     || !ctInvocation.getExecutable().getSimpleName().equals("fill")
                     || ctInvocation.getArguments().size() != 4) {
                     return;

@@ -7,6 +7,7 @@ import de.firemage.autograder.core.integrated.CtRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import org.apache.commons.lang3.Range;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -87,7 +88,7 @@ public class CharRange extends IntegratedCheck {
             public void process(CtBinaryOperator<Boolean> ctBinaryOperator) {
                 if (ctBinaryOperator.isImplicit()
                     || !ctBinaryOperator.getPosition().isValidPosition()
-                    || !SpoonUtil.isTypeEqualTo(ctBinaryOperator.getType(), java.lang.Boolean.class, boolean.class)) {
+                    || !TypeUtil.isTypeEqualTo(ctBinaryOperator.getType(), java.lang.Boolean.class, boolean.class)) {
                     return;
                 }
 

@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtCatch;
@@ -66,12 +66,12 @@ public class TryCatchComplexity extends IntegratedCheck {
     }
     private List<CtStatement> filterMethodInvocations(List<CtStatement> statements) {
         return statements.stream()
-                .filter(statement -> !SpoonUtil.isInvocation(statement))
+                .filter(statement -> !MethodUtil.isInvocation(statement))
                 .toList();
     }
 
     private List<CtStatement> extractMethodInvocations(List<CtStatement> statements) {
-        return statements.stream().filter(SpoonUtil::isInvocation).toList();
+        return statements.stream().filter(MethodUtil::isInvocation).toList();
     }
     private void visitStatement(CtStatement statement, List<CtStatement> allStatements) {
         // The CtStatement may be null if the body of an if statement is empty. for example "if (true);"
@@ -88,7 +88,7 @@ public class TryCatchComplexity extends IntegratedCheck {
                 visitNestedStatement(ctTry, allStatements);
                 List<CtCatch> catchers = ctTry.getCatchers();
                 catchers.stream().flatMap(catcher -> catcher.getBody().getStatements().stream())
-                        .filter(statement -> !SpoonUtil.isInvocation(statement))
+                        .filter(statement -> !MethodUtil.isInvocation(statement))
                         .forEach(statement -> visitStatement(statement, allStatements));
 
                 allStatements.addAll(extractMethodInvocations(catchers

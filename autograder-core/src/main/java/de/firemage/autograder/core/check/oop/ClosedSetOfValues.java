@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.AssignmentEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.CtAbstractSwitch;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtExpression;
@@ -42,7 +43,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
     );
 
     private static boolean isSupportedType(CtTypeReference<?> ctTypeReference) {
-        return SpoonUtil.isTypeEqualTo(ctTypeReference, SUPPORTED_TYPES.toArray(new Class[0]));
+        return TypeUtil.isTypeEqualTo(ctTypeReference, SUPPORTED_TYPES.toArray(new Class[0]));
     }
 
     private boolean shouldSwitchOverEnum(CtAbstractSwitch<?> ctSwitch) {

@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -32,7 +33,7 @@ public class CompareCharValue extends IntegratedCheck {
     );
 
     private static Optional<Integer> getComparedIntegerValue(CtExpression<?> left, CtExpression<?> right) {
-        if (!SpoonUtil.isTypeEqualTo(left.getType(), char.class)
+        if (!TypeUtil.isTypeEqualTo(left.getType(), char.class)
             || !(SpoonUtil.resolveConstant(right) instanceof CtLiteral<?> literal && literal.getValue() instanceof Integer value)) {
             return Optional.empty();
         }

@@ -6,6 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBinaryOperator;
@@ -35,14 +37,14 @@ import java.util.Set;
 public class MathReimplementation extends IntegratedCheck {
     private static boolean isMathPow(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), Math.class)
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), double.class, "pow", double.class, double.class);
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), Math.class)
+            && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), double.class, "pow", double.class, double.class);
     }
 
     private static boolean isMathSqrt(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), Math.class)
-            && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), double.class, "sqrt", double.class);
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), Math.class)
+            && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), double.class, "sqrt", double.class);
     }
 
     private static boolean isPowSqrt(CtInvocation<?> ctInvocation) {

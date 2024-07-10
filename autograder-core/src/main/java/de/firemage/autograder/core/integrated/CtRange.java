@@ -20,7 +20,7 @@ public record CtRange<T extends Comparable<T>>(
     @SuppressWarnings("unchecked")
     private static <T extends Comparable<T>> Optional<CtRange<T>> of(CtBinaryOperator<Boolean> ctBinaryOperator, Class<?>... expectedTypes) {
         Predicate<? super CtExpression<?>> isLiteral = expr -> expr instanceof CtLiteral<?> ctLiteral
-            && SpoonUtil.isTypeEqualTo(ctLiteral.getType(), expectedTypes);
+            && TypeUtil.isTypeEqualTo(ctLiteral.getType(), expectedTypes);
 
         // swap operator if necessary, so that the literal is on the right side:
         // <expr> <op> <literal>

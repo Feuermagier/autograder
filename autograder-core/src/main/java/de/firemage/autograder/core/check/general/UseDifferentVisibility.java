@@ -4,9 +4,10 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.CtModel;
@@ -71,7 +72,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
         }
         List<CtElement> references = referencesStream.toList();
 
-        CtElement commonParent = SpoonUtil.findCommonParent(ctTypeMember, references);
+        CtElement commonParent = ElementUtil.findCommonParent(ctTypeMember, references);
         CtType<?> declaringType = ctTypeMember.getDeclaringType();
 
         // if there are no references, the member itself will be returned
@@ -112,7 +113,7 @@ public class UseDifferentVisibility extends IntegratedCheck {
                 }
 
                 Visibility currentVisibility = Visibility.of(ctTypeMember);
-                if (ctTypeMember instanceof CtMethod<?> ctMethod && (SpoonUtil.isMainMethod(ctMethod) || MethodHierarchy.isOverridingMethod(ctMethod))) {
+                if (ctTypeMember instanceof CtMethod<?> ctMethod && (MethodUtil.isMainMethod(ctMethod) || MethodHierarchy.isOverridingMethod(ctMethod))) {
                     return;
                 }
 

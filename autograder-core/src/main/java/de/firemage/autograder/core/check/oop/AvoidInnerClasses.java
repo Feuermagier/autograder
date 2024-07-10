@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtType;
 
@@ -13,7 +13,7 @@ import spoon.reflect.declaration.CtType;
 public class AvoidInnerClasses extends IntegratedCheck {
     private void checkCtType(CtType<?> ctType) {
         // only lint non-private static inner classes
-        if (SpoonUtil.isInnerClass(ctType) && !ctType.isPrivate() && (ctType.isStatic() || ctType.isInterface() || ctType.isEnum() || ctType.isLocalType())) {
+        if (TypeUtil.isInnerClass(ctType) && !ctType.isPrivate() && (ctType.isStatic() || ctType.isInterface() || ctType.isEnum() || ctType.isLocalType())) {
             this.addLocalProblem(
                 ctType,
                 new LocalizedMessage("avoid-inner-classes"),

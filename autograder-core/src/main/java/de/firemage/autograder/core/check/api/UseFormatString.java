@@ -6,6 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -85,7 +87,7 @@ public class UseFormatString extends IntegratedCheck {
         for (CtExpression<?> ctExpression : ctExpressions) {
             if (SpoonUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal
                 && literal.getValue() != null
-                && SpoonUtil.isTypeEqualTo(literal.getType(), java.lang.String.class)) {
+                && TypeUtil.isTypeEqualTo(literal.getType(), java.lang.String.class)) {
                 ctExpression = literal;
             }
 
@@ -138,8 +140,8 @@ public class UseFormatString extends IntegratedCheck {
         if (ctExpression instanceof CtInvocation<?> ctInvocation
             && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
             // ensure the method is called on java.lang.System
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
-            && SpoonUtil.isSignatureEqualTo(
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
+            && MethodUtil.isSignatureEqualTo(
                 ctInvocation.getExecutable(),
                 typeFactory.stringType(),
                 "lineSeparator"

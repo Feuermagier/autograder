@@ -144,7 +144,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
      * @return
      */
     public CtElementStream<T> nestedIn(CtElement parent) {
-        return this.filter(e -> SpoonUtil.isNestedOrSame(e, parent));
+        return this.filter(e -> ElementUtil.isNestedOrSame(e, parent));
     }
 
     public CtElementStream<T> nestedInAny(CtElement... parents) {
@@ -159,7 +159,7 @@ public class CtElementStream<T extends CtElement> implements Stream<T> {
         Set<CtElement> potentialParents = Collections.newSetFromMap(new IdentityHashMap<>());
         potentialParents.addAll(parents);
 
-        return this.filter(e -> SpoonUtil.isAnyNestedOrSame(e, potentialParents));
+        return this.filter(e -> ElementUtil.isAnyNestedOrSame(e, potentialParents));
     }
 
     /**

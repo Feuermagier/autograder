@@ -8,6 +8,7 @@ import de.firemage.autograder.extra.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import org.apache.commons.lang3.StringUtils;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatchVariable;
@@ -280,7 +281,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isInOverridingMethod(ctVariable)) {
+                if (MethodUtil.isInOverridingMethod(ctVariable)) {
                     // The parameter of the equals and compareTo methods may be named "o", "obj", ...
                     //
                     // skip all overridden methods for consistency

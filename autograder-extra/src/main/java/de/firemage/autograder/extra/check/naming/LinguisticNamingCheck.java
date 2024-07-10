@@ -11,6 +11,7 @@ import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.declaration.CtField;
@@ -91,7 +92,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
 
         String prefix = words.get(0);
 
-        if (prefix.equals("get") && SpoonUtil.isTypeEqualTo(ctMethod.getType(), void.class)) {
+        if (prefix.equals("get") && TypeUtil.isTypeEqualTo(ctMethod.getType(), void.class)) {
             // it is expected that a getter returns something
             this.reportProblem(
                 "linguistic-naming-getter",
@@ -118,7 +119,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
         CtTypeReference<?> methodType = ctMethod.getType();
 
         // the expected return type of a setter is void
-        if (SpoonUtil.isTypeEqualTo(methodType, void.class)) {
+        if (TypeUtil.isTypeEqualTo(methodType, void.class)) {
             return false;
         }
 

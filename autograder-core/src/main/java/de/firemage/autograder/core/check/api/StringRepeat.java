@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtExpression;
@@ -34,7 +35,7 @@ public class StringRepeat extends IntegratedCheck {
         if (statements.get(0) instanceof CtOperatorAssignment<?, ?> ctAssignment
             && ctAssignment.getKind() == BinaryOperatorKind.PLUS) {
             CtExpression<?> lhs = ctAssignment.getAssigned();
-            if (!SpoonUtil.isTypeEqualTo(lhs.getType(), String.class)) {
+            if (!TypeUtil.isTypeEqualTo(lhs.getType(), String.class)) {
                 return;
             }
 
