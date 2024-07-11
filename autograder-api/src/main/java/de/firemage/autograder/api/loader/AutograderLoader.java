@@ -2,6 +2,7 @@ package de.firemage.autograder.api.loader;
 
 import de.firemage.autograder.api.Linter;
 import de.firemage.autograder.api.TempLocation;
+import org.reflections.Reflections;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -46,6 +47,10 @@ public class AutograderLoader {
         return getAutograderVersionTag().equals(currentTag);
     }
 
+    public static boolean isAutograderLoaded() {
+        return autograderClassLoader != null;
+    }
+
     public static Linter instantiateLinter(Linter.Builder builder) {
         return new ImplementationBinder<>(Linter.class)
                 .param(Linter.Builder.class, builder)
@@ -60,7 +65,12 @@ public class AutograderLoader {
                 .instantiate();
     }
 
-    public static TempLocation instantiateRandomTempLocation(Path path) {
+    public static TempLocation instantiateTempLocation() {
+        try {
+            Class.forName("de.firemage.autograder.core.file.TempLocationImpl", true, autograderClassLoader);
+        } catch (ClassNotFoundException e) {
+            throw new RuntimeException(e);
+        }
         return new ImplementationBinder<>(TempLocation.class)
                 .classLoader(autograderClassLoader)
                 .instantiate();
@@ -94,6 +104,11 @@ public class AutograderLoader {
             throw new IllegalStateException("Autograder already loaded. Restart the process to load a new version.");
         }
 
-        autograderClassLoader = new URLClassLoader(new URL[]{jar.toUri().toURL()});
+        if (!Files.exists(jar)) {
+            throw new IOException("Autograder JAR not found at " + jar.toAbsolutePath());
+        }
+
+        LOG.info("Loading autograder JAR from {}", jar.toAbsolutePath());
+        autograderClassLoader = new URLClassLoader(new URL[]{jar.toUri().toURL()}, AutograderLoader.class.getClassLoader());
     }
 }

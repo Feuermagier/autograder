@@ -1,7 +1,11 @@
 package de.firemage.autograder.api.loader;
 
+import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.api.LinterException;
+import de.firemage.autograder.api.TempLocation;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
+import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +15,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import static org.reflections.scanners.Scanners.SubTypes;
+
 public class ImplementationBinder<T> {
     private static final Logger LOG = LoggerFactory.getLogger(ImplementationBinder.class);
 
@@ -19,11 +25,10 @@ public class ImplementationBinder<T> {
     private final Class<T> superType;
     private final List<Class<?>> parameterTypes = new ArrayList<>();
     private final List<Object> arguments = new ArrayList<>();
-    private final List<ClassLoader> classLoaders = new ArrayList<>();
+    private ClassLoader classLoader;
 
     public ImplementationBinder(Class<T> superType) {
         this.superType = superType;
-        this.classLoaders.add(getClass().getClassLoader());
     }
 
     public <P> ImplementationBinder<T> param(Class<P> type, P value) {
@@ -33,20 +38,24 @@ public class ImplementationBinder<T> {
     }
 
     public ImplementationBinder<T> classLoader(ClassLoader classLoader) {
-        if (classLoader != null) {
-            this.classLoaders.add(classLoader);
-        }
+        this.classLoader = classLoader;
         return this;
     }
 
     public T instantiate() {
+        if (this.classLoader == null) {
+            this.classLoader = this.getClass().getClassLoader();
+        }
+
         String superTypeName = superType.getName();
         if (!reflectionCache.containsKey(superTypeName)) {
             var config = new ConfigurationBuilder()
-                    .forPackage("de.firemage.autograder.")
-                    .setClassLoaders(this.classLoaders.toArray(new ClassLoader[0]))
-                    .setScanners(Scanners.SubTypes);
-            var implementations = new Reflections(config).getSubTypesOf(superType);
+                    .setUrls(ClasspathHelper.forPackage("de.firemage.autograder", this.classLoader))
+                    .forPackage("de.firemage.autograder")
+                    .setClassLoaders(new ClassLoader[]{this.classLoader})
+                    .setExpandSuperTypes(false)
+                    .setScanners(SubTypes);
+            var implementations = new Reflections(config).get(SubTypes.of(this.superType).asClass(this.classLoader));
 
             if (implementations.isEmpty()) {
                 throw new IllegalStateException("No implementation found for " + superTypeName + ". Check your classpath.");
