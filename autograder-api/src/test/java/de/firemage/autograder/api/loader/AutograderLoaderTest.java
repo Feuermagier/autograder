@@ -2,6 +2,7 @@ package de.firemage.autograder.api.loader;
 
 import de.firemage.autograder.api.Linter;
 import de.firemage.autograder.api.TempLocation;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -10,6 +11,7 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+// @Disabled("This test is disabled because it requires the autograder-full.jar to be present in the target directory, which is not the case in the CI pipeline.")
 class AutograderLoaderTest {
     @Test
     void testLoadFromFile() throws IOException {
