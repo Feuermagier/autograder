@@ -1,12 +1,15 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.core.CheckConfiguration;
-import de.firemage.autograder.core.Linter;
-import de.firemage.autograder.core.LinterException;
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.core.LinterImpl;
+import de.firemage.autograder.api.LinterException;
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.core.file.TempLocationImpl;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
@@ -20,26 +23,25 @@ import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class AbstractCheckTest {
     protected final TempLocation tempLocation;
-    protected final Linter linter;
+    protected final LinterImpl linter;
 
     protected AbstractCheckTest() {
         this(-1);
     }
 
     protected AbstractCheckTest(int limit) {
-        this(TempLocation.random(), limit);
+        this(new TempLocationImpl(), limit);
     }
 
     private AbstractCheckTest(TempLocation tempLocation, int limit) {
         this.tempLocation = tempLocation;
-        this.linter = Linter.builder(Locale.US)
+        this.linter = new LinterImpl(Linter.builder(Locale.US)
             .tempLocation(this.tempLocation)
             .maxProblemsPerCheck(limit)
-            .threads(1)
-            .build();
+            .threads(1));
     }
 
-    protected List<Problem> check(
+    protected List<ProblemImpl> check(
         SourceInfo sourceInfo,
         List<ProblemType> problemTypes
     ) throws LinterException, IOException {

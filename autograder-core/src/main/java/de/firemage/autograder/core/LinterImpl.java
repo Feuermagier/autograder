@@ -1,8 +1,16 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.api.LinterException;
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.core.file.TempLocationImpl;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.parallel.AnalysisResult;
 import de.firemage.autograder.core.parallel.AnalysisScheduler;
@@ -16,6 +24,7 @@ import org.reflections.scanners.Scanners;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.IdentityHashMap;
@@ -27,20 +36,21 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class Linter {
+public final class LinterImpl implements Linter {
     private final int threads;
     private final TempLocation tempLocation;
     private final FluentBundle fluentBundle;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
 
-    private Linter(
-        Locale locale,
-        TempLocation tempLocation,
-        int threads,
-        ClassLoader classLoader,
-        int maxProblemsPerCheck
+    public static LinterImpl defaultLinter(Locale locale) {
+        return new LinterImpl(Linter.builder(locale));
+    }
+
+    public LinterImpl(
+        Linter.Builder builder
     ) {
+        var locale = builder.getLocale();
         String filename = switch (locale.getLanguage()) {
             case "de" -> "/strings.de.ftl";
             case "en" -> "/strings.en.ftl";
@@ -55,76 +65,27 @@ public final class Linter {
             throw new IllegalStateException(e);
         }
 
-        this.tempLocation = tempLocation;
-        this.threads = threads;
-        this.classLoader = classLoader;
-        this.maxProblemsPerCheck = maxProblemsPerCheck;
-    }
-
-    public static class Builder {
-        private final Locale locale;
-        private TempLocation tempLocation;
-        private int threads;
-        private ClassLoader classLoader;
-        private int maxProblemsPerCheck = -1;
-
-        private Builder(Locale locale) {
-            this.locale = locale;
-        }
-
-        public Builder tempLocation(TempLocation tempLocation) {
-            this.tempLocation = tempLocation;
-            return this;
-        }
-
-        public Builder threads(int threads) {
-            this.threads = threads;
-            return this;
-        }
-
-        public Builder maxProblemsPerCheck(int maxProblemsPerCheck) {
-            this.maxProblemsPerCheck = maxProblemsPerCheck;
-            return this;
-        }
-
-        public Builder classLoader(ClassLoader classLoader) {
-            this.classLoader = classLoader;
-            return this;
-        }
-
-        public Linter build() {
-            TempLocation tempLocation = this.tempLocation;
-
-            if (tempLocation == null) {
-                tempLocation = TempLocation.random();
-            }
-
-            return new Linter(
-                this.locale,
-                tempLocation,
-                this.threads,
-                this.classLoader,
-                this.maxProblemsPerCheck
-            );
-        }
-    }
-
-    public static Linter defaultLinter(Locale locale) {
-        return Linter.builder(locale).build();
-    }
-
-    public static Builder builder(Locale locale) {
-        return new Builder(locale);
+        this.tempLocation = builder.getTempLocation() != null ? builder.getTempLocation() : new TempLocationImpl();
+        this.threads = builder.getThreads();
+        this.classLoader = builder.getClassLoader();
+        this.maxProblemsPerCheck = builder.getMaxProblemsPerCheck();
     }
 
     public FluentBundle getFluentBundle() {
         return fluentBundle;
     }
 
-    public List<Problem> checkFile(
+    @Override
+    public List<ProblemImpl> checkFile(Path file, JavaVersion version, CheckConfiguration checkConfiguration, Consumer<Translatable> statusConsumer) throws LinterException, IOException {
+        try (var uploadedFile = UploadedFile.build(file, version, this.tempLocation, statusConsumer, this.classLoader)) {
+            return this.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+        }
+    }
+
+    public List<ProblemImpl> checkFile(
         UploadedFile file,
         CheckConfiguration checkConfiguration,
-        Consumer<LinterStatus> statusConsumer
+        Consumer<Translatable> statusConsumer
     ) throws LinterException, IOException {
         var checks = this.findChecksForProblemTypes(checkConfiguration.problemsToReport());
         return this.checkFile(file, checkConfiguration, checks, statusConsumer);
@@ -140,11 +101,11 @@ public final class Linter {
         return result;
     }
 
-    public List<Problem> checkFile(
+    public List<ProblemImpl> checkFile(
         UploadedFile file,
         CheckConfiguration checkConfiguration,
         Iterable<? extends Check> checks,
-        Consumer<LinterStatus> statusConsumer
+        Consumer<Translatable> statusConsumer
     ) throws LinterException, IOException {
         // the file is null if the student did not upload source code
         if (file == null) {
@@ -196,7 +157,7 @@ public final class Linter {
             }
         }
 
-        List<Problem> unreducedProblems = result.problems();
+        var unreducedProblems = result.problems();
         if (!checkConfiguration.problemsToReport().isEmpty()) {
             unreducedProblems = result
                 .problems()
@@ -217,20 +178,20 @@ public final class Linter {
         return this.mergeProblems(unreducedProblems);
     }
 
-    private List<Problem> mergeProblems(Collection<? extends Problem> unreducedProblems) {
+    private List<ProblemImpl> mergeProblems(Collection<? extends ProblemImpl> unreducedProblems) {
         // -1 means no limit (useful for unit tests, where one wants to see all problems)
         if (this.maxProblemsPerCheck == -1) {
             return new ArrayList<>(unreducedProblems);
         }
 
         // first group all problems by the check that created them
-        Map<Check, List<Problem>> problems = unreducedProblems.stream()
-            .collect(Collectors.groupingBy(Problem::getCheck, LinkedHashMap::new, Collectors.toList()));
+        Map<Check, List<ProblemImpl>> problems = unreducedProblems.stream()
+            .collect(Collectors.groupingBy(ProblemImpl::getCheck, LinkedHashMap::new, Collectors.toList()));
 
-        List<Problem> result = new ArrayList<>();
-        for (Map.Entry<Check, List<Problem>> entry : problems.entrySet()) {
+        List<ProblemImpl> result = new ArrayList<>();
+        for (Map.Entry<Check, List<ProblemImpl>> entry : problems.entrySet()) {
             Check check = entry.getKey();
-            List<Problem> problemsForCheck = entry.getValue();
+            List<ProblemImpl> problemsForCheck = entry.getValue();
 
             int targetNumberOfProblems = Math.min(
                 this.maxProblemsPerCheck,
@@ -241,7 +202,7 @@ public final class Linter {
             if (problemsForCheck.size() > targetNumberOfProblems) {
                 // further partition the problems by their ProblemType
                 // (one does not want to merge different types of problems):
-                Map<ProblemType, List<Problem>> problemsByType = problemsForCheck.stream()
+                Map<ProblemType, List<ProblemImpl>> problemsByType = problemsForCheck.stream()
                     .collect(Collectors.groupingBy(Problem::getProblemType, LinkedHashMap::new, Collectors.toList()));
 
                 problemsForCheck = problemsByType.values()

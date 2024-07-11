@@ -1,7 +1,7 @@
 package de.firemage.autograder.extra.check.complexity;
 
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.extra.pmd.PMDCheck;
 import net.sourceforge.pmd.lang.java.rule.codestyle.UseDiamondOperatorRule;

@@ -1,8 +1,10 @@
 package de.firemage.autograder.core.compiler;
 
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.TempLocation;
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.TempLocation;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;

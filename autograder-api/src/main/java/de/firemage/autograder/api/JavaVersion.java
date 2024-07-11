@@ -1,4 +1,4 @@
-package de.firemage.autograder.core.compiler;
+package de.firemage.autograder.api;
 
 import java.util.Arrays;
 import java.util.Comparator;

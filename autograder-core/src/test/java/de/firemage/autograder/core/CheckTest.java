@@ -1,8 +1,11 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.api.TempLocation;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.core.file.TempLocationImpl;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -91,7 +94,7 @@ public class CheckTest {
             folders = paths.toList();
         }
 
-        TempLocation tempLocation = TempLocation.random();
+        TempLocation tempLocation = new TempLocationImpl();
 
         return DynamicTest.stream(
             folders.stream().map(TestInput::fromPath)
@@ -108,10 +111,9 @@ public class CheckTest {
                         tmpDirectory, status -> {
                         }, null
                     );
-                    var linter = Linter.builder(Locale.US)
+                    var linter = new LinterImpl(Linter.builder(Locale.US)
                         .threads(1) // Use a single thread for performance reasons
-                        .tempLocation(tmpDirectory)
-                        .build();
+                        .tempLocation(tmpDirectory));
 
                     var problems = linter.checkFile(
                         file,

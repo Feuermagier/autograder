@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.check.naming;
 
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
@@ -13,7 +13,6 @@ import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtField;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;

@@ -1,6 +1,6 @@
 package de.firemage.autograder.extra.pmd;
 
-import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.CodePositionImpl;
 import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.file.SourceInfo;
@@ -12,7 +12,7 @@ public class PMDInCodeProblem extends ProblemImpl {
 
     public PMDInCodeProblem(PMDCheck check, RuleViolation violation, SourceInfo sourceInfo) {
         super(check,
-            new CodePosition(
+            new CodePositionImpl(
                 sourceInfo,
                 sourceInfo.getCompilationUnit(Path.of(violation.getFileId().getOriginalPath())).path(),
                 violation.getBeginLine(),

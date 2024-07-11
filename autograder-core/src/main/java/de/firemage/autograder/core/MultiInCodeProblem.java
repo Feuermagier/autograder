@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.file.SourcePath;
 import org.apache.commons.io.FilenameUtils;
 
@@ -14,8 +15,8 @@ import java.util.stream.Stream;
 public class MultiInCodeProblem extends ProblemImpl {
 
     public MultiInCodeProblem(
-        Problem firstProblem,
-        Collection<? extends Problem> otherProblems
+        ProblemImpl firstProblem,
+        Collection<? extends ProblemImpl> otherProblems
     ) {
         super(
             firstProblem.getCheck(),
@@ -25,7 +26,7 @@ public class MultiInCodeProblem extends ProblemImpl {
         );
     }
 
-    private static Translatable makeExplanation(Problem first, Collection<? extends Problem> problems) {
+    private static Translatable makeExplanation(ProblemImpl first, Collection<? extends ProblemImpl> problems) {
         return bundle -> {
             String message = first.getExplanation().format(bundle);
             if (!message.endsWith(".")) {
@@ -38,24 +39,24 @@ public class MultiInCodeProblem extends ProblemImpl {
                     "message", message,
                     "locations", displayLocations(
                         first.getPosition().file(),
-                        problems.stream().map(Problem::getPosition)
+                        problems.stream().map(ProblemImpl::getPosition)
                     )
                 )
             ).format(bundle);
         };
     }
 
-    private static String displayLocations(SourcePath firstFile, Stream<CodePosition> positions) {
-        Map<SourcePath, List<CodePosition>> positionsByFile = positions
-            .collect(Collectors.groupingBy(CodePosition::file, LinkedHashMap::new, Collectors.toList()));
+    private static String displayLocations(SourcePath firstFile, Stream<CodePositionImpl> positions) {
+        Map<SourcePath, List<CodePositionImpl>> positionsByFile = positions
+            .collect(Collectors.groupingBy(CodePositionImpl::file, LinkedHashMap::new, Collectors.toList()));
 
         boolean withoutFilename = positionsByFile.size() == 1 && positionsByFile.containsKey(firstFile);
 
         StringJoiner joiner = new StringJoiner(", ");
         // Format should look like this: File:(L1, L2, L3), File2:(L4, L5), File3:L5
-        for (Map.Entry<SourcePath, List<CodePosition>> entry : positionsByFile.entrySet()) {
+        for (Map.Entry<SourcePath, List<CodePositionImpl>> entry : positionsByFile.entrySet()) {
             SourcePath path = entry.getKey();
-            List<CodePosition> filePositions = entry.getValue();
+            List<CodePositionImpl> filePositions = entry.getValue();
 
             String lines = filePositions.stream()
                 .map(position -> "L%d".formatted(position.startLine()))

@@ -1,31 +1,33 @@
 package de.firemage.autograder.core.file;
 
+import de.firemage.autograder.api.TempLocation;
 import org.apache.commons.io.FileUtils;
 
-import java.io.Closeable;
 import java.io.File;
 import java.io.IOException;
-import java.io.Serializable;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
-public record TempLocation(File tempLocation) implements Serializable, Closeable {
+public final class TempLocationImpl implements TempLocation {
     private static final Random RANDOM = new Random();
     private static final String TEMPORARY_DIR_FORMAT = "%s%d";
 
-    public static TempLocation fromPath(Path path) {
-        return new TempLocation(path.toFile());
+    // Path is not serializable...
+    private final File tempLocation;
+
+    public TempLocationImpl(Path path) {
+        this.tempLocation = path.toFile();
     }
 
-    public static TempLocation of(String first, String... other) {
-        return TempLocation.fromPath(Path.of(first, other));
+    public TempLocationImpl(String first, String... other) {
+        this.tempLocation = Path.of(first, other).toFile();
     }
 
-    public static TempLocation random() {
+    public TempLocationImpl() {
         try {
-            return TempLocation.fromPath(Files.createTempDirectory("random"));
+            this.tempLocation = Files.createTempDirectory("random").toFile();
         } catch (IOException e) {
             throw new IllegalStateException("Could not create temporary directory", e);
         }
@@ -70,13 +72,14 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
         return Files.createDirectory(directory);
     }
 
-    public TempLocation createTempDirectory(String prefix) throws IOException {
+    @Override
+    public TempLocationImpl createTempDirectory(String prefix) throws IOException {
         if (prefix.contains(File.pathSeparator)) {
             throw new IllegalArgumentException("the prefix '%s' contains a path separator".formatted(prefix));
         }
         for (IOFunction<String, Path> tempDir : this.temporaryDirectories()) {
             try {
-                return TempLocation.fromPath(tempDir.apply(prefix));
+                return new TempLocationImpl(tempDir.apply(prefix));
             } catch (IOException exception) {
                 // this will fail if there is no read/write-access to the directory
             }
@@ -85,6 +88,7 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
         throw new IllegalStateException("could not find a temporary directory");
     }
 
+    @Override
     public Path createTempFile(String name) throws IOException {
         // fix conflicts by adding a random number to the name (e.g. "file.txt" -> "123456789file.txt")
         Path path = this.toPath().resolve(name);
@@ -99,6 +103,7 @@ public record TempLocation(File tempLocation) implements Serializable, Closeable
      * Returns the path of the temporary location.
      * @return the path of the temporary location
      */
+    @Override
     public Path toPath() {
         return this.tempLocation.toPath();
     }

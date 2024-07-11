@@ -1,4 +1,4 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.api;
 
 public enum ProblemType {
     /**

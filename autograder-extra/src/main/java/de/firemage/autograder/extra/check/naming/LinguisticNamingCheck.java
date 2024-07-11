@@ -1,9 +1,9 @@
 package de.firemage.autograder.extra.check.naming;
 
 import de.firemage.autograder.core.CodeModel;
-import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.CodePositionImpl;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.extra.integrated.IdentifierNameUtils;
@@ -51,7 +51,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
 
         addLocalProblem(
             // adjust position so that only the name is highlighted
-            CodePosition.fromSourcePosition(SpoonUtil.getNamePosition(ctNamedElement), ctNamedElement, this.getRoot()),
+            CodePositionImpl.fromSourcePosition(SpoonUtil.getNamePosition(ctNamedElement), ctNamedElement, this.getRoot()),
             new LocalizedMessage(key, arguments),
             ProblemType.CONFUSING_IDENTIFIER
         );

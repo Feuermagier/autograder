@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.Translatable;
 import fluent.bundle.FluentBundle;
 
 import java.util.Map;

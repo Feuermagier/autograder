@@ -1,4 +1,4 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;

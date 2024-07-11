@@ -46,6 +46,8 @@
         <slf4j.version>2.0.13</slf4j.version>
         <jackson.version>2.17.0</jackson.version>
         <spoon.version>11.0.0</spoon.version>
+        <fluent.version>0.70</fluent.version>
+        <reflections.version>0.10.2</reflections.version>
 
         <revision>0.5.13</revision>
     </properties>
@@ -76,6 +78,11 @@
         <dependencies>
             <dependency>
                 <groupId>de.firemage.autograder</groupId>
+                <artifactId>autograder-api</artifactId>
+                <version>0.5.41</version>
+            </dependency>
+            <dependency>
+                <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-core</artifactId>
                 <version>0.5.41</version>
             </dependency>
@@ -98,6 +105,12 @@
                 <groupId>de.firemage.autograder</groupId>
                 <artifactId>autograder-extra</artifactId>
                 <version>0.5.41</version>
+            </dependency>
+
+            <dependency>
+                <groupId>org.reflections</groupId>
+                <artifactId>reflections</artifactId>
+                <version>${reflections.version}</version>
             </dependency>
         </dependencies>
     </dependencyManagement>
@@ -230,11 +243,13 @@
                 </plugins>
             </build>
             <modules>
+                <module>autograder-api</module>
                 <module>autograder-core</module>
                 <module>autograder-cmd</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
                 <module>autograder-extra</module>
+                <module>autograder-full</module>
             </modules>
         </profile>
 
@@ -244,11 +259,13 @@
                 <activeByDefault>true</activeByDefault>
             </activation>
             <modules>
+                <module>autograder-api</module>
                 <module>autograder-core</module>
                 <module>autograder-cmd</module>
                 <module>autograder-treeg</module>
                 <module>autograder-span</module>
                 <module>autograder-extra</module>
+                <module>autograder-full</module>
             </modules>
         </profile>
     </profiles>

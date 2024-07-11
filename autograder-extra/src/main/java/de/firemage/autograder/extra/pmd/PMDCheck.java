@@ -1,8 +1,8 @@
 package de.firemage.autograder.extra.pmd;
 
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Translatable;
+import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import net.sourceforge.pmd.Rule;
 import net.sourceforge.pmd.RuleViolation;

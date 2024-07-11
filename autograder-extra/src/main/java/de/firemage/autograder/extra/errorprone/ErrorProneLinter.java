@@ -1,11 +1,12 @@
 package de.firemage.autograder.extra.errorprone;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
@@ -22,14 +23,14 @@ public class ErrorProneLinter implements CodeLinter<ErrorProneCheck> {
         return ErrorProneCheck.class;
     }
 
-    public List<Problem> lint(
+    public List<ProblemImpl> lint(
         UploadedFile submission,
         TempLocation tempLocation,
         ClassLoader classLoader,
         List<ErrorProneCheck> checks,
-        Consumer<? super LinterStatus> statusConsumer
+        Consumer<Translatable> statusConsumer
     ) throws IOException {
-        statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
+        statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE.getMessage());
         Map<ErrorProneLint, Function<ErrorProneDiagnostic, Message>> lintsForChecks = new HashMap<>();
         Map<ErrorProneLint, Check> checksForLints = new HashMap<>();
 
@@ -67,7 +68,7 @@ public class ErrorProneLinter implements CodeLinter<ErrorProneCheck> {
             diagnosticMapping.get(lint).add(diagnostic);
         }
 
-        List<Problem> result = new ArrayList<>();
+        List<ProblemImpl> result = new ArrayList<>();
 
         for (var entry : lintsForChecks.entrySet()) {
             ErrorProneLint lint = entry.getKey();

@@ -1,11 +1,13 @@
 package de.firemage.autograder.core.file;
 
+import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.CompilationResult;
 import de.firemage.autograder.core.compiler.Compiler;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,7 +46,7 @@ public final class UploadedFile implements AutoCloseable {
         Path file,
         JavaVersion version,
         TempLocation tmpLocation,
-        Consumer<? super LinterStatus> statusConsumer,
+        Consumer<Translatable> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, ModelBuildException, CompilationFailureException {
         return UploadedFile.build(new FileSourceInfo(file, version), tmpLocation, statusConsumer, classLoader);
@@ -53,11 +55,11 @@ public final class UploadedFile implements AutoCloseable {
     public static UploadedFile build(
         SourceInfo source,
         TempLocation tmpLocation,
-        Consumer<? super LinterStatus> statusConsumer,
+        Consumer<Translatable> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, CompilationFailureException {
         Compiler compiler = new Compiler(tmpLocation, source.getVersion());
-        statusConsumer.accept(LinterStatus.COMPILING);
+        statusConsumer.accept(LinterStatus.COMPILING.getMessage());
         Optional<CompilationResult> compilationResult = compiler.compileToJar(source);
         if (compilationResult.isEmpty()) {
             return null;

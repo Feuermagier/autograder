@@ -1,9 +1,9 @@
 package de.firemage.autograder.core.integrated;
 
-import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.CodePositionImpl;
 import de.firemage.autograder.core.ProblemImpl;
-import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Translatable;
+import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.file.SourceInfo;
 import spoon.reflect.declaration.CtElement;
@@ -18,8 +18,8 @@ public class IntegratedInCodeProblem extends ProblemImpl {
         this.element = element;
     }
 
-    public static CodePosition mapSourceToCode(CtElement element, SourceInfo sourceInfo) {
-        return CodePosition.fromSourcePosition(element.getPosition(), element, sourceInfo);
+    public static CodePositionImpl mapSourceToCode(CtElement element, SourceInfo sourceInfo) {
+        return CodePositionImpl.fromSourcePosition(element.getPosition(), element, sourceInfo);
     }
 
     @Override

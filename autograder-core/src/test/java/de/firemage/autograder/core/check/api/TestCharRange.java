@@ -1,12 +1,11 @@
 package de.firemage.autograder.core.check.api;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ public class TestCharRange extends AbstractCheckTest {
 
     @Test
     void testIsDigit() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        var problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -49,7 +48,7 @@ public class TestCharRange extends AbstractCheckTest {
 
     @Test
     void testIsLowerCase() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        var problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -78,7 +77,7 @@ public class TestCharRange extends AbstractCheckTest {
 
     @Test
     void testIsNotLowerCase() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        var problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -107,7 +106,7 @@ public class TestCharRange extends AbstractCheckTest {
 
     @Test
     void testNormalization() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        var problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -135,7 +134,7 @@ public class TestCharRange extends AbstractCheckTest {
 
     @Test
     void testIsUpperCase() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        var problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """

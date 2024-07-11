@@ -1,7 +1,7 @@
 package de.firemage.autograder.extra.check;
 
 import de.firemage.autograder.core.CheckTest;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.check.Check;
 import org.junit.jupiter.api.Disabled;

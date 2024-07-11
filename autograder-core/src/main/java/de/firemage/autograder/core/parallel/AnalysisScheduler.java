@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.parallel;
 
-import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.core.ProblemImpl;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
@@ -81,7 +82,7 @@ public class AnalysisScheduler {
     private AnalysisResult collectProblemsFromThreads() {
         this.completionAllowed = true;
 
-        List<Problem> allProblems = new ArrayList<>();
+        List<ProblemImpl> allProblems = new ArrayList<>();
         for (var thread : this.analysisThreads) {
             try {
                 var result = thread.join();
@@ -100,16 +101,16 @@ public class AnalysisScheduler {
     }
 
     private AnalysisResult executeChecksSingleThreaded() {
-        List<Problem> allProblems = new ArrayList<>();
+        List<ProblemImpl> allProblems = new ArrayList<>();
 
         var reporter = new ProblemReporter() {
             @Override
-            public void reportProblem(Problem problem) {
+            public void reportProblem(ProblemImpl problem) {
                 allProblems.add(problem);
             }
 
             @Override
-            public void reportProblems(Collection<Problem> problems) {
+            public void reportProblems(Collection<ProblemImpl> problems) {
                 allProblems.addAll(problems);
             }
         };

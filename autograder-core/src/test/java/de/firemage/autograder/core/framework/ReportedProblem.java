@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.framework;
 
-import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemImpl;
 
-public record ReportedProblem(Problem problem, String translatedMessage) {
+public record ReportedProblem(ProblemImpl problem, String translatedMessage) {
 }

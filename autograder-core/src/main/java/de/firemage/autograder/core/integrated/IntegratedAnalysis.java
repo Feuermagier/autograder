@@ -1,11 +1,12 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.parallel.AnalysisScheduler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import spoon.reflect.CtModel;
@@ -63,21 +64,21 @@ public class IntegratedAnalysis implements CodeLinter<IntegratedCheck> {
     }
 
     @Override
-    public List<Problem> lint(
+    public List<ProblemImpl> lint(
         UploadedFile submission,
         TempLocation tempLocation,
         ClassLoader classLoader,
         List<IntegratedCheck> checks,
-        Consumer<? super LinterStatus> statusConsumer
+        Consumer<Translatable> statusConsumer
     ) {
         this.init(submission);
 
-        statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL);
+        statusConsumer.accept(LinterStatus.BUILDING_CODE_MODEL.getMessage());
         this.staticAnalysis.getCodeModel().ensureModelBuild();
 
-        statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS);
+        statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS.getMessage());
 
-        List<Problem> result = new ArrayList<>();
+        List<ProblemImpl> result = new ArrayList<>();
         for (IntegratedCheck check : checks) {
             long beforeTime = System.nanoTime();
             result.addAll(check.run(

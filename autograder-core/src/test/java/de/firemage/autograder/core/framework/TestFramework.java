@@ -1,10 +1,12 @@
 package de.firemage.autograder.core.framework;
 
-import de.firemage.autograder.core.CheckConfiguration;
-import de.firemage.autograder.core.Linter;
-import de.firemage.autograder.core.LinterException;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.core.LinterImpl;
+import de.firemage.autograder.api.LinterException;
+import de.firemage.autograder.api.TempLocation;
 import de.firemage.autograder.core.file.SourcePath;
+import de.firemage.autograder.core.file.TempLocationImpl;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
 import org.junit.jupiter.api.TestFactory;
@@ -45,7 +47,7 @@ public class TestFramework {
             folders = paths.toList();
         }
 
-        try (TempLocation tempLocation = TempLocation.random()) {
+        try (TempLocation tempLocation = new TempLocationImpl()) {
             return DynamicTest.stream(
                     folders.stream().map(TestInput::new)
                             .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),
@@ -61,16 +63,15 @@ public class TestFramework {
     private static List<ReportedProblem> runAutograder(TestInput testInput, TempLocation tempLocation) throws LinterException, IOException, ClassNotFoundException, InvocationTargetException, NoSuchMethodException, InstantiationException, IllegalAccessException {
         var check = testInput.config().check();
 
-        try (TempLocation tmpDirectory = tempLocation.createTempDirectory(testInput.config().checkPath())) {
+        try (var tmpDirectory = tempLocation.createTempDirectory(testInput.config().checkPath())) {
             var file = UploadedFile.build(
                     testInput.sourceInfo(),
                     tmpDirectory, status -> {
                     }, null
             );
-            var linter = Linter.builder(Locale.US)
+            var linter = new LinterImpl(Linter.builder(Locale.US)
                     .threads(1) // Use a single thread for performance reasons
-                    .tempLocation(tmpDirectory)
-                    .build();
+                    .tempLocation(tmpDirectory));
 
             var problems = linter.checkFile(
                     file,

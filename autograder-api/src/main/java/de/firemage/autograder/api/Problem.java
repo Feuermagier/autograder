@@ -1,10 +1,8 @@
-package de.firemage.autograder.core;
-
-import de.firemage.autograder.core.check.Check;
+package de.firemage.autograder.api;
 
 public interface Problem {
-    Check getCheck();
-
+    String getCheckName();
+    Translatable getLinterName();
     Translatable getExplanation();
 
     String getDisplayLocation();

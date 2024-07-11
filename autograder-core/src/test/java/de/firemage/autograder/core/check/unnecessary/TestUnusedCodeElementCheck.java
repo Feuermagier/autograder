@@ -1,11 +1,11 @@
 package de.firemage.autograder.core.check.unnecessary;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
@@ -43,7 +43,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedField() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -76,7 +76,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedFieldWithShadowing() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -108,7 +108,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedRecursiveMethod() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -133,7 +133,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     @Test
     // See: https://github.com/Feuermagier/autograder/issues/228
     void testFieldUsedByInvocation() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -170,7 +170,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedTypeParameter() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -266,7 +266,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     @Test
     void testOnlyWrittenVariable() throws LinterException, IOException {
         // For now, this is not detected as unused, because it might result in false positives
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -291,7 +291,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedMainMethod() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -311,7 +311,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedMainMethodDefaultPackage() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -331,7 +331,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedExternalOverriddenMethod() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -355,7 +355,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testIndirectlyUsedEnumVariant() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -387,7 +387,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     @Test
     @Disabled("Unused types are not detected for now, because of potential false-positives")
     void testUnusedType() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -441,7 +441,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
     @Test
     void testUnusedPrivateConstructor() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceStrings(
+        var problems = this.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(

@@ -1,6 +1,6 @@
 package de.firemage.autograder.extra.errorprone;
 
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.TempLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;

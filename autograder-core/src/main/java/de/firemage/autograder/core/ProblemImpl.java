@@ -1,5 +1,8 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 
 /**
@@ -9,13 +12,13 @@ public abstract class ProblemImpl implements Problem {
 
     private final Check check;
 
-    private final CodePosition position;
+    private final CodePositionImpl position;
 
     private final Translatable explanation;
 
     private final ProblemType problemType;
 
-    protected ProblemImpl(Check check, CodePosition position, Translatable explanation, ProblemType problemType) {
+    protected ProblemImpl(Check check, CodePositionImpl position, Translatable explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;
@@ -36,15 +39,28 @@ public abstract class ProblemImpl implements Problem {
         return check;
     }
 
-    public CodePosition getPosition() {
+    @Override
+    public CodePositionImpl getPosition() {
         return position;
     }
 
+    @Override
     public Translatable getExplanation() {
         return explanation;
     }
 
+    @Override
     public ProblemType getProblemType() {
         return problemType;
+    }
+
+    @Override
+    public String getCheckName() {
+        return this.check.getClass().getSimpleName();
+    }
+
+    @Override
+    public Translatable getLinterName() {
+        return this.check.getLinter();
     }
 }

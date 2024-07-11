@@ -1,12 +1,11 @@
 package de.firemage.autograder.core.check.structure;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -20,7 +19,7 @@ class TestDefaultPackageCheck extends AbstractCheckTest {
 
     @Test
     void test() throws IOException, LinterException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
+        var problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -39,7 +38,7 @@ class TestDefaultPackageCheck extends AbstractCheckTest {
 
     @Test
     void testMultipleClasses() throws IOException, LinterException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        var problems = super.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 dummySourceEntry("com.example", "Test"),
@@ -58,7 +57,7 @@ class TestDefaultPackageCheck extends AbstractCheckTest {
 
     @Test
     void testNoDefaultPackageUsed() throws LinterException, IOException {
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        var problems = super.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 dummySourceEntry("com.example", "Test"),

@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.compiler;
 
-import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.CodePositionImpl;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 
@@ -24,8 +24,8 @@ public record CompilationDiagnostic(SourceInfo sourceInfo, SourcePath path, int 
         return diagnostics.stream().map(CompilationDiagnostic::toString).collect(Collectors.joining(System.lineSeparator()));
     }
 
-    public CodePosition codePosition() {
-        return new CodePosition(this.sourceInfo, this.path, this.line, this.line, this.column, this.column);
+    public CodePositionImpl codePosition() {
+        return new CodePositionImpl(this.sourceInfo, this.path, this.line, this.line, this.column, this.column);
     }
 
     @Override

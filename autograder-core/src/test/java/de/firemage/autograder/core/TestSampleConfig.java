@@ -1,5 +1,8 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.LinterConfigurationException;
+import de.firemage.autograder.api.ProblemType;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;

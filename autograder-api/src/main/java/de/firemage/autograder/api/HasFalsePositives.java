@@ -1,4 +1,4 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.api;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

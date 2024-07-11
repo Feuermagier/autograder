@@ -1,12 +1,13 @@
 package de.firemage.autograder.core.parallel;
 
-import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.core.ProblemImpl;
 
 import java.util.List;
 import java.util.Objects;
 
-public record AnalysisResult(List<Problem> problems, Exception thrownException) {
-    public static AnalysisResult forSuccess(List<Problem> problems) {
+public record AnalysisResult(List<ProblemImpl> problems, Exception thrownException) {
+    public static AnalysisResult forSuccess(List<ProblemImpl> problems) {
         Objects.requireNonNull(problems);
         return new AnalysisResult(problems, null);
     }

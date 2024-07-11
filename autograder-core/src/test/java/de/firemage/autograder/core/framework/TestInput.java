@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.framework;
 
-import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -20,7 +20,6 @@ import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
-import java.util.stream.Stream;
 
 public final class TestInput {
     private static final Logger LOGGER = LoggerFactory.getLogger(TestInput.class);

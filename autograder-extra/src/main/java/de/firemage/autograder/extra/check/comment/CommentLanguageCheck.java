@@ -3,9 +3,9 @@ package de.firemage.autograder.extra.check.comment;
 import com.github.pemistahl.lingua.api.Language;
 import com.github.pemistahl.lingua.api.LanguageDetector;
 import com.github.pemistahl.lingua.api.LanguageDetectorBuilder;
-import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.CodePositionImpl;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.ProblemType;
+import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.IntegratedInCodeProblem;
@@ -67,12 +67,12 @@ public class CommentLanguageCheck extends IntegratedCheck {
             CtComment bestEnglish = englishComments.stream()
                 .max(Comparator.comparingDouble(a -> a.confidence))
                 .get().comment;
-            CodePosition englishPosition = IntegratedInCodeProblem.mapSourceToCode(bestEnglish, this.getRoot());
+            CodePositionImpl englishPosition = IntegratedInCodeProblem.mapSourceToCode(bestEnglish, this.getRoot());
 
             CtComment bestGerman = germanComments.stream()
                 .max(Comparator.comparingDouble(a -> a.confidence))
                 .get().comment;
-            CodePosition germanPosition = IntegratedInCodeProblem.mapSourceToCode(bestGerman, this.getRoot());
+            CodePositionImpl germanPosition = IntegratedInCodeProblem.mapSourceToCode(bestGerman, this.getRoot());
 
             addLocalProblem(bestEnglish,
                 new LocalizedMessage(
