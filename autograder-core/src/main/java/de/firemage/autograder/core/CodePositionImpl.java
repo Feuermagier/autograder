@@ -1,7 +1,6 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.api.CodePosition;
-import de.firemage.autograder.api.PathLike;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 import spoon.reflect.code.CtAbstractSwitch;
@@ -65,7 +64,7 @@ public record CodePositionImpl(SourceInfo sourceInfo, SourcePath file, int start
     }
 
     @Override
-    public String readCompilationUnit() {
+    public String readSourceFile() {
         try {
             return this.sourceInfo.getCompilationUnit(this.file).readString();
         } catch (IOException exception) {

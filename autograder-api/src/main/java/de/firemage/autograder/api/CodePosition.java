@@ -11,5 +11,5 @@ public interface CodePosition {
     int startColumn();
 
     int endColumn();
-    String readCompilationUnit();
+    String readSourceFile();
 }

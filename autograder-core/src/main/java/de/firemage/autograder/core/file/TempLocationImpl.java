@@ -10,27 +10,20 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
-public final class TempLocationImpl implements TempLocation {
+public record TempLocationImpl(File tempLocation) implements TempLocation {
     private static final Random RANDOM = new Random();
     private static final String TEMPORARY_DIR_FORMAT = "%s%d";
 
-    // Path is not serializable...
-    private final File tempLocation;
-
     public TempLocationImpl(Path path) {
-        this.tempLocation = path.toFile();
+        this(path.toFile());
     }
 
     public TempLocationImpl(String first, String... other) {
-        this.tempLocation = Path.of(first, other).toFile();
+       this(Path.of(first, other).toFile());
     }
 
     public TempLocationImpl() {
-        try {
-            this.tempLocation = Files.createTempDirectory("random").toFile();
-        } catch (IOException e) {
-            throw new IllegalStateException("Could not create temporary directory", e);
-        }
+        this(tryCreateTempDirectory());
     }
 
     /**
@@ -117,5 +110,13 @@ public final class TempLocationImpl implements TempLocation {
     public void close() throws IOException {
         // delete the temporary directory, will not crash if it fails to delete it
         FileUtils.forceDeleteOnExit(this.toPath().toFile());
+    }
+
+    private static File tryCreateTempDirectory() {
+        try {
+           return Files.createTempDirectory("random").toFile();
+        } catch (IOException e) {
+            throw new IllegalStateException("Could not create temporary directory", e);
+        }
     }
 }
