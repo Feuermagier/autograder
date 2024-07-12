@@ -147,7 +147,7 @@ public class Application implements Callable<Integer> {
                 problems.stream()
                         .map(problem -> {
                             CodePosition position = problem.getPosition();
-                            Text sourceText = Text.fromString(0, position.readCompilationUnit());
+                            Text sourceText = Text.fromString(0, position.readSourceFile());
                             Formatter formatter = new Formatter(
                                     System.lineSeparator(),
                                     highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
