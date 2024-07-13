@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestClosedSetOfValues extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.CLOSED_SET_OF_VALUES);
 
-    void assertClosedSetSwitch(Problem problem, String values) {
+    void assertClosedSetSwitch(AbstractProblem problem, String values) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "closed-set-of-values-switch",
@@ -30,7 +30,7 @@ class TestClosedSetOfValues extends AbstractCheckTest {
         );
     }
 
-    void assertClosedSetListing(Problem problem, String values) {
+    void assertClosedSetListing(AbstractProblem problem, String values) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "closed-set-of-values-list",
@@ -42,7 +42,7 @@ class TestClosedSetOfValues extends AbstractCheckTest {
         );
     }
 
-    void assertClosedSetMethod(Problem problem, String values) {
+    void assertClosedSetMethod(AbstractProblem problem, String values) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "closed-set-of-values-method",

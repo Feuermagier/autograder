@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.api;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -23,7 +23,7 @@ class TestMathReimplementation extends AbstractCheckTest {
         ProblemType.COMMON_REIMPLEMENTATION_MAX_MIN
     );
 
-    private void assertEqualsReimplementation(Problem problem, String suggestion) {
+    private void assertEqualsReimplementation(AbstractProblem problem, String suggestion) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(

@@ -1,7 +1,7 @@
 package de.firemage.autograder.extra.errorprone;
 
 import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.Check;
@@ -19,8 +19,8 @@ public final class Message {
         return new Message(problemType, message);
     }
 
-    ProblemImpl toProblem(Check check, CodePosition position) {
-        return new ProblemImpl(check, position, this.message, this.problemType) {
+    Problem toProblem(Check check, CodePosition position) {
+        return new Problem(check, position, this.message, this.problemType) {
         };
     }
 }

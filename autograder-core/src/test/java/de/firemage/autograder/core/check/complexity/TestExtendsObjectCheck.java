@@ -3,7 +3,7 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.ProblemType;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Test;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestExtendsObjectCheck extends AbstractCheckTest {
     @Test
     void testExtendsObject() throws LinterException, IOException {
-        List<ProblemImpl> problems = super.check(StringSourceInfo.fromSourceString(
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             "public class Test extends Object {}"
@@ -29,7 +29,7 @@ class TestExtendsObjectCheck extends AbstractCheckTest {
 
     @Test
     void testNotExtendsObject() throws LinterException, IOException {
-        List<ProblemImpl> problems = super.check(StringSourceInfo.fromSourceString(
+        List<Problem> problems = super.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             "public class Test {}"

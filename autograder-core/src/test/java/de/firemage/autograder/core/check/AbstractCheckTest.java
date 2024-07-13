@@ -4,9 +4,9 @@ import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.api.LinterException;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.TempLocation;
@@ -30,7 +30,7 @@ public abstract class AbstractCheckTest {
     }
 
     protected AbstractCheckTest(int limit) {
-        this(new TempLocation(), limit);
+        this(TempLocation.random(), limit);
     }
 
     private AbstractCheckTest(AbstractTempLocation tempLocation, int limit) {
@@ -41,7 +41,7 @@ public abstract class AbstractCheckTest {
             .threads(1));
     }
 
-    protected List<ProblemImpl> check(
+    protected List<Problem> check(
         SourceInfo sourceInfo,
         List<ProblemType> problemTypes
     ) throws LinterException, IOException {
@@ -61,11 +61,11 @@ public abstract class AbstractCheckTest {
         return new ProblemIterator(this.check(sourceInfo, problemTypes));
     }
 
-    public static final class ProblemIterator implements Iterator<Problem> {
-        private final List<? extends Problem> problems;
+    public static final class ProblemIterator implements Iterator<AbstractProblem> {
+        private final List<? extends AbstractProblem> problems;
         private int index;
 
-        private ProblemIterator(List<? extends Problem> problems) {
+        private ProblemIterator(List<? extends AbstractProblem> problems) {
             this.problems = problems;
             this.index = 0;
         }
@@ -76,7 +76,7 @@ public abstract class AbstractCheckTest {
         }
 
         @Override
-        public Problem next() throws NoSuchElementException {
+        public AbstractProblem next() throws NoSuchElementException {
             if (!this.hasNext()) {
                 throw new NoSuchElementException(
                     "Expected at least %d problems, but got %d. Problems: %s".formatted(

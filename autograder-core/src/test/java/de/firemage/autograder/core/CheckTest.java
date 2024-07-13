@@ -94,7 +94,7 @@ public class CheckTest {
             folders = paths.toList();
         }
 
-        AbstractTempLocation tempLocation = new TempLocation();
+        AbstractTempLocation tempLocation = TempLocation.random();
 
         return DynamicTest.stream(
             folders.stream().map(TestInput::fromPath)

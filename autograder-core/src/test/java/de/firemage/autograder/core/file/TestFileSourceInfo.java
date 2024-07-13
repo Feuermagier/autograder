@@ -13,7 +13,7 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestFileSourceInfo {
-    private final AbstractTempLocation tempLocation = new TempLocation();
+    private final AbstractTempLocation tempLocation = TempLocation.random();
 
     // See https://github.com/Feuermagier/autograder/issues/368
     @Test

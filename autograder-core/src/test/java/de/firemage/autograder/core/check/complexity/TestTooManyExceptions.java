@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -26,7 +26,7 @@ class TestTooManyExceptions  extends AbstractCheckTest {
         "InvalidPlayerException", "InvalidMoveException", "InvalidPositionException"
     );
 
-    void assertEqualsTooMany(Problem problem, int count) {
+    void assertEqualsTooMany(AbstractProblem problem, int count) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "too-many-exceptions",

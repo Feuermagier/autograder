@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 class MethodHierarchyTest {
-    protected final AbstractTempLocation tempLocation;
+    protected final TempLocation tempLocation;
 
     MethodHierarchyTest() {
-        tempLocation = new TempLocation();
+        tempLocation = TempLocation.random();
     }
 
     @Test

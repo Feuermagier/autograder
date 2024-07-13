@@ -28,7 +28,7 @@ class TestStructuralEqualsVisitor {
             file = UploadedFile.build(StringSourceInfo.fromSourceString(JavaVersion.JAVA_17, "Test", "public class Test { void t(%s) { %s; } }".formatted(
                 arguments,
                 statement
-            )), new TempLocation(), y -> {}, null);
+            )), TempLocation.random(), y -> {}, null);
         } catch (Exception e) {
             throw new IllegalStateException(e);
         }

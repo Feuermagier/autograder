@@ -14,6 +14,14 @@ public record TempLocation(File tempLocation) implements AbstractTempLocation {
     private static final Random RANDOM = new Random();
     private static final String TEMPORARY_DIR_FORMAT = "%s%d";
 
+    public static TempLocation random() {
+        return new TempLocation();
+    }
+
+    public static TempLocation of(Path path) {
+        return new TempLocation(path);
+    }
+
     public TempLocation(Path path) {
         this(path.toFile());
     }
@@ -22,6 +30,9 @@ public record TempLocation(File tempLocation) implements AbstractTempLocation {
        this(Path.of(first, other).toFile());
     }
 
+    /**
+     * Creates a new random temporary location (same as {@link TempLocation#random()}).
+     */
     public TempLocation() {
         this(tryCreateTempDirectory());
     }

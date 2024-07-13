@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -16,7 +16,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestStaticBlock extends AbstractCheckTest {
-    private void assertEqualsStaticBlock(Problem problem) {
+    private void assertEqualsStaticBlock(AbstractProblem problem) {
         assertEquals(ProblemType.AVOID_STATIC_BLOCKS, problem.getProblemType());
         assertEquals(
                 this.linter.translateMessage(new LocalizedMessage(CheckStaticBlocks.LOCALIZED_MESSAGE_KEY)),

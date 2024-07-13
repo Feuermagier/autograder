@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.exceptions;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -21,7 +21,7 @@ class TestCustomExceptionInheritanceCheck extends AbstractCheckTest {
         ProblemType.CUSTOM_EXCEPTION_INHERITS_RUNTIME_EXCEPTION
     );
 
-    void assertEqualsRuntime(Problem problem, String name) {
+    void assertEqualsRuntime(AbstractProblem problem, String name) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "custom-exception-inheritance-runtime",
@@ -31,7 +31,7 @@ class TestCustomExceptionInheritanceCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsError(Problem problem, String name) {
+    void assertEqualsError(AbstractProblem problem, String name) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "custom-exception-inheritance-error",

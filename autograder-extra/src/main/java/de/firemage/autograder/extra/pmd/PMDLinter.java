@@ -3,7 +3,7 @@ package de.firemage.autograder.extra.pmd;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
@@ -33,7 +33,7 @@ public class PMDLinter implements CodeLinter<PMDCheck> {
     }
 
     @Override
-    public List<ProblemImpl> lint(
+    public List<Problem> lint(
         UploadedFile submission,
         AbstractTempLocation tempLocation,
         ClassLoader classLoader,

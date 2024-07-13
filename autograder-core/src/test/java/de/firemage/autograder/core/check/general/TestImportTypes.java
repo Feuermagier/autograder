@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestImportTypes extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.IMPORT_TYPES);
 
-    void assertEqualsImport(String typeName, Problem problem) {
+    void assertEqualsImport(String typeName, AbstractProblem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "import-types",

@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestForToForEachLoop extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.FOR_CAN_BE_FOREACH);
 
-    void assertEqualsForEach(Problem problem, String type, String iterable) {
+    void assertEqualsForEach(AbstractProblem problem, String type, String iterable) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "common-reimplementation",

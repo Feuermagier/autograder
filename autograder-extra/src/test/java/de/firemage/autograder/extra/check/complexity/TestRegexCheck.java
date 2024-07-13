@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -20,7 +20,7 @@ class TestRegexCheck extends AbstractCheckTest {
         ProblemType.COMPLEX_REGEX
     );
 
-    void assertComplex(Problem problem, double score) {
+    void assertComplex(AbstractProblem problem, double score) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "complex-regex", Map.of("score", Double.toString(score), "max", RegexCheck.MAX_ALLOWED_SCORE)

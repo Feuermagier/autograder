@@ -3,7 +3,7 @@ package de.firemage.autograder.extra.errorprone;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.api.AbstractTempLocation;
@@ -23,7 +23,7 @@ public class ErrorProneLinter implements CodeLinter<ErrorProneCheck> {
         return ErrorProneCheck.class;
     }
 
-    public List<ProblemImpl> lint(
+    public List<Problem> lint(
         UploadedFile submission,
         AbstractTempLocation tempLocation,
         ClassLoader classLoader,
@@ -68,7 +68,7 @@ public class ErrorProneLinter implements CodeLinter<ErrorProneCheck> {
             diagnosticMapping.get(lint).add(diagnostic);
         }
 
-        List<ProblemImpl> result = new ArrayList<>();
+        List<Problem> result = new ArrayList<>();
 
         for (var entry : lintsForChecks.entrySet()) {
             ErrorProneLint lint = entry.getKey();

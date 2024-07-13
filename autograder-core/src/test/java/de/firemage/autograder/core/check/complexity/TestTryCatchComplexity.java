@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 class TestTryCatchComplexity extends AbstractCheckTest {
-    void assertEqualsTryCatchComplexity(Problem problem) {
+    void assertEqualsTryCatchComplexity(AbstractProblem problem) {
         assertEquals(ProblemType.TRY_CATCH_COMPLEXITY, problem.getProblemType());
         assertEquals(
                 this.linter.translateMessage(new LocalizedMessage(

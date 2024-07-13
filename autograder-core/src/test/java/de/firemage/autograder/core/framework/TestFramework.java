@@ -47,7 +47,7 @@ public class TestFramework {
             folders = paths.toList();
         }
 
-        try (AbstractTempLocation tempLocation = new TempLocation()) {
+        try (AbstractTempLocation tempLocation = TempLocation.random()) {
             return DynamicTest.stream(
                     folders.stream().map(TestInput::new)
                             .filter(testInput -> ONLY_TEST.isEmpty() || ONLY_TEST.contains(testInput.config().checkPath())),

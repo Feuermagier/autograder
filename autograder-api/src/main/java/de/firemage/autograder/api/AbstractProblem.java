@@ -1,6 +1,6 @@
 package de.firemage.autograder.api;
 
-public interface Problem {
+public interface AbstractProblem {
     String getCheckName();
     Translatable getLinterName();
     Translatable getExplanation();

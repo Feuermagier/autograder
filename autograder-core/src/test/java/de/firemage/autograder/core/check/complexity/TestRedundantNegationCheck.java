@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestRedundantNegationCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.REDUNDANT_NEGATION);
 
-    void assertEqualsRedundant(Problem problem, String suggestion) {
+    void assertEqualsRedundant(AbstractProblem problem, String suggestion) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "common-reimplementation",

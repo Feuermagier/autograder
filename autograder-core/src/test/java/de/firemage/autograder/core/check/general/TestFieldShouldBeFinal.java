@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestFieldShouldBeFinal extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.FIELD_SHOULD_BE_FINAL);
 
-    void assertFinal(Problem problem, String name) {
+    void assertFinal(AbstractProblem problem, String name) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "field-should-be-final",

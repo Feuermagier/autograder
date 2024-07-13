@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.unnecessary;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -22,7 +22,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
     private static final ProblemType PROBLEM_TYPE = ProblemType.UNUSED_CODE_ELEMENT;
     private static final List<ProblemType> PROBLEM_TYPES = List.of(PROBLEM_TYPE, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE);
 
-    private void assertEqualsUnused(String name, Problem problem) {
+    private void assertEqualsUnused(String name, AbstractProblem problem) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(

@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.structure;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -19,7 +19,7 @@ class TestTooFewPackagesCheck extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "too-few-packages";
 
 
-    void assertEqualsTooFewPackages(Problem problem) {
+    void assertEqualsTooFewPackages(AbstractProblem problem) {
         assertEquals(ProblemType.TOO_FEW_PACKAGES, problem.getProblemType());
         assertEquals(
                 this.linter.translateMessage(new LocalizedMessage(

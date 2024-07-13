@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -20,7 +20,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestConcreteCollectionCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.CONCRETE_COLLECTION_AS_FIELD_OR_RETURN_VALUE);
 
-    void assertEqualsConcrete(Problem problem, String type) {
+    void assertEqualsConcrete(AbstractProblem problem, String type) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "concrete-collection",

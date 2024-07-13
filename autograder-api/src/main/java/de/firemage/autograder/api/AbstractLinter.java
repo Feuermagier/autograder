@@ -9,7 +9,7 @@ import java.util.Locale;
 import java.util.function.Consumer;
 
 public interface AbstractLinter {
-    List<? extends Problem> checkFile(Path file, JavaVersion version, CheckConfiguration checkConfiguration, Consumer<Translatable> statusConsumer) throws LinterException, IOException;
+    List<? extends AbstractProblem> checkFile(Path file, JavaVersion version, CheckConfiguration checkConfiguration, Consumer<Translatable> statusConsumer) throws LinterException, IOException;
     String translateMessage(Translatable translatable);
     FluentBundle getFluentBundle();
 

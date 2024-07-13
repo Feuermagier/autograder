@@ -23,7 +23,7 @@ public interface CodeLinter<T extends Check> {
      * @return a list of problems found in the submission
      * @throws IOException if an I/O error occurs
      */
-    List<ProblemImpl> lint(
+    List<Problem> lint(
         UploadedFile submission,
         AbstractTempLocation tempLocation,
         ClassLoader classLoader,

@@ -1,14 +1,14 @@
 package de.firemage.autograder.core;
 
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 
 /**
- * Contains the default implementation of most {@link Problem} methods.
+ * Contains the default implementation of most {@link AbstractProblem} methods.
  */
-public abstract class ProblemImpl implements Problem {
+public abstract class Problem implements AbstractProblem {
 
     private final Check check;
 
@@ -18,7 +18,7 @@ public abstract class ProblemImpl implements Problem {
 
     private final ProblemType problemType;
 
-    protected ProblemImpl(Check check, CodePosition position, Translatable explanation, ProblemType problemType) {
+    protected Problem(Check check, CodePosition position, Translatable explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;

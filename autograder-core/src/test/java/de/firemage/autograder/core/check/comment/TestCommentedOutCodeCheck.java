@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestCommentedOutCodeCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.COMMENTED_OUT_CODE);
 
-    void assertEqualsCode(Problem problem, int startLine, int endLine) {
+    void assertEqualsCode(AbstractProblem problem, int startLine, int endLine) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage("commented-out-code")),
             this.linter.translateMessage(problem.getExplanation())

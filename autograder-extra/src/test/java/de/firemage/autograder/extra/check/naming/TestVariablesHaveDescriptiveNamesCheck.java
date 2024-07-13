@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.naming;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -24,7 +24,7 @@ class TestVariablesHaveDescriptiveNamesCheck extends AbstractCheckTest {
         ProblemType.IDENTIFIER_REDUNDANT_NUMBER_SUFFIX
     );
 
-    private void assertInternal(Problem problem, String key, String name) {
+    private void assertInternal(AbstractProblem problem, String key, String name) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(
@@ -44,23 +44,23 @@ class TestVariablesHaveDescriptiveNamesCheck extends AbstractCheckTest {
     // "variable-redundant-number-suffix"
     // "similar-identifier"
 
-    private void assertSingleLetter(Problem problem, String name) {
+    private void assertSingleLetter(AbstractProblem problem, String name) {
         assertInternal(problem, "variable-name-single-letter", name);
     }
 
-    private void assertAbbreviation(Problem problem, String name) {
+    private void assertAbbreviation(AbstractProblem problem, String name) {
         assertInternal(problem, "variable-is-abbreviation", name);
     }
 
-    private void assertTypeInName(Problem problem, String name) {
+    private void assertTypeInName(AbstractProblem problem, String name) {
         assertInternal(problem, "variable-name-type-in-name", name);
     }
 
-    private void assertRedundantNumberSuffix(Problem problem, String name) {
+    private void assertRedundantNumberSuffix(AbstractProblem problem, String name) {
         assertInternal(problem, "variable-redundant-number-suffix", name);
     }
 
-    private void assertSimilarIdentifier(Problem problem, String left, String right) {
+    private void assertSimilarIdentifier(AbstractProblem problem, String left, String right) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(

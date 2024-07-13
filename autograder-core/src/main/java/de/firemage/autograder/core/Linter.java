@@ -3,7 +3,7 @@ package de.firemage.autograder.core;
 import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.LinterException;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
@@ -65,7 +65,7 @@ public final class Linter implements AbstractLinter {
             throw new IllegalStateException(e);
         }
 
-        this.tempLocation = builder.getTempLocation() != null ? builder.getTempLocation() : new TempLocation();
+        this.tempLocation = builder.getTempLocation() != null ? builder.getTempLocation() : TempLocation.random();
         this.threads = builder.getThreads();
         this.classLoader = builder.getClassLoader();
         this.maxProblemsPerCheck = builder.getMaxProblemsPerCheck();
@@ -76,13 +76,13 @@ public final class Linter implements AbstractLinter {
     }
 
     @Override
-    public List<ProblemImpl> checkFile(Path file, JavaVersion version, CheckConfiguration checkConfiguration, Consumer<Translatable> statusConsumer) throws LinterException, IOException {
+    public List<Problem> checkFile(Path file, JavaVersion version, CheckConfiguration checkConfiguration, Consumer<Translatable> statusConsumer) throws LinterException, IOException {
         try (var uploadedFile = UploadedFile.build(file, version, this.tempLocation, statusConsumer, this.classLoader)) {
             return this.checkFile(uploadedFile, checkConfiguration, statusConsumer);
         }
     }
 
-    public List<ProblemImpl> checkFile(
+    public List<Problem> checkFile(
         UploadedFile file,
         CheckConfiguration checkConfiguration,
         Consumer<Translatable> statusConsumer
@@ -101,7 +101,7 @@ public final class Linter implements AbstractLinter {
         return result;
     }
 
-    public List<ProblemImpl> checkFile(
+    public List<Problem> checkFile(
         UploadedFile file,
         CheckConfiguration checkConfiguration,
         Iterable<? extends Check> checks,
@@ -178,20 +178,20 @@ public final class Linter implements AbstractLinter {
         return this.mergeProblems(unreducedProblems);
     }
 
-    private List<ProblemImpl> mergeProblems(Collection<? extends ProblemImpl> unreducedProblems) {
+    private List<Problem> mergeProblems(Collection<? extends Problem> unreducedProblems) {
         // -1 means no limit (useful for unit tests, where one wants to see all problems)
         if (this.maxProblemsPerCheck == -1) {
             return new ArrayList<>(unreducedProblems);
         }
 
         // first group all problems by the check that created them
-        Map<Check, List<ProblemImpl>> problems = unreducedProblems.stream()
-            .collect(Collectors.groupingBy(ProblemImpl::getCheck, LinkedHashMap::new, Collectors.toList()));
+        Map<Check, List<Problem>> problems = unreducedProblems.stream()
+            .collect(Collectors.groupingBy(Problem::getCheck, LinkedHashMap::new, Collectors.toList()));
 
-        List<ProblemImpl> result = new ArrayList<>();
-        for (Map.Entry<Check, List<ProblemImpl>> entry : problems.entrySet()) {
+        List<Problem> result = new ArrayList<>();
+        for (Map.Entry<Check, List<Problem>> entry : problems.entrySet()) {
             Check check = entry.getKey();
-            List<ProblemImpl> problemsForCheck = entry.getValue();
+            List<Problem> problemsForCheck = entry.getValue();
 
             int targetNumberOfProblems = Math.min(
                 this.maxProblemsPerCheck,
@@ -202,8 +202,8 @@ public final class Linter implements AbstractLinter {
             if (problemsForCheck.size() > targetNumberOfProblems) {
                 // further partition the problems by their ProblemType
                 // (one does not want to merge different types of problems):
-                Map<ProblemType, List<ProblemImpl>> problemsByType = problemsForCheck.stream()
-                    .collect(Collectors.groupingBy(Problem::getProblemType, LinkedHashMap::new, Collectors.toList()));
+                Map<ProblemType, List<Problem>> problemsByType = problemsForCheck.stream()
+                    .collect(Collectors.groupingBy(AbstractProblem::getProblemType, LinkedHashMap::new, Collectors.toList()));
 
                 problemsForCheck = problemsByType.values()
                     .stream()

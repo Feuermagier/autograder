@@ -1,6 +1,6 @@
 package de.firemage.autograder.extra.pmd;
 
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.FileSourceInfo;
 import de.firemage.autograder.core.file.SourceInfo;
 import net.sourceforge.pmd.Report;
@@ -21,7 +21,7 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
 
     private final SourceInfo sourceInfo;
     private final Map<String, PMDCheck> checks;
-    private final List<ProblemImpl> problems = new ArrayList<>();
+    private final List<Problem> problems = new ArrayList<>();
 
     public ProblemRenderer(Map<String, PMDCheck> checks, SourceInfo sourceInfo) {
         super("Custom renderer", "Creates InCodeProblems");
@@ -69,7 +69,7 @@ public class ProblemRenderer extends AbstractIncrementingRenderer {
         // Do nothing for this renderer
     }
 
-    public List<ProblemImpl> getProblems() {
+    public List<Problem> getProblems() {
         return Collections.unmodifiableList(this.problems);
     }
 }

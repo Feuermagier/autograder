@@ -65,11 +65,6 @@ public class AutograderLoader {
     }
 
     public static AbstractTempLocation instantiateTempLocation() {
-        try {
-            Class.forName("de.firemage.autograder.core.file.TempLocationImpl", true, autograderClassLoader);
-        } catch (ClassNotFoundException e) {
-            throw new RuntimeException(e);
-        }
         return new ImplementationBinder<>(AbstractTempLocation.class)
                 .classLoader(autograderClassLoader)
                 .instantiate();

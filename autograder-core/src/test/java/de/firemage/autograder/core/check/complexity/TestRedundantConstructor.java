@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -363,7 +363,7 @@ class TestRedundantConstructor extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
-    private void assertEqualsRedundant(Problem problem) {
+    private void assertEqualsRedundant(AbstractProblem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage("implicit-constructor-exp")),
             this.linter.translateMessage(problem.getExplanation())

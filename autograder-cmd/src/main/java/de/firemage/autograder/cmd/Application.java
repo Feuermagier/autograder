@@ -9,7 +9,7 @@ import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.LinterConfigurationException;
 import de.firemage.autograder.api.LinterException;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.api.loader.AutograderLoader;
@@ -238,7 +238,7 @@ public class Application implements Callable<Integer> {
         return 0;
     }
 
-    private void printProblems(List<? extends Problem> problems, AbstractLinter linter) {
+    private void printProblems(List<? extends AbstractProblem> problems, AbstractLinter linter) {
         if (problems.isEmpty()) {
             CmdUtil.println("No problems found - good job!");
         } else {
@@ -247,7 +247,7 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private void printProblemsAsJson(Collection<? extends Problem> problems, AbstractLinter linter) {
+    private void printProblemsAsJson(Collection<? extends AbstractProblem> problems, AbstractLinter linter) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonOutput = mapper.writeValueAsString(problems.stream().map(problem -> {
@@ -266,7 +266,7 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private String formatProblem(Problem problem, AbstractLinter linter) {
+    private String formatProblem(AbstractProblem problem, AbstractLinter linter) {
         return String.format("%s %s (Source: %s)",
                 problem.getDisplayLocation(),
                 linter.translateMessage(problem.getExplanation()),

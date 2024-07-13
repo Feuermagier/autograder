@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -22,7 +22,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
         ProblemType.USE_DIFFERENT_VISIBILITY_PUBLIC_FIELD
     );
 
-    void assertDifferentVisibility(Problem problem, String name, String suggestion) {
+    void assertDifferentVisibility(AbstractProblem problem, String name, String suggestion) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "use-different-visibility",
@@ -67,7 +67,7 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        Problem problem = problems.next();
+        AbstractProblem problem = problems.next();
         assertDifferentVisibility(problem, "Parent", "protected");
         assertEquals(ProblemType.USE_DIFFERENT_VISIBILITY_PEDANTIC, problem.getProblemType());
 

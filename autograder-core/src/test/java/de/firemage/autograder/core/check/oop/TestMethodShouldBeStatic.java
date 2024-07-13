@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -21,7 +21,7 @@ class TestMethodShouldBeStatic extends AbstractCheckTest {
         ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC
     );
 
-    void assertEqualsStatic(Problem problem, String name) {
+    void assertEqualsStatic(AbstractProblem problem, String name) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "method-should-be-static",

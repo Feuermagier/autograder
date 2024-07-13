@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -20,7 +20,7 @@ class TestDiamondOperatorCheck extends AbstractCheckTest {
         ProblemType.UNUSED_DIAMOND_OPERATOR
     );
 
-    void assertRedundantDiamondOperator(Problem problem) {
+    void assertRedundantDiamondOperator(AbstractProblem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "use-diamond-operator"

@@ -4,7 +4,7 @@ import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.api.AbstractTempLocation;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -63,7 +63,7 @@ public class IntegratedAnalysis implements CodeLinter<IntegratedCheck> {
     }
 
     @Override
-    public List<ProblemImpl> lint(
+    public List<Problem> lint(
         UploadedFile submission,
         AbstractTempLocation tempLocation,
         ClassLoader classLoader,
@@ -77,7 +77,7 @@ public class IntegratedAnalysis implements CodeLinter<IntegratedCheck> {
 
         statusConsumer.accept(LinterStatus.RUNNING_INTEGRATED_CHECKS.getMessage());
 
-        List<ProblemImpl> result = new ArrayList<>();
+        List<Problem> result = new ArrayList<>();
         for (IntegratedCheck check : checks) {
             long beforeTime = System.nanoTime();
             result.addAll(check.run(

@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.Problem;
+import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -22,7 +22,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestFieldJavadocCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.JAVADOC_UNEXPECTED_TAG);
 
-    void assertEqualsUnknownTag(Problem problem, String tag) {
+    void assertEqualsUnknownTag(AbstractProblem problem, String tag) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "javadoc-unexpected-tag",
