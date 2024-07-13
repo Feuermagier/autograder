@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.api;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -30,7 +30,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         ProblemType.ARRAY_AS_KEY_OF_SET_OR_MAP
     );
 
-    void assertCompareToZero(AbstractProblem problem) {
+    void assertCompareToZero(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "compare-to-zero"
@@ -39,7 +39,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsUsingHashCode(AbstractProblem problem) {
+    void assertEqualsUsingHashCode(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "equals-using-hashcode"
@@ -48,7 +48,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsUnsafeCast(AbstractProblem problem) {
+    void assertEqualsUnsafeCast(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "equals-unsafe-cast"
@@ -57,7 +57,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsIncompatibleType(AbstractProblem problem) {
+    void assertEqualsIncompatibleType(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "equals-incompatible-type"
@@ -66,7 +66,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertInconsistentHashCode(AbstractProblem problem) {
+    void assertInconsistentHashCode(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "inconsistent-hashcode"
@@ -75,7 +75,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertUndefinedEquals(AbstractProblem problem) {
+    void assertUndefinedEquals(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "undefined-equals"
@@ -84,7 +84,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertNonOverridingEquals(AbstractProblem problem) {
+    void assertNonOverridingEquals(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "non-overriding-equals"
@@ -93,7 +93,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsBrokenForNull(AbstractProblem problem) {
+    void assertEqualsBrokenForNull(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "equals-broken-for-null"
@@ -102,7 +102,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertArrayHashCode(AbstractProblem problem) {
+    void assertArrayHashCode(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "array-hash-code"
@@ -111,7 +111,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsReference(AbstractProblem problem) {
+    void assertEqualsReference(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "equals-reference"
@@ -120,7 +120,7 @@ class TestProblematicEqualsHashCodeComparable extends AbstractCheckTest {
         );
     }
 
-    void assertArraysAsKeyOfSetOrMap(AbstractProblem problem) {
+    void assertArraysAsKeyOfSetOrMap(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "array-as-key-of-set-or-map"

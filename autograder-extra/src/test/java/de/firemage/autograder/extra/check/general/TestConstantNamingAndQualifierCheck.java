@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
@@ -21,7 +21,7 @@ class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
         ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
     );
 
-    private void assertProblem(AbstractProblem problem, String variable, String suggestion) {
+    private void assertProblem(Problem problem, String variable, String suggestion) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(

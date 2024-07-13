@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.naming;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestLinguisticNamingCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.CONFUSING_IDENTIFIER);
 
-    void assertEqualsBoolean(String name, String type, AbstractProblem problem) {
+    void assertEqualsBoolean(String name, String type, Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "linguistic-naming-boolean",
@@ -28,7 +28,7 @@ class TestLinguisticNamingCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsGetter(String name, AbstractProblem problem) {
+    void assertEqualsGetter(String name, Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "linguistic-naming-getter",
@@ -38,7 +38,7 @@ class TestLinguisticNamingCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsSetter(String name, AbstractProblem problem) {
+    void assertEqualsSetter(String name, Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "linguistic-naming-setter",

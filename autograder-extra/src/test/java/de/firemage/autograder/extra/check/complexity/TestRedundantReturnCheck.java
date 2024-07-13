@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -20,7 +20,7 @@ class TestRedundantReturnCheck extends AbstractCheckTest {
         ProblemType.REDUNDANT_VOID_RETURN
     );
 
-    void assertRedundantReturn(AbstractProblem problem) {
+    void assertRedundantReturn(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "redundant-return-exp"
