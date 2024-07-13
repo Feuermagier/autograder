@@ -11,11 +11,11 @@ import java.util.Locale;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@Disabled("This test is disabled because it requires the autograder-full.jar to be present in the target directory, which is not the case in the CI pipeline.")
+@Disabled("This test is disabled because it requires the autograder-cmd.jar to be present in the target directory, which is not the case in the CI pipeline.")
 class AutograderLoaderTest {
     @Test
     void testLoadFromFile() throws IOException {
-        Path path = Path.of("../autograder-full/target/autograder-full.jar");
+        Path path = Path.of("../autograder-cmd/target/autograder-cmd.jar");
         AutograderLoader.loadFromFile(path);
         this.assertClassesPresent();
     }

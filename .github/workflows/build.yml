@@ -51,7 +51,6 @@ jobs:
           name: autograder-cmd
           path: |
             autograder-cmd/target/autograder-cmd.jar
-            autograder-full/target/autograder-full.jar
           if-no-files-found: error
 
       # Release only when pushing to a tag
@@ -62,4 +61,3 @@ jobs:
           body: 'Minor Release (mostly for the automatic download of the jar file)'
           files: |
               autograder-cmd/target/autograder-cmd.jar
-              autograder-full/target/autograder-full.jar

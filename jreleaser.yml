@@ -48,4 +48,3 @@ distributions:
     type: SINGLE_JAR
     artifacts:
       - path: autograder-cmd/target/autograder-cmd.jar
-      - path: autograder-full/target/autograder-full.jar
