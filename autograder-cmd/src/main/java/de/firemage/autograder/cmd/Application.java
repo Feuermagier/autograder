@@ -154,7 +154,7 @@ public class Application implements Callable<Integer> {
                             );
 
                             String result = "[%s]: %s - Found problem in '%s'%n".formatted(
-                                    problem.getProblemType(),
+                                    problem.getType(),
                                     problem.getCheckName(),
                                     position.toString()
                             );
@@ -253,7 +253,7 @@ public class Application implements Callable<Integer> {
             String jsonOutput = mapper.writeValueAsString(problems.stream().map(problem -> {
                 AbstractCodePosition position = problem.getPosition();
                 return new Annotation(
-                        problem.getProblemType(),
+                        problem.getType(),
                         linter.translateMessage(problem.getExplanation()),
                         position.path().toString().replace("\\", "/"),
                         position.startLine(),
