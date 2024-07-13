@@ -1,7 +1,7 @@
 package de.firemage.autograder.api.loader;
 
-import de.firemage.autograder.api.Linter;
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.AbstractTempLocation;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
@@ -23,12 +23,12 @@ class AutograderLoaderTest {
     private void assertClassesPresent() throws IOException {
         assertTrue(AutograderLoader.isAutograderLoaded());
 
-        TempLocation randomTempLocation = AutograderLoader.instantiateTempLocation();
+        AbstractTempLocation randomTempLocation = AutograderLoader.instantiateTempLocation();
         randomTempLocation.close();
 
-        TempLocation fixedTempLocation = AutograderLoader.instantiateTempLocation(Path.of(".autograder-tmp"));
+        AbstractTempLocation fixedTempLocation = AutograderLoader.instantiateTempLocation(Path.of(".autograder-tmp"));
         fixedTempLocation.close();
 
-        Linter linter = AutograderLoader.instantiateLinter(Linter.builder(Locale.US));
+        AbstractLinter linter = AutograderLoader.instantiateLinter(AbstractLinter.builder(Locale.US));
     }
 }

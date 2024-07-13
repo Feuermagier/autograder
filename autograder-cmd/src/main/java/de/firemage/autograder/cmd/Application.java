@@ -4,13 +4,13 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import de.firemage.autograder.api.ArtemisUtil;
 import de.firemage.autograder.api.CheckConfiguration;
-import de.firemage.autograder.api.CodePosition;
+import de.firemage.autograder.api.AbstractCodePosition;
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.LinterConfigurationException;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.Problem;
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.api.loader.AutograderLoader;
 import de.firemage.autograder.cmd.output.Annotation;
@@ -84,9 +84,9 @@ public class Application implements Callable<Integer> {
     @Spec
     private CommandSpec spec;
 
-    private final TempLocation tempLocation;
+    private final AbstractTempLocation tempLocation;
 
-    public Application(TempLocation tempLocation) {
+    public Application(AbstractTempLocation tempLocation) {
         this.tempLocation = tempLocation;
     }
 
@@ -110,7 +110,7 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private static Highlight highlightFromCodePosition(CodePosition codePosition, String label) {
+    private static Highlight highlightFromCodePosition(AbstractCodePosition codePosition, String label) {
         return new Highlight(
                 new Span(
                         new Position(codePosition.startLine() - 1, codePosition.startColumn() - 1),
@@ -122,7 +122,7 @@ public class Application implements Callable<Integer> {
     }
 
     private void execute(
-            Linter linter,
+            AbstractLinter linter,
             CheckConfiguration checkConfiguration,
             Consumer<Translatable> statusConsumer
     ) throws LinterException, IOException {
@@ -146,7 +146,7 @@ public class Application implements Callable<Integer> {
                 CmdUtil.println("Found " + problems.size() + " problem(s):");
                 problems.stream()
                         .map(problem -> {
-                            CodePosition position = problem.getPosition();
+                            AbstractCodePosition position = problem.getPosition();
                             Text sourceText = Text.fromString(0, position.readSourceFile());
                             Formatter formatter = new Formatter(
                                     System.lineSeparator(),
@@ -212,7 +212,7 @@ public class Application implements Callable<Integer> {
             return IO_EXIT_CODE;
         }
 
-        Linter linter = AutograderLoader.instantiateLinter(Linter.builder(Locale.GERMANY)
+        AbstractLinter linter = AutograderLoader.instantiateLinter(AbstractLinter.builder(Locale.GERMANY)
                 .threads(0)
                 .tempLocation(this.tempLocation)
                 .maxProblemsPerCheck(this.maxProblemsPerCheck));
@@ -238,7 +238,7 @@ public class Application implements Callable<Integer> {
         return 0;
     }
 
-    private void printProblems(List<? extends Problem> problems, Linter linter) {
+    private void printProblems(List<? extends Problem> problems, AbstractLinter linter) {
         if (problems.isEmpty()) {
             CmdUtil.println("No problems found - good job!");
         } else {
@@ -247,11 +247,11 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private void printProblemsAsJson(Collection<? extends Problem> problems, Linter linter) {
+    private void printProblemsAsJson(Collection<? extends Problem> problems, AbstractLinter linter) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonOutput = mapper.writeValueAsString(problems.stream().map(problem -> {
-                CodePosition position = problem.getPosition();
+                AbstractCodePosition position = problem.getPosition();
                 return new Annotation(
                         problem.getProblemType(),
                         linter.translateMessage(problem.getExplanation()),
@@ -266,7 +266,7 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private String formatProblem(Problem problem, Linter linter) {
+    private String formatProblem(Problem problem, AbstractLinter linter) {
         return String.format("%s %s (Source: %s)",
                 problem.getDisplayLocation(),
                 linter.translateMessage(problem.getExplanation()),

@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.file;
 
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LinterStatus;
@@ -24,9 +24,9 @@ public final class UploadedFile implements AutoCloseable {
     private final SourceInfo source;
     private final CompilationResult compilationResult;
     private final ClassLoader classLoader;
-    private final TempLocation tempLocation;
+    private final AbstractTempLocation tempLocation;
 
-    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult, ClassLoader classLoader, TempLocation tempLocation) {
+    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult, ClassLoader classLoader, AbstractTempLocation tempLocation) {
         this.model = model;
         this.source = source;
         this.compilationResult = compilationResult;
@@ -45,7 +45,7 @@ public final class UploadedFile implements AutoCloseable {
     public static UploadedFile build(
         Path file,
         JavaVersion version,
-        TempLocation tmpLocation,
+        AbstractTempLocation tmpLocation,
         Consumer<Translatable> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, ModelBuildException, CompilationFailureException {
@@ -54,7 +54,7 @@ public final class UploadedFile implements AutoCloseable {
 
     public static UploadedFile build(
         SourceInfo source,
-        TempLocation tmpLocation,
+        AbstractTempLocation tmpLocation,
         Consumer<Translatable> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, CompilationFailureException {

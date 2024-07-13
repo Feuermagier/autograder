@@ -1,6 +1,6 @@
 package de.firemage.autograder.extra.errorprone;
 
-import de.firemage.autograder.core.CodePositionImpl;
+import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 
@@ -38,7 +38,7 @@ public record ErrorProneDiagnostic(SourceInfo sourceInfo, SourcePath path, int l
         );
     }
 
-    public CodePositionImpl position() {
-        return new CodePositionImpl(this.sourceInfo, this.path, this.line, this.line, this.column, this.column);
+    public CodePosition position() {
+        return new CodePosition(this.sourceInfo, this.path, this.line, this.line, this.column, this.column);
     }
 }

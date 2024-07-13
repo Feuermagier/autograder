@@ -2,7 +2,7 @@ package de.firemage.autograder.api;
 
 import java.nio.file.Path;
 
-public interface CodePosition {
+public interface AbstractCodePosition {
     Path path();
     int startLine();
 

@@ -1,10 +1,6 @@
 package de.firemage.autograder.api.loader;
 
-import de.firemage.autograder.api.Linter;
-import de.firemage.autograder.api.LinterException;
-import de.firemage.autograder.api.TempLocation;
 import org.reflections.Reflections;
-import org.reflections.scanners.Scanners;
 import org.reflections.util.ClasspathHelper;
 import org.reflections.util.ConfigurationBuilder;
 import org.slf4j.Logger;

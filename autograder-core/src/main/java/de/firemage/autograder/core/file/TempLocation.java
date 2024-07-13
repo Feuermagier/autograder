@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.file;
 
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import org.apache.commons.io.FileUtils;
 
 import java.io.File;
@@ -10,19 +10,19 @@ import java.nio.file.Path;
 import java.util.List;
 import java.util.Random;
 
-public record TempLocationImpl(File tempLocation) implements TempLocation {
+public record TempLocation(File tempLocation) implements AbstractTempLocation {
     private static final Random RANDOM = new Random();
     private static final String TEMPORARY_DIR_FORMAT = "%s%d";
 
-    public TempLocationImpl(Path path) {
+    public TempLocation(Path path) {
         this(path.toFile());
     }
 
-    public TempLocationImpl(String first, String... other) {
+    public TempLocation(String first, String... other) {
        this(Path.of(first, other).toFile());
     }
 
-    public TempLocationImpl() {
+    public TempLocation() {
         this(tryCreateTempDirectory());
     }
 
@@ -66,13 +66,13 @@ public record TempLocationImpl(File tempLocation) implements TempLocation {
     }
 
     @Override
-    public TempLocationImpl createTempDirectory(String prefix) throws IOException {
+    public TempLocation createTempDirectory(String prefix) throws IOException {
         if (prefix.contains(File.pathSeparator)) {
             throw new IllegalArgumentException("the prefix '%s' contains a path separator".formatted(prefix));
         }
         for (IOFunction<String, Path> tempDir : this.temporaryDirectories()) {
             try {
-                return new TempLocationImpl(tempDir.apply(prefix));
+                return new TempLocation(tempDir.apply(prefix));
             } catch (IOException exception) {
                 // this will fail if there is no read/write-access to the directory
             }

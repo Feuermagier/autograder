@@ -5,8 +5,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.nio.file.Path;
 
-public interface TempLocation extends Closeable, Serializable {
-    TempLocation createTempDirectory(String prefix) throws IOException;
+public interface AbstractTempLocation extends Closeable, Serializable {
+    AbstractTempLocation createTempDirectory(String prefix) throws IOException;
     Path createTempFile(String name) throws IOException;
     Path toPath();
 }

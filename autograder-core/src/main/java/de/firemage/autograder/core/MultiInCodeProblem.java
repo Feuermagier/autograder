@@ -46,17 +46,17 @@ public class MultiInCodeProblem extends ProblemImpl {
         };
     }
 
-    private static String displayLocations(SourcePath firstFile, Stream<CodePositionImpl> positions) {
-        Map<SourcePath, List<CodePositionImpl>> positionsByFile = positions
-            .collect(Collectors.groupingBy(CodePositionImpl::file, LinkedHashMap::new, Collectors.toList()));
+    private static String displayLocations(SourcePath firstFile, Stream<CodePosition> positions) {
+        Map<SourcePath, List<CodePosition>> positionsByFile = positions
+            .collect(Collectors.groupingBy(CodePosition::file, LinkedHashMap::new, Collectors.toList()));
 
         boolean withoutFilename = positionsByFile.size() == 1 && positionsByFile.containsKey(firstFile);
 
         StringJoiner joiner = new StringJoiner(", ");
         // Format should look like this: File:(L1, L2, L3), File2:(L4, L5), File3:L5
-        for (Map.Entry<SourcePath, List<CodePositionImpl>> entry : positionsByFile.entrySet()) {
+        for (Map.Entry<SourcePath, List<CodePosition>> entry : positionsByFile.entrySet()) {
             SourcePath path = entry.getKey();
-            List<CodePositionImpl> filePositions = entry.getValue();
+            List<CodePosition> filePositions = entry.getValue();
 
             String lines = filePositions.stream()
                 .map(position -> "L%d".formatted(position.startLine()))

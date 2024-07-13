@@ -1,10 +1,9 @@
 package de.firemage.autograder.core.compiler;
 
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.api.TempLocation;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -31,7 +30,7 @@ import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
 import java.util.regex.Pattern;
 
-public record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
+public record Compiler(AbstractTempLocation tempLocation, JavaVersion javaVersion) {
     static final Locale COMPILER_LOCALE = Locale.US;
 
     public Optional<CompilationResult> compileToJar(SourceInfo input) throws IOException, CompilationFailureException {
@@ -46,7 +45,7 @@ public record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
         SourceInfo input
     ) throws IOException, CompilationFailureException {
         Optional<CompilationResult> compilationResult;
-        try (TempLocation modifiedOutput = this.tempLocation.createTempDirectory(input.getName() + "_modified")) {
+        try (AbstractTempLocation modifiedOutput = this.tempLocation.createTempDirectory(input.getName() + "_modified")) {
             SourceInfo copiedVersion = input.copyTo(modifiedOutput.toPath());
 
             List<CompilationUnit> compilationUnits = copiedVersion.compilationUnits();
@@ -110,7 +109,7 @@ public record Compiler(TempLocation tempLocation, JavaVersion javaVersion) {
         List<CompilationDiagnostic> diagnostics = new ArrayList<>();
 
         Path jar;
-        try (TempLocation compilerOutput = this.tempLocation.createTempDirectory(input.getName() + "_compiled")) {
+        try (AbstractTempLocation compilerOutput = this.tempLocation.createTempDirectory(input.getName() + "_compiled")) {
             JavaFileManager fileManager = new SeparateBinaryFileManager(
                 compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),
                 compilerOutput.toPath().toFile(),

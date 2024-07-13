@@ -6,7 +6,7 @@ import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public class ErrorProneLinter implements CodeLinter<ErrorProneCheck> {
 
     public List<ProblemImpl> lint(
         UploadedFile submission,
-        TempLocation tempLocation,
+        AbstractTempLocation tempLocation,
         ClassLoader classLoader,
         List<ErrorProneCheck> checks,
         Consumer<Translatable> statusConsumer

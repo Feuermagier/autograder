@@ -7,7 +7,7 @@ public interface Problem {
 
     String getDisplayLocation();
 
-    CodePosition getPosition();
+    AbstractCodePosition getPosition();
 
     ProblemType getProblemType();
 }

@@ -1,6 +1,6 @@
 package de.firemage.autograder.extra.check;
 
-import de.firemage.autograder.core.LinterImpl;
+import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.extra.check.naming.LinguisticNamingCheck;
@@ -160,8 +160,8 @@ class TestLocalizedStrings {
 
         localizedKeys = getAllLocalizedKeys(ctModel);
 
-        englishBundle = LinterImpl.defaultLinter(Locale.ENGLISH).getFluentBundle();
-        germanBundle = LinterImpl.defaultLinter(Locale.GERMAN).getFluentBundle();
+        englishBundle = Linter.defaultLinter(Locale.ENGLISH).getFluentBundle();
+        germanBundle = Linter.defaultLinter(Locale.GERMAN).getFluentBundle();
     }
 
     Collection<String> findMissingKeys(FluentBundle bundle) {

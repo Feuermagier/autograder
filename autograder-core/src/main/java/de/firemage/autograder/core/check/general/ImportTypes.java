@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.check.general;
 
-import de.firemage.autograder.core.CodePositionImpl;
+import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -78,7 +78,7 @@ public class ImportTypes extends IntegratedCheck {
     }
 
     private void checkCtTypeReference(CtTypeReference<?> ctTypeReference) {
-        CodePositionImpl codePosition = CodePositionImpl.fromSourcePosition(
+        CodePosition codePosition = CodePosition.fromSourcePosition(
             findParentSourcePosition(ctTypeReference).orElseThrow().getPosition(),
             ctTypeReference,
             this.getRoot()

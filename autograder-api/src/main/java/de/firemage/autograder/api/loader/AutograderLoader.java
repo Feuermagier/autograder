@@ -1,8 +1,7 @@
 package de.firemage.autograder.api.loader;
 
-import de.firemage.autograder.api.Linter;
-import de.firemage.autograder.api.TempLocation;
-import org.reflections.Reflections;
+import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.AbstractTempLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -51,27 +50,27 @@ public class AutograderLoader {
         return autograderClassLoader != null;
     }
 
-    public static Linter instantiateLinter(Linter.Builder builder) {
-        return new ImplementationBinder<>(Linter.class)
-                .param(Linter.Builder.class, builder)
+    public static AbstractLinter instantiateLinter(AbstractLinter.Builder builder) {
+        return new ImplementationBinder<>(AbstractLinter.class)
+                .param(AbstractLinter.Builder.class, builder)
                 .classLoader(autograderClassLoader)
                 .instantiate();
     }
 
-    public static TempLocation instantiateTempLocation(Path path) {
-        return new ImplementationBinder<>(TempLocation.class)
+    public static AbstractTempLocation instantiateTempLocation(Path path) {
+        return new ImplementationBinder<>(AbstractTempLocation.class)
                 .param(Path.class, path)
                 .classLoader(autograderClassLoader)
                 .instantiate();
     }
 
-    public static TempLocation instantiateTempLocation() {
+    public static AbstractTempLocation instantiateTempLocation() {
         try {
             Class.forName("de.firemage.autograder.core.file.TempLocationImpl", true, autograderClassLoader);
         } catch (ClassNotFoundException e) {
             throw new RuntimeException(e);
         }
-        return new ImplementationBinder<>(TempLocation.class)
+        return new ImplementationBinder<>(AbstractTempLocation.class)
                 .classLoader(autograderClassLoader)
                 .instantiate();
     }

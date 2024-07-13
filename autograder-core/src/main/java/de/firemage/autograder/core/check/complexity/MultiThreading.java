@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.check.complexity;
 
-import de.firemage.autograder.core.CodePositionImpl;
+import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -46,7 +46,7 @@ public class MultiThreading extends IntegratedCheck {
 
                         if (modifier.getKind() == ModifierKind.SYNCHRONIZED) {
                             addLocalProblem(
-                                CodePositionImpl.fromSourcePosition(modifier.getPosition(), ctElement, getRoot()),
+                                CodePosition.fromSourcePosition(modifier.getPosition(), ctElement, getRoot()),
                                 new LocalizedMessage("multi-threading"),
                                 ProblemType.MULTI_THREADING
                             );

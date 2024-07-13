@@ -2,7 +2,7 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
@@ -25,7 +25,7 @@ public interface CodeLinter<T extends Check> {
      */
     List<ProblemImpl> lint(
         UploadedFile submission,
-        TempLocation tempLocation,
+        AbstractTempLocation tempLocation,
         ClassLoader classLoader,
         List<T> checks,
         Consumer<Translatable> statusConsumer

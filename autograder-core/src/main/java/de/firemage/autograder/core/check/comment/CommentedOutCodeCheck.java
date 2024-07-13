@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.check.comment;
 
-import de.firemage.autograder.core.CodePositionImpl;
+import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.api.Translatable;
@@ -96,7 +96,7 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
 
         void addProblem(SourcePath path) {
             addLocalProblem(
-                new CodePositionImpl(getRoot(), path, startLine, endLine, startColumn, endColumn),
+                new CodePosition(getRoot(), path, startLine, endLine, startColumn, endColumn),
                 MESSAGE,
                 ProblemType.COMMENTED_OUT_CODE
             );

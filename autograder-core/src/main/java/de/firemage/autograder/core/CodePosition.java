@@ -1,6 +1,6 @@
 package de.firemage.autograder.core;
 
-import de.firemage.autograder.api.CodePosition;
+import de.firemage.autograder.api.AbstractCodePosition;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 import spoon.reflect.code.CtAbstractSwitch;
@@ -14,8 +14,8 @@ import java.io.File;
 import java.io.IOException;
 import java.nio.file.Path;
 
-public record CodePositionImpl(SourceInfo sourceInfo, SourcePath file, int startLine, int endLine, int startColumn, int endColumn) implements CodePosition {
-    public static CodePositionImpl fromSourcePosition(
+public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine, int endLine, int startColumn, int endColumn) implements AbstractCodePosition {
+    public static CodePosition fromSourcePosition(
         SourcePosition sourcePosition,
         CtElement ctElement,
         SourceInfo sourceInfo
@@ -37,7 +37,7 @@ public record CodePositionImpl(SourceInfo sourceInfo, SourcePath file, int start
         //
         // Someone might explicitly specify a source position, in which case it will differ from the element's position.
         if ((ctElement instanceof CtType<?> || ctElement instanceof CtMethod<?> || ctElement instanceof CtLoop || ctElement instanceof CtAbstractSwitch<?>) && ctElement.getPosition().equals(sourcePosition)) {
-            return new CodePositionImpl(
+            return new CodePosition(
                 sourceInfo,
                 relativePath,
                 sourcePosition.getLine(),
@@ -47,7 +47,7 @@ public record CodePositionImpl(SourceInfo sourceInfo, SourcePath file, int start
             );
         }
 
-        return new CodePositionImpl(
+        return new CodePosition(
             sourceInfo,
             relativePath,
             sourcePosition.getLine(),

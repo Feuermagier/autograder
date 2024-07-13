@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
-import de.firemage.autograder.core.CodePositionImpl;
+import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.ProblemImpl;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.api.ProblemType;
@@ -22,7 +22,7 @@ public abstract class IntegratedCheck implements Check {
         this.problems.add(new IntegratedInCodeProblem(this, element, explanation, problemType, this.sourceInfo));
     }
 
-    protected void addLocalProblem(CodePositionImpl position, Translatable explanation, ProblemType problemType) {
+    protected void addLocalProblem(CodePosition position, Translatable explanation, ProblemType problemType) {
         this.problems.add(new ProblemImpl(this, position, explanation, problemType) {});
     }
 

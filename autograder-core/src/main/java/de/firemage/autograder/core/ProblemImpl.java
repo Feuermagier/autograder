@@ -12,13 +12,13 @@ public abstract class ProblemImpl implements Problem {
 
     private final Check check;
 
-    private final CodePositionImpl position;
+    private final CodePosition position;
 
     private final Translatable explanation;
 
     private final ProblemType problemType;
 
-    protected ProblemImpl(Check check, CodePositionImpl position, Translatable explanation, ProblemType problemType) {
+    protected ProblemImpl(Check check, CodePosition position, Translatable explanation, ProblemType problemType) {
         this.check = check;
         this.position = position;
         this.explanation = explanation;
@@ -40,7 +40,7 @@ public abstract class ProblemImpl implements Problem {
     }
 
     @Override
-    public CodePositionImpl getPosition() {
+    public CodePosition getPosition() {
         return position;
     }
 

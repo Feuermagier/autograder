@@ -3,10 +3,10 @@ package de.firemage.autograder.core.integrated;
 import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.api.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.StringSourceInfo;
-import de.firemage.autograder.core.file.TempLocationImpl;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.Test;
 import spoon.reflect.code.CtLambda;
@@ -21,10 +21,10 @@ import static org.junit.jupiter.api.Assertions.assertNotNull;
 
 
 class MethodHierarchyTest {
-    protected final TempLocation tempLocation;
+    protected final AbstractTempLocation tempLocation;
 
     MethodHierarchyTest() {
-        tempLocation = new TempLocationImpl();
+        tempLocation = new TempLocation();
     }
 
     @Test

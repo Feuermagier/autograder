@@ -1,7 +1,7 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.api.CheckConfiguration;
-import de.firemage.autograder.api.Linter;
+import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.Problem;
 import de.firemage.autograder.api.ProblemType;
@@ -9,8 +9,8 @@ import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.api.TempLocation;
-import de.firemage.autograder.core.file.TempLocationImpl;
+import de.firemage.autograder.api.AbstractTempLocation;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.parallel.AnalysisResult;
 import de.firemage.autograder.core.parallel.AnalysisScheduler;
@@ -36,19 +36,19 @@ import java.util.Map;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class LinterImpl implements Linter {
+public final class Linter implements AbstractLinter {
     private final int threads;
-    private final TempLocation tempLocation;
+    private final AbstractTempLocation tempLocation;
     private final FluentBundle fluentBundle;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
 
-    public static LinterImpl defaultLinter(Locale locale) {
-        return new LinterImpl(Linter.builder(locale));
+    public static Linter defaultLinter(Locale locale) {
+        return new Linter(AbstractLinter.builder(locale));
     }
 
-    public LinterImpl(
-        Linter.Builder builder
+    public Linter(
+        AbstractLinter.Builder builder
     ) {
         var locale = builder.getLocale();
         String filename = switch (locale.getLanguage()) {
@@ -65,7 +65,7 @@ public final class LinterImpl implements Linter {
             throw new IllegalStateException(e);
         }
 
-        this.tempLocation = builder.getTempLocation() != null ? builder.getTempLocation() : new TempLocationImpl();
+        this.tempLocation = builder.getTempLocation() != null ? builder.getTempLocation() : new TempLocation();
         this.threads = builder.getThreads();
         this.classLoader = builder.getClassLoader();
         this.maxProblemsPerCheck = builder.getMaxProblemsPerCheck();
@@ -128,7 +128,7 @@ public final class LinterImpl implements Linter {
         AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
 
         AnalysisResult result;
-        try (TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
+        try (AbstractTempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
             for (var entry : linterChecks.entrySet()) {
                 CodeLinter linter = entry.getKey();
                 var targetCheckType = linter.supportedCheckType();
