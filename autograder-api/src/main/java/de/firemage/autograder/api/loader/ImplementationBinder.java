@@ -39,6 +39,27 @@ public class ImplementationBinder<T> {
     }
 
     public T instantiate() {
+        var implementation = findImplementation();
+
+        try {
+            return implementation.getConstructor(parameterTypes.toArray(new Class[0])).newInstance(arguments.toArray());
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to instantiate " + implementation.getName() + " with a constructor with parameters " + parameterTypes, e);
+        }
+    }
+
+    public <R> R callStatic(String methodName, Class<R> returnType) {
+        var implementation = findImplementation();
+
+        try {
+            var method = implementation.getMethod(methodName, parameterTypes.toArray(new Class[0]));
+            return returnType.cast(method.invoke(null, arguments.toArray()));
+        } catch (ReflectiveOperationException e) {
+            throw new IllegalStateException("Failed to call static method " + methodName + " on " + implementation.getName(), e);
+        }
+    }
+
+    public Class<T> findImplementation() {
         if (this.classLoader == null) {
             this.classLoader = this.getClass().getClassLoader();
         }
@@ -66,12 +87,7 @@ public class ImplementationBinder<T> {
 
         @SuppressWarnings("unchecked")
         var implementation = (Class<T>) reflectionCache.get(superType.getName());
-
-        try {
-            return implementation.getConstructor(parameterTypes.toArray(new Class[0])).newInstance(arguments.toArray());
-        } catch (ReflectiveOperationException e) {
-            throw new IllegalStateException("Failed to instantiate " + implementation.getName() + " with a constructor with parameters " + parameterTypes, e);
-        }
+        return implementation;
     }
 
     public static void invalidateCache() {

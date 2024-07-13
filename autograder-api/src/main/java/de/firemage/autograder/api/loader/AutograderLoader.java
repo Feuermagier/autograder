@@ -1,6 +1,7 @@
 package de.firemage.autograder.api.loader;
 
 import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.AbstractProblemType;
 import de.firemage.autograder.api.AbstractTempLocation;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -68,6 +69,13 @@ public class AutograderLoader {
         return new ImplementationBinder<>(AbstractTempLocation.class)
                 .classLoader(autograderClassLoader)
                 .instantiate();
+    }
+
+    public static AbstractProblemType convertProblemType(String problemType) {
+        return new ImplementationBinder<>(AbstractProblemType.class)
+                .param(String.class, problemType)
+                .classLoader(autograderClassLoader)
+                .callStatic("fromString", AbstractProblemType.class);
     }
 
     private static String getAutograderVersionTag() throws IOException {

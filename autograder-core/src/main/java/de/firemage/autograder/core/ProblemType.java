@@ -1,11 +1,12 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.AbstractProblemType;
 import de.firemage.autograder.api.HasFalsePositives;
 
 import java.util.Collection;
 import java.util.List;
 
-public enum ProblemType {
+public enum ProblemType implements AbstractProblemType {
     /**
      * If the code is split into multiple packages, all input must happen in one package. Otherwise, one class must do all input.
      * <br/>
@@ -1055,11 +1056,12 @@ public enum ProblemType {
     @HasFalsePositives
     REDUNDANT_UNINITIALIZED_VARIABLE;
 
+    /**
+     * <strong>Used via reflection, so don't remove, even if your IDE shows no usages!</strong>
+     * @param name
+     * @return
+     */
     public static ProblemType fromString(String name) {
         return ProblemType.valueOf(name);
-    }
-
-    public static List<ProblemType> fromStrings(Collection<String> names) {
-        return names.stream().map(ProblemType::fromString).toList();
     }
 }

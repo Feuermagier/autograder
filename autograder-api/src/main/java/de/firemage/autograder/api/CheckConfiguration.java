@@ -1,14 +1,16 @@
 package de.firemage.autograder.api;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.module.SimpleModule;
 import com.fasterxml.jackson.dataformat.yaml.YAMLFactory;
+import de.firemage.autograder.api.loader.ImplementationBinder;
 
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public record CheckConfiguration(List<String> problemsToReport, List<String> excludedClasses) {
+public record CheckConfiguration(List<? extends AbstractProblemType> problemsToReport, List<String> excludedClasses) {
     public static CheckConfiguration empty() {
         return new CheckConfiguration(List.of(), List.of());
     }
@@ -21,12 +23,19 @@ public record CheckConfiguration(List<String> problemsToReport, List<String> exc
         if (!configString.contains("problemsToReport") && configString.startsWith("[")) {
             configString = "problemsToReport: " + configString;
         }
-        var config =  new ObjectMapper(new YAMLFactory()).readValue(configString, CheckConfiguration.class);
+
+        // Tell Jackson how to instantiate AbstractProblemType
+        var coreModule = new SimpleModule("autograder-core");
+        coreModule.addAbstractTypeMapping(AbstractProblemType.class, new ImplementationBinder<>(AbstractProblemType.class).findImplementation());
+
+        var mapper = new ObjectMapper(new YAMLFactory());
+        mapper.registerModule(coreModule);
+        var config =  mapper.readValue(configString, CheckConfiguration.class);
         config.validate();
         return config;
     }
 
-    public static CheckConfiguration fromProblemTypes(List<String> problemsToReport) {
+    public static CheckConfiguration fromProblemTypes(List<? extends AbstractProblemType> problemsToReport) {
         return new CheckConfiguration(problemsToReport, List.of());
     }
 

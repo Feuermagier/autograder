@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.AbstractProblemType;
 import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.LinterException;
@@ -84,8 +85,7 @@ public final class Linter implements AbstractLinter {
         CheckConfiguration checkConfiguration,
         Consumer<Translatable> statusConsumer
     ) throws LinterException, IOException {
-        var typedProblems = ProblemType.fromStrings(checkConfiguration.problemsToReport());
-        var checks = this.findChecksForProblemTypes(typedProblems);
+        var checks = this.findChecksForProblemTypes(checkConfiguration.problemsToReport());
         return this.checkFile(file, checkConfiguration, checks, statusConsumer);
     }
 
@@ -220,7 +220,7 @@ public final class Linter implements AbstractLinter {
             .getTypesAnnotatedWith(ExecutableCheck.class)
     );
 
-    public List<Check> findChecksForProblemTypes(Collection<ProblemType> problems) {
+    public List<Check> findChecksForProblemTypes(Collection<? extends AbstractProblemType> problems) {
         return CHECKS
             .stream()
             .filter(check -> isRequiredCheck(check.getAnnotation(ExecutableCheck.class), problems))
@@ -257,7 +257,7 @@ public final class Linter implements AbstractLinter {
     }
 
 
-    private boolean isRequiredCheck(ExecutableCheck check, Collection<ProblemType> problems) {
+    private boolean isRequiredCheck(ExecutableCheck check, Collection<? extends AbstractProblemType> problems) {
         return check.enabled() && problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));
     }
 
