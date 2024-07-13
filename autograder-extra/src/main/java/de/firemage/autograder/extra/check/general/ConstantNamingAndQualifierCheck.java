@@ -1,7 +1,7 @@
 package de.firemage.autograder.extra.check.general;
 
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.extra.integrated.IdentifierNameUtils;

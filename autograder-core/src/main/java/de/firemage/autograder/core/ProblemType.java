@@ -1,4 +1,9 @@
-package de.firemage.autograder.api;
+package de.firemage.autograder.core;
+
+import de.firemage.autograder.api.HasFalsePositives;
+
+import java.util.Collection;
+import java.util.List;
 
 public enum ProblemType {
     /**
@@ -1048,5 +1053,13 @@ public enum ProblemType {
      * Reports code where a variable is declared, but not initialized.
      */
     @HasFalsePositives
-    REDUNDANT_UNINITIALIZED_VARIABLE
+    REDUNDANT_UNINITIALIZED_VARIABLE;
+
+    public static ProblemType fromString(String name) {
+        return ProblemType.valueOf(name);
+    }
+
+    public static List<ProblemType> fromStrings(Collection<String> names) {
+        return names.stream().map(ProblemType::fromString).toList();
+    }
 }

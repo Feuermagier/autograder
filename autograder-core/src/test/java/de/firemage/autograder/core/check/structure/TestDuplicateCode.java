@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.structure;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -19,7 +19,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestDuplicateCode extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.DUPLICATE_CODE);
 
-    void assertDuplicateCode(AbstractProblem problem, String left, String right) {
+    void assertDuplicateCode(Problem problem, String left, String right) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "duplicate-code",

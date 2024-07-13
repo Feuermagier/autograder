@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestMagicString extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.MAGIC_STRING);
 
-    void assertMagicString(AbstractProblem problem, String value) {
+    void assertMagicString(Problem problem, String value) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "magic-string",

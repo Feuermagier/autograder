@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.oop;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -24,7 +24,7 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         ProblemType.LEAKED_COLLECTION_ASSIGN
     );
 
-    void assertEqualsLeakedReturn(AbstractProblem problem, String method, String field) {
+    void assertEqualsLeakedReturn(Problem problem, String method, String field) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "leaked-collection-return",
@@ -37,7 +37,7 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsLeakedAssign(AbstractProblem problem, String method, String field) {
+    void assertEqualsLeakedAssign(Problem problem, String method, String field) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "leaked-collection-assign",
@@ -50,7 +50,7 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsLeakedConstructor(AbstractProblem problem, String signature, String field) {
+    void assertEqualsLeakedConstructor(Problem problem, String signature, String field) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "leaked-collection-constructor",

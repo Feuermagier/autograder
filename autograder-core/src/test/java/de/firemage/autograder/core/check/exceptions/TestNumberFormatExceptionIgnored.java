@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.exceptions;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -17,7 +17,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestNumberFormatExceptionIgnored extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.NUMBER_FORMAT_EXCEPTION_IGNORED);
 
-    void assertEqualsIgnored(AbstractProblem problem) {
+    void assertEqualsIgnored(Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "number-format-exception-ignored"

@@ -2,7 +2,6 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.LinterConfigurationException;
-import de.firemage.autograder.api.ProblemType;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -39,7 +38,7 @@ class TestSampleConfig {
     void hasAllProblemTypes() throws IOException, LinterConfigurationException {
         // the `System.getProperty("user.dir")` is the path to the autograder-core directory
         Path path = Path.of(System.getProperty("user.dir"), "..", "sample_config.yaml");
-        List<ProblemType> present = CheckConfiguration.fromConfigFile(path).problemsToReport();
+        List<ProblemType> present = ProblemType.fromStrings(CheckConfiguration.fromConfigFile(path).problemsToReport());
 
         assertProblemTypes(Arrays.asList(ProblemType.values()), present);
     }

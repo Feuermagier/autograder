@@ -1,7 +1,6 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 
@@ -50,11 +49,6 @@ public abstract class Problem implements AbstractProblem {
     }
 
     @Override
-    public ProblemType getProblemType() {
-        return problemType;
-    }
-
-    @Override
     public String getCheckName() {
         return this.check.getClass().getSimpleName();
     }
@@ -62,5 +56,14 @@ public abstract class Problem implements AbstractProblem {
     @Override
     public Translatable getLinterName() {
         return this.check.getLinter();
+    }
+
+    @Override
+    public String getType() {
+        return this.problemType.toString();
+    }
+
+    public ProblemType getProblemType() {
+        return problemType;
     }
 }

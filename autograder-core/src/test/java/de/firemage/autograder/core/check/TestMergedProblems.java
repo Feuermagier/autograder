@@ -2,7 +2,7 @@ package de.firemage.autograder.core.check;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.api.JavaVersion;
 import org.junit.jupiter.api.Test;

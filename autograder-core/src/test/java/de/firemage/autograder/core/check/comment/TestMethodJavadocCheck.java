@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.comment;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.SourceInfo;
@@ -26,7 +26,7 @@ class TestMethodJavadocCheck extends AbstractCheckTest {
         ProblemType.JAVADOC_UNEXPECTED_TAG
     );
 
-    void assertEqualsMissing(AbstractProblem problem, String param) {
+    void assertEqualsMissing(Problem problem, String param) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "javadoc-method-exp-param-missing",
@@ -36,7 +36,7 @@ class TestMethodJavadocCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsUnknownParam(AbstractProblem problem, String param) {
+    void assertEqualsUnknownParam(Problem problem, String param) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "javadoc-method-exp-param-unknown",
@@ -46,7 +46,7 @@ class TestMethodJavadocCheck extends AbstractCheckTest {
         );
     }
 
-    void assertEqualsUnknownTag(AbstractProblem problem, String tag) {
+    void assertEqualsUnknownTag(Problem problem, String tag) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "javadoc-unexpected-tag",

@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.api;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
@@ -19,7 +19,7 @@ class TestUseFormatString extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "use-format-string";
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.USE_FORMAT_STRING);
 
-    void assertUseFormatString(String expected, AbstractProblem problem) {
+    void assertUseFormatString(String expected, Problem problem) {
         assertEquals(ProblemType.USE_FORMAT_STRING, problem.getProblemType());
         assertEquals(
             this.linter.translateMessage(

@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.ProblemType;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;

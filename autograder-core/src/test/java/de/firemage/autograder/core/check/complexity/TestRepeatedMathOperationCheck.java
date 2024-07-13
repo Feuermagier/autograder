@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.complexity;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -18,7 +18,7 @@ import static org.junit.jupiter.api.Assertions.assertEquals;
 class TestRepeatedMathOperationCheck extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.REPEATED_MATH_OPERATION);
 
-    void assertEqualsRepeat(String suggestion, AbstractProblem problem) {
+    void assertEqualsRepeat(String suggestion, Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "common-reimplementation",

@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -19,7 +19,7 @@ class TestCompareCharValue extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "compare-char-value";
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.COMPARE_CHAR_VALUE);
 
-    private void assertEqualsCompare(AbstractProblem problem, String expression, int intValue, char charValue) {
+    private void assertEqualsCompare(Problem problem, String expression, int intValue, char charValue) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(

@@ -1,7 +1,5 @@
 package de.firemage.autograder.api;
 
-import fluent.bundle.FluentBundle;
-
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.List;
@@ -11,7 +9,6 @@ import java.util.function.Consumer;
 public interface AbstractLinter {
     List<? extends AbstractProblem> checkFile(Path file, JavaVersion version, CheckConfiguration checkConfiguration, Consumer<Translatable> statusConsumer) throws LinterException, IOException;
     String translateMessage(Translatable translatable);
-    FluentBundle getFluentBundle();
 
     static Builder builder(Locale locale) {
         return new Builder(locale);

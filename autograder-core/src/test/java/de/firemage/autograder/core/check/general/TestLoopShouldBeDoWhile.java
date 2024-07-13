@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.general;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -23,7 +23,7 @@ class TestLoopShouldBeDoWhile extends AbstractCheckTest {
         return value;
     }
 
-    void assertEqualsDoWhile(AbstractProblem problem, String body, String condition) {
+    void assertEqualsDoWhile(Problem problem, String body, String condition) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "loop-should-be-do-while",

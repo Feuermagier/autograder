@@ -8,7 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public record CheckConfiguration(List<ProblemType> problemsToReport, List<String> excludedClasses) {
+public record CheckConfiguration(List<String> problemsToReport, List<String> excludedClasses) {
     public static CheckConfiguration empty() {
         return new CheckConfiguration(List.of(), List.of());
     }
@@ -26,7 +26,7 @@ public record CheckConfiguration(List<ProblemType> problemsToReport, List<String
         return config;
     }
 
-    public static CheckConfiguration fromProblemTypes(List<ProblemType> problemsToReport) {
+    public static CheckConfiguration fromProblemTypes(List<String> problemsToReport) {
         return new CheckConfiguration(problemsToReport, List.of());
     }
 

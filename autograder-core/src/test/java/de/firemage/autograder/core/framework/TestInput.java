@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.framework;
 
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;

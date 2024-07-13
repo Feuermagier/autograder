@@ -3,13 +3,10 @@ package de.firemage.autograder.core;
 import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.LinterException;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.core.parallel.AnalysisResult;
@@ -38,7 +35,7 @@ import java.util.stream.Collectors;
 
 public final class Linter implements AbstractLinter {
     private final int threads;
-    private final AbstractTempLocation tempLocation;
+    private final TempLocation tempLocation;
     private final FluentBundle fluentBundle;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
@@ -65,7 +62,7 @@ public final class Linter implements AbstractLinter {
             throw new IllegalStateException(e);
         }
 
-        this.tempLocation = builder.getTempLocation() != null ? builder.getTempLocation() : TempLocation.random();
+        this.tempLocation = builder.getTempLocation() != null ? (TempLocation) builder.getTempLocation() : TempLocation.random();
         this.threads = builder.getThreads();
         this.classLoader = builder.getClassLoader();
         this.maxProblemsPerCheck = builder.getMaxProblemsPerCheck();
@@ -87,18 +84,9 @@ public final class Linter implements AbstractLinter {
         CheckConfiguration checkConfiguration,
         Consumer<Translatable> statusConsumer
     ) throws LinterException, IOException {
-        var checks = this.findChecksForProblemTypes(checkConfiguration.problemsToReport());
+        var typedProblems = ProblemType.fromStrings(checkConfiguration.problemsToReport());
+        var checks = this.findChecksForProblemTypes(typedProblems);
         return this.checkFile(file, checkConfiguration, checks, statusConsumer);
-    }
-
-    private static <T> List<T> castUnsafe(Iterable<?> list, Class<? extends T> clazz) {
-        List<T> result = new ArrayList<>();
-
-        for (Object object : list) {
-            result.add(clazz.cast(object));
-        }
-
-        return result;
     }
 
     public List<Problem> checkFile(
@@ -128,7 +116,7 @@ public final class Linter implements AbstractLinter {
         AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
 
         AnalysisResult result;
-        try (AbstractTempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
+        try (TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
             for (var entry : linterChecks.entrySet()) {
                 CodeLinter linter = entry.getKey();
                 var targetCheckType = linter.supportedCheckType();
@@ -162,7 +150,7 @@ public final class Linter implements AbstractLinter {
             unreducedProblems = result
                 .problems()
                 .stream()
-                .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getProblemType()))
+                .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getType()))
                 .toList();
         }
 
@@ -203,7 +191,7 @@ public final class Linter implements AbstractLinter {
                 // further partition the problems by their ProblemType
                 // (one does not want to merge different types of problems):
                 Map<ProblemType, List<Problem>> problemsByType = problemsForCheck.stream()
-                    .collect(Collectors.groupingBy(AbstractProblem::getProblemType, LinkedHashMap::new, Collectors.toList()));
+                    .collect(Collectors.groupingBy(Problem::getProblemType, LinkedHashMap::new, Collectors.toList()));
 
                 problemsForCheck = problemsByType.values()
                     .stream()
@@ -271,5 +259,15 @@ public final class Linter implements AbstractLinter {
 
     private boolean isRequiredCheck(ExecutableCheck check, Collection<ProblemType> problems) {
         return check.enabled() && problems.stream().anyMatch(p -> List.of(check.reportedProblems()).contains(p));
+    }
+
+    private static <T> List<T> castUnsafe(Iterable<?> list, Class<? extends T> clazz) {
+        List<T> result = new ArrayList<>();
+
+        for (Object object : list) {
+            result.add(clazz.cast(object));
+        }
+
+        return result;
     }
 }

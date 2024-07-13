@@ -1,14 +1,12 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.AbstractLinter;
-import de.firemage.autograder.core.Linter;
+import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.LinterException;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
@@ -22,7 +20,7 @@ import java.util.NoSuchElementException;
 import static org.junit.jupiter.api.Assertions.fail;
 
 public abstract class AbstractCheckTest {
-    protected final AbstractTempLocation tempLocation;
+    protected final TempLocation tempLocation;
     protected final Linter linter;
 
     protected AbstractCheckTest() {
@@ -33,7 +31,7 @@ public abstract class AbstractCheckTest {
         this(TempLocation.random(), limit);
     }
 
-    private AbstractCheckTest(AbstractTempLocation tempLocation, int limit) {
+    private AbstractCheckTest(TempLocation tempLocation, int limit) {
         this.tempLocation = tempLocation;
         this.linter = new Linter(AbstractLinter.builder(Locale.US)
             .tempLocation(this.tempLocation)
@@ -45,10 +43,11 @@ public abstract class AbstractCheckTest {
         SourceInfo sourceInfo,
         List<ProblemType> problemTypes
     ) throws LinterException, IOException {
+        var problemTypeStrings = problemTypes.stream().map(ProblemType::toString).toList();
         return this.linter.checkFile(
             UploadedFile.build(sourceInfo, this.tempLocation, status -> {
             }, null),
-            CheckConfiguration.fromProblemTypes(problemTypes),
+            CheckConfiguration.fromProblemTypes(problemTypeStrings),
             status -> {
             }
         );
@@ -61,11 +60,11 @@ public abstract class AbstractCheckTest {
         return new ProblemIterator(this.check(sourceInfo, problemTypes));
     }
 
-    public static final class ProblemIterator implements Iterator<AbstractProblem> {
-        private final List<? extends AbstractProblem> problems;
+    public static final class ProblemIterator implements Iterator<Problem> {
+        private final List<? extends Problem> problems;
         private int index;
 
-        private ProblemIterator(List<? extends AbstractProblem> problems) {
+        private ProblemIterator(List<? extends Problem> problems) {
             this.problems = problems;
             this.index = 0;
         }
@@ -76,7 +75,7 @@ public abstract class AbstractCheckTest {
         }
 
         @Override
-        public AbstractProblem next() throws NoSuchElementException {
+        public Problem next() throws NoSuchElementException {
             if (!this.hasNext()) {
                 throw new NoSuchElementException(
                     "Expected at least %d problems, but got %d. Problems: %s".formatted(

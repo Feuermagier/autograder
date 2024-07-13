@@ -1,11 +1,11 @@
 package de.firemage.autograder.core.check.api;
 
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Test;
 
@@ -19,7 +19,7 @@ class TestAvoidStringConcat  extends AbstractCheckTest {
     private static final String LOCALIZED_MESSAGE_KEY = "common-reimplementation";
     private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.AVOID_STRING_CONCAT);
 
-    private void assertEqualsConcat(AbstractProblem problem, String suggestion) {
+    private void assertEqualsConcat(Problem problem, String suggestion) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(

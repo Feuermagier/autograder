@@ -2,8 +2,8 @@ package de.firemage.autograder.core.check.api;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.api.AbstractProblem;
-import de.firemage.autograder.api.ProblemType;
+import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
@@ -23,7 +23,7 @@ class TestIsEmptyReimplementationCheck extends AbstractCheckTest {
         ProblemType.COLLECTION_IS_EMPTY_REIMPLEMENTED
     );
 
-    void assertEqualsIsEmpty(String original, String suggestion, AbstractProblem problem) {
+    void assertEqualsIsEmpty(String original, String suggestion, Problem problem) {
         assertEquals(
             this.linter.translateMessage(new LocalizedMessage(
                 "suggest-replacement",

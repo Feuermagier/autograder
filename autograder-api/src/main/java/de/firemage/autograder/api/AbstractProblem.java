@@ -4,10 +4,7 @@ public interface AbstractProblem {
     String getCheckName();
     Translatable getLinterName();
     Translatable getExplanation();
-
     String getDisplayLocation();
-
     AbstractCodePosition getPosition();
-
-    ProblemType getProblemType();
+    String getType();
 }
