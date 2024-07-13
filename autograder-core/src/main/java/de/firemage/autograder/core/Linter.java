@@ -150,7 +150,7 @@ public final class Linter implements AbstractLinter {
             unreducedProblems = result
                 .problems()
                 .stream()
-                .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getType()))
+                .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getProblemType()))
                 .toList();
         }
 
