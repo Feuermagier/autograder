@@ -29,6 +29,8 @@ class AutograderLoaderTest {
         AbstractTempLocation fixedTempLocation = AutograderLoader.instantiateTempLocation(Path.of(".autograder-tmp"));
         fixedTempLocation.close();
 
-        AbstractLinter linter = AutograderLoader.instantiateLinter(AbstractLinter.builder(Locale.US));
+        AutograderLoader.instantiateLinter(AbstractLinter.builder(Locale.US));
+
+        AutograderLoader.convertProblemType("ASSERT");
     }
 }
