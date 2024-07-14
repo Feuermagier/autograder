@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.file;
 
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import org.apache.commons.io.FileUtils;
 import spoon.compiler.SpoonResource;
 import spoon.support.compiler.VirtualFile;

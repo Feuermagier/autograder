@@ -1,7 +1,7 @@
 package de.firemage.autograder.core.file;
 
 import de.firemage.autograder.core.SerializableCharset;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.compiler.PhysicalFileObject;
 import org.apache.commons.io.FileUtils;
 import org.mozilla.universalchardet.UniversalDetector;

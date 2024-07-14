@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.AbstractCodePosition;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.file.SourcePath;
 import spoon.reflect.code.CtAbstractSwitch;
@@ -11,8 +12,9 @@ import spoon.reflect.declaration.CtType;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.Path;
 
-public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine, int endLine, int startColumn, int endColumn) {
+public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine, int endLine, int startColumn, int endColumn) implements AbstractCodePosition {
     public static CodePosition fromSourcePosition(
         SourcePosition sourcePosition,
         CtElement ctElement,
@@ -55,7 +57,14 @@ public record CodePosition(SourceInfo sourceInfo, SourcePath file, int startLine
         );
     }
 
-    public String readString() {
+
+    @Override
+    public Path path() {
+        return this.file.toPath();
+    }
+
+    @Override
+    public String readSourceFile() {
         try {
             return this.sourceInfo.getCompilationUnit(this.file).readString();
         } catch (IOException exception) {

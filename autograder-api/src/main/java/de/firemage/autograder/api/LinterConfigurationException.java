@@ -1,4 +1,4 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.api;
 
 public class LinterConfigurationException extends LinterException {
     public LinterConfigurationException(String message) {

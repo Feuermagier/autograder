@@ -1,16 +1,14 @@
 package de.firemage.autograder.core.check.general;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.util.List;

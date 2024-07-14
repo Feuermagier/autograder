@@ -1,12 +1,11 @@
 package de.firemage.autograder.extra.check.oop;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -25,7 +24,7 @@ class TestInheritanceBadPractices extends AbstractCheckTest {
 
     @Test
     void testCompositionMessage() throws LinterException, IOException {
-        List<Problem> problems = this.check(StringSourceInfo.fromSourceString(
+        var problems = this.check(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """

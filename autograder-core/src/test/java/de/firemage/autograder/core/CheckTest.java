@@ -1,7 +1,10 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.compiler.JavaVersion;
 import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.api.DynamicTest;
@@ -91,7 +94,7 @@ public class CheckTest {
             folders = paths.toList();
         }
 
-        TempLocation tempLocation = TempLocation.random();
+        AbstractTempLocation tempLocation = TempLocation.random();
 
         return DynamicTest.stream(
             folders.stream().map(TestInput::fromPath)
@@ -101,17 +104,16 @@ public class CheckTest {
                 var check = testInput.config().check();
                 var expectedProblems = testInput.config().expectedProblems();
 
-                try (TempLocation tmpDirectory = tempLocation.createTempDirectory(testInput.config().checkPath())) {
+                try (AbstractTempLocation tmpDirectory = tempLocation.createTempDirectory(testInput.config().checkPath())) {
                     var file = UploadedFile.build(
                         testInput.path().resolve("code"),
                         JavaVersion.JAVA_17,
                         tmpDirectory, status -> {
                         }, null
                     );
-                    var linter = Linter.builder(Locale.US)
+                    var linter = new Linter(AbstractLinter.builder(Locale.US)
                         .threads(1) // Use a single thread for performance reasons
-                        .tempLocation(tmpDirectory)
-                        .build();
+                        .tempLocation(tmpDirectory));
 
                     var problems = linter.checkFile(
                         file,

@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check.oop;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;

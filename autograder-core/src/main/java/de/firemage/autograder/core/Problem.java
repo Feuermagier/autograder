@@ -1,15 +1,69 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.AbstractProblem;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 
-public interface Problem {
-    Check getCheck();
+/**
+ * Contains the default implementation of most {@link AbstractProblem} methods.
+ */
+public abstract class Problem implements AbstractProblem {
 
-    Translatable getExplanation();
+    private final Check check;
 
-    String getDisplayLocation();
+    private final CodePosition position;
 
-    CodePosition getPosition();
+    private final Translatable explanation;
 
-    ProblemType getProblemType();
+    private final ProblemType problemType;
+
+    protected Problem(Check check, CodePosition position, Translatable explanation, ProblemType problemType) {
+        this.check = check;
+        this.position = position;
+        this.explanation = explanation;
+        this.problemType = problemType;
+    }
+
+    @Override
+    public String getDisplayLocation() {
+        // TODO
+        if (this.position.startLine() == this.position.endLine()) {
+            return this.position.file() + ":" + this.position.startLine();
+        } else {
+            return this.position.file() + ":" + this.position.startLine() + "-" + this.position.endLine();
+        }
+    }
+
+    public Check getCheck() {
+        return check;
+    }
+
+    @Override
+    public CodePosition getPosition() {
+        return position;
+    }
+
+    @Override
+    public Translatable getExplanation() {
+        return explanation;
+    }
+
+    @Override
+    public String getCheckName() {
+        return this.check.getClass().getSimpleName();
+    }
+
+    @Override
+    public Translatable getLinterName() {
+        return this.check.getLinter();
+    }
+
+    @Override
+    public String getType() {
+        return this.problemType.toString();
+    }
+
+    public ProblemType getProblemType() {
+        return problemType;
+    }
 }

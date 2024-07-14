@@ -1,10 +1,11 @@
 package de.firemage.autograder.extra.pmd;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.CompilationUnit;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import net.sourceforge.pmd.PMDConfiguration;
 import net.sourceforge.pmd.PmdAnalysis;
@@ -34,12 +35,12 @@ public class PMDLinter implements CodeLinter<PMDCheck> {
     @Override
     public List<Problem> lint(
         UploadedFile submission,
-        TempLocation tempLocation,
+        AbstractTempLocation tempLocation,
         ClassLoader classLoader,
         List<PMDCheck> checks,
-        Consumer<? super LinterStatus> statusConsumer
+        Consumer<Translatable> statusConsumer
     ) throws IOException {
-        statusConsumer.accept(LinterStatus.RUNNING_PMD);
+        statusConsumer.accept(LinterStatus.RUNNING_PMD.getMessage());
 
         PMDConfiguration config = new PMDConfiguration();
 

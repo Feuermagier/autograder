@@ -1,14 +1,14 @@
 package de.firemage.autograder.extra.pmd;
 
 import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.ProblemImpl;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.file.SourceInfo;
 import net.sourceforge.pmd.RuleViolation;
 
 import java.nio.file.Path;
 
-public class PMDInCodeProblem extends ProblemImpl {
+public class PMDInCodeProblem extends Problem {
 
     public PMDInCodeProblem(PMDCheck check, RuleViolation violation, SourceInfo sourceInfo) {
         super(check,

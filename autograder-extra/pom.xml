@@ -23,6 +23,10 @@
         <!-- Internal -->
         <dependency>
             <groupId>de.firemage.autograder</groupId>
+            <artifactId>autograder-api</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-core</artifactId>
         </dependency>
 
@@ -30,7 +34,7 @@
         <dependency>
             <groupId>de.firemage.autograder</groupId>
             <artifactId>autograder-core</artifactId>
-            <version>${parent.version}</version>
+            <version>${project.parent.version}</version>
             <classifier>tests</classifier>
             <type>test-jar</type>
             <scope>test</scope>

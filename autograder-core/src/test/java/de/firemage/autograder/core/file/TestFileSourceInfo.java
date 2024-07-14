@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.file;
 
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.AbstractTempLocation;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -12,13 +13,13 @@ import java.nio.file.Paths;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestFileSourceInfo {
-    private final TempLocation tempLocation = TempLocation.random();
+    private final AbstractTempLocation tempLocation = TempLocation.random();
 
     // See https://github.com/Feuermagier/autograder/issues/368
     @Test
     void testDetectThaiEncoding() throws IOException {
-        try (TempLocation folder = tempLocation.createTempDirectory("test")) {
-            Path folderPath = folder.tempLocation().toPath();
+        try (AbstractTempLocation folder = tempLocation.createTempDirectory("test")) {
+            Path folderPath = folder.toPath();
             Path filePath = Paths.get(folderPath.toString(), "Test.java");
             Files.write(filePath, "public class Test { char symbol = '§'; }".getBytes());
 

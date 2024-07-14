@@ -1,4 +1,4 @@
-package de.firemage.autograder.core;
+package de.firemage.autograder.api;
 
 import java.io.IOException;
 import java.nio.file.Files;

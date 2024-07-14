@@ -10,7 +10,6 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.fold.Fold;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.UnaryOperatorKind;

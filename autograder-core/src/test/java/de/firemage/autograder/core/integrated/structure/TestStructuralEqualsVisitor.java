@@ -1,8 +1,8 @@
 package de.firemage.autograder.core.integrated.structure;
 
-import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
+import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.provider.CsvSource;

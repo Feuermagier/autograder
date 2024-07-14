@@ -1,6 +1,6 @@
 package de.firemage.autograder.extra.errorprone;
 
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -25,8 +25,8 @@ import java.util.Optional;
  * @param jvmArgs      arguments to pass to the new JVM (those are that java -... flags)
  * @param tempLocation a location where the result of the code can be written to (used for inter-process communication)
  */
-public record VMLauncher(List<String> jvmArgs, TempLocation tempLocation, Optional<String> mainClassName) {
-    public static VMLauncher fromDefault(TempLocation tmpLocation) throws IOException {
+public record VMLauncher(List<String> jvmArgs, AbstractTempLocation tempLocation, Optional<String> mainClassName) {
+    public static VMLauncher fromDefault(AbstractTempLocation tmpLocation) throws IOException {
         Optional<String> mainClassName = Optional.empty();
         {
             String potentialName = System.getProperty("sun.java.command");

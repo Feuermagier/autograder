@@ -1,5 +1,7 @@
 package de.firemage.autograder.core.file;
 
+import de.firemage.autograder.api.PathLike;
+
 import java.io.Serializable;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -18,7 +20,7 @@ import java.util.stream.StreamSupport;
  * Additionally, it would be possible to have paths with {@code ".."} that have to be normalized first, which
  * makes comparisons harder.
  */
-public final class SourcePath implements Comparable<SourcePath>, Serializable {
+public final class SourcePath implements Comparable<SourcePath>, Serializable, PathLike {
     private static final String SEPARATOR = "/";
 
     private final List<String> segments;

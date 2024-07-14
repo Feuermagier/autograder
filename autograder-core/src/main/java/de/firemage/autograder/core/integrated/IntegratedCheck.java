@@ -1,11 +1,10 @@
 package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.ProblemImpl;
-import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.Problem;
+import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Translatable;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.file.SourceInfo;
 import spoon.reflect.declaration.CtElement;
@@ -24,7 +23,7 @@ public abstract class IntegratedCheck implements Check {
     }
 
     protected void addLocalProblem(CodePosition position, Translatable explanation, ProblemType problemType) {
-        this.problems.add(new ProblemImpl(this, position, explanation, problemType) {});
+        this.problems.add(new Problem(this, position, explanation, problemType) {});
     }
 
     public List<Problem> run(StaticAnalysis staticAnalysis, SourceInfo sourceInfo) {
@@ -37,7 +36,7 @@ public abstract class IntegratedCheck implements Check {
     protected abstract void check(StaticAnalysis staticAnalysis);
 
     @Override
-    public LocalizedMessage getLinter() {
+    public Translatable getLinter() {
         return new LocalizedMessage("linter-integrated");
     }
 

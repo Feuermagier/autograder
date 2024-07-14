@@ -6,10 +6,8 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import spoon.processing.AbstractProcessor;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtCompilationUnit;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtPackageDeclaration;
 import spoon.reflect.declaration.CtType;
 

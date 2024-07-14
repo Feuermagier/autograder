@@ -3,7 +3,7 @@ package de.firemage.autograder.core.check.comment;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.Translatable;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.file.SourcePath;

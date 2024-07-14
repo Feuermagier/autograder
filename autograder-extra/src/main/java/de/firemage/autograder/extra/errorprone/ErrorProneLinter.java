@@ -1,11 +1,12 @@
 package de.firemage.autograder.extra.errorprone;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeLinter;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.core.check.Check;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 
 import java.io.IOException;
@@ -24,12 +25,12 @@ public class ErrorProneLinter implements CodeLinter<ErrorProneCheck> {
 
     public List<Problem> lint(
         UploadedFile submission,
-        TempLocation tempLocation,
+        AbstractTempLocation tempLocation,
         ClassLoader classLoader,
         List<ErrorProneCheck> checks,
-        Consumer<? super LinterStatus> statusConsumer
+        Consumer<Translatable> statusConsumer
     ) throws IOException {
-        statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE);
+        statusConsumer.accept(LinterStatus.RUNNING_ERROR_PRONE.getMessage());
         Map<ErrorProneLint, Function<ErrorProneDiagnostic, Message>> lintsForChecks = new HashMap<>();
         Map<ErrorProneLint, Check> checksForLints = new HashMap<>();
 

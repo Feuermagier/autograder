@@ -2,8 +2,8 @@ package de.firemage.autograder.extra.errorprone;
 
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.file.TempLocation;
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.AbstractTempLocation;
 
 import javax.tools.DiagnosticCollector;
 import javax.tools.JavaCompiler;
@@ -25,7 +25,7 @@ import java.util.stream.Stream;
  * @param javaVersion the java version with which to compile
  * @param lints       the lints that should be emitted
  */
-record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
+record ErrorProneCompiler(JavaVersion javaVersion, AbstractTempLocation tempLocation,
                           List<ErrorProneLint> lints) implements Serializable {
     /**
      * Compiles the given source files and returns the emitted lints.
@@ -80,7 +80,7 @@ record ErrorProneCompiler(JavaVersion javaVersion, TempLocation tempLocation,
         StringWriter output = new StringWriter();
 
         boolean isSuccessful;
-        try (TempLocation tempLocation = this.tempLocation.createTempDirectory("classes")) {
+        try (AbstractTempLocation tempLocation = this.tempLocation.createTempDirectory("classes")) {
             isSuccessful = compiler.getTask(
                 output,
                 compiler.getStandardFileManager(diagnosticCollector, Locale.US, charset),

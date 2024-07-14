@@ -1,5 +1,6 @@
 package de.firemage.autograder.extra.errorprone;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.check.Check;
 
@@ -19,7 +20,7 @@ public interface ErrorProneCheck extends Check {
     Map<ErrorProneLint, Function<ErrorProneDiagnostic, Message>> subscribedLints();
 
     @Override
-    default LocalizedMessage getLinter() {
+    default Translatable getLinter() {
         return new LocalizedMessage("linter-error-prone");
     }
 }
