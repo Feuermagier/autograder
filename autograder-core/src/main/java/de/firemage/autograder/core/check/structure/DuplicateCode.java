@@ -34,7 +34,6 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.SequencedSet;
 import java.util.Set;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
@@ -97,11 +96,11 @@ public class DuplicateCode extends IntegratedCheck {
         }
 
         public CtStatement getFirst() {
-            return this.statements.getFirst();
+            return this.statements.get(0);
         }
 
         public CtStatement getLast() {
-            return this.statements.getLast();
+            return this.statements.get(this.statements.size() - 1);
         }
 
         public List<CtStatement> statements() {
@@ -113,8 +112,8 @@ public class DuplicateCode extends IntegratedCheck {
             return this.statements().iterator();
         }
 
-        private SequencedSet<CtVariable<?>> declaredVariables() {
-            SequencedSet<CtVariable<?>> declaredVariables = new LinkedHashSet<>();
+        private Set<CtVariable<?>> declaredVariables() {
+            Set<CtVariable<?>> declaredVariables = new LinkedHashSet<>();
 
             for (CtStatement ctStatement : this) {
                 if (ctStatement instanceof CtVariable<?> ctVariable) {

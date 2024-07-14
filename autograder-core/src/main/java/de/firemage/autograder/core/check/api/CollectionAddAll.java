@@ -3,10 +3,10 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.check.api.UseEnumValues.CtEnumFieldRead;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.check.api.UseEnumValues.CtEnumFieldRead;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtForEach;
@@ -200,7 +200,7 @@ public class CollectionAddAll extends IntegratedCheck {
 
             // handle edge case where the variable is implicitly cast in the invocation (Character in List, but char in iterable)
             List<CtTypeReference<?>> actualTypeArguments = ctInvocation.getTarget().getType().getActualTypeArguments();
-            if (!actualTypeArguments.isEmpty() && !ctFor.getVariable().getType().equals(actualTypeArguments.getFirst())) {
+            if (!actualTypeArguments.isEmpty() && !ctFor.getVariable().getType().equals(actualTypeArguments.get(0))) {
                 return;
             }
 

@@ -22,7 +22,6 @@ import spoon.reflect.visitor.Filter;
 
 import java.util.Map;
 
-
 @ExecutableCheck(reportedProblems = { ProblemType.METHOD_SHOULD_BE_STATIC, ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC})
 public class MethodShouldBeStatic extends IntegratedCheck {
     /**
@@ -48,12 +47,14 @@ public class MethodShouldBeStatic extends IntegratedCheck {
 
         @Override
         public boolean matches(CtElement element) {
-            return switch (element) {
-                case CtFieldAccess<?> ctFieldAccess -> this.isThisTypeAccess(ctFieldAccess);
-                case CtInvocation<?> ctInvocation -> this.isThisTypeAccess(ctInvocation);
-                case CtExecutableReferenceExpression<?, ?> ctExecutableReferenceExpression -> this.isThisTypeAccess(ctExecutableReferenceExpression);
-                default -> false;
-            };
+            if (element instanceof CtFieldAccess<?> ctFieldAccess) {
+                return this.isThisTypeAccess(ctFieldAccess);
+            } else if (element instanceof CtInvocation<?> ctInvocation) {
+                return this.isThisTypeAccess(ctInvocation);
+            } else if (element instanceof CtExecutableReferenceExpression<?, ?> ctExecutableReferenceExpression) {
+                return this.isThisTypeAccess(ctExecutableReferenceExpression);
+            }
+            return false;
         }
     }
 
