@@ -1,6 +1,12 @@
 package de.firemage.autograder.core;
 
-public enum ProblemType {
+import de.firemage.autograder.api.AbstractProblemType;
+import de.firemage.autograder.api.HasFalsePositives;
+
+import java.util.Collection;
+import java.util.List;
+
+public enum ProblemType implements AbstractProblemType {
     /**
      * If the code is split into multiple packages, all input must happen in one package. Otherwise, one class must do all input.
      * <br/>
@@ -1048,5 +1054,14 @@ public enum ProblemType {
      * Reports code where a variable is declared, but not initialized.
      */
     @HasFalsePositives
-    REDUNDANT_UNINITIALIZED_VARIABLE
+    REDUNDANT_UNINITIALIZED_VARIABLE;
+
+    /**
+     * <strong>Used via reflection, so don't remove, even if your IDE shows no usages!</strong>
+     * @param name
+     * @return
+     */
+    public static ProblemType fromString(String name) {
+        return ProblemType.valueOf(name);
+    }
 }

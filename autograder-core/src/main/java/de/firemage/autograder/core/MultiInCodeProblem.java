@@ -1,5 +1,6 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.file.SourcePath;
 import org.apache.commons.io.FilenameUtils;
 
@@ -11,7 +12,7 @@ import java.util.StringJoiner;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class MultiInCodeProblem extends ProblemImpl {
+public class MultiInCodeProblem extends Problem {
 
     public MultiInCodeProblem(
         Problem firstProblem,

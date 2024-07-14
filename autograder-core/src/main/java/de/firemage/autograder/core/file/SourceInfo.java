@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.file;
 
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import spoon.compiler.SpoonResource;
 
 import java.io.IOException;

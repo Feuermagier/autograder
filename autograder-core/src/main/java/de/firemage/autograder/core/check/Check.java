@@ -1,16 +1,15 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.LocalizedMessage;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.MultiInCodeProblem;
+import de.firemage.autograder.core.Problem;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
-@FunctionalInterface
 public interface Check {
-    LocalizedMessage getLinter();
+    Translatable getLinter();
 
     default List<Problem> merge(List<Problem> problems, int limit) {
         // use a dumb algorithm: keep the first limit - 1 problems, and merge the rest into a single problem

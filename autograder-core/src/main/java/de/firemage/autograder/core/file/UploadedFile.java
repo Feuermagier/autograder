@@ -1,11 +1,13 @@
 package de.firemage.autograder.core.file;
 
+import de.firemage.autograder.api.AbstractTempLocation;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LinterStatus;
 import de.firemage.autograder.core.compiler.CompilationFailureException;
 import de.firemage.autograder.core.compiler.CompilationResult;
 import de.firemage.autograder.core.compiler.Compiler;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.integrated.ModelBuildException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,9 +24,9 @@ public final class UploadedFile implements AutoCloseable {
     private final SourceInfo source;
     private final CompilationResult compilationResult;
     private final ClassLoader classLoader;
-    private final TempLocation tempLocation;
+    private final AbstractTempLocation tempLocation;
 
-    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult, ClassLoader classLoader, TempLocation tempLocation) {
+    private UploadedFile(CodeModel model, SourceInfo source, CompilationResult compilationResult, ClassLoader classLoader, AbstractTempLocation tempLocation) {
         this.model = model;
         this.source = source;
         this.compilationResult = compilationResult;
@@ -43,8 +45,8 @@ public final class UploadedFile implements AutoCloseable {
     public static UploadedFile build(
         Path file,
         JavaVersion version,
-        TempLocation tmpLocation,
-        Consumer<? super LinterStatus> statusConsumer,
+        AbstractTempLocation tmpLocation,
+        Consumer<Translatable> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, ModelBuildException, CompilationFailureException {
         return UploadedFile.build(new FileSourceInfo(file, version), tmpLocation, statusConsumer, classLoader);
@@ -52,12 +54,12 @@ public final class UploadedFile implements AutoCloseable {
 
     public static UploadedFile build(
         SourceInfo source,
-        TempLocation tmpLocation,
-        Consumer<? super LinterStatus> statusConsumer,
+        AbstractTempLocation tmpLocation,
+        Consumer<Translatable> statusConsumer,
         ClassLoader classLoader
     ) throws IOException, CompilationFailureException {
         Compiler compiler = new Compiler(tmpLocation, source.getVersion());
-        statusConsumer.accept(LinterStatus.COMPILING);
+        statusConsumer.accept(LinterStatus.COMPILING.getMessage());
         Optional<CompilationResult> compilationResult = compiler.compileToJar(source);
         if (compilationResult.isEmpty()) {
             return null;

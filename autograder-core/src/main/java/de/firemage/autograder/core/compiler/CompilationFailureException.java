@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.compiler;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 
 import java.util.List;
 

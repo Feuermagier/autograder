@@ -1,8 +1,10 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.core.CheckConfiguration;
+import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.AbstractProblemType;
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.Linter;
-import de.firemage.autograder.core.LinterException;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.SourceInfo;
@@ -32,16 +34,15 @@ public abstract class AbstractCheckTest {
 
     private AbstractCheckTest(TempLocation tempLocation, int limit) {
         this.tempLocation = tempLocation;
-        this.linter = Linter.builder(Locale.US)
+        this.linter = new Linter(AbstractLinter.builder(Locale.US)
             .tempLocation(this.tempLocation)
             .maxProblemsPerCheck(limit)
-            .threads(1)
-            .build();
+            .threads(1));
     }
 
     protected List<Problem> check(
         SourceInfo sourceInfo,
-        List<ProblemType> problemTypes
+        List<? extends AbstractProblemType> problemTypes
     ) throws LinterException, IOException {
         return this.linter.checkFile(
             UploadedFile.build(sourceInfo, this.tempLocation, status -> {

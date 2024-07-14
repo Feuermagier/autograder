@@ -2,19 +2,18 @@ package de.firemage.autograder.cmd;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import de.firemage.autograder.api.ArtemisUtil;
+import de.firemage.autograder.api.CheckConfiguration;
+import de.firemage.autograder.api.AbstractCodePosition;
+import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.LinterConfigurationException;
+import de.firemage.autograder.api.LinterException;
+import de.firemage.autograder.api.AbstractProblem;
+import de.firemage.autograder.api.AbstractTempLocation;
+import de.firemage.autograder.api.Translatable;
+import de.firemage.autograder.api.loader.AutograderLoader;
 import de.firemage.autograder.cmd.output.Annotation;
-import de.firemage.autograder.core.ArtemisUtil;
-import de.firemage.autograder.core.CheckConfiguration;
-import de.firemage.autograder.core.CodePosition;
-import de.firemage.autograder.core.Linter;
-import de.firemage.autograder.core.LinterConfigurationException;
-import de.firemage.autograder.core.LinterException;
-import de.firemage.autograder.core.LinterStatus;
-import de.firemage.autograder.core.Problem;
-import de.firemage.autograder.core.compiler.CompilationFailureException;
-import de.firemage.autograder.core.compiler.JavaVersion;
-import de.firemage.autograder.core.file.TempLocation;
-import de.firemage.autograder.core.file.UploadedFile;
 import de.firemage.autograder.span.Formatter;
 import de.firemage.autograder.span.Highlight;
 import de.firemage.autograder.span.Position;
@@ -48,10 +47,7 @@ import java.util.function.Consumer;
         description = "Static code analysis for student java code")
 public class Application implements Callable<Integer> {
     private static final int IO_EXIT_CODE = 3;
-    private static final int COMPILATION_EXIT_CODE = 4;
     private static final int MISC_EXIT_CODE = 10;
-
-    private static final int CAPTION_LENGTH = 20;
 
     @Parameters(index = "0", description = "The check configuration.")
     private String checkConfig;
@@ -72,7 +68,7 @@ public class Application implements Callable<Integer> {
 
     // TODO: remove this
     @Option(names = {
-        "--static-only"}, description = "Only kept here so the grading tool keeps working, does nothing.")
+            "--static-only"}, description = "Only kept here so the grading tool keeps working, does nothing.")
     private boolean staticOnly;
 
     @Option(names = {
@@ -82,15 +78,15 @@ public class Application implements Callable<Integer> {
     @Option(names = {"-p", "--output-pretty"}, description = "Pretty print the output", defaultValue = "false")
     private boolean isPrettyOutput;
 
-    @Option(names = { "--max-problems" }, description = "The maximum number of problems to report per check", defaultValue = "10")
+    @Option(names = {"--max-problems"}, description = "The maximum number of problems to report per check", defaultValue = "10")
     private int maxProblemsPerCheck;
 
     @Spec
     private CommandSpec spec;
 
-    private final TempLocation tempLocation;
+    private final AbstractTempLocation tempLocation;
 
-    public Application(TempLocation tempLocation) {
+    public Application(AbstractTempLocation tempLocation) {
         this.tempLocation = tempLocation;
     }
 
@@ -107,32 +103,31 @@ public class Application implements Callable<Integer> {
     // Useful for testing
     public static int runApplication(String... args) {
         // to automatically delete the temp location on exit
-        try (TempLocation tempLocation = TempLocation.of(".autograder-tmp")) {
+        try (var tempLocation = AutograderLoader.instantiateTempLocation(Path.of(".autograder-tmp"))) {
             return new CommandLine(new Application(tempLocation)).execute(args);
         } catch (IOException exception) {
             throw new IllegalArgumentException("Could not create temp location", exception);
         }
     }
 
-    private static Highlight highlightFromCodePosition(CodePosition codePosition, String label) {
+    private static Highlight highlightFromCodePosition(AbstractCodePosition codePosition, String label) {
         return new Highlight(
-            new Span(
-                new Position(codePosition.startLine() - 1, codePosition.startColumn() - 1),
-                new Position(codePosition.endLine() - 1, codePosition.endColumn() - 1)
-            ),
-            Optional.ofNullable(label),
-            Style.ERROR
+                new Span(
+                        new Position(codePosition.startLine() - 1, codePosition.startColumn() - 1),
+                        new Position(codePosition.endLine() - 1, codePosition.endColumn() - 1)
+                ),
+                Optional.ofNullable(label),
+                Style.ERROR
         );
     }
 
     private void execute(
-        Linter linter,
-        CheckConfiguration checkConfiguration,
-        UploadedFile uploadedFile,
-        Consumer<LinterStatus> statusConsumer
+            AbstractLinter linter,
+            CheckConfiguration checkConfiguration,
+            Consumer<Translatable> statusConsumer
     ) throws LinterException, IOException {
         if (outputJson) {
-            List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+            var problems = linter.checkFile(this.file, JavaVersion.fromString(this.javaVersion), checkConfiguration, statusConsumer);
             System.out.println(">> Problems <<");
             printProblemsAsJson(problems, linter);
             return;
@@ -142,7 +137,7 @@ public class Application implements Callable<Integer> {
             CmdUtil.beginSection("Checks");
             ProgressAnimation progress = new ProgressAnimation("Checking...");
             progress.start();
-            List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+            var problems = linter.checkFile(this.file, JavaVersion.fromString(this.javaVersion), checkConfiguration, statusConsumer);
             progress.finish("Completed checks");
 
             if (problems.isEmpty()) {
@@ -150,24 +145,24 @@ public class Application implements Callable<Integer> {
             } else {
                 CmdUtil.println("Found " + problems.size() + " problem(s):");
                 problems.stream()
-                    .map(problem -> {
-                        CodePosition position = problem.getPosition();
-                        Text sourceText = Text.fromString(0, position.readString());
-                        Formatter formatter = new Formatter(
-                            System.lineSeparator(),
-                            highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
-                        );
+                        .map(problem -> {
+                            AbstractCodePosition position = problem.getPosition();
+                            Text sourceText = Text.fromString(0, position.readSourceFile());
+                            Formatter formatter = new Formatter(
+                                    System.lineSeparator(),
+                                    highlightFromCodePosition(position, linter.translateMessage(problem.getExplanation()))
+                            );
 
-                        String result = "[%s]: %s - Found problem in '%s'%n".formatted(
-                            problem.getProblemType(),
-                            problem.getCheck().getClass().getSimpleName(),
-                            position.toString()
-                        );
-                        result += formatter.render(sourceText);
+                            String result = "[%s]: %s - Found problem in '%s'%n".formatted(
+                                    problem.getType(),
+                                    problem.getCheckName(),
+                                    position.toString()
+                            );
+                            result += formatter.render(sourceText);
 
-                        return result;
-                    })
-                    .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
+                            return result;
+                        })
+                        .forEach(string -> CmdUtil.println(string + System.lineSeparator()));
             }
 
             CmdUtil.endSection();
@@ -177,7 +172,7 @@ public class Application implements Callable<Integer> {
         CmdUtil.beginSection("Checks");
         ProgressAnimation progress = new ProgressAnimation("Checking...");
         progress.start();
-        List<Problem> problems = linter.checkFile(uploadedFile, checkConfiguration, statusConsumer);
+        var problems = linter.checkFile(this.file, JavaVersion.fromString(this.javaVersion), checkConfiguration, statusConsumer);
         progress.finish("Completed checks");
 
         printProblems(problems, linter);
@@ -217,30 +212,21 @@ public class Application implements Callable<Integer> {
             return IO_EXIT_CODE;
         }
 
-        Linter linter = Linter.builder(Locale.GERMANY)
-            .threads(0)
-            .tempLocation(this.tempLocation)
-            .maxProblemsPerCheck(this.maxProblemsPerCheck)
-            .build();
+        AbstractLinter linter = AutograderLoader.instantiateLinter(AbstractLinter.builder(Locale.GERMANY)
+                .threads(0)
+                .tempLocation(this.tempLocation)
+                .maxProblemsPerCheck(this.maxProblemsPerCheck));
 
-        Consumer<LinterStatus> statusConsumer = status ->
-                System.out.println(linter.translateMessage(status.getMessage()));
+        Consumer<Translatable> statusConsumer = status ->
+                System.out.println(linter.translateMessage(status));
 
         if (!Files.exists(file)) {
             CmdUtil.printlnErr("The path '%s' does not exist".formatted(file));
-            return COMPILATION_EXIT_CODE;
+            return IO_EXIT_CODE;
         }
 
-        try (UploadedFile uploadedFile = UploadedFile.build(
-                file,
-                JavaVersion.fromString(this.javaVersion),
-                this.tempLocation,
-                statusConsumer,
-            null)) {
-            this.execute(linter, checkConfiguration, uploadedFile, statusConsumer);
-        } catch (CompilationFailureException e) {
-            CmdUtil.printlnErr("Compilation failed: " + e.getMessage());
-            return COMPILATION_EXIT_CODE;
+        try {
+            this.execute(linter, checkConfiguration, statusConsumer);
         } catch (LinterException e) {
             e.printStackTrace();
             return MISC_EXIT_CODE;
@@ -252,7 +238,7 @@ public class Application implements Callable<Integer> {
         return 0;
     }
 
-    private void printProblems(List<Problem> problems, Linter linter) {
+    private void printProblems(List<? extends AbstractProblem> problems, AbstractLinter linter) {
         if (problems.isEmpty()) {
             CmdUtil.println("No problems found - good job!");
         } else {
@@ -261,17 +247,17 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private void printProblemsAsJson(Collection<? extends Problem> problems, Linter linter) {
+    private void printProblemsAsJson(Collection<? extends AbstractProblem> problems, AbstractLinter linter) {
         try {
             ObjectMapper mapper = new ObjectMapper();
             String jsonOutput = mapper.writeValueAsString(problems.stream().map(problem -> {
-                CodePosition position = problem.getPosition();
+                AbstractCodePosition position = problem.getPosition();
                 return new Annotation(
-                    problem.getProblemType(),
-                    linter.translateMessage(problem.getExplanation()),
-                    position.file().toString().replace("\\", "/"),
-                    position.startLine(),
-                    position.endLine()
+                        problem.getType(),
+                        linter.translateMessage(problem.getExplanation()),
+                        position.path().toString().replace("\\", "/"),
+                        position.startLine(),
+                        position.endLine()
                 );
             }).toList());
             System.out.println(jsonOutput);
@@ -280,10 +266,10 @@ public class Application implements Callable<Integer> {
         }
     }
 
-    private String formatProblem(Problem problem, Linter linter) {
+    private String formatProblem(AbstractProblem problem, AbstractLinter linter) {
         return String.format("%s %s (Source: %s)",
                 problem.getDisplayLocation(),
                 linter.translateMessage(problem.getExplanation()),
-                linter.translateMessage(problem.getCheck().getLinter()));
+                linter.translateMessage(problem.getLinterName()));
     }
 }

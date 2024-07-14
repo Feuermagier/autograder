@@ -1,7 +1,7 @@
 package de.firemage.autograder.extra.check;
 
 import de.firemage.autograder.core.Linter;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.extra.check.naming.LinguisticNamingCheck;
 import de.firemage.autograder.extra.check.naming.VariablesHaveDescriptiveNamesCheck;

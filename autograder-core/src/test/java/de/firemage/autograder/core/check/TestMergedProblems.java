@@ -1,11 +1,10 @@
 package de.firemage.autograder.core.check;
 
-import de.firemage.autograder.core.LinterException;
+import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
-import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
-import de.firemage.autograder.core.compiler.JavaVersion;
+import de.firemage.autograder.api.JavaVersion;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -31,7 +30,7 @@ class TestMergedProblems extends AbstractCheckTest {
     void testMergeSingleFile() throws LinterException, IOException {
         List<String> fields = generateViolations(10).toList();
 
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        var problems = super.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -78,7 +77,7 @@ class TestMergedProblems extends AbstractCheckTest {
     void testMergeMultiFile() throws LinterException, IOException {
         List<String> fields = generateViolations(10).toList();
 
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        var problems = super.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -136,7 +135,7 @@ class TestMergedProblems extends AbstractCheckTest {
     void testMergeSingleViolationInFile() throws LinterException, IOException {
         List<String> fields = generateViolations(10).toList();
 
-        List<Problem> problems = super.check(StringSourceInfo.fromSourceStrings(
+        var problems = super.check(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
