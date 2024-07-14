@@ -20,26 +20,26 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
     }
 
     default T unwrap() {
-		if (this instanceof Some<T> someValue) {
-			return someValue.value;
-		} else if (this instanceof None<T>) {
-			throw new IllegalStateException("Expected Some value, but got None.");
-		}
-		throw new IllegalArgumentException();
-	}
+        if (this instanceof Some<T> someValue) {
+            return someValue.value;
+        } else if (this instanceof None<T>) {
+            throw new IllegalStateException("Expected Some value, but got None.");
+        }
+        throw new IllegalArgumentException();
+    }
 
     default boolean isSome() {
         return this instanceof Some;
     }
 
     default <U> Option<U> map(Function<T, U> function) {
-		if (this instanceof Some<T> someValue) {
-			return new Some<>(function.apply(someValue.value));
-		} else if (this instanceof None<T>) {
-			return new None<>();
-		}
-		throw new IllegalArgumentException();
-	}
+	if (this instanceof Some<T> someValue) {
+            return new Some<>(function.apply(someValue.value));
+        } else if (this instanceof None<T>) {
+            return new None<>();
+        }
+         throw new IllegalArgumentException();
+    }
 
     /**
      * Returns the value if it is present or null if it is not.
@@ -47,22 +47,22 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
      * @return the value or null
      */
     default T nullable() {
-		if (this instanceof Some<T> someValue) {
-			return someValue.value;
-		} else if (this instanceof None<T>) {
-			return null;
-		}
-		throw new IllegalArgumentException();
-	}
+        if (this instanceof Some<T> someValue) {
+            return someValue.value;
+        } else if (this instanceof None<T>) {
+            return null;
+        }
+        throw new IllegalArgumentException();
+    }
 
     default Stream<T> stream() {
-		if (this instanceof Some<T> someValue) {
-			return Stream.of(someValue.value);
-		} else if (this instanceof None<T>) {
-			return Stream.empty();
-		}
-		throw new IllegalArgumentException();
-	}
+        if (this instanceof Some<T> someValue) {
+            return Stream.of(someValue.value);
+        } else if (this instanceof None<T>) {
+            return Stream.empty();
+        }
+        throw new IllegalArgumentException();
+    }
 
     @Override
     default Iterator<T> iterator() {
