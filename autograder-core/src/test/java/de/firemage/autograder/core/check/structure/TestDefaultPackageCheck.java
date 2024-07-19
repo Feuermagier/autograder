@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.structure;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
@@ -15,11 +16,22 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.*;
 
 class TestDefaultPackageCheck extends AbstractCheckTest {
-    private static final String LOCALIZED_MESSAGE_KEY = "default-package";
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(
+        ProblemType.DEFAULT_PACKAGE_USED
+    );
+
+    private void assertEqualsDefaultPackageUsed(Problem problem, String positions) {
+        assertEquals(ProblemType.DEFAULT_PACKAGE_USED, problem.getProblemType());
+
+        assertEquals(
+            this.linter.translateMessage(new LocalizedMessage("default-package", Map.of("positions", positions))),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
 
     @Test
     void test() throws IOException, LinterException {
-        var problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
@@ -29,43 +41,39 @@ class TestDefaultPackageCheck extends AbstractCheckTest {
                 }
             }
             """
-        ), List.of(ProblemType.DEFAULT_PACKAGE_USED));
+        ), PROBLEM_TYPES);
 
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.DEFAULT_PACKAGE_USED, problems.get(0).getProblemType());
+        assertEqualsDefaultPackageUsed(problems.next(), "Test:L1");
+        problems.assertExhausted();
     }
 
     @Test
     void testMultipleClasses() throws IOException, LinterException {
-        var problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 dummySourceEntry("com.example", "Test"),
                 dummySourceEntry("", "Hello"),
                 dummySourceEntry("", "World")
             )
-        ), List.of(ProblemType.DEFAULT_PACKAGE_USED));
+        ), PROBLEM_TYPES);
 
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.DEFAULT_PACKAGE_USED, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(new LocalizedMessage(LOCALIZED_MESSAGE_KEY, Map.of("positions", "Hello:L1, World:L1"))),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsDefaultPackageUsed(problems.next(), "Hello:L1, World:L1");
+        problems.assertExhausted();
     }
 
     @Test
     void testNoDefaultPackageUsed() throws LinterException, IOException {
-        var problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 dummySourceEntry("com.example", "Test"),
                 dummySourceEntry("com.example.a", "Hello"),
                 dummySourceEntry("com.example.b", "World")
             )
-        ), List.of(ProblemType.DEFAULT_PACKAGE_USED));
+        ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 }
