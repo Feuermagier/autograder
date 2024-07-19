@@ -129,7 +129,7 @@ class TestLocalizedStrings {
             // PMD Rule#setMessage(String) calls
             result.addAll(ctType.filterChildren(ctElement -> ctElement instanceof CtInvocation<?> ctInvocation
                     && ctInvocation.getExecutable().getSimpleName().equals("setMessage")
-                    && TypeUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), net.sourceforge.pmd.Rule.class)
+                    && TypeUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), net.sourceforge.pmd.lang.rule.Rule.class)
                 )
                 .map(ctElement -> ((CtInvocation<?>) ctElement).getArguments().get(0))
                 .map(key -> resolveKey(ctModel, List.of((CtExpression<?>) key)))
