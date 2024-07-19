@@ -4,7 +4,7 @@ import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.file.SourceInfo;
-import net.sourceforge.pmd.RuleViolation;
+import net.sourceforge.pmd.reporting.RuleViolation;
 
 import java.nio.file.Path;
 
