@@ -31,7 +31,7 @@ public final class InlineVariableRead implements Fold {
     @Override
     @SuppressWarnings("unchecked")
     public <T> CtExpression<T> foldCtVariableRead(CtVariableRead<T> ctVariableRead) {
-        CtVariable<T> ctVariable = (CtVariable<T>) UsesFinder.getDeclaredVariable(ctVariableRead);
+        CtVariable<T> ctVariable = ctVariableRead.getVariable().getDeclaration();
 
         if (ctVariable == null || this.ignoreLocalVariables && ctVariable instanceof CtLocalVariable<T>) {
             return ctVariableRead;
