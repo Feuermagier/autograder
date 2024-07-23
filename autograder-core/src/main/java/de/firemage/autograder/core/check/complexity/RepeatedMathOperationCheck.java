@@ -3,9 +3,10 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.fold.Fold;
 import spoon.processing.AbstractProcessor;
@@ -90,7 +91,7 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
         public <T> CtExpression<T> foldCtBinaryOperator(CtBinaryOperator<T> ctBinaryOperator) {
             // skip if the operator is not supported
             if (!OCCURRENCE_THRESHOLDS.containsKey(ctBinaryOperator.getKind()) ||
-                !SpoonUtil.isPrimitiveNumeric(ctBinaryOperator.getType())) {
+                !TypeUtil.isPrimitiveNumeric(ctBinaryOperator.getType())) {
                 return ctBinaryOperator;
             }
 
@@ -112,7 +113,7 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
                         return this.function.apply(expression, count);
                     }
                 })
-                .reduce((left, right) -> SpoonUtil.createBinaryOperator(left, right, this.kind))
+                .reduce((left, right) -> FactoryUtil.createBinaryOperator(left, right, this.kind))
                 .orElseThrow();
         }
     }
@@ -125,7 +126,7 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
     }
 
     public static CtExpression<?> joinExpressions(BinaryOperatorKind kind, CtExpression<?> first, CtExpression<?>... others) {
-        return Arrays.stream(others).reduce(first, (left, right) -> SpoonUtil.createBinaryOperator(left, right, kind));
+        return Arrays.stream(others).reduce(first, (left, right) -> FactoryUtil.createBinaryOperator(left, right, kind));
     }
 
     @Override
@@ -148,9 +149,9 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
                     OCCURRENCE_THRESHOLDS.get(BinaryOperatorKind.PLUS),
                     (expression, count) -> {
                         plusOptimizations.addAndGet(1);
-                        return SpoonUtil.createBinaryOperator(
+                        return FactoryUtil.createBinaryOperator(
                             expression,
-                            SpoonUtil.makeLiteralNumber(expression.getType(), count),
+                            FactoryUtil.makeLiteralNumber(expression.getType(), count),
                             BinaryOperatorKind.MUL
                         );
                     }
@@ -162,11 +163,11 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
                     (expression, count) -> {
                         TypeFactory typeFactory = expression.getFactory().Type();
                         mulOptimizations.addAndGet(1);
-                        return SpoonUtil.createStaticInvocation(
+                        return FactoryUtil.createStaticInvocation(
                             typeFactory.get(java.lang.Math.class).getReference(),
                             "pow",
                             expression,
-                            SpoonUtil.makeLiteralNumber(typeFactory.integerPrimitiveType(), count)
+                            FactoryUtil.makeLiteralNumber(typeFactory.integerPrimitiveType(), count)
                         );
                     }
                 );
@@ -197,8 +198,8 @@ public class RepeatedMathOperationCheck extends IntegratedCheck {
 
         if (expression instanceof CtBinaryOperator<?> operator && operator.getKind() == kind) {
             // '+' can also be used on Strings, but String operations are not associative
-            if (SpoonUtil.isString(operator.getLeftHandOperand().getType()) ||
-                SpoonUtil.isString(operator.getRightHandOperand().getType())) {
+            if (TypeUtil.isString(operator.getLeftHandOperand().getType()) ||
+                TypeUtil.isString(operator.getRightHandOperand().getType())) {
                 return Map.of();
             }
 

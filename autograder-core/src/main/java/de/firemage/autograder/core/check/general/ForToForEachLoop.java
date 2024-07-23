@@ -6,7 +6,6 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -175,7 +174,7 @@ public class ForToForEachLoop extends IntegratedCheck {
                 String iterableExpression = iterable.getSimpleName();
 
                 Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess;
-                if (SpoonUtil.isString(iterable.getType())) {
+                if (TypeUtil.isString(iterable.getType())) {
                     getPotentialLoopVariableAccess = LOOP_VARIABLE_ACCESS_STRING;
 
                     iterableExpression = "%s.toCharArray()".formatted(iterableExpression);

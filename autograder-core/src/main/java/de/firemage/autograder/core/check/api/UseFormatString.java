@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -85,7 +86,7 @@ public class UseFormatString extends IntegratedCheck {
         // true if the formatString has a %n placeholder
         boolean hasInlineNewline = false;
         for (CtExpression<?> ctExpression : ctExpressions) {
-            if (SpoonUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal
+            if (ExpressionUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal
                 && literal.getValue() != null
                 && TypeUtil.isTypeEqualTo(literal.getType(), java.lang.String.class)) {
                 ctExpression = literal;
@@ -146,12 +147,12 @@ public class UseFormatString extends IntegratedCheck {
                 typeFactory.stringType(),
                 "lineSeparator"
             )) {
-            return SpoonUtil.makeLiteral(typeFactory.stringType(), "\n");
+            return FactoryUtil.makeLiteral(typeFactory.stringType(), "\n");
         }
 
         if (ctExpression instanceof CtLiteral<?> ctLiteral
-            && SpoonUtil.areLiteralsEqual(ctLiteral, SpoonUtil.makeLiteral(typeFactory.characterPrimitiveType(), '\n'))) {
-            return SpoonUtil.makeLiteral(typeFactory.stringType(), "\n");
+            && ExpressionUtil.areLiteralsEqual(ctLiteral, FactoryUtil.makeLiteral(typeFactory.characterPrimitiveType(), '\n'))) {
+            return FactoryUtil.makeLiteral(typeFactory.stringType(), "\n");
         }
 
         return ctExpression;
@@ -198,13 +199,13 @@ public class UseFormatString extends IntegratedCheck {
 
         // only visit binary operators that evaluate to a String
         // (should be guaranteed by the visitor) -> seems to not be guaranteed; replacing the throw by a return for now
-        if (!SpoonUtil.isString(ctBinaryOperator.getType())) {
+        if (!TypeUtil.isString(ctBinaryOperator.getType())) {
             return;
         }
 
         List<CtExpression<?>> formatArgs = this.getFormatArgs(ctBinaryOperator);
 
-        int numberOfLiterals = (int) formatArgs.stream().filter(ctExpression -> SpoonUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal && literal.getValue() != null).count();
+        int numberOfLiterals = (int) formatArgs.stream().filter(ctExpression -> ExpressionUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal && literal.getValue() != null).count();
         if (numberOfLiterals < MIN_NUMBER_LITERALS) {
             return;
         }

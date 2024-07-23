@@ -24,7 +24,7 @@ public record CtRange<T extends Comparable<T>>(
 
         // swap operator if necessary, so that the literal is on the right side:
         // <expr> <op> <literal>
-        CtBinaryOperator<Boolean> result = SpoonUtil.normalizeBy(
+        CtBinaryOperator<Boolean> result = ExpressionUtil.normalizeBy(
             (left, right) -> isLiteral.test(left) && !isLiteral.test(right),
             ctBinaryOperator
         );
@@ -44,17 +44,17 @@ public record CtRange<T extends Comparable<T>>(
     public Range<T> toRange() {
         // <expr> <op> <literal>
         if (this.operator == BinaryOperatorKind.LE) {
-            T lowerBound = SpoonUtil.minimumValue(this.ctLiteral).getValue();
+            T lowerBound = ExpressionUtil.minimumValue(this.ctLiteral).getValue();
 
-            if (SpoonUtil.resolveCtExpression(this.ctExpression) instanceof CtLiteral<T> exprLiteral) {
+            if (ExpressionUtil.resolveCtExpression(this.ctExpression) instanceof CtLiteral<T> exprLiteral) {
                 lowerBound = exprLiteral.getValue();
             }
 
             return Range.of(lowerBound, this.ctLiteral.getValue());
         } else if (this.operator == BinaryOperatorKind.GE) {
             // <expr> >= <literal>
-            T upperBound = SpoonUtil.maximumValue(this.ctLiteral).getValue();
-            if (SpoonUtil.resolveCtExpression(this.ctExpression) instanceof CtLiteral<T> exprLiteral) {
+            T upperBound = ExpressionUtil.maximumValue(this.ctLiteral).getValue();
+            if (ExpressionUtil.resolveCtExpression(this.ctExpression) instanceof CtLiteral<T> exprLiteral) {
                 upperBound = exprLiteral.getValue();
             }
 

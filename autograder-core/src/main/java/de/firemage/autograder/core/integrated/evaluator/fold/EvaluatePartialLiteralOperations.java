@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtExpression;
@@ -30,7 +30,7 @@ public final class EvaluatePartialLiteralOperations implements Fold {
         CtExpression<?> rightExpression = promotedOperator.getRightHandOperand();
 
         if (!(promotedOperator.getLeftHandOperand() instanceof CtLiteral<?>) && promotedOperator.getRightHandOperand() instanceof CtLiteral<?>) {
-            promotedOperator = SpoonUtil.swapCtBinaryOperator(promotedOperator);
+            promotedOperator = ExpressionUtil.swapCtBinaryOperator(promotedOperator);
         }
 
         // ignore if both operands are not literals

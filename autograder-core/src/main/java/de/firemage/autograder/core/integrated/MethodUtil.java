@@ -4,6 +4,7 @@ import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLambda;
 import spoon.reflect.code.CtStatement;
+import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.factory.TypeFactory;
@@ -103,5 +104,31 @@ public final class MethodUtil {
         }
 
         return MethodUtil.isMainMethod(ctMethod);
+    }
+
+    public static boolean isGetter(CtMethod<?> method) {
+        return method.getSimpleName().startsWith("get")
+               && method.getParameters().isEmpty()
+               && !method.getType().getSimpleName().equals("void")
+               && (method.isAbstract() || StatementUtil.getEffectiveStatements(method.getBody()).size() == 1);
+    }
+
+    public static boolean isSetter(CtMethod<?> method) {
+        return method.getSimpleName().startsWith("set")
+               && method.getParameters().size() == 1
+               && method.getType().getSimpleName().equals("void")
+               && (method.isAbstract() || StatementUtil.getEffectiveStatements(method.getBody()).size() == 1);
+    }
+
+    public static boolean isStaticCallTo(CtInvocation<?> invocation, String typeName, String methodName) {
+        return invocation.getExecutable().isStatic()
+               && invocation.getTarget() instanceof CtTypeAccess<?> access
+               && access.getAccessedType().getQualifiedName().equals(typeName)
+               && invocation.getExecutable().getSimpleName().equals(methodName);
+    }
+
+    public static boolean isInSetter(CtElement ctElement) {
+        CtMethod<?> parent = ctElement.getParent(CtMethod.class);
+        return parent != null && isSetter(parent);
     }
 }

@@ -5,7 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -32,7 +32,7 @@ public class CollectionsNCopies extends IntegratedCheck {
 
                 ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctFor.getBody());
 
                 if (statements.size() != 1
                     || forLoopRange == null
@@ -50,7 +50,7 @@ public class CollectionsNCopies extends IntegratedCheck {
                 }
 
                 CtExpression<?> rhs = ctInvocation.getArguments().get(0);
-                if (!SpoonUtil.isImmutable(rhs.getType())) {
+                if (!TypeUtil.isImmutable(rhs.getType())) {
                     return;
                 }
 

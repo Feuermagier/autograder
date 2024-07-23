@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtInvocation;
@@ -28,12 +28,12 @@ public class CompareObjectsNotStringsCheck extends IntegratedCheck {
                 CtExecutableReference<?> executable = invocation.getExecutable();
                 if (executable.getSignature().equals("equals(java.lang.Object)") &&
                     executable.getParameters().size() == 1) {
-                    Optional<CtTypeReference<?>> lhsType = SpoonUtil.isToStringCall(invocation.getTarget());
+                    Optional<CtTypeReference<?>> lhsType = ExpressionUtil.isToStringCall(invocation.getTarget());
                     if (lhsType.isEmpty()) {
                         return;
                     }
 
-                    Optional<CtTypeReference<?>> rhsType = SpoonUtil.isToStringCall(invocation.getArguments().get(0));
+                    Optional<CtTypeReference<?>> rhsType = ExpressionUtil.isToStringCall(invocation.getArguments().get(0));
                     if (rhsType.isEmpty()) {
                         return;
                     }

@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
@@ -94,7 +94,7 @@ public class FieldShouldBeFinal extends IntegratedCheck {
 
             int mainPathWrites = 0;
             int otherPathWrites = 0;
-            for (CtStatement ctStatement : SpoonUtil.getEffectiveStatementsOf(ctConstructor)) {
+            for (CtStatement ctStatement : StatementUtil.getEffectiveStatementsOf(ctConstructor)) {
                 if (ctStatement instanceof CtAssignment<?,?> ctAssignment && UsesFinder.variableWrites(ctField).nestedIn(ctAssignment).hasAny()) {
                     mainPathWrites += 1;
                 } else if (UsesFinder.variableWrites(ctField).nestedIn(ctStatement).hasAny()) {

@@ -4,9 +4,11 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.extra.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLiteral;
@@ -59,7 +61,7 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                 // skip non-constant variables (and those that should be ignored)
                 if (ctVariable.isImplicit()
                     || !ctVariable.getPosition().isValidPosition()
-                    || !SpoonUtil.isEffectivelyFinal(ctVariable)
+                    || !VariableUtil.isEffectivelyFinal(ctVariable)
                     || ctVariable.getDefaultExpression() == null
                     || IGNORE_FIELDS.contains(ctVariable.getSimpleName())) {
                     return;
@@ -67,12 +69,12 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
 
                 // only check primitive types and strings, because other types may be mutable like list
                 // and should therefore not be static, even if they are final
-                if (!ctVariable.getType().unbox().isPrimitive() && !SpoonUtil.isString(ctVariable.getType())) {
+                if (!ctVariable.getType().unbox().isPrimitive() && !TypeUtil.isString(ctVariable.getType())) {
                     return;
                 }
 
                 if (ctVariable instanceof CtLocalVariable<?> ctLocalVariable
-                    && SpoonUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression()) instanceof CtLiteral<?>) {
+                    && ExpressionUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression()) instanceof CtLiteral<?>) {
                     // by the check above, ctLocalVariable has a default expression and is effectively final
                     //
                     // this code catches the case where one tries to bypass the checkstyle by doing:

@@ -5,7 +5,8 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.utils.Option;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -158,7 +159,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         // In both cases the assigned expression is mutable, and we have to detect this.
         // To do this, we check if the assigned variable is mutable.
         if (ctExpression instanceof CtVariableRead<?> ctVariableRead && ctExecutable != null) {
-            CtVariable<?> ctVariable = SpoonUtil.getVariableDeclaration(ctVariableRead.getVariable());
+            CtVariable<?> ctVariable = VariableUtil.getVariableDeclaration(ctVariableRead.getVariable());
 
             // this is a special case for enums, where the constructor is private and mutability can only be introduced
             // through the enum constructor calls
@@ -213,7 +214,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
 
         boolean foundPreviousAssignment = false;
         CtStatement currentStatement = ctVariableRead.getParent(CtStatement.class);
-        var reversedStatements = new ArrayList<>(SpoonUtil.getEffectiveStatements(ctExecutable.getBody()));
+        var reversedStatements = new ArrayList<>(StatementUtil.getEffectiveStatements(ctExecutable.getBody()));
         Collections.reverse(reversedStatements);
         for (CtStatement ctStatement : reversedStatements) {
             if (!foundPreviousAssignment) {
@@ -240,7 +241,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             return Option.none();
         }
 
-        CtVariable<?> ctVariableDeclaration = SpoonUtil.getVariableDeclaration(ctVariableRead.getVariable());
+        CtVariable<?> ctVariableDeclaration = VariableUtil.getVariableDeclaration(ctVariableRead.getVariable());
         if (ctVariableDeclaration != null
             && isParameterOf(ctVariableDeclaration, ctExecutable)) {
             // There is a special-case: one can reassign the parameter to itself with a different value:
@@ -268,7 +269,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
     }
 
     private void checkCtExecutableReturn(CtExecutable<?> ctExecutable) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctExecutable.getBody());
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctExecutable.getBody());
 
         // a lambda like () -> true does not have a body, but an expression which is a return statement
         // this case is handled here
@@ -340,7 +341,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             return;
         }
 
-        for (CtStatement ctStatement : SpoonUtil.getEffectiveStatements(ctExecutable.getBody())) {
+        for (CtStatement ctStatement : StatementUtil.getEffectiveStatements(ctExecutable.getBody())) {
             if (!(ctStatement instanceof CtAssignment<?, ?> ctAssignment)
                 || !(ctAssignment.getAssigned() instanceof CtFieldWrite<?> ctFieldWrite)) {
                 continue;

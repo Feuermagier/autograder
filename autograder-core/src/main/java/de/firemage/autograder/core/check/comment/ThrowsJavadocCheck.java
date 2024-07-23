@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.comment;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.code.CtCase;
 import spoon.reflect.code.CtConstructorCall;
@@ -25,7 +25,7 @@ import java.util.stream.Collectors;
 @ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_UNDOCUMENTED_THROWS})
 public class ThrowsJavadocCheck extends IntegratedCheck {
     private void checkCtExecutable(CtExecutable<?> ctExecutable) {
-        Optional<CtJavaDoc> doc = SpoonUtil.getJavadoc(ctExecutable);
+        Optional<CtJavaDoc> doc = ElementUtil.getJavadoc(ctExecutable);
         if (doc.isEmpty()) {
             return;
         }

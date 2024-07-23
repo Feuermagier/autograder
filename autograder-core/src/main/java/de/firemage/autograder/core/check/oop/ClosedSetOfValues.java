@@ -3,8 +3,10 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.AssignmentEffect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -53,7 +55,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
                 continue;
             }
 
-            var effect = SpoonUtil.getSingleEffect(ctCase.getStatements()).orElse(null);
+            var effect = StatementUtil.getSingleEffect(ctCase.getStatements()).orElse(null);
 
             if (!(effect instanceof TerminalEffect || effect instanceof AssignmentEffect)) {
                 return true;
@@ -68,7 +70,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
         List<? extends CtExpression<?>> elements = ctSwitch.getCases()
             .stream()
             .flatMap((CtCase<?> e) -> e.getCaseExpressions().stream())
-            .map(SpoonUtil::resolveCtExpression)
+            .map(ExpressionUtil::resolveCtExpression)
             .toList();
 
         if (elements.stream().anyMatch(e -> !(e instanceof CtLiteral<?>))) {
@@ -122,7 +124,7 @@ public class ClosedSetOfValues extends IntegratedCheck {
         List<CtLiteral<?>> result = new ArrayList<>();
 
         for (CtExpression<?> ctExpression : elements) {
-            CtExpression<?> resolved = SpoonUtil.resolveCtExpression(ctExpression);
+            CtExpression<?> resolved = ExpressionUtil.resolveCtExpression(ctExpression);
 
             if (!isSupportedType(resolved.getType()) || !(resolved instanceof CtLiteral<?> ctLiteral)) {
                 return List.of();
@@ -216,14 +218,14 @@ public class ClosedSetOfValues extends IntegratedCheck {
                     return;
                 }
 
-                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
+                if (!VariableUtil.isEffectivelyFinal(ctField)) {
                     return;
                 }
 
                 if (ctField.getType().isArray() && ctExpression instanceof CtNewArray<?> ctNewArray) {
                     checkFiniteListing(ctExpression, ctNewArray.getElements());
                 } else {
-                    checkFiniteListing(ctExpression, SpoonUtil.getElementsOfExpression(ctExpression));
+                    checkFiniteListing(ctExpression, ExpressionUtil.getElementsOfExpression(ctExpression));
                 }
 
                 super.visitCtField(ctField);
@@ -240,14 +242,14 @@ public class ClosedSetOfValues extends IntegratedCheck {
                     return;
                 }
 
-                if (!SpoonUtil.isEffectivelyFinal(ctLocalVariable)) {
+                if (!VariableUtil.isEffectivelyFinal(ctLocalVariable)) {
                     return;
                 }
 
                 if (ctLocalVariable.getType().isArray() && ctExpression instanceof CtNewArray<?> ctNewArray) {
                     checkFiniteListing(ctExpression, ctNewArray.getElements());
                 } else {
-                    checkFiniteListing(ctExpression, SpoonUtil.getElementsOfExpression(ctExpression));
+                    checkFiniteListing(ctExpression, ExpressionUtil.getElementsOfExpression(ctExpression));
                 }
 
                 super.visitCtLocalVariable(ctLocalVariable);

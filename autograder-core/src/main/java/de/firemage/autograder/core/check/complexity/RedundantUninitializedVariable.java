@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
@@ -51,7 +51,7 @@ public class RedundantUninitializedVariable extends IntegratedCheck {
 
                 if (ctAssignments.isEmpty()) return;
 
-                boolean isConditional = !SpoonUtil.getEffectiveStatements(ctLocalVariable.getParent(CtBlock.class))
+                boolean isConditional = !StatementUtil.getEffectiveStatements(ctLocalVariable.getParent(CtBlock.class))
                     .contains(ctAssignments.get(0));
 
                 if (isConditional) {

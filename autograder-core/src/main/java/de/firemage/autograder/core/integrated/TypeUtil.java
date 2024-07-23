@@ -4,12 +4,14 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.factory.TypeFactory;
+import spoon.reflect.reference.CtFieldReference;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayDeque;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -152,5 +154,70 @@ public final class TypeUtil {
      */
     public static boolean isInnerClass(CtTypeMember type) {
         return type.getDeclaringType() != null;
+    }
+
+    public static boolean isString(CtTypeReference<?> type) {
+        return isTypeEqualTo(type, String.class);
+    }
+
+    public static boolean isPrimitiveNumeric(CtTypeReference<?> type) {
+        return type.isPrimitive()
+               && !type.getQualifiedName().equals("boolean")
+               && !type.getQualifiedName().equals("char");
+    }
+
+    /**
+     * Checks if the given element is guaranteed to be immutable.
+     * <p>
+     * Note that when this method returns {@code false}, the type might still be immutable.
+     *
+     * @param ctTypeReference the type to check
+     * @return true if the given element is guaranteed to be immutable, false otherwise
+     * @param <T> the type of the element
+     */
+    public static <T> boolean isImmutable(CtTypeReference<T> ctTypeReference) {
+        Deque<CtTypeReference<?>> queue = new ArrayDeque<>(Collections.singletonList(ctTypeReference));
+        Collection<CtType<?>> visited = new HashSet<>();
+
+        while (!queue.isEmpty()) {
+            CtType<?> ctType = queue.removeFirst().getTypeDeclaration();
+
+            // if the type is not in the classpath, null is returned
+            // in those cases, assume that the type is not immutable
+            if (ctType == null) {
+                return false;
+            }
+
+            // skip types that have been checked (those are guaranteed to be immutable)
+            if (visited.contains(ctType)) {
+                continue;
+            }
+
+            // primitive types and strings are immutable as well:
+            if (ctType.getReference().unbox().isPrimitive()
+                || isTypeEqualTo(ctType.getReference(), String.class)) {
+                continue;
+            }
+
+            // types that are not in the classpath like java.util.ArrayList are shadow types.
+            // the source code for those is missing, so it is impossible to check if they are immutable.
+            // => assume they are not immutable
+            if (ctType.isShadow()) {
+                return false;
+            }
+
+            // for a type to be immutable, all of its fields must be final and immutable as well:
+            for (CtFieldReference<?> ctFieldReference : ctType.getAllFields()) {
+                if (!VariableUtil.isEffectivelyFinal(ctFieldReference.getFieldDeclaration())) {
+                    return false;
+                }
+
+                queue.add(ctFieldReference.getType());
+            }
+
+            visited.add(ctType);
+        }
+
+        return true;
     }
 }

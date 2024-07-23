@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtEnum;
@@ -22,7 +22,7 @@ public class MutableEnum extends IntegratedCheck {
      */
     private static boolean isMutable(CtType<?> ctType) {
         for (CtField<?> ctField : ctType.getFields()) {
-            if (!SpoonUtil.isEffectivelyFinal(ctField)) {
+            if (!VariableUtil.isEffectivelyFinal(ctField)) {
                 return true;
             }
         }

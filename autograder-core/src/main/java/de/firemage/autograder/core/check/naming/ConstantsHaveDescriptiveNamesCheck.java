@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.naming;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -201,7 +201,7 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                     && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
                     && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
                     && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "lineSeparator")) {
-                    literal = SpoonUtil.makeLiteral(field.getFactory().Type().stringType(), "\n");
+                    literal = FactoryUtil.makeLiteral(field.getFactory().Type().stringType(), "\n");
                 } else {
                     return;
                 }

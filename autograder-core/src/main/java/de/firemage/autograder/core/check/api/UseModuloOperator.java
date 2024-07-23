@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -33,7 +34,7 @@ public class UseModuloOperator extends IntegratedCheck {
     );
 
     private void checkModulo(CtIf ctIf) {
-        List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
+        List<CtStatement> thenBlock = StatementUtil.getEffectiveStatements(ctIf.getThenStatement());
         if (ctIf.getElseStatement() != null
             || thenBlock.size() != 1
             || !(thenBlock.get(0) instanceof CtAssignment<?, ?> thenAssignment)
@@ -44,7 +45,7 @@ public class UseModuloOperator extends IntegratedCheck {
         }
 
         // must assign a value of 0
-        if (!(SpoonUtil.resolveCtExpression(thenAssignment.getAssignment()) instanceof CtLiteral<?> ctLiteral)
+        if (!(ExpressionUtil.resolveCtExpression(thenAssignment.getAssignment()) instanceof CtLiteral<?> ctLiteral)
             || !(ctLiteral.getValue() instanceof Integer integer)
             || integer != 0) {
             return;
@@ -52,7 +53,7 @@ public class UseModuloOperator extends IntegratedCheck {
 
         CtVariableReference<?> assignedVariable = ctVariableWrite.getVariable();
 
-        CtBinaryOperator<Boolean> condition = SpoonUtil.normalizeBy(
+        CtBinaryOperator<Boolean> condition = ExpressionUtil.normalizeBy(
             (left, right) -> right instanceof CtVariableAccess<?> ctVariableAccess && ctVariableAccess.getVariable().equals(assignedVariable),
             ctBinaryOperator
         );
@@ -74,7 +75,7 @@ public class UseModuloOperator extends IntegratedCheck {
 
         // for boxed types, one could check if the value is null,
         // for which the suggestion `a %= null` would not make sense
-        if (SpoonUtil.isNullLiteral(checkedValue)) {
+        if (ExpressionUtil.isNullLiteral(checkedValue)) {
             return;
         }
 

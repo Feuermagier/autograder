@@ -5,7 +5,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtComment;
@@ -53,10 +53,10 @@ public class RedundantVariable extends IntegratedCheck {
             return;
         }
 
-        CtStatement previousStatement = SpoonUtil.getPreviousStatement(ctStatement).orElse(null);
+        CtStatement previousStatement = StatementUtil.getPreviousStatement(ctStatement).orElse(null);
 
         while (!ctLocalVariable.equals(previousStatement) && this.isAllowedStatement(previousStatement)) {
-            previousStatement = SpoonUtil.getPreviousStatement(previousStatement).orElse(null);
+            previousStatement = StatementUtil.getPreviousStatement(previousStatement).orElse(null);
         }
 
         if (previousStatement == null) {

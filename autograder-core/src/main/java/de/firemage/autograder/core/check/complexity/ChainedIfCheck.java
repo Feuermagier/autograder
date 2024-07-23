@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtBlock;
@@ -27,17 +28,17 @@ public class ChainedIfCheck extends IntegratedCheck {
                 }
 
                 // check if the if-statement has a nested if:
-                List<CtStatement> thenStatements = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
+                List<CtStatement> thenStatements = StatementUtil.getEffectiveStatements(ctIf.getThenStatement());
                 if (thenStatements.size() == 1
                     && thenStatements.get(0) instanceof CtIf nestedIf
                     && (nestedIf.getElseStatement() == null
-                        || SpoonUtil.getEffectiveStatements(nestedIf.getElseStatement()).isEmpty())) {
+                        || StatementUtil.getEffectiveStatements(nestedIf.getElseStatement()).isEmpty())) {
                     addLocalProblem(
                         ctIf.getCondition(),
                         new LocalizedMessage(
                             "merge-nested-if",
                             Map.of(
-                                "suggestion", SpoonUtil.createBinaryOperator(
+                                "suggestion", FactoryUtil.createBinaryOperator(
                                     ctIf.getCondition(),
                                     nestedIf.getCondition(),
                                     spoon.reflect.code.BinaryOperatorKind.AND
@@ -53,7 +54,7 @@ public class ChainedIfCheck extends IntegratedCheck {
                     return;
                 }
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctBlock);
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctBlock);
                 if (statements.size() != 1) {
                     return;
                 }

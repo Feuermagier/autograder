@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -21,11 +21,11 @@ public class RedundantElse extends IntegratedCheck {
     private static final int MINIMUM_STATEMENTS = 5;
 
     private Optional<TerminalEffect> getTerminalEffect(CtStatement ctStatement) {
-        List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(ctStatement);
+        List<CtStatement> ctStatements = StatementUtil.getEffectiveStatements(ctStatement);
 
         if (ctStatements.isEmpty()) return Optional.empty();
 
-        Optional<Effect> optionalEffect = SpoonUtil.tryMakeEffect(ctStatements.get(ctStatements.size() - 1));
+        Optional<Effect> optionalEffect = StatementUtil.tryMakeEffect(ctStatements.get(ctStatements.size() - 1));
 
         return optionalEffect.flatMap(effect -> {
             if (effect instanceof TerminalEffect terminalEffect) {
@@ -49,7 +49,7 @@ public class RedundantElse extends IntegratedCheck {
         }
 
         String elseIf = "";
-        List<CtStatement> elseStatements = SpoonUtil.getEffectiveStatements(ctIf.getElseStatement());
+        List<CtStatement> elseStatements = StatementUtil.getEffectiveStatements(ctIf.getElseStatement());
         int numberOfElseStatements = elseStatements.size();
         if (elseStatements.size() == 1 && elseStatements.get(0) instanceof CtIf ctElseIf) {
             // skip else { if ... }
@@ -67,7 +67,7 @@ public class RedundantElse extends IntegratedCheck {
                 return;
             }
 
-            numberOfElseStatements = SpoonUtil.getEffectiveStatements(ctElseIf.getThenStatement()).size();
+            numberOfElseStatements = StatementUtil.getEffectiveStatements(ctElseIf.getThenStatement()).size();
 
             elseIf = " else if (b) { ... }";
         } else if (ctIf.getElseStatement().isImplicit()) {
@@ -105,7 +105,7 @@ public class RedundantElse extends IntegratedCheck {
                 if (parentIf != null && parentIf.getElseStatement() != null) {
                     // if so, then check if the else statement is this if
                     // (to avoid conflicts with else { if } can be else if {})
-                    List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(parentIf.getElseStatement());
+                    List<CtStatement> ctStatements = StatementUtil.getEffectiveStatements(parentIf.getElseStatement());
                     if (ctStatements.size() == 1 && ctStatements.get(0).equals(ctIf)) {
                         return;
                     }

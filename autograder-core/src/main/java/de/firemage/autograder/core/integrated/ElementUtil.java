@@ -1,9 +1,12 @@
 package de.firemage.autograder.core.integrated;
 
 import spoon.processing.FactoryAccessor;
+import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtPackage;
+import spoon.reflect.declaration.CtParameter;
 
 import java.util.Collections;
 import java.util.HashSet;
@@ -11,6 +14,8 @@ import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.NoSuchElementException;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.function.Function;
 
@@ -73,6 +78,32 @@ public final class ElementUtil {
                 return result;
             }
         };
+    }
+
+    public static <P extends CtElement> P getParentOrSelf(CtElement element, Class<P> parentType) {
+        Objects.requireNonNull(element);
+        if (parentType.isAssignableFrom(element.getClass())) {
+            return (P) element;
+        }
+        return element.getParent(parentType);
+    }
+
+    public static int getParameterIndex(CtParameter<?> parameter, CtExecutable<?> executable) {
+        for (int i = 0; i < executable.getParameters().size(); i++) {
+            if (executable.getParameters().get(i) == parameter) {
+                return i;
+            }
+        }
+        throw new IllegalArgumentException("Parameter not found in executable");
+    }
+
+    public static Optional<CtJavaDoc> getJavadoc(CtElement element) {
+        if (element.getComments().isEmpty() || !(element.getComments().get(0) instanceof CtJavaDoc)) {
+            // TODO lookup inherited javadoc
+            return Optional.empty();
+        } else {
+            return Optional.of(element.getComments().get(0).asJavaDoc());
+        }
     }
 
     private record IdentityKey<T>(T value) {

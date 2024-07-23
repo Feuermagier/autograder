@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -95,7 +96,7 @@ public class UnusedImport extends IntegratedCheck {
     }
 
     private static boolean isReferencingTheSameElement(CtReference left, CtReference right) {
-        return left.equals(right) || Objects.equals(SpoonUtil.getReferenceDeclaration(left), SpoonUtil.getReferenceDeclaration(right));
+        return left.equals(right) || Objects.equals(VariableUtil.getReferenceDeclaration(left), VariableUtil.getReferenceDeclaration(right));
     }
 
     @SuppressWarnings("unchecked")
@@ -136,7 +137,7 @@ public class UnusedImport extends IntegratedCheck {
             return;
         }
 
-        CtNamedElement element = (CtNamedElement) SpoonUtil.getReferenceDeclaration(ctImport.getReference());
+        CtNamedElement element = (CtNamedElement) VariableUtil.getReferenceDeclaration(ctImport.getReference());
 
         // types from the same package are imported implicitly
         //
@@ -213,7 +214,7 @@ public class UnusedImport extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
-        SpoonUtil.visitCtCompilationUnit(staticAnalysis.getModel(), ctCompilationUnit -> {
+        CoreUtil.visitCtCompilationUnit(staticAnalysis.getModel(), ctCompilationUnit -> {
             Collection<CtElement> importedElements = new HashSet<>();
 
             for (CtImport ctImport : ctCompilationUnit.getImports()) {

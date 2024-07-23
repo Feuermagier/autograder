@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
@@ -38,7 +38,7 @@ public class AvoidRecompilingRegex extends IntegratedCheck {
                     return;
                 }
 
-                CtExpression<?> ctExpression = SpoonUtil.resolveCtExpression(ctField.getDefaultExpression());
+                CtExpression<?> ctExpression = ExpressionUtil.resolveCtExpression(ctField.getDefaultExpression());
 
                 // skip all non-literals to improve performance
                 if (!(ctExpression instanceof CtLiteral<?>)) {

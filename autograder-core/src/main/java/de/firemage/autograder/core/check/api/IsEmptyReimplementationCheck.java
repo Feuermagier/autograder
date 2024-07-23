@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -71,7 +71,7 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
     private void checkIsEmptyReimplementation(CtExpression<?> target, CtBinaryOperator<?> ctBinaryOperator, ProblemType problemType) {
         Predicate<? super CtExpression<?>> isLiteral = expr -> expr instanceof CtLiteral<?>;
 
-        if (!SpoonUtil.isBoolean(ctBinaryOperator)) {
+        if (!ExpressionUtil.isBoolean(ctBinaryOperator)) {
             return;
         }
 
@@ -117,12 +117,12 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
         // f() == 0    : isEmpty
 
 
-        CtBinaryOperator<?> result = SpoonUtil.normalizeBy(
-            (left, right) -> isLiteral.test(SpoonUtil.resolveConstant(left)) && !isLiteral.test(SpoonUtil.resolveConstant(right)),
+        CtBinaryOperator<?> result = ExpressionUtil.normalizeBy(
+            (left, right) -> isLiteral.test(ExpressionUtil.resolveConstant(left)) && !isLiteral.test(ExpressionUtil.resolveConstant(right)),
             ctBinaryOperator
         );
 
-        if (!(result.getRightHandOperand() instanceof CtLiteral<?> ctLiteral) || !(ctLiteral.getValue() instanceof Number number) || SpoonUtil.isNullLiteral(ctLiteral)) {
+        if (!(result.getRightHandOperand() instanceof CtLiteral<?> ctLiteral) || !(ctLiteral.getValue() instanceof Number number) || ExpressionUtil.isNullLiteral(ctLiteral)) {
             return;
         }
 
@@ -142,13 +142,13 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
             // f() != 0    : !isEmpty
             case NE -> {
                 if (isZero) {
-                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), SpoonUtil.negate(suggestion).toString(), problemType);
+                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), ExpressionUtil.negate(suggestion).toString(), problemType);
                 }
             }
             // f() >= 1    : !isEmpty
             case GE -> {
                 if (isOne) {
-                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), SpoonUtil.negate(suggestion).toString(), problemType);
+                    this.reportProblem(ctBinaryOperator, ctBinaryOperator.toString(), ExpressionUtil.negate(suggestion).toString(), problemType);
                 }
             }
         }
@@ -157,17 +157,17 @@ public class IsEmptyReimplementationCheck extends IntegratedCheck {
     private void checkEqualsCall(CtExpression<?> target, CtInvocation<?> ctInvocation, ProblemType problemType) {
         CtExpression<?> argument = ctInvocation.getArguments().get(0);
 
-        if (SpoonUtil.isNullLiteral(argument)) {
+        if (ExpressionUtil.isNullLiteral(argument)) {
             return;
         }
 
-        if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(argument), "")) {
+        if (ExpressionUtil.isStringLiteral(ExpressionUtil.resolveConstant(argument), "")) {
             this.reportProblem(ctInvocation, ctInvocation.toString(), buildIsEmptySuggestion(target).toString(), problemType);
             return;
         }
 
         // detect "".equals(s)
-        if (SpoonUtil.isStringLiteral(SpoonUtil.resolveConstant(target), "")) {
+        if (ExpressionUtil.isStringLiteral(ExpressionUtil.resolveConstant(target), "")) {
             this.reportProblem(ctInvocation, ctInvocation.toString(), buildIsEmptySuggestion(argument).toString(), problemType);
         }
     }

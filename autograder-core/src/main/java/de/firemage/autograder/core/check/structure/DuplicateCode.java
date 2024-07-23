@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.structure;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.integrated.structure.StructuralElement;
@@ -48,7 +49,7 @@ public class DuplicateCode extends IntegratedCheck {
 
         return String.format(
             "%s:%d-%d",
-            SpoonUtil.getBaseName(startPosition.getFile().getName()),
+            CoreUtil.getBaseName(startPosition.getFile().getName()),
             startPosition.getLine(),
             endPosition.getEndLine()
         );
@@ -131,7 +132,7 @@ public class DuplicateCode extends IntegratedCheck {
             }
 
             int count = 0;
-            for (CtStatement ctStatement : SpoonUtil.getNextStatements(this.getLast())) {
+            for (CtStatement ctStatement : StatementUtil.getNextStatements(this.getLast())) {
                 for (CtVariable<?> declaredVariable : declaredVariables) {
                     if (UsesFinder.variableUses(declaredVariable).nestedIn(ctStatement).hasAny()) {
                         count += 1;
@@ -206,7 +207,7 @@ public class DuplicateCode extends IntegratedCheck {
                     CodeSegment leftCode = CodeSegment.of(ctStatement);
                     CodeSegment rightCode = CodeSegment.of(duplicate);
 
-                    for (var entry : zip(SpoonUtil.getNextStatements(ctStatement), SpoonUtil.getNextStatements(duplicate))) {
+                    for (var entry : zip(StatementUtil.getNextStatements(ctStatement), StatementUtil.getNextStatements(duplicate))) {
                         if (!StructuralEqualsVisitor.equals(entry.getKey(), entry.getValue())) {
                             break;
                         }
@@ -271,7 +272,7 @@ public class DuplicateCode extends IntegratedCheck {
                     return;
                 }
 
-                for (CtStatement ctStatement : SpoonUtil.getEffectiveStatements(ctMethod.getBody())) {
+                for (CtStatement ctStatement : StatementUtil.getEffectiveStatements(ctMethod.getBody())) {
                     this.checkCtStatement(ctStatement);
                 }
 

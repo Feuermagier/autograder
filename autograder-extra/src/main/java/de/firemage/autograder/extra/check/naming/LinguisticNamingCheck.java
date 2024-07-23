@@ -6,10 +6,12 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
+import de.firemage.autograder.core.integrated.CoreUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.extra.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -52,7 +54,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
 
         addLocalProblem(
             // adjust position so that only the name is highlighted
-            CodePosition.fromSourcePosition(SpoonUtil.getNamePosition(ctNamedElement), ctNamedElement, this.getRoot()),
+            CodePosition.fromSourcePosition(CoreUtil.getNamePosition(ctNamedElement), ctNamedElement, this.getRoot()),
             new LocalizedMessage(key, arguments),
             ProblemType.CONFUSING_IDENTIFIER
         );
@@ -63,7 +65,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
             return;
         }
 
-        if (hasBooleanPrefix(ctVariable) && !SpoonUtil.isBoolean(ctVariable)) {
+        if (hasBooleanPrefix(ctVariable) && !ExpressionUtil.isBoolean(ctVariable)) {
             this.reportProblem(
                 "linguistic-naming-boolean",
                 ctVariable,
@@ -78,7 +80,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
             return;
         }
 
-        if (hasBooleanPrefix(ctMethod) && !SpoonUtil.isBoolean(ctMethod)) {
+        if (hasBooleanPrefix(ctMethod) && !ExpressionUtil.isBoolean(ctMethod)) {
             this.reportProblem(
                 "linguistic-naming-boolean",
                 ctMethod,
@@ -106,7 +108,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
             return;
         }
 
-        if (prefix.equals("set") && isInvalidSetterReturnType(ctMethod) && SpoonUtil.getEffectiveStatements(ctMethod.getBody()).size() <= 3) {
+        if (prefix.equals("set") && isInvalidSetterReturnType(ctMethod) && StatementUtil.getEffectiveStatements(ctMethod.getBody()).size() <= 3) {
             // it is expected that a setter returns nothing (void)
             this.reportProblem(
                 "linguistic-naming-setter",
@@ -134,7 +136,7 @@ public class LinguisticNamingCheck extends IntegratedCheck {
         }
 
         // returning a boolean is allowed as well (for indicating success)
-        return !SpoonUtil.isBoolean(ctMethod);
+        return !ExpressionUtil.isBoolean(ctMethod);
     }
 
     @Override

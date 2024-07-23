@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -50,7 +51,7 @@ public class MathReimplementation extends IntegratedCheck {
     private static boolean isPowSqrt(CtInvocation<?> ctInvocation) {
         return isMathPow(ctInvocation)
             && ctInvocation.getArguments().size() == 2
-            && SpoonUtil.resolveConstant(ctInvocation.getArguments().get(1)) instanceof CtLiteral<?> ctLiteral
+            && ExpressionUtil.resolveConstant(ctInvocation.getArguments().get(1)) instanceof CtLiteral<?> ctLiteral
             && ctLiteral.getValue() instanceof Double doubleValue
             && doubleValue == 0.5;
     }
@@ -124,7 +125,7 @@ public class MathReimplementation extends IntegratedCheck {
 
         // ensure that in the if block there is only one assignment to a variable
         // and the condition is a binary operator with <, <=, > or >=
-        List<CtStatement> thenBlock = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
+        List<CtStatement> thenBlock = StatementUtil.getEffectiveStatements(ctIf.getThenStatement());
         if (thenBlock.size() != 1
             || !(thenBlock.get(0) instanceof CtAssignment<?, ?> thenAssignment)
             || !(thenAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite)
@@ -143,7 +144,7 @@ public class MathReimplementation extends IntegratedCheck {
             assignedVariable.getModifiers().contains(ModifierKind.STATIC)
         );
         if (ctIf.getElseStatement() != null) {
-            List<CtStatement> elseBlock = SpoonUtil.getEffectiveStatements(ctIf.getElseStatement());
+            List<CtStatement> elseBlock = StatementUtil.getEffectiveStatements(ctIf.getElseStatement());
             if (elseBlock.size() != 1
                 || !(elseBlock.get(0) instanceof CtAssignment<?,?> elseAssignment)
                 || !(elseAssignment.getAssigned() instanceof CtVariableAccess<?> elseAccess)
@@ -158,7 +159,7 @@ public class MathReimplementation extends IntegratedCheck {
         CtBinaryOperator<Boolean> condition = ctBinaryOperator;
         // ensure that the else value is on the left side of the condition
         if (ctBinaryOperator.getRightHandOperand().equals(elseValue)) {
-            condition = SpoonUtil.swapCtBinaryOperator(condition);
+            condition = ExpressionUtil.swapCtBinaryOperator(condition);
         }
 
         // if it is not on either side of the condition, return

@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -44,7 +44,7 @@ public class WrapperInstantiationCheck extends IntegratedCheck {
 
                     // check if the argument is not the unboxed type
                     // for example Integer(String)
-                    if (!boxedType.unbox().equals(SpoonUtil.getExpressionType(value))) {
+                    if (!boxedType.unbox().equals(ExpressionUtil.getExpressionType(value))) {
                         suggestion = "%s.valueOf(%s)".formatted(boxedType, suggestion);
                     }
 

@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.structure;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.CoreUtil;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtConditional;
@@ -132,7 +133,7 @@ public final class StructuralEqualsVisitor extends EqualsVisitor {
                     return;
                 }
 
-                if (SpoonUtil.resolveConstant(expression) instanceof CtLiteral<?> || isAllowedExpression.test(expression)) {
+                if (ExpressionUtil.resolveConstant(expression) instanceof CtLiteral<?> || isAllowedExpression.test(expression)) {
                     this.isConstant = true;
                 } else {
                     this.isConstant = false;
@@ -155,8 +156,8 @@ public final class StructuralEqualsVisitor extends EqualsVisitor {
             return isConstantExpressionOr(ctExpression, e -> {
                 // in addition to constant expressions, it is also okay to access parameters (if they have not been modified in the method)
                 if (e instanceof CtVariableRead<?> ctVariableRead) {
-                    CtVariable<?> ctVariable = SpoonUtil.getVariableDeclaration(ctVariableRead.getVariable());
-                    return ctVariable instanceof CtParameter<?> ctParameter && SpoonUtil.isEffectivelyFinal(ctParameter);
+                    CtVariable<?> ctVariable = VariableUtil.getVariableDeclaration(ctVariableRead.getVariable());
+                    return ctVariable instanceof CtParameter<?> ctParameter && VariableUtil.isEffectivelyFinal(ctParameter);
                 }
 
                 return false;

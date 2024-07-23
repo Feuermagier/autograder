@@ -6,7 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayAccess;
@@ -25,7 +25,7 @@ public class UseArrayCopy extends IntegratedCheck {
     private void checkArrayCopy(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctFor.getBody());
         if (statements.size() != 1 || forLoopRange == null) {
             return;
         }

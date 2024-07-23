@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtConstructor;
@@ -26,7 +26,7 @@ public class ReassignedParameterCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (!SpoonUtil.isEffectivelyFinal(ctParameter)) {
+                if (!VariableUtil.isEffectivelyFinal(ctParameter)) {
                     addLocalProblem(
                         ctParameter,
                         new LocalizedMessage(

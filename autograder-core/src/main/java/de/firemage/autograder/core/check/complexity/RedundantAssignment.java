@@ -5,7 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.unnecessary.UnusedCodeElementCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
@@ -42,7 +42,7 @@ public class RedundantAssignment extends IntegratedCheck {
                     return;
                 }
 
-                List<CtStatement> followingStatements = SpoonUtil.getNextStatements(ctAssignment);
+                List<CtStatement> followingStatements = StatementUtil.getNextStatements(ctAssignment);
 
                 CtLocalVariable<?> ctLocalVariable = ctLocalVariableReference.getDeclaration();
 

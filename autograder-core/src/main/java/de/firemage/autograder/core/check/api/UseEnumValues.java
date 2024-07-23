@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 
 import spoon.processing.AbstractProcessor;
@@ -125,7 +126,7 @@ public class UseEnumValues extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
             public void process(CtField<?> ctField) {
-                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
+                if (!VariableUtil.isEffectivelyFinal(ctField)) {
                     return;
                 }
 
@@ -144,7 +145,7 @@ public class UseEnumValues extends IntegratedCheck {
                 } else {
                     checkListingEnumValues(
                         isOrderedCollection(ctExpression.getType()),
-                        SpoonUtil.getElementsOfExpression(ctExpression),
+                        ExpressionUtil.getElementsOfExpression(ctExpression),
                         suggestion -> "%s.of(%s)".formatted(ctExpression.getType().getSimpleName(), suggestion),
                         ctExpression
                     );

@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.MethodUtil;
@@ -169,7 +169,7 @@ public class IOUISeparation extends IntegratedCheck {
                     "ui-input-separation",
                     Map.of(
                         "first",
-                        SpoonUtil.formatSourcePosition(scannerUses.get(0).getPosition())
+                        CoreUtil.formatSourcePosition(scannerUses.get(0).getPosition())
                     )
                 ),
                 ProblemType.UI_INPUT_SEPARATION
@@ -183,7 +183,7 @@ public class IOUISeparation extends IntegratedCheck {
                     "ui-output-separation",
                     Map.of(
                         "first",
-                        SpoonUtil.formatSourcePosition(printUses.get(0).getPosition())
+                        CoreUtil.formatSourcePosition(printUses.get(0).getPosition())
                     )
                 ),
                 ProblemType.UI_OUTPUT_SEPARATION

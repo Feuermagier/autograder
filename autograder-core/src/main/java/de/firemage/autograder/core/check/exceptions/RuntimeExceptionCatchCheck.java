@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatch;
@@ -28,7 +28,7 @@ public class RuntimeExceptionCatchCheck extends IntegratedCheck {
                 CtTypeReference<?> varType = ctCatch.getParameter().getType();
 
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctCatch.getBody());
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctCatch.getBody());
                 // catching an exception to throw another is okay
                 if (statements.size() == 1 && statements.get(0) instanceof CtThrow) {
                     return;

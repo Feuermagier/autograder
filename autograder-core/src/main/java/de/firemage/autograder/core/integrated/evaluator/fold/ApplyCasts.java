@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.reference.CtTypeReference;
@@ -38,7 +38,7 @@ public final class ApplyCasts implements Fold {
         ctLiteral.setTypeCasts(new ArrayList<>());
 
         for (CtTypeReference<?> cast : casts) {
-            result = SpoonUtil.castLiteral(cast, result);
+            result = ExpressionUtil.castLiteral(cast, result);
         }
 
         return result;

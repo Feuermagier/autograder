@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -34,7 +34,7 @@ public class CompareCharValue extends IntegratedCheck {
 
     private static Optional<Integer> getComparedIntegerValue(CtExpression<?> left, CtExpression<?> right) {
         if (!TypeUtil.isTypeEqualTo(left.getType(), char.class)
-            || !(SpoonUtil.resolveConstant(right) instanceof CtLiteral<?> literal && literal.getValue() instanceof Integer value)) {
+            || !(ExpressionUtil.resolveConstant(right) instanceof CtLiteral<?> literal && literal.getValue() instanceof Integer value)) {
             return Optional.empty();
         }
 

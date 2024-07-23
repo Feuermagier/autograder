@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtStatement;
@@ -59,8 +60,8 @@ public class LoopShouldBeDoWhile extends IntegratedCheck {
                 // }
                 // ```
 
-                Deque<CtStatement> loopStatements = new ArrayDeque<>(SpoonUtil.getEffectiveStatements(ctWhile.getBody()));
-                CtStatement currentStatementBeforeLoop = SpoonUtil.getPreviousStatement(ctWhile).orElse(null);
+                Deque<CtStatement> loopStatements = new ArrayDeque<>(StatementUtil.getEffectiveStatements(ctWhile.getBody()));
+                CtStatement currentStatementBeforeLoop = StatementUtil.getPreviousStatement(ctWhile).orElse(null);
                 if (currentStatementBeforeLoop == null || loopStatements.isEmpty()) {
                     return;
                 }
@@ -72,7 +73,7 @@ public class LoopShouldBeDoWhile extends IntegratedCheck {
                         return;
                     }
 
-                    currentStatementBeforeLoop = SpoonUtil.getPreviousStatement(currentStatementBeforeLoop).orElse(null);
+                    currentStatementBeforeLoop = StatementUtil.getPreviousStatement(currentStatementBeforeLoop).orElse(null);
                 }
 
                 if (loopStatements.isEmpty()) {
@@ -81,7 +82,7 @@ public class LoopShouldBeDoWhile extends IntegratedCheck {
                         new LocalizedMessage(
                             "loop-should-be-do-while",
                             Map.of("suggestion", """
-                            %ndo %s while (%s)""".formatted(SpoonUtil.truncatedSuggestion(ctWhile.getBody()), ctWhile.getLoopingExpression()))
+                            %ndo %s while (%s)""".formatted(CoreUtil.truncatedSuggestion(ctWhile.getBody()), ctWhile.getLoopingExpression()))
                         ),
                         ProblemType.LOOP_SHOULD_BE_DO_WHILE
                     );

@@ -4,9 +4,10 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -26,7 +27,7 @@ public class StringRepeat extends IntegratedCheck {
     private void checkStringRepeat(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctFor.getBody());
         if (statements.size() != 1 || forLoopRange == null) {
             return;
         }
@@ -39,7 +40,7 @@ public class StringRepeat extends IntegratedCheck {
                 return;
             }
 
-            CtExpression<?> rhs = SpoonUtil.resolveCtExpression(ctAssignment.getAssignment());
+            CtExpression<?> rhs = ExpressionUtil.resolveCtExpression(ctAssignment.getAssignment());
             // return if the for loop uses the loop variable (would not be a simple repetition)
             if (!ctAssignment.getElements(new VariableAccessFilter<>(forLoopRange.loopVariable())).isEmpty()) {
                 return;

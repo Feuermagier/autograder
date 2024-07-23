@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.OperatorHelper;
 import spoon.SpoonException;
@@ -48,7 +48,7 @@ public final class EvaluateLiteralOperations implements Fold {
         Object leftObject = leftLiteral.getValue();
         Object rightObject = rightLiteral.getValue();
 
-        CtTypeReference<T> operatorType = (CtTypeReference<T>) SpoonUtil.getExpressionType(ctBinaryOperator);
+        CtTypeReference<T> operatorType = (CtTypeReference<T>) ExpressionUtil.getExpressionType(ctBinaryOperator);
 
         Object value = switch (ctBinaryOperator.getKind()) {
             case AND -> (Boolean) leftObject && (Boolean) rightObject;
@@ -185,7 +185,7 @@ public final class EvaluateLiteralOperations implements Fold {
             return ctUnaryOperator;
         }
 
-        CtTypeReference<T> operatorType = (CtTypeReference<T>) SpoonUtil.getExpressionType(promotedOperator);
+        CtTypeReference<T> operatorType = (CtTypeReference<T>) ExpressionUtil.getExpressionType(promotedOperator);
         Object literalValue = literal.getValue();
         Object value = switch (promotedOperator.getKind()) {
             case NOT -> !(Boolean) literalValue;

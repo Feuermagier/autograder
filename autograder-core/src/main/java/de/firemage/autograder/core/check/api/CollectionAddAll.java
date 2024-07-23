@@ -5,7 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.api.UseEnumValues.CtEnumFieldRead;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -138,7 +138,7 @@ public class CollectionAddAll extends IntegratedCheck {
     }
 
     private void checkAddAll(CtBlock<?> ctBlock) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctBlock);
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctBlock);
 
         CtVariableReference<?> collection = null;
         List<CtExpression<?>> addedValues = new ArrayList<>();
@@ -179,7 +179,7 @@ public class CollectionAddAll extends IntegratedCheck {
     }
 
     private void checkAddAll(CtForEach ctFor) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctFor.getBody());
         if (statements.size() != 1) {
             return;
         }

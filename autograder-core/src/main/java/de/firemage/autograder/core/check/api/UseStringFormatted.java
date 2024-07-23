@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -39,7 +39,7 @@ public class UseStringFormatted extends IntegratedCheck {
 
         CtExpression<?> format = args.remove(0);
         // skip if the format string is not a string literal (e.g. a complex concatenation)
-        if (SpoonUtil.tryGetStringLiteral(SpoonUtil.resolveConstant(format)).isEmpty()) {
+        if (ExpressionUtil.tryGetStringLiteral(ExpressionUtil.resolveConstant(format)).isEmpty()) {
             return;
         }
 

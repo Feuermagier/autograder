@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtConstructorCall;
@@ -46,7 +46,7 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
                         continue;
                     }
 
-                    List<CtStatement> statements = SpoonUtil.getEffectiveStatements(method.getBody());
+                    List<CtStatement> statements = StatementUtil.getEffectiveStatements(method.getBody());
                     if (statements.isEmpty()) {
                         addLocalProblem(method, formatExplanation(method),
                             ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);

@@ -2,7 +2,7 @@ package de.firemage.autograder.extra.check;
 
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.extra.check.naming.LinguisticNamingCheck;
 import de.firemage.autograder.extra.check.naming.VariablesHaveDescriptiveNamesCheck;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -80,7 +80,7 @@ class TestLocalizedStrings {
     private static FluentBundle germanBundle;
 
     private static String resolveKey(CtModel ctModel, List<? extends CtExpression<?>> args) {
-        if (args.isEmpty() || !(SpoonUtil.resolveCtExpression(args.get(0)) instanceof CtLiteral<?> ctLiteral
+        if (args.isEmpty() || !(ExpressionUtil.resolveCtExpression(args.get(0)) instanceof CtLiteral<?> ctLiteral
             && ctLiteral.getValue() instanceof String key)) {
             throw new IllegalArgumentException("The first argument must be a string literal: " + args);
         }

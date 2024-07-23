@@ -5,8 +5,10 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayWrite;
@@ -30,7 +32,7 @@ public class UseArraysFill extends IntegratedCheck {
     private void checkArraysFill(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctFor.getBody());
 
         if (statements.size() != 1
             || forLoopRange == null
@@ -41,7 +43,7 @@ public class UseArraysFill extends IntegratedCheck {
             return;
         }
 
-        CtVariable<?> loopVariable = (CtVariable<?>) SpoonUtil.getReferenceDeclaration(forLoopRange.loopVariable());
+        CtVariable<?> loopVariable = (CtVariable<?>) VariableUtil.getReferenceDeclaration(forLoopRange.loopVariable());
         // return if the for loop uses the loop variable (would not be a simple repetition)
         if (UsesFinder.variableUses(loopVariable).nestedIn(ctAssignment.getAssignment()).hasAny()) {
             return;
@@ -53,7 +55,7 @@ public class UseArraysFill extends IntegratedCheck {
         }
 
         CtExpression<?> rhs = ctAssignment.getAssignment();
-        if (!SpoonUtil.isImmutable(rhs.getType())) {
+        if (!TypeUtil.isImmutable(rhs.getType())) {
             return;
         }
 

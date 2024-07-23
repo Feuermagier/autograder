@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -77,7 +77,7 @@ public class RegexCheck extends IntegratedCheck {
     private static boolean isInAllowedContext(CtLiteral<?> ctLiteral) {
         CtElement parent = ctLiteral.getParent();
         if (parent instanceof CtVariable<?> ctVariable
-            && SpoonUtil.isEffectivelyFinal(ctVariable)) {
+            && VariableUtil.isEffectivelyFinal(ctVariable)) {
             // Check if the variable is only used in a regex invocation (e.g. Pattern.compile)
             return UsesFinder.variableUses(ctVariable)
                 .hasAnyAndAllMatch(ctVariableAccess -> ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
@@ -92,7 +92,7 @@ public class RegexCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtLiteral<String>>() {
             @Override
             public void process(CtLiteral<String> literal) {
-                if (!SpoonUtil.isString(literal.getType()) || !isInAllowedContext(literal)) {
+                if (!TypeUtil.isString(literal.getType()) || !isInAllowedContext(literal)) {
                     return;
                 }
 

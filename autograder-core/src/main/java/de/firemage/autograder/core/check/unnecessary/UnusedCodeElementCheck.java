@@ -4,9 +4,9 @@ import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -42,7 +42,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
      */
     public static boolean isConsideredUnused(CtNamedElement element, CodeModel model) {
         // ignore exception constructors and params in those constructors
-        var parentConstructor = SpoonUtil.getParentOrSelf(element, CtConstructor.class);
+        var parentConstructor = ElementUtil.getParentOrSelf(element, CtConstructor.class);
         if (parentConstructor != null && TypeUtil.isSubtypeOf(parentConstructor.getType(), java.lang.Throwable.class)) {
             return false;
         }
@@ -65,7 +65,7 @@ public class UnusedCodeElementCheck extends IntegratedCheck {
                 return false;
             } else if (variable instanceof CtParameter<?> parameter && parameter.getParent() instanceof CtMethod<?> method) {
                 // For method parameters, also look in overriding methods
-                int parameterIndex = SpoonUtil.getParameterIndex(parameter, method);
+                int parameterIndex = ElementUtil.getParameterIndex(parameter, method);
                 return MethodHierarchy
                         .streamAllOverridingMethods(method)
                         .allMatch(m -> isConsideredUnused(m.getExecutable().getParameters().get(parameterIndex), model));

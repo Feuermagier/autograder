@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.comment;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtJavaDoc;
@@ -51,7 +51,7 @@ public class TypeJavadocCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtType<?>>() {
             @Override
             public void process(CtType<?> type) {
-                Optional<CtJavaDoc> javadoc = SpoonUtil.getJavadoc(type);
+                Optional<CtJavaDoc> javadoc = ElementUtil.getJavadoc(type);
                 if (javadoc.isEmpty()) {
                     return;
                 }

@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.CtRange;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import org.apache.commons.lang3.Range;
@@ -40,35 +41,35 @@ public class CharRange extends IntegratedCheck {
 
     private static final Map<Range<Character>, Suggester<Character, Boolean>> MAPPING = Map.of(
         Range.of('a', 'z'), (factory, ctExpression, targetType) -> factory.createBinaryOperator(
-            SpoonUtil.createStaticInvocation(
+            FactoryUtil.createStaticInvocation(
                 targetType,
                 "isAlphabetic",
-                SpoonUtil.castExpression(int.class, ctExpression)
+                ExpressionUtil.castExpression(int.class, ctExpression)
             ),
-            SpoonUtil.createStaticInvocation(
+            FactoryUtil.createStaticInvocation(
                 targetType,
                 "isLowerCase",
-                SpoonUtil.castExpression(char.class, ctExpression)
+                ExpressionUtil.castExpression(char.class, ctExpression)
             ),
             BinaryOperatorKind.AND
         ),
         Range.of('A', 'Z'), (factory, ctExpression, targetType) -> factory.createBinaryOperator(
-            SpoonUtil.createStaticInvocation(
+            FactoryUtil.createStaticInvocation(
                 targetType,
                 "isAlphabetic",
-                SpoonUtil.castExpression(int.class, ctExpression)
+                ExpressionUtil.castExpression(int.class, ctExpression)
             ),
-            SpoonUtil.createStaticInvocation(
+            FactoryUtil.createStaticInvocation(
                 targetType,
                 "isUpperCase",
-                SpoonUtil.castExpression(char.class, ctExpression)
+                ExpressionUtil.castExpression(char.class, ctExpression)
             ),
             BinaryOperatorKind.AND
         ),
-        Range.of('0', '9'), (factory, ctExpression, targetType) -> SpoonUtil.createStaticInvocation(
+        Range.of('0', '9'), (factory, ctExpression, targetType) -> FactoryUtil.createStaticInvocation(
             targetType,
             "isDigit",
-            SpoonUtil.castExpression(char.class, ctExpression)
+            ExpressionUtil.castExpression(char.class, ctExpression)
         )
     );
 
@@ -96,7 +97,7 @@ public class CharRange extends IntegratedCheck {
                 CtBinaryOperator<Boolean> operator = ctBinaryOperator;
                 if (ctBinaryOperator.getKind() == BinaryOperatorKind.OR) {
                     isNegated = true;
-                    operator = (CtBinaryOperator<Boolean>) SpoonUtil.negate(ctBinaryOperator);
+                    operator = (CtBinaryOperator<Boolean>) ExpressionUtil.negate(ctBinaryOperator);
                 } else {
                     isNegated = false;
                     if (ctBinaryOperator.getKind() != BinaryOperatorKind.AND) {
@@ -133,7 +134,7 @@ public class CharRange extends IntegratedCheck {
 
                 makeSuggestion(leftRange.ctExpression(), intersection).ifPresent(suggestion -> {
                     if (isNegated) {
-                        suggestion = SpoonUtil.negate(suggestion);
+                        suggestion = ExpressionUtil.negate(suggestion);
                     }
 
                     addLocalProblem(
