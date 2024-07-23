@@ -32,7 +32,7 @@ import java.util.stream.Collectors;
     ProblemType.COMPOSITION_OVER_INHERITANCE
 })
 public class InheritanceBadPractices extends IntegratedCheck {
-    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInJunitTest();
+    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInDebugMode();
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {

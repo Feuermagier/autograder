@@ -29,7 +29,7 @@ import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
 public class IntegratedAnalysis implements CodeLinter<IntegratedCheck> {
-    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInJunitTest();
+    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInDebugMode();
     private static final String INITIAL_INTEGRITY_CHECK_NAME = "StaticAnalysis-Constructor";
     private static final boolean ENSURE_NO_ORPHANS = false;
     private static final boolean ENSURE_NO_MODEL_CHANGES = false;

@@ -25,7 +25,7 @@ import java.util.function.Predicate;
 import java.util.function.UnaryOperator;
 
 public final class StructuralEqualsVisitor extends EqualsVisitor {
-    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInJunitTest();
+    private static final boolean IS_IN_DEBUG_MODE = CoreUtil.isInDebugMode();
 
     private static final Set<CtRole> ALLOWED_MISMATCHING_ROLES = Set.of(
         // allow mismatching comments

@@ -141,7 +141,7 @@ public class UsesFinder {
         boolean result = TypeUtil.streamAllSuperTypes(potentialSubtype).anyMatch(type -> parentType == type);
 
         // this is just a sanity check to ensure that our implementation is correct
-        if (CoreUtil.isInJunitTest() && result != potentialSubtype.isSubtypeOf(parentType.getReference())) {
+        if (CoreUtil.isInDebugMode() && result != potentialSubtype.isSubtypeOf(parentType.getReference())) {
             throw new IllegalStateException("Inconsistent subtype information for %s and %s".formatted(
                 potentialSubtype.getQualifiedName(),
                 parentType.getQualifiedName()

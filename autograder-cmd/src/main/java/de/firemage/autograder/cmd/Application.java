@@ -14,6 +14,7 @@ import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.api.loader.AutograderLoader;
 import de.firemage.autograder.cmd.output.Annotation;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.span.Formatter;
 import de.firemage.autograder.span.Highlight;
 import de.firemage.autograder.span.Position;
@@ -80,6 +81,9 @@ public class Application implements Callable<Integer> {
 
     @Option(names = {"--max-problems"}, description = "The maximum number of problems to report per check", defaultValue = "10")
     private int maxProblemsPerCheck;
+
+    @Option(names = {"--debug"}, description = "Enables debug mode, note that this slows down execution", defaultValue = "false")
+    private boolean isInDebugMode;
 
     @Spec
     private CommandSpec spec;
@@ -193,6 +197,10 @@ public class Application implements Callable<Integer> {
                 e.printStackTrace();
                 return IO_EXIT_CODE;
             }
+        }
+
+        if (this.isInDebugMode) {
+            CoreUtil.setDebugMode();
         }
 
         if (!outputJson) {
