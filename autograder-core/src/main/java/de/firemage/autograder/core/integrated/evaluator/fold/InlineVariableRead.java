@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
 import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLocalVariable;
@@ -30,7 +31,7 @@ public final class InlineVariableRead implements Fold {
     @Override
     @SuppressWarnings("unchecked")
     public <T> CtExpression<T> foldCtVariableRead(CtVariableRead<T> ctVariableRead) {
-        CtVariable<T> ctVariable = ctVariableRead.getVariable().getDeclaration();
+        CtVariable<T> ctVariable = (CtVariable<T>) UsesFinder.getDeclaredVariable(ctVariableRead);
 
         if (ctVariable == null || this.ignoreLocalVariables && ctVariable instanceof CtLocalVariable<T>) {
             return ctVariableRead;
