@@ -16,12 +16,14 @@ import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtTextBlock;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtUnaryOperator;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtEnum;
 import spoon.reflect.declaration.CtEnumValue;
 import spoon.reflect.declaration.CtTypedElement;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -564,17 +566,30 @@ public final class ExpressionUtil {
     }
 
     /**
-     * Checks if the given expression is a constant expression or it satisfies the given predicate.
+     * Checks if the given expression is a constant expression, or it satisfies the given predicate.
      *
      * @param expr the expression to check
      * @param isAllowedExpression checks if the expression is allowed to be non-constant
-     * @return true if the expression is a constant expression or it satisfies the given predicate, false otherwise
+     * @return true if the expression is a constant expression, or it satisfies the given predicate, false otherwise
      * @param <T> the type of the expression
      */
     public static <T> boolean isConstantExpressionOr(CtExpression<T> expr, Predicate<? super CtExpression<?>> isAllowedExpression) {
         var visitor = new CtScanner() {
             private boolean isConstant;
             private boolean isDone;
+
+            private static <T> boolean isConstantVariableRead(CtExpression<T> expression) {
+                if (!(expression instanceof CtVariableRead<T> ctVariableRead)) {
+                    return false;
+                }
+                CtVariable<?> ctVariable = VariableUtil.getVariableDeclaration(ctVariableRead.getVariable());
+
+                if (ctVariable == null) {
+                    return false;
+                }
+
+                return VariableUtil.getEffectivelyFinalExpression(ctVariable).orElse(null) instanceof CtLiteral<?>;
+            }
 
             // use the exit instead of the enter method, so it checks the deepest nodes first.
             // This way, one can assume that when a <left> <op> <right> expression is encountered,
@@ -646,7 +661,7 @@ public final class ExpressionUtil {
                     return;
                 }
 
-                if (ExpressionUtil.resolveConstant(expression) instanceof CtLiteral<?> || isAllowedExpression.test(expression)) {
+                if (isConstantVariableRead(expression) || isAllowedExpression.test(expression)) {
                     this.isConstant = true;
                 } else {
                     this.isConstant = false;
