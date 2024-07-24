@@ -1,5 +1,6 @@
 package de.firemage.autograder.core.integrated;
 
+import de.firemage.autograder.core.check.api.UseEnumValues;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.fold.FoldUtils;
 import de.firemage.autograder.core.integrated.evaluator.fold.InlineVariableRead;
@@ -7,17 +8,24 @@ import de.firemage.autograder.core.integrated.evaluator.fold.RemoveRedundantCast
 import spoon.reflect.CtModel;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
+import spoon.reflect.code.CtConditional;
 import spoon.reflect.code.CtExpression;
+import spoon.reflect.code.CtFieldRead;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtTextBlock;
 import spoon.reflect.code.CtTypeAccess;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.LiteralBase;
 import spoon.reflect.code.UnaryOperatorKind;
+import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtEnum;
+import spoon.reflect.declaration.CtEnumValue;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.eval.PartialEvaluator;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.reference.CtTypeReference;
+import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +34,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
 public final class ExpressionUtil {
@@ -552,5 +561,106 @@ public final class ExpressionUtil {
         ctExpression.setTypeCasts(typeCasts);
 
         return (E) RemoveRedundantCasts.removeRedundantCasts(ctExpression);
+    }
+
+    /**
+     * Checks if the given expression is a constant expression or it satisfies the given predicate.
+     *
+     * @param expr the expression to check
+     * @param isAllowedExpression checks if the expression is allowed to be non-constant
+     * @return true if the expression is a constant expression or it satisfies the given predicate, false otherwise
+     * @param <T> the type of the expression
+     */
+    public static <T> boolean isConstantExpressionOr(CtExpression<T> expr, Predicate<? super CtExpression<?>> isAllowedExpression) {
+        var visitor = new CtScanner() {
+            private boolean isConstant;
+            private boolean isDone;
+
+            // use the exit instead of the enter method, so it checks the deepest nodes first.
+            // This way, one can assume that when a <left> <op> <right> expression is encountered,
+            // the <left> and <right> are already guaranteed to be constant.
+            @Override
+            protected void exit(CtElement ctElement) {
+                if (!(ctElement instanceof CtExpression<?> expression) || this.isDone) {
+                    return;
+                }
+
+                // Of all the Subinterfaces of CtExpression, these are irrelevant:
+                // - CtAnnotation
+                // - CtAnnotationFieldAccess
+                // - CtOperatorAssignment
+                // - CtArrayWrite
+                // - CtArrayAccess
+                // - CtFieldWrite
+                // - CtFieldAccess
+                // - CtVariableAccess
+                // - CtVariableWrite
+                // - CtCodeSnippetExpression (should never be encountered)
+                //
+                // these might be constant expressions, depending on more context:
+                // - CtArrayRead
+                // - CtAssignment
+                // - CtConstructorCall
+                // - CtExecutableReferenceExpression
+                // - CtLambda
+                // - CtNewArray
+                // - CtNewClass
+                // - CtSuperAccess
+                // - CtSwitchExpression
+                // - CtTargetedExpression
+                // - CtThisAccess
+                // - CtTypePattern
+                //
+                // and these are the relevant ones:
+                // - CtLiteral
+                // - CtUnaryOperator
+                // - CtBinaryOperator
+                // - CtFieldRead (if the field itself is static and final)
+                // - CtInvocation (if the method is static and all arguments are constant expressions)
+                // - CtTextBlock
+                // - CtConditional (ternary operator)
+                // - CtTypeAccess
+
+                if (CoreUtil.isInstanceOfAny(
+                    expression,
+                    CtBinaryOperator.class,
+                    UnaryOperator.class,
+                    CtTextBlock.class,
+                    CtConditional.class,
+                    CtTypeAccess.class,
+                    CtLiteral.class
+                )) {
+                    this.isConstant = true;
+                    return;
+                }
+
+                if (expression instanceof CtInvocation<?> ctInvocation && ctInvocation.getExecutable().isStatic()) {
+                    // the arguments and target of the invocation have already been visited and all of them work in a constant context
+                    // -> the invocation would work in a constant context as well
+                    this.isConstant = true;
+                    return;
+                }
+
+                if (ExpressionUtil.isEnumValue(expression)) {
+                    this.isConstant = true;
+                    return;
+                }
+
+                if (ExpressionUtil.resolveConstant(expression) instanceof CtLiteral<?> || isAllowedExpression.test(expression)) {
+                    this.isConstant = true;
+                } else {
+                    this.isConstant = false;
+                    this.isDone = true;
+                }
+            }
+        };
+
+        expr.accept(visitor);
+
+        return visitor.isConstant;
+    }
+
+    private static boolean isEnumValue(CtExpression<?> ctExpression) {
+        return UseEnumValues.CtEnumFieldRead.of(ctExpression).isPresent();
     }
 }

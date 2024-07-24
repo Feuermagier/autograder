@@ -220,4 +220,15 @@ public final class TypeUtil {
 
         return true;
     }
+
+    /**
+     * Checks if the given type is a collection that has a defined order.
+     *
+     * @param ctTypeReference the type to check
+     * @return true if the given type is a collection that has a defined order, false if not or if it can not be determined
+     * @param <T> the type of the element
+     */
+    public static <T> boolean isOrderedCollection(CtTypeReference<T> ctTypeReference) {
+        return TypeUtil.isSubtypeOf(ctTypeReference, java.util.List.class);
+    }
 }

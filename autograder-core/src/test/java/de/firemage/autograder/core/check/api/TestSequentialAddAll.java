@@ -10,6 +10,7 @@ import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
@@ -21,7 +22,24 @@ class TestSequentialAddAll extends AbstractCheckTest {
         ProblemType.USE_ENUM_VALUES
     );
 
-    private void assertEqualsReimplementation(Problem problem, String suggestion) {
+    private void assertEqualsReimplementation(Problem problem, String type, Iterable<String> values, String collection) {
+        assertEquals(
+            this.linter.translateMessage(
+                new LocalizedMessage(
+                    "common-reimplementation",
+                    Map.of(
+                        "suggestion", "private static final List<%s> SOME_GOOD_NAME = List.of(%s); /* ... */ %s.addAll(SOME_GOOD_NAME)".formatted(
+                            type,
+                            String.join(", ", values),
+                            collection
+                        )
+                    )
+                )),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
+
+    private void assertEqualsEnumValues(Problem problem, String suggestion) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(
@@ -53,11 +71,63 @@ class TestSequentialAddAll extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsReimplementation(problems.next(), "list.addAll(List.of(\" \", \"a\", \"b\", \"c\"))");
+        assertEqualsReimplementation(problems.next(), "String", List.of("\" \"", "\"a\"", "\"b\"", "\"c\""), "list");
 
         problems.assertExhausted();
     }
 
+    @Test
+    void testListAddPartiallyConstant() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+
+                public class Test {
+                    public void foo(List<String> list, String value) {
+                        list.add(" ");
+                        list.add("a");
+                        list.add("b");
+                        list.add(value);
+                        list.add("c");
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testListAddConstants() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.List;
+
+                public class Test {
+                    private static final String A = "a";
+                    private static final String B = "b";
+                    private static final String C = "c";
+                    private static final String D = "d";
+                    
+                    public void foo(List<String> list) {
+                        list.add(A);
+                        list.add(B);
+                        list.add(C);
+                        list.add(D);
+                        list.add(D);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsReimplementation(problems.next(), "String", List.of("A", "B", "C", "D", "D"), "list");
+
+        problems.assertExhausted();
+    }
 
     @Test
     void testEnumValuesAddAllUnorderedSet() throws LinterException, IOException {
@@ -86,7 +156,7 @@ class TestSequentialAddAll extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsReimplementation(problems.next(), "fruits.addAll(Arrays.asList(Fruit.values()))");
+        assertEqualsEnumValues(problems.next(), "fruits.addAll(Arrays.asList(Fruit.values()))");
         problems.assertExhausted();
     }
 
@@ -169,10 +239,10 @@ class TestSequentialAddAll extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsReimplementation(problems.next(), "availableCards.addAll(Arrays.asList(GodCard.values()))");
-        assertEqualsReimplementation(problems.next(), "availableCards.addAll(List.of(GodCard.HERMES, GodCard.DEMETER, GodCard.ATLAS, GodCard.APOLLO, GodCard.ATHENA, GodCard.ARTEMIS))");
-        assertEqualsReimplementation(problems.next(), "availableCards.addAll(List.of(GodCard.APOLLO, GodCard.ARTEMIS, GodCard.ATHENA, GodCard.ATLAS, GodCard.ATLAS, GodCard.DEMETER, GodCard.HERMES))");
-        assertEqualsReimplementation(problems.next(), "availableCards.addAll(List.of(GodCard.APOLLO, GodCard.ARTEMIS, GodCard.ATHENA, GodCard.ATLAS, GodCard.DEMETER, GodCard.HERMES, GodCard.HERMES))");
+        assertEqualsEnumValues(problems.next(), "availableCards.addAll(Arrays.asList(GodCard.values()))");
+        assertEqualsReimplementation(problems.next(), "GodCard", List.of("GodCard.HERMES", "GodCard.DEMETER", "GodCard.ATLAS", "GodCard.APOLLO", "GodCard.ATHENA", "GodCard.ARTEMIS"), "availableCards");
+        assertEqualsReimplementation(problems.next(), "GodCard", List.of("GodCard.APOLLO", "GodCard.ARTEMIS", "GodCard.ATHENA", "GodCard.ATLAS", "GodCard.ATLAS", "GodCard.DEMETER", "GodCard.HERMES"), "availableCards");
+        assertEqualsReimplementation(problems.next(), "GodCard", List.of("GodCard.APOLLO", "GodCard.ARTEMIS", "GodCard.ATHENA", "GodCard.ATLAS", "GodCard.DEMETER", "GodCard.HERMES", "GodCard.HERMES"), "availableCards");
         problems.assertExhausted();
     }
 }

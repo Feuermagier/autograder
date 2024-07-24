@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 
@@ -28,13 +29,6 @@ import java.util.stream.Stream;
 
 @ExecutableCheck(reportedProblems = {ProblemType.USE_ENUM_VALUES})
 public class UseEnumValues extends IntegratedCheck {
-
-    private static <T> boolean isOrderedCollection(CtTypeReference<T> ctTypeReference) {
-        return Stream.of(java.util.List.class)
-            .map(ctClass -> ctTypeReference.getFactory().createCtTypeReference(ctClass))
-            .anyMatch(ctTypeReference::isSubtypeOf);
-    }
-
     public static boolean checkEnumValues(
         CtEnum<?> ctEnum,
         boolean isOrdered,
@@ -66,18 +60,17 @@ public class UseEnumValues extends IntegratedCheck {
                 return Optional.empty();
             }
 
-            // check if the expression is an enum type
-            if (!ctExpression.getType().isEnum()
+            if (ctExpression.getType().isEnum()
                 // that it accesses a variant of the enum
-                || !(ctExpression instanceof CtFieldRead<?> ctFieldRead)
+                && ctExpression instanceof CtFieldRead<?> ctFieldRead
                 // that the field is a variant of the enum
-                || !(ctFieldRead.getVariable().getDeclaration() instanceof CtEnumValue<?> ctEnumValue)
+                && ctFieldRead.getVariable().getDeclaration() instanceof CtEnumValue<?> ctEnumValue
                 // that the field is in an enum
-                || !(ctEnumValue.getDeclaringType() instanceof CtEnum<?> ctEnum)) {
-                return Optional.empty();
+                && ctEnumValue.getDeclaringType() instanceof CtEnum<?> ctEnum) {
+                return Optional.of(new CtEnumFieldRead(ctEnum, ctEnumValue));
             }
 
-            return Optional.of(new CtEnumFieldRead(ctEnum, ctEnumValue));
+            return Optional.empty();
         }
     }
 
@@ -144,7 +137,7 @@ public class UseEnumValues extends IntegratedCheck {
                     );
                 } else {
                     checkListingEnumValues(
-                        isOrderedCollection(ctExpression.getType()),
+                        TypeUtil.isOrderedCollection(ctExpression.getType()),
                         ExpressionUtil.getElementsOfExpression(ctExpression),
                         suggestion -> "%s.of(%s)".formatted(ctExpression.getType().getSimpleName(), suggestion),
                         ctExpression

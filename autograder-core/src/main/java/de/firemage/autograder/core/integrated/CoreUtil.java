@@ -135,4 +135,14 @@ public final class CoreUtil {
 
         return position;
     }
+
+    public static boolean isInstanceOfAny(Object object, Class<?>... classes) {
+        for (Class<?> clazz : classes) {
+            if (clazz.isInstance(object)) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }
