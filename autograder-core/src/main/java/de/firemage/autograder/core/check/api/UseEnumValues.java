@@ -26,7 +26,7 @@ import java.util.Optional;
 import java.util.function.UnaryOperator;
 import java.util.stream.Stream;
 
-@ExecutableCheck(reportedProblems = {ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES})
+@ExecutableCheck(reportedProblems = {ProblemType.USE_ENUM_VALUES})
 public class UseEnumValues extends IntegratedCheck {
 
     private static <T> boolean isOrderedCollection(CtTypeReference<T> ctTypeReference) {
@@ -114,7 +114,7 @@ public class UseEnumValues extends IntegratedCheck {
                         "suggestion", suggestion.apply("%s.values()".formatted(ctEnum.getSimpleName()))
                     )
                 ),
-                ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES
+                ProblemType.USE_ENUM_VALUES
             );
         }
     }

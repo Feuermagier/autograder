@@ -3,9 +3,6 @@ package de.firemage.autograder.core;
 import de.firemage.autograder.api.AbstractProblemType;
 import de.firemage.autograder.api.HasFalsePositives;
 
-import java.util.Collection;
-import java.util.List;
-
 public enum ProblemType implements AbstractProblemType {
     /**
      * If the code is split into multiple packages, all input must happen in one package. Otherwise, one class must do all input.
@@ -342,7 +339,7 @@ public enum ProblemType implements AbstractProblemType {
      * Reports code where the Collection#addAll method could be used.
      */
     @HasFalsePositives
-    COLLECTION_ADD_ALL,
+    SEQUENTIAL_ADD_ALL,
 
     /**
      * Reports cases where Pattern#compile is not in a static final field.
@@ -675,16 +672,17 @@ public enum ProblemType implements AbstractProblemType {
     COMMON_REIMPLEMENTATION_HYPOT,
 
     /**
-     * Reports code where the Collection#addAll method could be used.
+     * Reports loops where a method is repeatedly called like Collection#add,
+     * which could be replaced with a single call to Collection#addAll.
      */
     @HasFalsePositives
-    COMMON_REIMPLEMENTATION_ADD_ALL,
+    FOR_LOOP_CAN_BE_INVOCATION,
 
     /**
      * Reports code where Enum#values() could be used.
      */
     @HasFalsePositives
-    COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES,
+    USE_ENUM_VALUES,
 
     /**
      * Reports code where Arrays#fill could be used.

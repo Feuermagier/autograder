@@ -28,7 +28,7 @@ import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
 
-public class ExpressionUtil {
+public final class ExpressionUtil {
     private ExpressionUtil() {
     }
 
