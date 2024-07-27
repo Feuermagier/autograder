@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtExpression;
@@ -27,7 +28,7 @@ public class DoNotMakeConstantsClasses extends IntegratedCheck {
             && !ctType.getFields().isEmpty()
             // all fields should be static and effectively final (no assignments)
             && ctType.getFields().stream().allMatch(
-                ctField -> ctField.isStatic() && SpoonUtil.isEffectivelyFinal(ctField)
+                ctField -> ctField.isStatic() && VariableUtil.isEffectivelyFinal(ctField)
             )
             // the class should not be abstract
             && !ctType.isAbstract()
@@ -36,7 +37,7 @@ public class DoNotMakeConstantsClasses extends IntegratedCheck {
             // the class should not have any inner classes
             && ctType.getNestedTypes().isEmpty()
             // the class itself should not be an inner class
-            && !SpoonUtil.isInnerClass(ctType);
+            && !TypeUtil.isInnerClass(ctType);
     }
 
     private boolean isConstantsEnum(CtType<?> ctType) {

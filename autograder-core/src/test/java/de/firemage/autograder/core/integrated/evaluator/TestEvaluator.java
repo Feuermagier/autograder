@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated.evaluator;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.integrated.evaluator.fold.ApplyCasts;
 import de.firemage.autograder.core.integrated.evaluator.fold.ChainedFold;
@@ -85,11 +85,11 @@ class TestEvaluator {
 
         CtExpression<?> ctExpression = createExpression(expression, arguments);
         // the type should not change throughout the evaluation
-        CtTypeReference<?> currentType = SpoonUtil.getExpressionType(ctExpression).clone();
+        CtTypeReference<?> currentType = ExpressionUtil.getExpressionType(ctExpression).clone();
         CtExpression<?> result = evaluator.evaluate(ctExpression);
 
         assertEquals(expected, result.toString());
-        assertEquals(currentType, SpoonUtil.getExpressionType(result));
+        assertEquals(currentType, ExpressionUtil.getExpressionType(result));
     }
 
     /**

@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtThrow;
 import spoon.reflect.code.CtTry;
@@ -59,7 +59,7 @@ public class ExceptionControlFlowCheck extends IntegratedCheck {
                 }
 
                 for (CtTypeReference<?> ctTypeReference : ctCatch.getParameter().getMultiTypes()) {
-                    if (SpoonUtil.isTypeEqualTo(
+                    if (TypeUtil.isTypeEqualTo(
                         ctTypeReference,
                         java.lang.NullPointerException.class,
                         java.lang.ArithmeticException.class,

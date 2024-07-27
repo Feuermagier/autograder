@@ -33,12 +33,12 @@ public record ForLoopRange(
             // check that this variable is a local variable
             && ctVariableAccess.getVariable().getDeclaration() instanceof CtLocalVariable<?> localVariable
             // which is declared before the loop
-            && SpoonUtil.getPreviousStatement(ctFor)
+            && StatementUtil.getPreviousStatement(ctFor)
                 .map(statement -> statement instanceof CtVariable<?> ctVariable
                     && ctVariable.getReference().equals(ctVariableAccess.getVariable()))
                 .orElse(false)
             // the loop variable must not be used after the loop
-            && SpoonUtil.getNextStatements(ctFor).stream().noneMatch(statement -> UsesFinder.variableUses(localVariable).nestedIn(statement).hasAny())
+            && StatementUtil.getNextStatements(ctFor).stream().noneMatch(statement -> UsesFinder.variableUses(localVariable).nestedIn(statement).hasAny())
         ) {
             potentialLoopVariable = localVariable;
         } else if (ctFor.getForInit().size() == 1 && ctFor.getForInit().get(0) instanceof CtLocalVariable<?> ctLocalVariable) {
@@ -46,7 +46,7 @@ public record ForLoopRange(
         }
 
         if (potentialLoopVariable == null
-            || !SpoonUtil.isTypeEqualTo(potentialLoopVariable.getType(), int.class, Integer.class)
+            || !TypeUtil.isTypeEqualTo(potentialLoopVariable.getType(), int.class, Integer.class)
             || potentialLoopVariable.getDefaultExpression() == null) {
             return Optional.empty();
         }
@@ -54,16 +54,16 @@ public record ForLoopRange(
         CtLocalVariable<Integer> ctLocalVariable = (CtLocalVariable<Integer>) potentialLoopVariable;
 
         // ensure that the loop has exactly one variable initialized with a literal value
-        CtExpression<?> start = SpoonUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression());
+        CtExpression<?> start = ExpressionUtil.resolveCtExpression(ctLocalVariable.getDefaultExpression());
 
         // ensure that it is initialized with some integer
-        if (!(SpoonUtil.isTypeEqualTo(start.getType(), int.class, Integer.class))
+        if (!(TypeUtil.isTypeEqualTo(start.getType(), int.class, Integer.class))
             // validate the for expression:
             || ctFor.getExpression() == null
             // must be i <= or i <
             || !(ctFor.getExpression() instanceof CtBinaryOperator<Boolean> loopExpression)
             || !Set.of(BinaryOperatorKind.LT, BinaryOperatorKind.LE).contains(loopExpression.getKind())
-            || !(SpoonUtil.isTypeEqualTo(loopExpression.getRightHandOperand().getType(), int.class, Integer.class))
+            || !(TypeUtil.isTypeEqualTo(loopExpression.getRightHandOperand().getType(), int.class, Integer.class))
             // check that the left side is the loop variable
             || !(loopExpression.getLeftHandOperand() instanceof CtVariableAccess<?> ctVariableAccess)
             || !ctVariableAccess.getVariable().equals(ctLocalVariable.getReference())
@@ -83,12 +83,12 @@ public record ForLoopRange(
             // check for i <= n - 1, so it is not converted to (n - 1) + 1
             if (end instanceof CtBinaryOperator<Integer> ctBinaryOperator
                 && ctBinaryOperator.getKind() == BinaryOperatorKind.MINUS
-                && SpoonUtil.isIntegerLiteral(SpoonUtil.resolveCtExpression(ctBinaryOperator.getRightHandOperand()), 1)) {
+                && ExpressionUtil.isIntegerLiteral(ExpressionUtil.resolveCtExpression(ctBinaryOperator.getRightHandOperand()), 1)) {
                 end = (CtExpression<Integer>) ctBinaryOperator.getLeftHandOperand();
             } else {
-                end = SpoonUtil.createBinaryOperator(
+                end = FactoryUtil.createBinaryOperator(
                     end,
-                    SpoonUtil.makeLiteral(end.getType(), 1),
+                    FactoryUtil.makeLiteral(end.getType(), 1),
                     BinaryOperatorKind.PLUS
                 );
             }
@@ -104,8 +104,8 @@ public record ForLoopRange(
     public CtExpression<Integer> length() {
         CtExpression<Integer> length = this.end;
         // special case init with 0, because end - 0 = end
-        if (!SpoonUtil.isIntegerLiteral(this.start, 0)) {
-            length = SpoonUtil.createBinaryOperator(
+        if (!ExpressionUtil.isIntegerLiteral(this.start, 0)) {
+            length = FactoryUtil.createBinaryOperator(
                 this.end,
                 this.start,
                 BinaryOperatorKind.MINUS

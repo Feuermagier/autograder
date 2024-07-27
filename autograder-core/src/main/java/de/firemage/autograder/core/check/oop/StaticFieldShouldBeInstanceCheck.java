@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtField;
 
@@ -28,13 +29,13 @@ public class StaticFieldShouldBeInstanceCheck extends IntegratedCheck {
                 // class Foo { static int counter = 0; Foo() { counter++; } } the field counter **must** be static
 
                 // to keep the code simple, we ignore all fields that are a number:
-                if (ctField.getType() != null && SpoonUtil.isTypeEqualTo(ctField.getType().unbox(), int.class)) {
+                if (ctField.getType() != null && TypeUtil.isTypeEqualTo(ctField.getType().unbox(), int.class)) {
                     return;
                 }
 
                 // the field is not marked as final, so values can be assigned to it.
                 // if the field is assigned multiple times, it should not be static
-                if (!SpoonUtil.isEffectivelyFinal(ctField)) {
+                if (!VariableUtil.isEffectivelyFinal(ctField)) {
                     addLocalProblem(
                         ctField,
                         new LocalizedMessage(

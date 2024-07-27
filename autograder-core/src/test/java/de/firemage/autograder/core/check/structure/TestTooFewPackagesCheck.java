@@ -92,4 +92,3 @@ class TestTooFewPackagesCheck extends AbstractCheckTest {
 
     }
 }
-

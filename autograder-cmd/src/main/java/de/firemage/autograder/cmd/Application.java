@@ -2,7 +2,6 @@ package de.firemage.autograder.cmd;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import de.firemage.autograder.api.ArtemisUtil;
 import de.firemage.autograder.api.CheckConfiguration;
 import de.firemage.autograder.api.AbstractCodePosition;
 import de.firemage.autograder.api.JavaVersion;
@@ -14,6 +13,7 @@ import de.firemage.autograder.api.AbstractTempLocation;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.api.loader.AutograderLoader;
 import de.firemage.autograder.cmd.output.Annotation;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.span.Formatter;
 import de.firemage.autograder.span.Highlight;
 import de.firemage.autograder.span.Position;
@@ -59,10 +59,6 @@ public class Application implements Callable<Integer> {
     private String javaVersion;
 
     @Option(names = {
-            "--artemis"}, description = "Assume that the given root folder is the workspace root of the grading tool.")
-    private boolean artemisFolders;
-
-    @Option(names = {
             "--output-json"}, description = "Output the found problems in JSON format instead of more readable plain text")
     private boolean outputJson;
 
@@ -80,6 +76,9 @@ public class Application implements Callable<Integer> {
 
     @Option(names = {"--max-problems"}, description = "The maximum number of problems to report per check", defaultValue = "10")
     private int maxProblemsPerCheck;
+
+    @Option(names = {"--debug"}, description = "Enables debug mode, note that this slows down execution", defaultValue = "false")
+    private boolean isInDebugMode;
 
     @Spec
     private CommandSpec spec;
@@ -186,13 +185,21 @@ public class Application implements Callable<Integer> {
             throw new ParameterException(this.spec.commandLine(), "Unknown java version '" + javaVersion + "'");
         }
 
-        if (this.artemisFolders) {
-            try {
-                this.file = ArtemisUtil.resolveCodePathEclipseGradingTool(this.file);
-            } catch (IOException e) {
-                e.printStackTrace();
-                return IO_EXIT_CODE;
-            }
+        // Depending on the structure of the project, the code might be in a subdirectory.
+        // By default, we support explicitly specifying the folder to the first package (./src/main/java)
+        //
+        // Here we check if the project has a folder `src/<here the first package>` or `assignment/src/<here the first package>`
+        // and if so, we assume that the code is in that folder.
+        if (Files.exists(this.file.resolve("src"))) {
+            this.file = this.file.resolve("src");
+        }
+
+        if (Files.exists(this.file.resolve("assignment/src"))) {
+            this.file = this.file.resolve("assignment/src");
+        }
+
+        if (this.isInDebugMode) {
+            CoreUtil.setDebugMode();
         }
 
         if (!outputJson) {

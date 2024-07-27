@@ -5,9 +5,9 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.check.general.ForToForEachLoop;
 
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFor;
@@ -45,7 +45,7 @@ public class UseSubList extends IntegratedCheck {
         }
 
         // check if the loop iterates over the whole list (then it is covered by the foreach loop check)
-        if (SpoonUtil.resolveConstant(forLoopRange.start()) instanceof CtLiteral<Integer> ctLiteral
+        if (ExpressionUtil.resolveConstant(forLoopRange.start()) instanceof CtLiteral<Integer> ctLiteral
             && ctLiteral.getValue() == 0
             && ForToForEachLoop.findIterable(forLoopRange).isPresent()) {
             return;

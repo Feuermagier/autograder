@@ -19,7 +19,7 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
         return new None<>();
     }
 
-    default T unwrap() {
+    default T orElseThrow() {
         if (this instanceof Some<T> someValue) {
             return someValue.value;
         } else if (this instanceof None<T>) {
@@ -33,12 +33,12 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
     }
 
     default <U> Option<U> map(Function<T, U> function) {
-	if (this instanceof Some<T> someValue) {
+	    if (this instanceof Some<T> someValue) {
             return new Some<>(function.apply(someValue.value));
         } else if (this instanceof None<T>) {
             return new None<>();
         }
-         throw new IllegalArgumentException();
+        throw new IllegalStateException();
     }
 
     /**
@@ -52,7 +52,7 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
         } else if (this instanceof None<T>) {
             return null;
         }
-        throw new IllegalArgumentException();
+        throw new IllegalStateException();
     }
 
     default Stream<T> stream() {
@@ -61,7 +61,7 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
         } else if (this instanceof None<T>) {
             return Stream.empty();
         }
-        throw new IllegalArgumentException();
+        throw new IllegalStateException();
     }
 
     @Override

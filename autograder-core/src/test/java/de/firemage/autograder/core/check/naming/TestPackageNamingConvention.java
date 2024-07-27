@@ -2,6 +2,7 @@ package de.firemage.autograder.core.check.naming;
 
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
+import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
@@ -14,25 +15,34 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-
 class TestPackageNamingConvention extends AbstractCheckTest {
-    private static final String LOCALIZED_MESSAGE_KEY = "package-naming-convention";
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(
+        ProblemType.PACKAGE_NAMING_CONVENTION
+    );
+
+    private void assertEqualsWrongNaming(Problem problem, String positions) {
+        assertEquals(ProblemType.PACKAGE_NAMING_CONVENTION, problem.getProblemType());
+        assertEquals(
+            this.linter.translateMessage(new LocalizedMessage("package-naming-convention", Map.of("positions", positions))),
+            this.linter.translateMessage(problem.getExplanation())
+        );
+    }
 
     @Test
     void testDefaultPackage() throws IOException, LinterException {
-        var problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             "public class Test {}"
-        ), List.of(ProblemType.PACKAGE_NAMING_CONVENTION));
+        ), PROBLEM_TYPES);
 
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testSingleViolation() throws IOException, LinterException {
-        var problems = super.check(StringSourceInfo.fromSourceString(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "com.Example.Test",
             """
@@ -40,20 +50,15 @@ class TestPackageNamingConvention extends AbstractCheckTest {
 
             public class Test {}
             """
-        ), List.of(ProblemType.PACKAGE_NAMING_CONVENTION));
+        ), PROBLEM_TYPES);
 
-
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.PACKAGE_NAMING_CONVENTION, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(new LocalizedMessage(LOCALIZED_MESSAGE_KEY, Map.of("positions", "Test:L1"))),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsWrongNaming(problems.next(), "Test:L1");
+        problems.assertExhausted();
     }
 
     @Test
     void testMultipleViolations() throws IOException, LinterException {
-        var problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 dummySourceEntry("com.Example", "Test"),
@@ -62,30 +67,22 @@ class TestPackageNamingConvention extends AbstractCheckTest {
                 dummySourceEntry("com.Other.Pack", "OtherPack2"),
                 dummySourceEntry("com.Other.Pack", "OtherPack3")
             )
-        ), List.of(ProblemType.PACKAGE_NAMING_CONVENTION));
+        ), PROBLEM_TYPES);
 
-
-        assertEquals(1, problems.size());
-        assertEquals(ProblemType.PACKAGE_NAMING_CONVENTION, problems.get(0).getProblemType());
-        assertEquals(
-            this.linter.translateMessage(new LocalizedMessage(
-                LOCALIZED_MESSAGE_KEY,
-                Map.of("positions", "Test:L1, OtherPack:L1")
-            )),
-            this.linter.translateMessage(problems.get(0).getExplanation())
-        );
+        assertEqualsWrongNaming(problems.next(), "Test:L1, OtherPack:L1");
+        problems.assertExhausted();
     }
 
     @Test
     void testFalsePositive01() throws IOException, LinterException  {
-        var problems = super.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 dummySourceEntry("edu.kit", "Test"),
                 dummySourceEntry("edu.kit.informatik", "Main")
             )
-        ), List.of(ProblemType.PACKAGE_NAMING_CONVENTION));
+        ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 }

@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.structure;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.reflect.declaration.CtPackage;
 import spoon.reflect.declaration.CtType;
@@ -34,7 +34,7 @@ public class DefaultPackageCheck extends IntegratedCheck {
 
         String positions = typesInDefaultPackage.stream()
             .map(CtType::getPosition)
-            .map(SpoonUtil::formatSourcePosition)
+            .map(CoreUtil::formatSourcePosition)
             .collect(Collectors.joining(", "));
 
         this.addLocalProblem(

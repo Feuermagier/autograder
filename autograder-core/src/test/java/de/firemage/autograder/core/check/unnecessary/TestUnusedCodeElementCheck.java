@@ -11,39 +11,31 @@ import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
-import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestUnusedCodeElementCheck extends AbstractCheckTest {
-    private static final String LOCALIZED_MESSAGE_KEY = "unused-element";
-    private static final ProblemType PROBLEM_TYPE = ProblemType.UNUSED_CODE_ELEMENT;
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(PROBLEM_TYPE, ProblemType.UNUSED_CODE_ELEMENT_PRIVATE);
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(
+        ProblemType.UNUSED_CODE_ELEMENT,
+        ProblemType.UNUSED_CODE_ELEMENT_PRIVATE
+    );
 
-    private void assertEqualsUnused(String name, Problem problem) {
+    private void assertEqualsUnused(Problem problem, String name) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(
-                    LOCALIZED_MESSAGE_KEY,
+                    "unused-element",
                     Map.of("name", name)
                 )),
             this.linter.translateMessage(problem.getExplanation())
         );
     }
 
-    private static <T> void assertProblemSize(int expectedSize, Collection<T> problems) {
-        assertEquals(
-            expectedSize,
-            problems.size(),
-            "Expected %d problems, got %d: '%s'".formatted(expectedSize, problems.size(), problems)
-        );
-    }
-
     @Test
     void testUnusedField() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -69,14 +61,14 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(2, problems);
-        assertEqualsUnused("exampleVariable", problems.get(0));
-        assertEqualsUnused("b", problems.get(1));
+        assertEqualsUnused(problems.next(), "exampleVariable");
+        assertEqualsUnused(problems.next(), "b");
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedFieldWithShadowing() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -98,17 +90,17 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(5, problems);
-        assertEqualsUnused("a", problems.get(0));
-        assertEqualsUnused("b", problems.get(1));
-        assertEqualsUnused("doSomething", problems.get(2));
-        assertEqualsUnused("a", problems.get(3));
-        assertEqualsUnused("b", problems.get(4));
+        assertEqualsUnused(problems.next(), "a");
+        assertEqualsUnused(problems.next(), "b");
+        assertEqualsUnused(problems.next(), "doSomething");
+        assertEqualsUnused(problems.next(), "a");
+        assertEqualsUnused(problems.next(), "b");
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedRecursiveMethod() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -126,14 +118,14 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(1, problems);
-        assertEqualsUnused("foo", problems.get(0));
+        assertEqualsUnused(problems.next(), "foo");
+        problems.assertExhausted();
     }
 
     @Test
     // See: https://github.com/Feuermagier/autograder/issues/228
     void testFieldUsedByInvocation() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -165,12 +157,12 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEquals(0, problems.size());
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedTypeParameter() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -198,13 +190,13 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(1, problems);
-        assertEqualsUnused("T", problems.get(0));
+        assertEqualsUnused(problems.next(), "T");
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedNestedTypeParameter() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
                 JavaVersion.JAVA_17,
                 Map.ofEntries(
                         Map.entry(
@@ -228,13 +220,13 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
                 )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(1, problems);
-        assertEqualsUnused("X", problems.get(0));
+        assertEqualsUnused(problems.next(), "X");
+        problems.assertExhausted();
     }
 
     @Test
     void testUsedWildcardBound() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
                 JavaVersion.JAVA_17,
                 Map.ofEntries(
                         Map.entry(
@@ -260,13 +252,13 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
                 )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(0, problems);
+        problems.assertExhausted();
     }
 
     @Test
     void testOnlyWrittenVariable() throws LinterException, IOException {
         // For now, this is not detected as unused, because it might result in false positives
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -284,14 +276,14 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(1, problems);
-        assertEqualsUnused("arg1", problems.get(0));
-        // assertEqualsUnused("arg2", problems.get(1));
+        assertEqualsUnused(problems.next(), "arg1");
+        // assertEqualsUnused("arg2", problems.next());
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedMainMethod() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -306,12 +298,12 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(0, problems);
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedMainMethodDefaultPackage() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -326,12 +318,12 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(0, problems);
+        problems.assertExhausted();
     }
 
     @Test
     void testUnusedExternalOverriddenMethod() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -350,12 +342,12 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(0, problems);
+        problems.assertExhausted();
     }
 
     @Test
     void testIndirectlyUsedEnumVariant() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -381,13 +373,13 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(0, problems);
+        problems.assertExhausted();
     }
 
     @Test
     @Disabled("Unused types are not detected for now, because of potential false-positives")
     void testUnusedType() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -411,9 +403,9 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(2, problems);
-        assertEqualsUnused("InnerClass", problems.get(0));
-        assertEqualsUnused("MyEnum", problems.get(1));
+        assertEqualsUnused(problems.next(), "InnerClass");
+        assertEqualsUnused(problems.next(), "MyEnum");
+        problems.assertExhausted();
     }
 
     @Test
@@ -434,14 +426,14 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEqualsUnused("Main()", problems.next());
+        assertEqualsUnused(problems.next(), "Main()");
 
         problems.assertExhausted();
     }
 
     @Test
     void testUnusedPrivateConstructor() throws LinterException, IOException {
-        var problems = this.check(StringSourceInfo.fromSourceStrings(
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
             JavaVersion.JAVA_17,
             Map.ofEntries(
                 Map.entry(
@@ -457,7 +449,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertProblemSize(0, problems);
+        problems.assertExhausted();
     }
 
     @Test
@@ -490,7 +482,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEqualsUnused("helper", problems.next());
+        assertEqualsUnused(problems.next(), "helper");
         problems.assertExhausted();
     }
 
@@ -725,7 +717,7 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEqualsUnused("parameterName", problems.next());
+        assertEqualsUnused(problems.next(), "parameterName");
 
         problems.assertExhausted();
     }

@@ -4,8 +4,8 @@ import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
@@ -26,7 +26,7 @@ public class UnnecessaryBoxing extends IntegratedCheck {
 
     private static <T> boolean isLikelyNull(CtExpression<T> ctExpression) {
         return ctExpression == null
-            || SpoonUtil.isNullLiteral(ctExpression)
+            || ExpressionUtil.isNullLiteral(ctExpression)
             || isBoxedType(ctExpression.getType());
     }
 

@@ -16,7 +16,7 @@ import java.util.Map;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 class TestUseEnumValues extends AbstractCheckTest {
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.COMMON_REIMPLEMENTATION_ADD_ENUM_VALUES);
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.USE_ENUM_VALUES);
 
     private void assertEqualsReimplementation(Problem problem, String suggestion) {
         assertEquals(

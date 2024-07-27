@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtConstructor;
@@ -34,7 +34,7 @@ public class UtilityClassCheck extends IntegratedCheck {
                 // the class should not implement anything
                 && ctClass.getSuperInterfaces().isEmpty()
                 // the class itself should not be an inner class
-                && !SpoonUtil.isInnerClass(ctClass);
+                && !TypeUtil.isInnerClass(ctClass);
     }
 
     private void checkCtClassConstructor(CtClass<?> ctClass, ProblemType problemType) {

@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.evaluator.OperatorHelper;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -69,11 +69,11 @@ public final class ApplyOperatorPromotion implements Fold {
 
         // only promote if the predicate allows it
         if (this.shouldApplyOnBinaryOperator.shouldApplyOn(ctBinaryOperator, ctBinaryOperator.getLeftHandOperand())) {
-            ctBinaryOperator.setLeftHandOperand(SpoonUtil.castExpression(promotedType, ctBinaryOperator.getLeftHandOperand()));
+            ctBinaryOperator.setLeftHandOperand(ExpressionUtil.castExpression(promotedType, ctBinaryOperator.getLeftHandOperand()));
         }
 
         if (this.shouldApplyOnBinaryOperator.shouldApplyOn(ctBinaryOperator, ctBinaryOperator.getRightHandOperand())) {
-            ctBinaryOperator.setRightHandOperand(SpoonUtil.castExpression(promotedType, ctBinaryOperator.getRightHandOperand()));
+            ctBinaryOperator.setRightHandOperand(ExpressionUtil.castExpression(promotedType, ctBinaryOperator.getRightHandOperand()));
         }
 
         return ctBinaryOperator;
@@ -92,7 +92,7 @@ public final class ApplyOperatorPromotion implements Fold {
         }
 
         if (this.shouldApplyOnUnaryOperator.shouldApplyOn(ctUnaryOperator, ctUnaryOperator.getOperand())) {
-            ctUnaryOperator.setOperand((CtExpression<T>) SpoonUtil.castExpression(promotedType, ctUnaryOperator.getOperand()));
+            ctUnaryOperator.setOperand((CtExpression<T>) ExpressionUtil.castExpression(promotedType, ctUnaryOperator.getOperand()));
         }
 
         return ctUnaryOperator;

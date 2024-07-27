@@ -3,9 +3,12 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.ElementUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.javadoc.api.elements.JavadocReference;
 import spoon.javadoc.api.elements.JavadocVisitor;
@@ -62,7 +65,7 @@ public class UnusedImport extends IntegratedCheck {
     }
 
     private static boolean isInnerType(CtElement ctElement) {
-        return ctElement instanceof CtType<?> ctType && SpoonUtil.isInnerClass(ctType);
+        return ctElement instanceof CtType<?> ctType && TypeUtil.isInnerClass(ctType);
     }
 
     private void reportProblem(CtImport ctImport) {
@@ -93,7 +96,7 @@ public class UnusedImport extends IntegratedCheck {
     }
 
     private static boolean isReferencingTheSameElement(CtReference left, CtReference right) {
-        return left.equals(right) || Objects.equals(SpoonUtil.getReferenceDeclaration(left), SpoonUtil.getReferenceDeclaration(right));
+        return left.equals(right) || Objects.equals(VariableUtil.getReferenceDeclaration(left), VariableUtil.getReferenceDeclaration(right));
     }
 
     @SuppressWarnings("unchecked")
@@ -116,7 +119,7 @@ public class UnusedImport extends IntegratedCheck {
     }
 
     private boolean isInSamePackage(CtElement ctElement, CtCompilationUnit ctCompilationUnit) {
-        SourcePosition position = SpoonUtil.findPosition(ctElement);
+        SourcePosition position = ElementUtil.findPosition(ctElement);
         if (position == null) {
             return false;
         }
@@ -129,12 +132,12 @@ public class UnusedImport extends IntegratedCheck {
         // check if the import is from the java.lang package, which is redundant
 
         // inner class imports might not be redundant, therefore, they are skipped here
-        if (isJavaLangImport(ctImport) && !(ctImport.getReference() instanceof CtTypeReference<?> ctTypeReference && SpoonUtil.isInnerClass(ctTypeReference.getTypeDeclaration()))) {
+        if (isJavaLangImport(ctImport) && !(ctImport.getReference() instanceof CtTypeReference<?> ctTypeReference && TypeUtil.isInnerClass(ctTypeReference.getTypeDeclaration()))) {
             this.reportProblem(ctImport);
             return;
         }
 
-        CtNamedElement element = (CtNamedElement) SpoonUtil.getReferenceDeclaration(ctImport.getReference());
+        CtNamedElement element = (CtNamedElement) VariableUtil.getReferenceDeclaration(ctImport.getReference());
 
         // types from the same package are imported implicitly
         //
@@ -169,7 +172,7 @@ public class UnusedImport extends IntegratedCheck {
         }
 
         Predicate<CtElement> isSameFile = ctElement -> {
-            SourcePosition position = SpoonUtil.findPosition(ctElement);
+            SourcePosition position = ElementUtil.findPosition(ctElement);
 
             return position != null && position.getCompilationUnit().equals(ctCompilationUnit);
         };
@@ -211,7 +214,7 @@ public class UnusedImport extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
-        SpoonUtil.visitCtCompilationUnit(staticAnalysis.getModel(), ctCompilationUnit -> {
+        CoreUtil.visitCtCompilationUnit(staticAnalysis.getModel(), ctCompilationUnit -> {
             Collection<CtElement> importedElements = new HashSet<>();
 
             for (CtImport ctImport : ctCompilationUnit.getImports()) {

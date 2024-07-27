@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.comment;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ElementUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtJavaDoc;
@@ -32,7 +32,7 @@ public class FieldJavadocCheck extends IntegratedCheck {
                     return;
                 }
 
-                Optional<CtJavaDoc> javadoc = SpoonUtil.getJavadoc(field);
+                Optional<CtJavaDoc> javadoc = ElementUtil.getJavadoc(field);
                 if (javadoc.isEmpty()) {
                     return;
                 }

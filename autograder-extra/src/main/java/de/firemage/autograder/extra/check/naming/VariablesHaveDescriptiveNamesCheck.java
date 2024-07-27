@@ -4,10 +4,11 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.extra.integrated.IdentifierNameUtils;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import org.apache.commons.lang3.StringUtils;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatchVariable;
@@ -127,7 +128,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
         }
 
         // for (int i = 0; i < 10; i++)
-        return SpoonUtil.isPrimitiveNumeric(variable.getType());
+        return TypeUtil.isPrimitiveNumeric(variable.getType());
     }
 
     private static boolean isAbbreviation(CtVariable<?> variable) {
@@ -280,7 +281,7 @@ public class VariablesHaveDescriptiveNamesCheck extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isInOverridingMethod(ctVariable)) {
+                if (MethodUtil.isInOverridingMethod(ctVariable)) {
                     // The parameter of the equals and compareTo methods may be named "o", "obj", ...
                     //
                     // skip all overridden methods for consistency

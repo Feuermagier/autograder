@@ -4,9 +4,11 @@ import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -62,15 +64,15 @@ public class LoopShouldBeFor extends IntegratedCheck {
     }
 
     private static LoopSuggestion getCounter(CtLoop ctLoop, CodeModel model) {
-        List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctLoop.getBody());
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctLoop.getBody());
 
         if (statements.isEmpty()) {
             return null;
         }
 
 
-        CtStatement previous = SpoonUtil.getPreviousStatement(ctLoop).orElse(null);
-        if (!(previous instanceof CtLocalVariable<?> ctLocalVariable) || !SpoonUtil.isPrimitiveNumeric(ctLocalVariable.getType())) {
+        CtStatement previous = StatementUtil.getPreviousStatement(ctLoop).orElse(null);
+        if (!(previous instanceof CtLocalVariable<?> ctLocalVariable) || !TypeUtil.isPrimitiveNumeric(ctLocalVariable.getType())) {
             return null;
         }
 
@@ -129,7 +131,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
             newBody = ctLoop.getFactory().createBlock();
         }
 
-        boolean isUsedAfterLoop = SpoonUtil.getNextStatements(ctLoop)
+        boolean isUsedAfterLoop = StatementUtil.getNextStatements(ctLoop)
             .stream()
             .anyMatch(statement -> UsesFinder.variableUses(ctLocalVariable).nestedIn(statement).hasAny());
 
@@ -169,7 +171,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
                 upperBound = factory.createInvocation(ctForEach.getExpression().clone(), methods.get(0).getReference(), List.of());
             }
 
-            condition = SpoonUtil.createBinaryOperator(
+            condition = FactoryUtil.createBinaryOperator(
                 factory.createVariableRead(ctLocalVariable.getReference(), false),
                 upperBound,
                 BinaryOperatorKind.LT

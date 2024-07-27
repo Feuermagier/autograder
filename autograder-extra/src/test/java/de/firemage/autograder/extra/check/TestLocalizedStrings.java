@@ -2,9 +2,10 @@ package de.firemage.autograder.extra.check;
 
 import de.firemage.autograder.core.Linter;
 import de.firemage.autograder.api.JavaVersion;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.extra.check.naming.LinguisticNamingCheck;
 import de.firemage.autograder.extra.check.naming.VariablesHaveDescriptiveNamesCheck;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import fluent.bundle.FluentBundle;
 import fluent.bundle.FluentResource;
 import fluent.syntax.AST.Message;
@@ -79,7 +80,7 @@ class TestLocalizedStrings {
     private static FluentBundle germanBundle;
 
     private static String resolveKey(CtModel ctModel, List<? extends CtExpression<?>> args) {
-        if (args.isEmpty() || !(SpoonUtil.resolveCtExpression(args.get(0)) instanceof CtLiteral<?> ctLiteral
+        if (args.isEmpty() || !(ExpressionUtil.resolveCtExpression(args.get(0)) instanceof CtLiteral<?> ctLiteral
             && ctLiteral.getValue() instanceof String key)) {
             throw new IllegalArgumentException("The first argument must be a string literal: " + args);
         }
@@ -102,7 +103,7 @@ class TestLocalizedStrings {
             }
 
             Optional<Map.Entry<Class<?>, List<String>>> manualMapping = MANUAL_MAPPING.entrySet().stream()
-                .filter(entry -> SpoonUtil.isTypeEqualTo(ctType.getReference(), entry.getKey()))
+                .filter(entry -> TypeUtil.isTypeEqualTo(ctType.getReference(), entry.getKey()))
                 .findAny();
 
             if (manualMapping.isPresent()) {
@@ -128,7 +129,7 @@ class TestLocalizedStrings {
             // PMD Rule#setMessage(String) calls
             result.addAll(ctType.filterChildren(ctElement -> ctElement instanceof CtInvocation<?> ctInvocation
                     && ctInvocation.getExecutable().getSimpleName().equals("setMessage")
-                    && SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), net.sourceforge.pmd.Rule.class)
+                    && TypeUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), net.sourceforge.pmd.lang.rule.Rule.class)
                 )
                 .map(ctElement -> ((CtInvocation<?>) ctElement).getArguments().get(0))
                 .map(key -> resolveKey(ctModel, List.of((CtExpression<?>) key)))

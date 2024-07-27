@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtJavaDoc;
@@ -34,7 +34,7 @@ public class JavadocStubCheck extends IntegratedCheck {
             public void process(CtJavaDoc javadoc) {
                 if (allowGettersSettersWithEmptyDescription
                     && javadoc.getParent() instanceof CtMethod<?> method
-                    && (SpoonUtil.isGetter(method) || SpoonUtil.isSetter(method))) {
+                    && (MethodUtil.isGetter(method) || MethodUtil.isSetter(method))) {
                     // Setters and Getters are okay
                 } else if (isDefaultValueDescription(javadoc.getContent())) {
                     addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-desc"),

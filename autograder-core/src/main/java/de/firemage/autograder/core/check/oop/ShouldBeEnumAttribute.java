@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import spoon.processing.AbstractProcessor;
@@ -27,7 +27,7 @@ public class ShouldBeEnumAttribute extends IntegratedCheck {
                     return;
                 }
 
-                List<Effect> effects = SpoonUtil.getCasesEffects(ctSwitch.getCases());
+                List<Effect> effects = StatementUtil.getCasesEffects(ctSwitch.getCases());
                 if (effects.isEmpty()) {
                     return;
                 }

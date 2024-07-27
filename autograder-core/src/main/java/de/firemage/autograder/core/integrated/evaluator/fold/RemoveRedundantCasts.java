@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.reference.CtTypeParameterReference;
 import spoon.reflect.reference.CtTypeReference;
@@ -47,7 +48,7 @@ public final class RemoveRedundantCasts implements Fold {
 
         CtTypeReference<?> unboxedFrom = from.unbox();
         if (unboxedFrom.isPrimitive() && to.isPrimitive()) {
-            if (SpoonUtil.isTypeEqualTo(unboxedFrom, char.class)) {
+            if (TypeUtil.isTypeEqualTo(unboxedFrom, char.class)) {
                 return CHARACTER_IMPLICIT_WIDENING.contains(to.getActualClass());
             }
 
@@ -122,7 +123,7 @@ public final class RemoveRedundantCasts implements Fold {
             currentType = newType;
         }
 
-        CtTypeReference<?> originalExpressionType = SpoonUtil.getExpressionType(ctExpression);
+        CtTypeReference<?> originalExpressionType = ExpressionUtil.getExpressionType(ctExpression);
         CtTypeReference<?> newExpressionType = ctExpression.getType();
         if (!newCasts.isEmpty()) {
             newExpressionType = newCasts.get(newCasts.size() - 1);

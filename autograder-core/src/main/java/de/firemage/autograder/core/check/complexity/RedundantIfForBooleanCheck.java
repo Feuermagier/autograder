@@ -3,8 +3,10 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.AssignmentEffect;
 import de.firemage.autograder.core.integrated.effects.Effect;
@@ -39,8 +41,8 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
     }
 
     private void checkIfElse(CtExpression<?> condition, CtStatement thenStmt, CtStatement elseStmt) {
-        Effect thenEffect = SpoonUtil.tryMakeEffect(thenStmt).orElse(null);
-        Effect elseEffect = SpoonUtil.tryMakeEffect(elseStmt).orElse(null);
+        Effect thenEffect = StatementUtil.tryMakeEffect(thenStmt).orElse(null);
+        Effect elseEffect = StatementUtil.tryMakeEffect(elseStmt).orElse(null);
 
         // skip if they are not both return statements or both assignments to the same variable
         if (thenEffect == null
@@ -56,12 +58,12 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
         CtExpression<?> elseValue = elseEffect.value().get();
 
         // skip if they do not assign or return a boolean expression
-        if (!SpoonUtil.isBoolean(thenValue) || !SpoonUtil.isBoolean(elseValue)) {
+        if (!ExpressionUtil.isBoolean(thenValue) || !ExpressionUtil.isBoolean(elseValue)) {
             return;
         }
 
-        Boolean thenLiteral = SpoonUtil.tryGetBooleanLiteral(thenValue).orElse(null);
-        Boolean elseLiteral = SpoonUtil.tryGetBooleanLiteral(elseValue).orElse(null);
+        Boolean thenLiteral = ExpressionUtil.tryGetBooleanLiteral(thenValue).orElse(null);
+        Boolean elseLiteral = ExpressionUtil.tryGetBooleanLiteral(elseValue).orElse(null);
 
         // skip non-sense like if (a) return true else return true
         if (thenLiteral != null && thenLiteral.equals(elseLiteral)) {
@@ -72,7 +74,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
 
         if (thenLiteral == null) {
             // if it does not return a literal, both the condition and the return value must be true
-            thenCondition = SpoonUtil.createBinaryOperator(
+            thenCondition = FactoryUtil.createBinaryOperator(
                 condition,
                 thenValue,
                 BinaryOperatorKind.AND
@@ -90,13 +92,13 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
             // if (a) { return b; } else { return c; } -> return a && b || c;
 
             if (thenCondition == null) {
-                combinedCondition = SpoonUtil.createBinaryOperator(
-                    SpoonUtil.negate(condition),
+                combinedCondition = FactoryUtil.createBinaryOperator(
+                    ExpressionUtil.negate(condition),
                     elseValue,
                     BinaryOperatorKind.AND
                 );
             } else {
-                combinedCondition = SpoonUtil.createBinaryOperator(
+                combinedCondition = FactoryUtil.createBinaryOperator(
                     combinedCondition,
                     elseValue,
                     BinaryOperatorKind.OR
@@ -105,11 +107,11 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
         } else if (elseLiteral) {
             // if it does return true, then the if condition must be false
             if (thenCondition == null) {
-                combinedCondition = SpoonUtil.negate(condition);
+                combinedCondition = ExpressionUtil.negate(condition);
             } else {
-                combinedCondition = SpoonUtil.createBinaryOperator(
+                combinedCondition = FactoryUtil.createBinaryOperator(
                     combinedCondition,
-                    SpoonUtil.negate(condition),
+                    ExpressionUtil.negate(condition),
                     BinaryOperatorKind.OR
                 );
             }
@@ -137,7 +139,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
                     return;
                 }
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(block);
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(block);
 
                 // TODO: write test
 
@@ -148,7 +150,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
                         continue;
                     }
 
-                    CtStatement thenStatement = SpoonUtil.unwrapStatement(ifStmt.getThenStatement());
+                    CtStatement thenStatement = StatementUtil.unwrapStatement(ifStmt.getThenStatement());
                     CtStatement elseStatement = ifStmt.getElseStatement();
 
                     // if(...) { return true } return false
@@ -163,7 +165,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
                     checkIfElse(
                         ifStmt.getCondition(),
                         thenStatement,
-                        SpoonUtil.unwrapStatement(elseStatement)
+                        StatementUtil.unwrapStatement(elseStatement)
                     );
                 }
             }

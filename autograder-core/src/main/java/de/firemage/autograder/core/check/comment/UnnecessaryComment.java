@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtComment;
@@ -69,7 +69,7 @@ public class UnnecessaryComment extends IntegratedCheck {
                 //
                 // Here the comments without an attached CtElement are processed:
                 if (element instanceof CtComment ctComment && isStandaloneComment(ctComment) && !visitedComments.contains(ctComment)) {
-                    List<CtComment> followingComments = SpoonUtil.getNextStatements(ctComment)
+                    List<CtComment> followingComments = StatementUtil.getNextStatements(ctComment)
                         .stream()
                         .takeWhile(CtComment.class::isInstance)
                         .map(CtComment.class::cast)

@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
+import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtLocalVariable;
@@ -36,7 +37,7 @@ public final class InlineVariableRead implements Fold {
             return ctVariableRead;
         }
 
-        Optional<CtExpression<T>> ctExpressionOptional = SpoonUtil.getEffectivelyFinalExpression(ctVariable);
+        Optional<CtExpression<T>> ctExpressionOptional = VariableUtil.getEffectivelyFinalExpression(ctVariable);
 
         return ctExpressionOptional.flatMap(ctExpression -> {
             // only inline literals:

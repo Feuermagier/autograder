@@ -1,6 +1,6 @@
 package de.firemage.autograder.core.integrated.evaluator;
 
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtVariableRead;
@@ -175,8 +175,8 @@ public final class OperatorHelper {
         CtExpression<?> right
     ) {
         TypeFactory typeFactory = left.getFactory().Type();
-        CtTypeReference<?> leftType = SpoonUtil.getExpressionType(left);
-        CtTypeReference<?> rightType = SpoonUtil.getExpressionType(right);
+        CtTypeReference<?> leftType = ExpressionUtil.getExpressionType(left);
+        CtTypeReference<?> rightType = ExpressionUtil.getExpressionType(right);
 
         switch (operator) {
             // logical operators
@@ -322,7 +322,7 @@ public final class OperatorHelper {
         CtExpression<?> operand
     ) {
         TypeFactory typeFactory = operand.getFactory().Type();
-        CtTypeReference<?> operandType = SpoonUtil.getExpressionType(operand);
+        CtTypeReference<?> operandType = ExpressionUtil.getExpressionType(operand);
 
         // The type of the expression is the type of the variable.
         return switch (operator) {

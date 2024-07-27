@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBreak;
@@ -53,7 +54,7 @@ public class CheckIterableDuplicates extends IntegratedCheck {
                     return;
                 }
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctForEach.getBody());
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctForEach.getBody());
                 if (statements.size() != 1 || !(statements.get(0) instanceof CtIf ctIf)) {
                     return;
                 }
@@ -63,7 +64,7 @@ public class CheckIterableDuplicates extends IntegratedCheck {
                     return;
                 }
 
-                List<CtStatement> ifStatements = SpoonUtil.getEffectiveStatements(ctIf.getThenStatement());
+                List<CtStatement> ifStatements = StatementUtil.getEffectiveStatements(ctIf.getThenStatement());
                 if (ifStatements.isEmpty()) {
                     return;
                 }
@@ -92,12 +93,12 @@ public class CheckIterableDuplicates extends IntegratedCheck {
                 if (!(ctIf.getCondition() instanceof CtUnaryOperator<Boolean> ctUnaryOperator
                     && ctUnaryOperator.getKind() == UnaryOperatorKind.NOT
                     && ctUnaryOperator.getOperand() instanceof CtInvocation<?> ctInvocation
-                    && SpoonUtil.isTypeEqualTo(ctInvocation.getExecutable().getType(), boolean.class)
+                    && TypeUtil.isTypeEqualTo(ctInvocation.getExecutable().getType(), boolean.class)
                     && ctInvocation.getExecutable().getSimpleName().equals("add")
                     && ctInvocation.getArguments().size() == 1
                     && ctInvocation.getArguments().get(0) instanceof CtVariableRead<?> ctVariableRead
                     && ctVariableRead.getVariable().equals(ctForEach.getVariable().getReference())
-                    && SpoonUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Set.class)))
+                    && TypeUtil.isSubtypeOf(ctInvocation.getTarget().getType(), java.util.Set.class)))
                 {
                     return;
                 }

@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtComment;
@@ -16,7 +17,7 @@ import spoon.reflect.visitor.CtScanner;
 @ExecutableCheck(reportedProblems = {ProblemType.EMPTY_BLOCK, ProblemType.EMPTY_CATCH})
 public class EmptyBlockCheck extends IntegratedCheck {
     private static boolean isEmptyBlock(CtBlock<?> ctBlock) {
-        return SpoonUtil.getEffectiveStatements(ctBlock).isEmpty()
+        return StatementUtil.getEffectiveStatements(ctBlock).isEmpty()
             // allow empty blocks that only contain comments
             && (ctBlock.getStatements().isEmpty() || !ctBlock.getStatements().stream().allMatch(CtComment.class::isInstance));
     }
@@ -33,7 +34,7 @@ public class EmptyBlockCheck extends IntegratedCheck {
 
                 if (ctBlock.getParent() instanceof CtMethod<?> ctMethod
                     && ctMethod.getBody().equals(ctBlock)
-                    && SpoonUtil.isInOverridingMethod(ctBlock)) {
+                    && MethodUtil.isInOverridingMethod(ctBlock)) {
                     return;
                 }
 

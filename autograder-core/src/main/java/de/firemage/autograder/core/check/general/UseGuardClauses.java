@@ -3,8 +3,9 @@ package de.firemage.autograder.core.check.general;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -29,12 +30,12 @@ public class UseGuardClauses extends IntegratedCheck {
     }
 
     private boolean isTerminal(CtStatement ctStatement) {
-        List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(ctStatement);
+        List<CtStatement> ctStatements = StatementUtil.getEffectiveStatements(ctStatement);
 
         if (ctStatements.isEmpty()) return false;
 
 
-        Optional<Effect> optionalEffect = SpoonUtil.tryMakeEffect(ctStatements.get(ctStatements.size() - 1));
+        Optional<Effect> optionalEffect = StatementUtil.tryMakeEffect(ctStatements.get(ctStatements.size() - 1));
 
         return optionalEffect.map(TerminalEffect.class::isInstance).orElse(false);
     }
@@ -42,7 +43,7 @@ public class UseGuardClauses extends IntegratedCheck {
     private void checkCtIf(CtIf ctIf, CtExpression<?> condition) {
         // if the condition != null, then the ctIf is an else if
         if (condition != null) {
-            CtExpression<?> ifCondition = SpoonUtil.createBinaryOperator(
+            CtExpression<?> ifCondition = FactoryUtil.createBinaryOperator(
                 condition,
                 ctIf.getCondition(),
                 BinaryOperatorKind.AND
@@ -54,7 +55,7 @@ public class UseGuardClauses extends IntegratedCheck {
         }
 
         // the condition to reach the else statement
-        CtExpression<?> elseCondition = SpoonUtil.createUnaryOperator(
+        CtExpression<?> elseCondition = FactoryUtil.createUnaryOperator(
             UnaryOperatorKind.NOT,
             ctIf.getCondition()
         );
@@ -64,10 +65,10 @@ public class UseGuardClauses extends IntegratedCheck {
         // if there is no else, return
         if (ctStatement == null) return;
 
-        List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(ctStatement);
+        List<CtStatement> ctStatements = StatementUtil.getEffectiveStatements(ctStatement);
 
         if (condition != null) {
-            elseCondition = SpoonUtil.createBinaryOperator(
+            elseCondition = FactoryUtil.createBinaryOperator(
                 condition,
                 elseCondition,
                 BinaryOperatorKind.AND
@@ -75,7 +76,7 @@ public class UseGuardClauses extends IntegratedCheck {
         }
 
         if (ctStatements.size() == 1 && ctStatements.get(0) instanceof CtIf ctElseIf) {
-            CtExpression<?> elseIfCondition = SpoonUtil.createBinaryOperator(
+            CtExpression<?> elseIfCondition = FactoryUtil.createBinaryOperator(
                 elseCondition,
                 ctElseIf.getCondition(),
                 BinaryOperatorKind.AND
@@ -97,7 +98,7 @@ public class UseGuardClauses extends IntegratedCheck {
 
                 CtIf parentIf = ctIf.getParent(CtIf.class);
                 if (parentIf != null && parentIf.getElseStatement() != null) {
-                    List<CtStatement> ctStatements = SpoonUtil.getEffectiveStatements(parentIf.getElseStatement());
+                    List<CtStatement> ctStatements = StatementUtil.getEffectiveStatements(parentIf.getElseStatement());
                     if (ctStatements.size() == 1 && ctStatements.get(0).equals(ctIf)) {
                         return;
                     }

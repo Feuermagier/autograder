@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check.complexity;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
@@ -30,7 +30,7 @@ public class RedundantNegationCheck extends IntegratedCheck {
             CtExpression<?> operand = ctUnaryOperator.getOperand();
 
             // this negates the operand and optimizes it if possible
-            return (CtExpression<T>) SpoonUtil.negate(operand);
+            return (CtExpression<T>) ExpressionUtil.negate(operand);
         }
     }
 

@@ -4,7 +4,7 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.Effect;
 import de.firemage.autograder.core.integrated.effects.TerminalEffect;
@@ -26,8 +26,8 @@ public class RedundantCatch extends IntegratedCheck {
             public void process(CtCatch ctCatch) {
                 if (ctCatch.isImplicit() || !ctCatch.getPosition().isValidPosition()) return;
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctCatch.getBody());
-                Optional<Effect> singleEffect = SpoonUtil.getSingleEffect(statements);
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctCatch.getBody());
+                Optional<Effect> singleEffect = StatementUtil.getSingleEffect(statements);
 
                 CtVariableReference<?> caughtVariable = ctCatch.getParameter().getReference();
 

@@ -3,9 +3,11 @@ package de.firemage.autograder.core.check.naming;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
@@ -197,9 +199,9 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
                 } else if (field.getDefaultExpression() instanceof CtInvocation<?> ctInvocation
                     // check if the value is System.lineSeparator()
                     && ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-                    && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
-                    && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "lineSeparator")) {
-                    literal = SpoonUtil.makeLiteral(field.getFactory().Type().stringType(), "\n");
+                    && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.lang.System.class)
+                    && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), String.class, "lineSeparator")) {
+                    literal = FactoryUtil.makeLiteral(field.getFactory().Type().stringType(), "\n");
                 } else {
                     return;
                 }

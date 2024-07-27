@@ -1,8 +1,8 @@
 package de.firemage.autograder.core.compiler;
 
+import de.firemage.autograder.core.file.SourcePath;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.file.SourceInfo;
-import de.firemage.autograder.core.file.SourcePath;
 
 import javax.tools.Diagnostic;
 import javax.tools.JavaFileObject;

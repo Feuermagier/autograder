@@ -4,8 +4,10 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.treeg.InvalidRegExSyntaxException;
 import de.firemage.autograder.treeg.RegExParser;
@@ -60,22 +62,22 @@ public class RegexCheck extends IntegratedCheck {
         }
 
         return ctInvocation.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-            && SpoonUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
+            && TypeUtil.isTypeEqualTo(ctTypeAccess.getAccessedType(), java.util.regex.Pattern.class)
             && List.of("matches", "compile").contains(ctExecutable.getSimpleName())
-            || SpoonUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), java.lang.String.class)
+            || TypeUtil.isTypeEqualTo(ctInvocation.getTarget().getType(), java.lang.String.class)
             && (
-            SpoonUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceAll", String.class, String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceFirst", String.class, String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class)
-                || SpoonUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class, int.class)
+            MethodUtil.isSignatureEqualTo(ctExecutable, boolean.class, "matches", String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceAll", String.class, String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String.class, "replaceFirst", String.class, String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class)
+                || MethodUtil.isSignatureEqualTo(ctExecutable, String[].class, "split", String.class, int.class)
         );
     }
 
     private static boolean isInAllowedContext(CtLiteral<?> ctLiteral) {
         CtElement parent = ctLiteral.getParent();
         if (parent instanceof CtVariable<?> ctVariable
-            && SpoonUtil.isEffectivelyFinal(ctVariable)) {
+            && VariableUtil.isEffectivelyFinal(ctVariable)) {
             // Check if the variable is only used in a regex invocation (e.g. Pattern.compile)
             return UsesFinder.variableUses(ctVariable)
                 .hasAnyAndAllMatch(ctVariableAccess -> ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
@@ -90,7 +92,7 @@ public class RegexCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtLiteral<String>>() {
             @Override
             public void process(CtLiteral<String> literal) {
-                if (!SpoonUtil.isString(literal.getType()) || !isInAllowedContext(literal)) {
+                if (!TypeUtil.isString(literal.getType()) || !isInAllowedContext(literal)) {
                     return;
                 }
 

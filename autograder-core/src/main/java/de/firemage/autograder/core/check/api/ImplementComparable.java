@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.declaration.CtClass;
 import spoon.reflect.declaration.CtType;
@@ -20,7 +20,7 @@ public class ImplementComparable extends IntegratedCheck {
     private static CtTypeReference<?> getInterface(CtTypeInformation ctType, Class<?> interfaceType) {
         return ctType.getSuperInterfaces()
             .stream()
-            .filter(type -> SpoonUtil.isSubtypeOf(type, interfaceType))
+            .filter(type -> TypeUtil.isSubtypeOf(type, interfaceType))
             .findAny()
             .orElse(null);
     }

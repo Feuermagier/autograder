@@ -4,8 +4,9 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtCatch;
 import spoon.reflect.code.CtInvocation;
@@ -21,7 +22,7 @@ public class NumberFormatExceptionIgnored extends IntegratedCheck {
         return ctInvocation.getParent(new CompositeFilter<>(
             FilteringOperator.INTERSECTION,
             new TypeFilter<>(CtTry.class),
-            ctTry -> ctTry.getCatchers().stream().anyMatch((CtCatch ctCatch) -> SpoonUtil.isTypeEqualTo(ctCatch.getParameter().getType(), NumberFormatException.class))
+            ctTry -> ctTry.getCatchers().stream().anyMatch((CtCatch ctCatch) -> TypeUtil.isTypeEqualTo(ctCatch.getParameter().getType(), NumberFormatException.class))
         )) != null;
     }
     @Override
@@ -33,7 +34,7 @@ public class NumberFormatExceptionIgnored extends IntegratedCheck {
                     return;
                 }
 
-                if (SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "parseInt", String.class) && !isNFECaught(ctInvocation)) {
+                if (MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "parseInt", String.class) && !isNFECaught(ctInvocation)) {
                     addLocalProblem(
                         ctInvocation,
                         new LocalizedMessage("number-format-exception-ignored"),

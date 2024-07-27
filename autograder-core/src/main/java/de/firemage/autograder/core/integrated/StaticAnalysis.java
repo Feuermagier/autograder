@@ -54,7 +54,7 @@ public class StaticAnalysis {
 
     public boolean hasJavaUtilImport() {
         AtomicBoolean hasImport = new AtomicBoolean(false);
-        SpoonUtil.visitCtCompilationUnit(this.getModel(), ctCompilationUnit -> {
+        CoreUtil.visitCtCompilationUnit(this.getModel(), ctCompilationUnit -> {
             if (hasImport.get()) {
                 return;
             }

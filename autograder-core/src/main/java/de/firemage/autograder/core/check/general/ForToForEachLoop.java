@@ -6,8 +6,9 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayRead;
@@ -32,7 +33,7 @@ import java.util.function.Function;
 public class ForToForEachLoop extends IntegratedCheck {
     private static final Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> LOOP_VARIABLE_ACCESS_STRING = ctVariableAccess -> {
         if (ctVariableAccess.getParent() instanceof CtInvocation<?> ctInvocation
-                && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), char.class, "charAt", int.class)
+                && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), char.class, "charAt", int.class)
                 && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess) {
             return Optional.of(variableAccess);
         }
@@ -54,7 +55,7 @@ public class ForToForEachLoop extends IntegratedCheck {
                 // && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), Object.class, "get", int.class)
                 && ctInvocation.getExecutable().getSimpleName().equals("get")
                 && ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess
-                && SpoonUtil.isSubtypeOf(variableAccess.getType(), java.util.List.class)) {
+                && TypeUtil.isSubtypeOf(variableAccess.getType(), java.util.List.class)) {
             return Optional.of(variableAccess);
         }
 
@@ -127,17 +128,17 @@ public class ForToForEachLoop extends IntegratedCheck {
 
         // check if the end condition is collection.size()
         if (end instanceof CtInvocation<?> ctInvocation
-                && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size")
+                && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "size")
                 && ctInvocation.getTarget() instanceof CtVariableAccess<?> target
-                && SpoonUtil.isSubtypeOf(target.getType(), java.util.Collection.class)) {
+                && TypeUtil.isSubtypeOf(target.getType(), java.util.Collection.class)) {
             return Optional.ofNullable(target.getVariable().getDeclaration());
         }
 
         // check if the end condition is string.length()
         if (end instanceof CtInvocation<?> ctInvocation
-                && SpoonUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "length")
+                && MethodUtil.isSignatureEqualTo(ctInvocation.getExecutable(), int.class, "length")
                 && ctInvocation.getTarget() instanceof CtVariableAccess<?> target
-                && SpoonUtil.isTypeEqualTo(target.getType(), java.lang.String.class)) {
+                && TypeUtil.isTypeEqualTo(target.getType(), java.lang.String.class)) {
             return Optional.ofNullable(target.getVariable().getDeclaration());
         }
 
@@ -173,12 +174,12 @@ public class ForToForEachLoop extends IntegratedCheck {
                 String iterableExpression = iterable.getSimpleName();
 
                 Function<CtVariableAccess<?>, Optional<CtVariableAccess<?>>> getPotentialLoopVariableAccess;
-                if (SpoonUtil.isString(iterable.getType())) {
+                if (TypeUtil.isString(iterable.getType())) {
                     getPotentialLoopVariableAccess = LOOP_VARIABLE_ACCESS_STRING;
 
                     iterableExpression = "%s.toCharArray()".formatted(iterableExpression);
                     elementType = ctFor.getFactory().createCtTypeReference(char.class);
-                } else if (SpoonUtil.isSubtypeOf(iterable.getType(), java.util.List.class)) {
+                } else if (TypeUtil.isSubtypeOf(iterable.getType(), java.util.List.class)) {
                     getPotentialLoopVariableAccess = LOOP_VARIABLE_ACCESS_LIST;
 
                     // size != 1, if the list is a raw type: List list = new ArrayList();

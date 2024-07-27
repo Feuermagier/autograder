@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
@@ -32,11 +32,11 @@ public class BinaryOperator extends IntegratedCheck {
                 }
 
                 boolean hasBinaryOperator = BINARY_OPERATORS.contains(ctBinaryOperator.getKind())
-                    && SpoonUtil.isTypeEqualTo(ctBinaryOperator.getType(), boolean.class, Boolean.class);
+                    && TypeUtil.isTypeEqualTo(ctBinaryOperator.getType(), boolean.class, Boolean.class);
 
                 if (!hasBinaryOperator) {
                     hasBinaryOperator = ctBinaryOperator.getElements(new TypeFilter<>(CtBinaryOperator.class)).stream()
-                        .anyMatch(operator -> SpoonUtil.isTypeEqualTo(operator.getType(), boolean.class, Boolean.class)
+                        .anyMatch(operator -> TypeUtil.isTypeEqualTo(operator.getType(), boolean.class, Boolean.class)
                             && BINARY_OPERATORS.contains(operator.getKind()));
                 }
 

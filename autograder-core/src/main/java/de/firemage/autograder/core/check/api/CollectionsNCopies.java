@@ -5,8 +5,9 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
-import de.firemage.autograder.core.integrated.SpoonUtil;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFor;
@@ -31,7 +32,7 @@ public class CollectionsNCopies extends IntegratedCheck {
 
                 ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
-                List<CtStatement> statements = SpoonUtil.getEffectiveStatements(ctFor.getBody());
+                List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctFor.getBody());
 
                 if (statements.size() != 1
                     || forLoopRange == null
@@ -39,7 +40,7 @@ public class CollectionsNCopies extends IntegratedCheck {
                     || !(ctInvocation.getExecutable().getSimpleName().equals("add"))
                     || ctInvocation.getArguments().size() != 1
                     || !(ctInvocation.getTarget() instanceof CtVariableRead<?> ctVariableRead)
-                    || !SpoonUtil.isSubtypeOf(ctVariableRead.getType(), java.util.Collection.class)) {
+                    || !TypeUtil.isSubtypeOf(ctVariableRead.getType(), java.util.Collection.class)) {
                     return;
                 }
 
@@ -49,7 +50,7 @@ public class CollectionsNCopies extends IntegratedCheck {
                 }
 
                 CtExpression<?> rhs = ctInvocation.getArguments().get(0);
-                if (!SpoonUtil.isImmutable(rhs.getType())) {
+                if (!TypeUtil.isImmutable(rhs.getType())) {
                     return;
                 }
 

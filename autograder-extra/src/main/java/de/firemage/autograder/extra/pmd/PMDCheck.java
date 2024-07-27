@@ -4,8 +4,8 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
-import net.sourceforge.pmd.Rule;
-import net.sourceforge.pmd.RuleViolation;
+import net.sourceforge.pmd.lang.rule.Rule;
+import net.sourceforge.pmd.reporting.RuleViolation;
 import net.sourceforge.pmd.lang.Language;
 import net.sourceforge.pmd.lang.LanguageRegistry;
 
