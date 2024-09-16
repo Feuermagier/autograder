@@ -19,6 +19,7 @@ import fluent.syntax.parser.FTLParser;
 import fluent.syntax.parser.FTLStream;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
+import org.reflections.util.ConfigurationBuilder;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -216,8 +217,11 @@ public final class Linter implements AbstractLinter {
     }
 
     private static final Collection<Class<?>> CHECKS = new LinkedHashSet<>(
-        new Reflections("de.firemage.autograder.", Scanners.TypesAnnotated)
-            .getTypesAnnotatedWith(ExecutableCheck.class)
+            new Reflections(new ConfigurationBuilder()
+                    .forPackage("de.firemage.autograder", Linter.class.getClassLoader())
+                    .addClassLoaders(Linter.class.getClassLoader())
+                    .setScanners(Scanners.TypesAnnotated)
+            ).getTypesAnnotatedWith(ExecutableCheck.class)
     );
 
     public List<Check> findChecksForProblemTypes(Collection<? extends AbstractProblemType> problems) {
@@ -237,8 +241,11 @@ public final class Linter implements AbstractLinter {
     }
 
     private static final Collection<Class<?>> CODE_LINTER = new LinkedHashSet<>(
-        new Reflections("de.firemage.autograder.", Scanners.SubTypes)
-            .getSubTypesOf(CodeLinter.class)
+            new Reflections(new ConfigurationBuilder()
+                    .forPackage("de.firemage.autograder", Linter.class.getClassLoader())
+                    .addClassLoaders(Linter.class.getClassLoader())
+                    .setScanners(Scanners.SubTypes)
+            ).getSubTypesOf(CodeLinter.class)
     );
 
     public List<? extends CodeLinter<?>> findCodeLinter() {

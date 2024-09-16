@@ -1,5 +1,6 @@
 package de.firemage.autograder.extra.errorprone;
 
+import de.firemage.autograder.core.compiler.CompilerProvider;
 import de.firemage.autograder.core.file.CompilationUnit;
 import de.firemage.autograder.core.file.SourceInfo;
 import de.firemage.autograder.api.JavaVersion;
@@ -75,7 +76,7 @@ record ErrorProneCompiler(JavaVersion javaVersion, AbstractTempLocation tempLoca
             throw new IllegalArgumentException("Nothing found to compile in " + input.path());
         }
 
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        JavaCompiler compiler = CompilerProvider.findSystemCompiler();
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
 

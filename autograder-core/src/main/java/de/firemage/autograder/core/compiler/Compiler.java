@@ -102,7 +102,7 @@ public record Compiler(AbstractTempLocation tempLocation, JavaVersion javaVersio
         // TODO: charset should be for each file individually, this requires changing SeparateBinaryFileManager
         Charset charset = compilationUnits.get(0).charset();
 
-        JavaCompiler compiler = ToolProvider.getSystemJavaCompiler();
+        JavaCompiler compiler = CompilerProvider.findSystemCompiler();
         DiagnosticCollector<JavaFileObject> diagnosticCollector = new DiagnosticCollector<>();
         StringWriter output = new StringWriter();
 
