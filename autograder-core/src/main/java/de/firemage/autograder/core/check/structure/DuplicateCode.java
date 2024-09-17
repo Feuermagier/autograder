@@ -5,39 +5,28 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.UsesFinder;
 import de.firemage.autograder.core.integrated.structure.StructuralElement;
 import de.firemage.autograder.core.integrated.structure.StructuralEqualsVisitor;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtStatementList;
-import spoon.reflect.code.CtVariableAccess;
-import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
-import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.visitor.CtScanner;
-import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
-import java.util.IdentityHashMap;
 import java.util.Iterator;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
-import java.util.stream.Collectors;
 
 @ExecutableCheck(reportedProblems = { ProblemType.DUPLICATE_CODE })
 public class DuplicateCode extends IntegratedCheck {
@@ -112,54 +101,6 @@ public class DuplicateCode extends IntegratedCheck {
         public Iterator<CtStatement> iterator() {
             return this.statements().iterator();
         }
-
-        private Set<CtVariable<?>> declaredVariables() {
-            Set<CtVariable<?>> declaredVariables = new LinkedHashSet<>();
-
-            for (CtStatement ctStatement : this) {
-                if (ctStatement instanceof CtVariable<?> ctVariable) {
-                    declaredVariables.add(ctVariable);
-                }
-            }
-
-            return declaredVariables;
-        }
-
-        public int countExposedVariables() {
-            Set<CtVariable<?>> declaredVariables = this.declaredVariables();
-            if (declaredVariables.isEmpty()) {
-                return 0;
-            }
-
-            int count = 0;
-            for (CtStatement ctStatement : StatementUtil.getNextStatements(this.getLast())) {
-                for (CtVariable<?> declaredVariable : declaredVariables) {
-                    if (UsesFinder.variableUses(declaredVariable).nestedIn(ctStatement).hasAny()) {
-                        count += 1;
-                    }
-                }
-            }
-            return count;
-        }
-
-        public int countDependencies(Predicate<? super CtVariable<?>> isDependency, Predicate<? super CtVariableAccess<?>> isDependencyAccess) {
-            if (this.statements().isEmpty()) {
-                return 0;
-            }
-
-            Set<CtVariable<?>> codeSegmentVariables = this.statements.stream()
-                .flatMap(ctStatement -> ctStatement.getElements(new TypeFilter<CtVariable<?>>(CtVariable.class)).stream())
-                .collect(Collectors.toCollection(() -> Collections.newSetFromMap(new IdentityHashMap<>())));
-
-            return (int) this.statements.stream()
-                .flatMap(ctStatement -> ctStatement.getElements(new TypeFilter<CtVariableAccess<?>>(CtVariableAccess.class)).stream())
-                .filter(isDependencyAccess)
-                .map(UsesFinder::getDeclaredVariable)
-                .unordered()
-                .distinct()
-                .filter(ctVariable -> !codeSegmentVariables.contains(ctVariable) && isDependency.test(ctVariable))
-                .count();
-        }
     }
 
     @Override
@@ -179,12 +120,18 @@ public class DuplicateCode extends IntegratedCheck {
             }
         });
 
-        /*
         Map<Integer, List<Object>> collisions = new HashMap<>();
         for (var key : occurrences.keySet()) {
             collisions.computeIfAbsent(key.hashCode(), k -> new ArrayList<>()).add(key);
         }
 
+        /*
+        var mostCommonCollisions = collisions.values()
+            .stream()
+            .filter(list -> list.size() > 1)
+            .sorted((a, b) -> Integer.compare(b.size(), a.size()))
+            .limit(10)
+            .toList();
         System.out.println("Number of duplicate hashCodes: " + (occurrences.size() - collisions.size()) + " of " + occurrences.size() + " elements");*/
 
         Set<CtElement> reported = new HashSet<>();
@@ -221,27 +168,10 @@ public class DuplicateCode extends IntegratedCheck {
                         continue;
                     }
 
-                    // The duplicate code might access variables that are not declared in the code segment.
-                    // The variables would have to be passed as parameters of a helper method.
-                    //
-                    // The problem is that when a variable is reassigned, it can not be passed as a parameter
-                    // -> we would have to ignore the duplicate code segment
-                    int numberOfReassignedVariables = leftCode.countDependencies(
-                        ctVariable -> !(ctVariable instanceof CtField<?>) && !ctVariable.isStatic(),
-                        ctVariableAccess -> ctVariableAccess instanceof CtVariableWrite<?> && ctVariableAccess.getParent() instanceof CtAssignment<?,?>
-                    );
+                    MethodUtil.UnnamedMethod leftMethod = MethodUtil.createMethodFrom(null, leftCode.statements());
+                    MethodUtil.UnnamedMethod rightMethod = MethodUtil.createMethodFrom(null, rightCode.statements());
 
-                    if (numberOfReassignedVariables > 1) {
-                        continue;
-                    }
-
-                    // Another problem is that the duplicate code segment might declare variables that are used
-                    // after the code segment.
-                    //
-                    // A method can at most return one value (ignoring more complicated solutions like returning a custom object)
-                    int numberOfUsedVariables = Math.max(leftCode.countExposedVariables(), rightCode.countExposedVariables());
-
-                    if (numberOfReassignedVariables + numberOfUsedVariables > 1) {
+                    if (!leftMethod.canBeMethod() || !rightMethod.canBeMethod()) {
                         continue;
                     }
 
