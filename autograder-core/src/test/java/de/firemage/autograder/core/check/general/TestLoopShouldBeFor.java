@@ -258,6 +258,43 @@ class TestLoopShouldBeFor extends AbstractCheckTest {
     }
 
     @Test
+    void testCounterDeclaredWithOtherVariablesBeforeLoop() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                class Test {
+                    String test(String sentence) {
+                        int c = 0;
+                        boolean spaceBefore = true;
+                        String word = "";
+                        while (c < sentence.length()) {
+                            if (Character.isWhitespace(sentence.charAt(c))) {
+                                spaceBefore = true;
+                            } else if (spaceBefore) {
+                                word += sentence.charAt(c);
+                                spaceBefore = false;
+                            }
+                            c++;
+                        }
+                        return word;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsFor(
+            problems.next(),
+            "int c = 0",
+            "c < sentence.length()",
+            "c++",
+            "{%n    if (Character.isWhitespace(sentence.charAt(c))) {%n        spaceBefore = true;%n    } else if (spaceBefore) {%n        word += sentence.charAt(c);%n        spaceBefore = false;%n    }%n}".formatted()
+        );
+
+        problems.assertExhausted();
+    }
+
+    @Test
     void testMissingUpdate() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
