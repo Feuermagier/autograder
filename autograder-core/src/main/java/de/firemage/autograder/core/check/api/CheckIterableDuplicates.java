@@ -98,7 +98,6 @@ public class CheckIterableDuplicates extends IntegratedCheck {
                     return;
                 }
 
-                // TODO: the contains might be negated
                 if ((ctIf.getElseStatement() != null || statements.size() == 2)
                     && ctIf.getCondition() instanceof CtInvocation<?> ctInvocation
                     && isContainsInvocationOnSet(ctInvocation, ctForEach.getVariable().getReference())) {
