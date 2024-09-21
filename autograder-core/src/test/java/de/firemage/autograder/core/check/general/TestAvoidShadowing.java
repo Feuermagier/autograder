@@ -108,6 +108,8 @@ class TestAvoidShadowing extends AbstractCheckTest {
                             public void doSomething() {
                                 // both fields are used:
                                 System.out.println(this.number);
+                                System.out.println(this.number);
+                                System.out.println(super.number);
                                 System.out.println(super.number);
                             }
 
@@ -145,6 +147,7 @@ class TestAvoidShadowing extends AbstractCheckTest {
                             public void doSomething() {
                                 int number = 6;
 
+                                System.out.println(this.number);
                                 System.out.println(this.number);
                                 System.out.println(number);
                             }
@@ -198,7 +201,10 @@ class TestAvoidShadowing extends AbstractCheckTest {
                                 int number = 6;
 
                                 System.out.println(this.number);
+                                System.out.println(this.number);
                                 System.out.println(super.number);
+                                System.out.println(super.number);
+                                System.out.println(number);
                                 System.out.println(number);
                             }
 
@@ -246,7 +252,10 @@ class TestAvoidShadowing extends AbstractCheckTest {
                                 int number = 6;
 
                                 System.out.println(Main.number);
+                                System.out.println(Main.number);
                                 System.out.println(super.number);
+                                System.out.println(super.number);
+                                System.out.println(number);
                                 System.out.println(number);
                             }
 
@@ -294,8 +303,12 @@ class TestAvoidShadowing extends AbstractCheckTest {
                                 this.c = c;
                                 
                                 System.out.println(b);
+                                System.out.println(b);
+                                System.out.println(this.b);
                                 System.out.println(this.b);
                                 System.out.println(c);
+                                System.out.println(c);
+                                System.out.println(this.c);
                                 System.out.println(this.c);
                             }
 
@@ -311,8 +324,12 @@ class TestAvoidShadowing extends AbstractCheckTest {
                                 final int z = 5; /*# ok #*/
                                 
                                 System.out.println("" + a + this.a);
+                                System.out.println("" + a + this.a);
+                                System.out.println("" + x + this.x);
                                 System.out.println("" + x + this.x);
                                 System.out.println("" + y + A.y);
+                                System.out.println("" + y + A.y);
+                                System.out.println("" + z);
                                 System.out.println("" + z);
                             }
                         }
@@ -329,8 +346,12 @@ class TestAvoidShadowing extends AbstractCheckTest {
                             
                             void doSomething() {
                                 System.out.println("" + super.a + this.a);
+                                System.out.println("" + super.a + this.a);
+                                System.out.println("" + super.x + this.x);
                                 System.out.println("" + super.x + this.x);
                                 System.out.println("" + A.y + C.y);
+                                System.out.println("" + A.y + C.y);
+                                System.out.println("" + z);
                                 System.out.println("" + z);
                             }
                         }
