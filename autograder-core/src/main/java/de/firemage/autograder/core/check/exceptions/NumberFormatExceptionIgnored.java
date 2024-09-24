@@ -27,6 +27,12 @@ public class NumberFormatExceptionIgnored extends IntegratedCheck {
     }
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
+        boolean hasCaughtAnyException = staticAnalysis.getModel().filterChildren(CtCatch.class::isInstance).first() != null;
+        // if exception handling is not present, we don't need to check for ignored exceptions
+        if (!hasCaughtAnyException) {
+            return;
+        }
+
         staticAnalysis.processWith(new AbstractProcessor<CtInvocation<?>>() {
             @Override
             public void process(CtInvocation<?> ctInvocation) {

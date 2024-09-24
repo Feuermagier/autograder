@@ -6,8 +6,10 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
 import spoon.processing.AbstractProcessor;
+import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
@@ -15,7 +17,6 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeInformation;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtFieldReference;
-import spoon.reflect.reference.CtTypeReference;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -25,23 +26,25 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.AVOID_SHADOWING})
 public class AvoidShadowing extends IntegratedCheck {
+    // a lower bound for the number of reads on a hidden field, before it is reported
+    private static final int MINIMUM_FIELD_READS = 2;
     private static final List<String> ALLOWED_FIELDS = List.of("serialVersionUID");
 
     private static Collection<CtFieldReference<?>> getAllVisibleFields(CtTypeInformation ctTypeInformation) {
-
         Collection<CtFieldReference<?>> result = new ArrayList<>(ctTypeInformation.getDeclaredFields());
 
-        CtTypeReference<?> parent = ctTypeInformation.getSuperclass();
-        while (parent != null) {
+        for (CtType<?> parent : TypeUtil.allSuperTypes(ctTypeInformation)) {
+            if (parent.isInterface()) {
+                continue;
+            }
+
             result.addAll(
                 parent.getDeclaredFields()
-                      .stream()
-                      // only non-private fields are visible to a subclass
-                      .filter(ctFieldReference -> !ctFieldReference.getFieldDeclaration().isPrivate())
-                      .toList()
+                    .stream()
+                    // only non-private fields are visible to a subclass
+                    .filter(ctFieldReference -> !ctFieldReference.getFieldDeclaration().isPrivate())
+                    .toList()
             );
-
-            parent = parent.getSuperclass();
         }
 
         return result;
@@ -90,12 +93,25 @@ public class AvoidShadowing extends IntegratedCheck {
 
                 CtElement variableParent = ctVariable.getParent();
 
-                // there might be multiple fields hidden by the variable (e.g. subclass hides superclass field)
-                boolean isFieldRead = hiddenFields.stream().anyMatch(ctFieldReference -> UsesFinder.variableUses(ctFieldReference.getFieldDeclaration()).nestedIn(variableParent).hasAny());
+                // there might be multiple fields hidden by the variable, like for example:
+                // class A {
+                //    int a;
+                // }
+                //
+                // class B extends A {
+                //    int a;
+                //    void foo(int a) {} // param hides field of A and B
+                // }
+                int numberOfFieldReads = Math.toIntExact(hiddenFields.stream()
+                    .map(ctFieldReference -> UsesFinder.variableUses(ctFieldReference.getFieldDeclaration())
+                        .nestedIn(variableParent)
+                        .filter(ctVariableAccess -> ctVariableAccess instanceof CtVariableRead<?>)
+                        .count()).max(Long::compareTo).orElse(0L));
+
 
                 // to reduce the number of annotations, we only report a problem if the variable AND the hidden field are read in
                 // the same context
-                if (UsesFinder.variableUses(ctVariable).nestedIn(variableParent).hasAny() && isFieldRead) {
+                if (UsesFinder.variableUses(ctVariable).nestedIn(variableParent).hasAny() && numberOfFieldReads >= MINIMUM_FIELD_READS) {
                     addLocalProblem(
                         ctVariable,
                         new LocalizedMessage("avoid-shadowing", Map.of("name", ctVariable.getSimpleName())),

@@ -1031,6 +1031,12 @@ public enum ProblemType implements AbstractProblemType {
     AVOID_STRING_CONCAT,
 
     /**
+     * Reports code where {@link Character#isLetterOrDigit(char)} could be used.
+     */
+    @HasFalsePositives
+    IS_LETTER_OR_DIGIT,
+
+    /**
      * Reports unnecessary comments.
      */
     @HasFalsePositives

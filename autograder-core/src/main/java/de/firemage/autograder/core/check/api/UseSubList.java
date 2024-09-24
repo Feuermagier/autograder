@@ -8,18 +8,21 @@ import de.firemage.autograder.core.check.general.ForToForEachLoop;
 import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtFor;
+import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtLiteral;
+import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.reference.CtTypeReference;
 
+import java.util.List;
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.COMMON_REIMPLEMENTATION_SUBLIST})
 public class UseSubList extends IntegratedCheck {
-
     private void checkSubList(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
 
@@ -28,6 +31,7 @@ public class UseSubList extends IntegratedCheck {
         }
 
         // ensure that the variable is only used to access the list elements via get
+        // like list.get(i)
         CtVariable<?> ctListVariable = ForToForEachLoop.getForEachLoopVariable(
             ctFor,
             forLoopRange,
@@ -38,16 +42,21 @@ public class UseSubList extends IntegratedCheck {
             return;
         }
 
-        CtTypeReference<?> listElementType = ctFor.getFactory().createCtTypeReference(java.lang.Object.class);
-        // size != 1, if the list is a raw type: List list = new ArrayList();
-        if (ctListVariable.getType().getActualTypeArguments().size() == 1) {
-            listElementType = ctListVariable.getType().getActualTypeArguments().get(0);
-        }
-
         // check if the loop iterates over the whole list (then it is covered by the foreach loop check)
         if (ExpressionUtil.resolveConstant(forLoopRange.start()) instanceof CtLiteral<Integer> ctLiteral
             && ctLiteral.getValue() == 0
             && ForToForEachLoop.findIterable(forLoopRange).isPresent()) {
+            return;
+        }
+
+        // look for a single statement in the loop body, which should be a single invocation to add
+        List<CtStatement> statementList = StatementUtil.getEffectiveStatements(ctFor.getBody());
+        if (statementList.size() != 1) {
+            return;
+        }
+
+        // should look like this: result.add(list.get(i))
+        if (!(statementList.get(0) instanceof CtInvocation<?> ctInvocation) || !ForLoopCanBeInvocation.isCollectionAddInvocation(ctInvocation)) {
             return;
         }
 
@@ -57,8 +66,8 @@ public class UseSubList extends IntegratedCheck {
             new LocalizedMessage(
                 "common-reimplementation",
                 Map.of(
-                    "suggestion", "for (%s value : %s.subList(%s, %s)) { ... }".formatted(
-                        listElementType.unbox(),
+                    "suggestion", "%s.addAll(%s.subList(%s, %s))".formatted(
+                        ctInvocation.getTarget(),
                         ctListVariable.getSimpleName(),
                         forLoopRange.start(),
                         forLoopRange.end()

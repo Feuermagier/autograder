@@ -36,6 +36,14 @@ class TestNumberFormatExceptionIgnored extends AbstractCheckTest {
                     public static void main(String[] args) {
                         int number = Integer.parseInt("123");
                     }
+                    
+                    private void catcher() {
+                        try {
+                            Integer.parseInt("123");
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error");
+                        }
+                    }
                 }
                 """
         ), PROBLEM_TYPES);
@@ -59,10 +67,36 @@ class TestNumberFormatExceptionIgnored extends AbstractCheckTest {
                             System.out.println("Error");
                         }
                     }
+
+                    private void catcher() {
+                        try {
+                            Integer.parseInt("123");
+                        } catch (NumberFormatException e) {
+                            System.out.println("Error");
+                        }
+                    }
                 }
                 """
         ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testNoExceptionHandling() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                public class Main {
+                    public static void main(String[] args) {
+                        int number = Integer.parseInt("123");
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
 }

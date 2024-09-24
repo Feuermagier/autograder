@@ -31,6 +31,7 @@ import spoon.reflect.visitor.CtScanner;
 
 import java.util.ArrayDeque;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Deque;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -90,17 +91,17 @@ public class UsesFinder {
     }
 
     public static CtElementStream<CtVariableAccess<?>> variableUses(CtVariable<?> variable) {
-        return CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType();
+        return CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, Set.of())).assumeElementType();
     }
 
     @SuppressWarnings("unchecked")
     public static CtElementStream<CtVariableWrite<?>> variableWrites(CtVariable<?> variable) {
-        return (CtElementStream<CtVariableWrite<?>>) (Object) CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType().ofType(CtVariableWrite.class);
+        return (CtElementStream<CtVariableWrite<?>>) (Object) CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, Set.of())).assumeElementType().ofType(CtVariableWrite.class);
     }
 
     @SuppressWarnings("unchecked")
     public static CtElementStream<CtVariableRead<?>> variableReads(CtVariable<?> variable) {
-        return (CtElementStream<CtVariableRead<?>>) (Object) CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, List.of())).assumeElementType().ofType(CtVariableRead.class);
+        return (CtElementStream<CtVariableRead<?>>) (Object) CtElementStream.of(UsesFinder.getFor(variable).scanner.variableUses.getOrDefault(variable, Set.of())).assumeElementType().ofType(CtVariableRead.class);
     }
 
     public static CtElementStream<CtTypeParameterReference> typeParameterUses(CtTypeParameter typeParameter) {
@@ -192,7 +193,7 @@ public class UsesFinder {
     private static class UsesScanner extends CtScanner {
         // The IdentityHashMaps are very important here, since
         // E.g. CtVariable's equals method considers locals with the same name to be equal
-        private final Map<CtVariable, List<CtVariableAccess>> variableUses = new IdentityHashMap<>();
+        private final Map<CtVariable, Set<CtVariableAccess>> variableUses = new IdentityHashMap<>();
         private final Map<CtVariableAccess, CtVariable> variableAccessDeclarations = new IdentityHashMap<>();
         private final Map<CtTypeParameter, List<CtTypeParameterReference>> typeParameterUses = new IdentityHashMap<>();
         private final Map<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
@@ -317,7 +318,7 @@ public class UsesFinder {
             }
 
             if (variable != null) {
-                var accesses = this.variableUses.computeIfAbsent(variable, k -> new ArrayList<>());
+                var accesses = this.variableUses.computeIfAbsent(variable, k -> Collections.newSetFromMap(new IdentityHashMap<>()));
                 accesses.add(variableAccess);
                 this.variableAccessDeclarations.put(variableAccess, variable);
             }

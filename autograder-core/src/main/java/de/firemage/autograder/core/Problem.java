@@ -4,6 +4,8 @@ import de.firemage.autograder.api.AbstractProblem;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 
+import java.util.Optional;
+
 /**
  * Contains the default implementation of most {@link AbstractProblem} methods.
  */
@@ -61,6 +63,11 @@ public abstract class Problem implements AbstractProblem {
     @Override
     public String getType() {
         return this.problemType.toString();
+    }
+
+    @Override
+    public Optional<Integer> getMaximumProblemsForCheck() {
+        return this.getCheck().maximumProblems();
     }
 
     public ProblemType getProblemType() {

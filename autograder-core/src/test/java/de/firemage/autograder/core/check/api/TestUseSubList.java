@@ -39,32 +39,39 @@ class TestUseSubList extends AbstractCheckTest {
             """
                 import java.util.ArrayList;
                 import java.util.List;
+                import java.util.Collection;
 
                 public class Test {
-                    public static <T> void printList(List<T> list, int start, int end) {
+                    public static <T> Collection<T> printList(List<T> list, int start, int end) {
+                        Collection<T> result = new ArrayList<>();
                         for (int i = start; i < end; i++) {
-                            System.out.println(list.get(i));
+                            result.add(list.get(i));
                         }
+                        return result;
                     }
                     
-                    public static void printRawList(List list, int start, int end) {
+                    public static Collection printRawList(List list, int start, int end) {
+                        Collection result = new ArrayList();
                         for (int i = start; i < end; i++) {
-                            System.out.println(list.get(i));
+                            result.add(list.get(i));
                         }
+                        return result;
                     }
                     
-                    public static void printList2(List<Integer> list, int start, int end) {
+                    public static Collection<Integer> printList2(List<Integer> list, int start, int end) {
+                        Collection<Integer> result = new ArrayList<>();
                         for (int i = start; i < end; i++) {
-                            System.out.println(list.get(i));
+                            result.add(list.get(i));
                         }
+                        return result;
                     }
                 }
                 """
         ), PROBLEM_TYPES);
 
-        assertEqualsReimplementation(problems.next(), "for (T value : list.subList(start, end)) { ... }");
-        assertEqualsReimplementation(problems.next(), "for (Object value : list.subList(start, end)) { ... }");
-        assertEqualsReimplementation(problems.next(), "for (int value : list.subList(start, end)) { ... }");
+        assertEqualsReimplementation(problems.next(), "result.addAll(list.subList(start, end))");
+        assertEqualsReimplementation(problems.next(), "result.addAll(list.subList(start, end))");
+        assertEqualsReimplementation(problems.next(), "result.addAll(list.subList(start, end))");
         problems.assertExhausted();
     }
 
@@ -75,12 +82,16 @@ class TestUseSubList extends AbstractCheckTest {
             "Test",
             """
                 import java.util.List;
+                import java.util.ArrayList;
+                import java.util.Collection;
 
                 public class Test {
-                    public static void iter(List<String> storage) {
+                    public static Collection<String> iter(List<String> storage) {
+                        Collection<String> result = new ArrayList<>();
                         for (int i = 0; i < storage.size(); i++) {
-                            System.out.println(storage.get(i));
+                            result.add(storage.get(i));
                         }
+                        return result;
                     }
                 }
                 """
@@ -96,12 +107,16 @@ class TestUseSubList extends AbstractCheckTest {
             "Test",
             """
                 import java.util.Map;
+                import java.util.ArrayList;
+                import java.util.Collection;
 
                 public class Test {
-                    public static void iterMap(Map<Integer, String> storage) {
+                    public static Collection<String> iterMap(Map<Integer, String> storage) {
+                        Collection<String> result = new ArrayList<>();
                         for (int i = 0; i < storage.size(); i++) {
-                            System.out.println(storage.get(i));
+                            result.add(storage.get(i));
                         }
+                        return result;
                     }
                 }
                 """

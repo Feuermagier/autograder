@@ -31,6 +31,112 @@ class TestCheckIterableDuplicates extends AbstractCheckTest {
     }
 
     @Test
+    void testContainsImplicitElse() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.Set;
+                import java.util.HashSet;
+                import java.util.List;
+
+                public class Test {
+                    public static void main(String[] args) {
+                    }
+
+                    private static boolean hasDuplicates(List<String> list) {
+                        Set<String> uniqueElements = new HashSet<>();
+
+                        for (String element : list) {
+                            if (uniqueElements.contains(element)) {
+                                return true; // Found a duplicate
+                            }
+
+                            uniqueElements.add(element);
+                        }
+
+                        return false; // No duplicates found
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertReimplementation(problems.next(), "new HashSet<>(list).size() != list.size()");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testContainsExplicitElse() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.Set;
+                import java.util.HashSet;
+                import java.util.List;
+
+                public class Test {
+                    public static void main(String[] args) {
+                    }
+
+                    private static boolean hasDuplicates(List<String> list) {
+                        Set<String> uniqueElements = new HashSet<>();
+
+                        for (String element : list) {
+                            if (uniqueElements.contains(element)) {
+                                return true; // Found a duplicate
+                            } else {
+                                uniqueElements.add(element);
+                            }
+                        }
+
+                        return false; // No duplicates found
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertReimplementation(problems.next(), "new HashSet<>(list).size() != list.size()");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testContainsAfterIf() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.Set;
+                import java.util.HashSet;
+                import java.util.List;
+
+                public class Test {
+                    public static void main(String[] args) {
+                    }
+
+                    private static boolean hasDuplicates(List<String> list) {
+                        Set<String> uniqueElements = new HashSet<>();
+
+                        for (String element : list) {
+                            uniqueElements.add(element);
+
+                            if (uniqueElements.contains(element)) {
+                                return true; // Found a duplicate
+                            }
+                        }
+
+                        return false; // No duplicates found
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
     void testReturnList() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,

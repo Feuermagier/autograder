@@ -1,6 +1,5 @@
 package de.firemage.autograder.core.check.general;
 
-import de.firemage.autograder.core.CodeModel;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
@@ -63,7 +62,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
         }
     }
 
-    private static LoopSuggestion getCounter(CtLoop ctLoop, CodeModel model) {
+    private static LoopSuggestion getCounter(CtLoop ctLoop) {
         List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctLoop.getBody());
 
         if (statements.isEmpty()) {
@@ -72,6 +71,10 @@ public class LoopShouldBeFor extends IntegratedCheck {
 
 
         CtStatement previous = StatementUtil.getPreviousStatement(ctLoop).orElse(null);
+        while (previous instanceof CtLocalVariable<?> ctLocalVariable && !TypeUtil.isPrimitiveNumeric(ctLocalVariable.getType())) {
+            previous = StatementUtil.getPreviousStatement(previous).orElse(null);
+        }
+
         if (!(previous instanceof CtLocalVariable<?> ctLocalVariable) || !TypeUtil.isPrimitiveNumeric(ctLocalVariable.getType())) {
             return null;
         }
@@ -203,7 +206,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
                     return;
                 }
 
-                LoopSuggestion forLoop = getCounter(ctLoop, staticAnalysis.getCodeModel());
+                LoopSuggestion forLoop = getCounter(ctLoop);
 
                 if (forLoop != null) {
                     addLocalProblem(
