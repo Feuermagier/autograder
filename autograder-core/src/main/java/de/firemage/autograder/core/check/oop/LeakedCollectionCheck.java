@@ -44,9 +44,11 @@ import spoon.reflect.visitor.filter.TypeFilter;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 // What should be supported:
@@ -116,6 +118,109 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                 && isMutableExpression(ctAssignment.getAssignment()));
     }
 
+    private record MutableExpressionChecker(Set<CtExpression<?>> currentlyChecking) {
+        private static boolean check(CtExpression<?> ctExpression) {
+            var instance = new MutableExpressionChecker(Collections.newSetFromMap(new IdentityHashMap<>()));
+            return instance.isMutableExpression(ctExpression);
+        }
+
+        private boolean isMutableExpression(CtExpression<?> ctExpression) {
+            if (ctExpression instanceof CtNewArray<?>) {
+                return true;
+            }
+
+            // we only care about arrays and collections for now
+            if (!TypeUtil.isSubtypeOf(ctExpression.getType(), java.util.Collection.class)) {
+                // not a collection
+                return false;
+            }
+
+            // something like new ArrayList<>() is always mutable
+            if (ctExpression instanceof CtConstructorCall<?>) {
+                return true;
+            }
+
+            CtExecutable<?> ctExecutable = ctExpression.getParent(CtExecutable.class);
+
+            // Sometimes we have this
+            //
+            // ```
+            // List<String> values = new ArrayList<>();
+            // values.add("foo");
+            // this.values = values;
+            // ```
+            //
+            // or this
+            //
+            // ```
+            // public Constructor(List<String> values) {
+            //     this.values = values;
+            // }
+            // ```
+            //
+            // In both cases the assigned expression is mutable, and we have to detect this.
+            // To do this, we check if the assigned variable is mutable.
+            if (ctExpression instanceof CtVariableRead<?> ctVariableRead && ctExecutable != null) {
+                CtVariable<?> ctVariable = VariableUtil.getVariableDeclaration(ctVariableRead.getVariable());
+
+                // this is a special case for enums, where the constructor is private and mutability can only be introduced
+                // through the enum constructor calls
+                if (ctExecutable instanceof CtConstructor<?> ctConstructor
+                    && ctConstructor.getDeclaringType() instanceof CtEnum<?> ctEnum
+                    && hasAssignedParameterReference(ctExpression, ctConstructor)) {
+                    // figure out the index of the parameter reference:
+                    CtParameter<?> ctParameterToFind = findParameterReference(ctExpression, ctConstructor).orElseThrow();
+                    int index = -1;
+                    for (CtParameter<?> ctParameter : ctConstructor.getParameters()) {
+                        index += 1;
+                        if (ctParameter == ctParameterToFind) {
+                            break;
+                        }
+                    }
+
+                    if (index >= ctConstructor.getParameters().size() || index == -1) {
+                        throw new IllegalStateException("Could not find parameter reference of %s in %s".formatted(ctExpression, ctConstructor));
+                    }
+
+                    for (CtEnumValue<?> ctEnumValue : ctEnum.getEnumValues()) {
+                        if (ctEnumValue.getDefaultExpression() instanceof CtConstructorCall<?> ctConstructorCall
+                            && ctConstructorCall.getExecutable().getExecutableDeclaration() == ctConstructor
+                            && isMutableExpression(ctConstructorCall.getArguments().get(index))) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                }
+
+                if (hasAssignedParameterReference(ctVariableRead, ctExecutable) || (ctVariable.getDefaultExpression() != null && isMutableExpression(ctVariable.getDefaultExpression()))) {
+                    return true;
+                }
+
+                // the variable is mutable if it is assigned a mutable value in the declaration or through any write
+                return UsesFinder.variableWrites(ctVariable)
+                    .hasAnyMatch(ctVariableWrite -> {
+                        if (!(ctVariableWrite.getParent() instanceof CtAssignment<?,?> ctAssignment)) {
+                            return false;
+                        }
+
+                        // this prevents infinite recursion when the variable is assigned to itself or there are assignment cycles
+                        if (!this.currentlyChecking.add(ctAssignment.getAssignment())) {
+                            return false;
+                        }
+
+                        boolean result = this.isMutableExpression(ctAssignment.getAssignment());
+
+                        this.currentlyChecking.remove(ctAssignment.getAssignment());
+
+                        return result;
+                    });
+            }
+
+            return false;
+        }
+    }
+
     /**
      * Checks if the state of the given expression can be mutated.
      *
@@ -123,85 +228,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
      * @return true if the expression is mutable, false otherwise
      */
     private static boolean isMutableExpression(CtExpression<?> ctExpression) {
-        if (ctExpression instanceof CtNewArray<?>) {
-            return true;
-        }
-
-        // we only care about arrays and collections for now
-        if (!TypeUtil.isSubtypeOf(ctExpression.getType(), java.util.Collection.class)) {
-            // not a collection
-            return false;
-        }
-
-        // something like new ArrayList<>() is always mutable
-        if (ctExpression instanceof CtConstructorCall<?>) {
-            return true;
-        }
-
-        CtExecutable<?> ctExecutable = ctExpression.getParent(CtExecutable.class);
-
-        // Sometimes we have this
-        //
-        // ```
-        // List<String> values = new ArrayList<>();
-        // values.add("foo");
-        // this.values = values;
-        // ```
-        //
-        // or this
-        //
-        // ```
-        // public Constructor(List<String> values) {
-        //     this.values = values;
-        // }
-        // ```
-        //
-        // In both cases the assigned expression is mutable, and we have to detect this.
-        // To do this, we check if the assigned variable is mutable.
-        if (ctExpression instanceof CtVariableRead<?> ctVariableRead && ctExecutable != null) {
-            CtVariable<?> ctVariable = VariableUtil.getVariableDeclaration(ctVariableRead.getVariable());
-
-            // this is a special case for enums, where the constructor is private and mutability can only be introduced
-            // through the enum constructor calls
-            if (ctExecutable instanceof CtConstructor<?> ctConstructor
-                && ctConstructor.getDeclaringType() instanceof CtEnum<?> ctEnum
-                && hasAssignedParameterReference(ctExpression, ctConstructor)) {
-                // figure out the index of the parameter reference:
-                CtParameter<?> ctParameterToFind = findParameterReference(ctExpression, ctConstructor).orElseThrow();
-                int index = -1;
-                for (CtParameter<?> ctParameter : ctConstructor.getParameters()) {
-                    index += 1;
-                    if (ctParameter == ctParameterToFind) {
-                        break;
-                    }
-                }
-
-                if (index >= ctConstructor.getParameters().size() || index == -1) {
-                    throw new IllegalStateException("Could not find parameter reference of %s in %s".formatted(ctExpression, ctConstructor));
-                }
-
-                for (CtEnumValue<?> ctEnumValue : ctEnum.getEnumValues()) {
-                    if (ctEnumValue.getDefaultExpression() instanceof CtConstructorCall<?> ctConstructorCall
-                        && ctConstructorCall.getExecutable().getExecutableDeclaration() == ctConstructor
-                        && isMutableExpression(ctConstructorCall.getArguments().get(index))) {
-                        return true;
-                    }
-                }
-
-                return false;
-            }
-
-            if (hasAssignedParameterReference(ctVariableRead, ctExecutable) || (ctVariable.getDefaultExpression() != null && isMutableExpression(ctVariable.getDefaultExpression()))) {
-                return true;
-            }
-
-            // the variable is mutable if it is assigned a mutable value in the declaration or through any write
-            return UsesFinder.variableWrites(ctVariable)
-                .hasAnyMatch(ctVariableWrite -> ctVariableWrite.getParent() instanceof CtAssignment<?,?> ctAssignment
-                    && isMutableExpression(ctAssignment.getAssignment()));
-        }
-
-        return false;
+        return MutableExpressionChecker.check(ctExpression);
     }
 
     private static boolean isParameterOf(CtVariable<?> ctVariable, CtExecutable<?> ctExecutable) {
