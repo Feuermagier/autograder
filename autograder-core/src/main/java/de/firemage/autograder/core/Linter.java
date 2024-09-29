@@ -114,9 +114,23 @@ public final class Linter implements AbstractLinter {
             }
         }
 
-        AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
 
-        AnalysisResult result;
+        // TODO: refactor AnalysisScheduler/AnalysisThread to be simpler/easier to understand
+        //
+        // The code has been disabled, because of the following issues:
+        // - Spoon Code does not like to be run in parallel
+        // - Having checks run in parallel, resulted in bugs that were hard to reproduce, because they depended on the order
+        //   in which the checks were run
+        // - Crashes resulted in the program looping/hanging, instead of exiting with the thrown exception
+        //
+        // The last issue was the one that made me disable the code, because it made debugging very hard, and
+        // it was not clear how to fix it. It looks like the code is reinventing the wheel, instead of using
+        // existing solutions like ExecutorService.
+        //
+        //AnalysisScheduler scheduler = new AnalysisScheduler(this.threads, classLoader);
+
+        // AnalysisResult result;
+        List<Problem> unreducedProblems = new ArrayList<>();
         try (TempLocation tempLinterLocation = this.tempLocation.createTempDirectory("linter")) {
             for (var entry : linterChecks.entrySet()) {
                 CodeLinter linter = entry.getKey();
@@ -129,7 +143,7 @@ public final class Linter implements AbstractLinter {
                     continue;
                 }
 
-                scheduler.submitTask((s, reporter) -> {
+                /*scheduler.submitTask((s, reporter) -> {
                     reporter.reportProblems(linter.lint(
                         file,
                         tempLinterLocation,
@@ -137,19 +151,19 @@ public final class Linter implements AbstractLinter {
                         associatedChecks,
                         statusConsumer
                     ));
-                });
-            }
-
-            result = scheduler.collectProblems();
-            if (result.failed()) {
-                throw new LinterException(result.thrownException());
+                });*/
+                unreducedProblems.addAll(linter.lint(
+                    file,
+                    tempLinterLocation,
+                    this.classLoader,
+                    associatedChecks,
+                    statusConsumer
+                ));
             }
         }
 
-        var unreducedProblems = result.problems();
         if (!checkConfiguration.problemsToReport().isEmpty()) {
-            unreducedProblems = result
-                .problems()
+            unreducedProblems = unreducedProblems
                 .stream()
                 .filter(problem -> checkConfiguration.problemsToReport().contains(problem.getProblemType()))
                 .toList();
