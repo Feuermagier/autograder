@@ -21,6 +21,7 @@ public class BooleanIdentifierCheck extends IntegratedCheck {
                     return;
                 }
 
+                //
                 String methodName = ctMethod.getSimpleName();
                 if (ctMethod.getType().equals(ctMethod.getFactory().Type().booleanPrimitiveType())
                     && methodName.startsWith("get")) {
