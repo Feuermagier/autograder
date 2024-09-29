@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -43,7 +42,7 @@ public class UseEntrySet extends IntegratedCheck {
             public void process(CtForEach ctForEach) {
                 if (ctForEach.isImplicit()
                     || !ctForEach.getPosition().isValidPosition()
-                    || !(ExpressionUtil.resolveCtExpression(ctForEach.getExpression()) instanceof CtInvocation<?> ctInvocation)
+                    || !(ctForEach.getExpression() instanceof CtInvocation<?> ctInvocation)
                     || !hasInvokedKeySet(ctInvocation)
                     || !ctForEach.getExpression().getPosition().isValidPosition()) {
                     return;

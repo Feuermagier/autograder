@@ -143,4 +143,29 @@ class TestUseEntrySet extends AbstractCheckTest {
         }
         problems.assertExhausted();
     }
+
+    @Test
+    void testResolvesGeneric() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                import java.util.Map;
+                import java.util.HashMap;
+
+                public class Test {
+                    private static <T extends Map<String, String>> void execute(T map) {
+                        for (var mapKey : map.keySet()) {
+                            System.out.println(map.get(mapKey));
+                            System.out.println(map.get(mapKey));
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertShouldUseEntrySet(problems.next(), "map.keySet()", "map.entrySet()");
+
+        problems.assertExhausted();
+    }
 }
