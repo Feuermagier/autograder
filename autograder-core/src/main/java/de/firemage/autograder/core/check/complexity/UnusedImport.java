@@ -108,12 +108,20 @@ public class UnusedImport extends IntegratedCheck {
                 filter,
                 new TypeFilter<>(CtJavaDoc.class),
                 ctJavaDoc -> {
-                    JavadocParser parser = new JavadocParser(ctJavaDoc.getRawContent(), ctJavaDoc.getParent());
+                    try {
+                        JavadocParser parser = new JavadocParser(ctJavaDoc.getRawContent(), ctJavaDoc.getParent());
 
-                    return parser.parse()
-                        .stream()
-                        .flatMap(element -> element.accept(new ReferenceFinder()).stream())
-                        .anyMatch(otherReference -> isReferencingTheSameElement(ctReference, otherReference));
+                        return parser.parse()
+                            .stream()
+                            .flatMap(element -> element.accept(new ReferenceFinder()).stream())
+                            .anyMatch(otherReference -> isReferencingTheSameElement(ctReference, otherReference));
+                    } catch (AssertionError e) {
+                        // the javadoc parser did throw an assertion error on javadoc that was not valid, but the code did compile,
+                        // so this is caught here to prevent the whole thing from crashing;
+                        //
+                        // The javadoc in question was:  "/**\n     * @param length the {@param string} and {@param value}.\n     */"
+                        return false;
+                    }
                 }
             )).first(CtJavaDoc.class) != null;
     }
