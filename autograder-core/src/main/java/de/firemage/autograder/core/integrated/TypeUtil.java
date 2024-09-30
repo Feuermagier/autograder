@@ -192,8 +192,7 @@ public final class TypeUtil {
             }
 
             // primitive types and strings are immutable as well:
-            if (ctType.getReference().unbox().isPrimitive()
-                || isTypeEqualTo(ctType.getReference(), String.class)) {
+            if (ctType.getReference().unbox().isPrimitive() || isString(ctType.getReference()) || ctType.isEnum()) {
                 continue;
             }
 

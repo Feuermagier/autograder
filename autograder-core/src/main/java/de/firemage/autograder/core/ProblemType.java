@@ -429,6 +429,12 @@ public enum ProblemType implements AbstractProblemType {
     FIELD_SHOULD_BE_CONSTANT,
 
     /**
+     * Reports code where a local variable could be a constant.
+     */
+    @HasFalsePositives
+    LOCAL_VARIABLE_SHOULD_BE_CONSTANT,
+
+    /**
      * Tries to find classes that are exclusively used for constants.
      * <br>
      * Difficult to detect reliably and everyone has a different opinion on what a constant class is.
@@ -854,12 +860,6 @@ public enum ProblemType implements AbstractProblemType {
      */
     @HasFalsePositives
     USE_FORMAT_STRING,
-
-    /**
-     * Reports code where a local variable could be a constant.
-     */
-    @HasFalsePositives
-    LOCAL_VARIABLE_SHOULD_BE_CONSTANT,
 
     /**
      * Suggests using EnumMap or EnumSet.

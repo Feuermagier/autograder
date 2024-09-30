@@ -15,7 +15,7 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
+class TestVariableShouldBeConstant extends AbstractCheckTest {
     private static final List<ProblemType> PROBLEM_TYPES = List.of(
         ProblemType.FIELD_SHOULD_BE_CONSTANT,
         ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
