@@ -180,6 +180,12 @@ public enum ProblemType implements AbstractProblemType {
     CHAR_RANGE,
 
     /**
+     * Suggests using `Arrays.copyOf` instead of `System.arraycopy`.
+     */
+    @HasFalsePositives
+    USE_ARRAYS_COPY_OF,
+
+    /**
      * Similar to {@link ProblemType#INCONSISTENT_COMMENT_LANGUAGE}, but reports comments where the AI thinks that the comment is neither german nor english.
      * <br>
      * Not very reliable and does not detect the obvious cases like japanese characters.
