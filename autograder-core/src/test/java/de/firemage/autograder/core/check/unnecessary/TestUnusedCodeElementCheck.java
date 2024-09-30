@@ -1027,4 +1027,65 @@ class TestUnusedCodeElementCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testUnusedForCounter() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                class Test {
+                    void test(int count) {
+                        String result = "";
+                        for (int i = 0; result.length() < count;) {
+                            result += "a";
+                        }
+                        System.out.println(result);
+                    }
+                    
+                    public static void main(String[] args) {
+                        new Test().test(10);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsUnused(problems.next(), "i");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testUsedForCounter() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                class Test {
+                    void test(int count) {
+                        String result = "";
+                        for (int i = 0; result.length() < count; i++) {
+                            result += "a" + i;
+                        }
+                        System.out.println(result);
+                        test2(count);
+                    }
+
+                    void test2(int count) {
+                        String result = "";
+                        for (int i = 0; i < result.length() + count; i++) {
+                            result += "a";
+                        }
+                        System.out.println(result);
+                    }
+
+                    public static void main(String[] args) {
+                        new Test().test(10);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

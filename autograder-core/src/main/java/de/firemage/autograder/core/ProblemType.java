@@ -534,6 +534,14 @@ public enum ProblemType implements AbstractProblemType {
     LOOP_SHOULD_BE_FOR,
 
     /**
+     * Reports loops that can be replaced with a while loop.
+     * <br>
+     * This check is not trivial and likely has false-positives.
+     */
+    @HasFalsePositives
+    LOOP_SHOULD_BE_WHILE,
+
+    /**
      * Reports methods that do not have an override annotation, but override a method.
      * <br>
      * Had false positives in the past.
