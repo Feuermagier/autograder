@@ -174,6 +174,12 @@ public enum ProblemType implements AbstractProblemType {
     MUTABLE_ENUM,
 
     /**
+     * Suggests using {@link String#substring(int)} instead of {@link String#substring(int, int)} when possible.
+     */
+    @HasFalsePositives
+    SIMPLIFY_STRING_SUBSTRING,
+
+    /**
      * Reports code where methods Character.isDigit are reimplemented (e.g. `c >= '0' && c <= '9'`).
      */
     @HasFalsePositives
