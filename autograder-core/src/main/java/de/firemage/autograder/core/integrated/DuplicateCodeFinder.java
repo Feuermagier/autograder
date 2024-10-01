@@ -108,6 +108,19 @@ public final class DuplicateCodeFinder {
             return Math.max(count, 1);
         }
 
+        public boolean isMoreThanOrEqualTo(int threshold) {
+            int size = 0;
+            // TODO: this could be optimized in the future by stopping getElements when the threshold is reached
+            for (var statement : this.left) {
+                size += countStatements(statement);
+                if (size >= threshold) {
+                    return true;
+                }
+            }
+
+            return Math.max(size, 1) >= threshold;
+        }
+
         public List<StructuralEqualsVisitor.Difference> differences() {
             return StreamSupport.stream(zip(this.left, this.right).spliterator(), false)
                 .flatMap(entry -> StructuralEqualsVisitor.findDifferences(entry.getKey(), entry.getValue()).stream())

@@ -45,7 +45,7 @@ public class DuplicateCode extends IntegratedCheck {
     public static boolean isConsideredDuplicateCode(List<CtStatement> left, List<CtStatement> right) {
         var duplicate = new DuplicateCodeFinder.DuplicateCode(left, right);
 
-        if (duplicate.size() < MINIMUM_DUPLICATE_STATEMENT_SIZE) {
+        if (!duplicate.isMoreThanOrEqualTo(MINIMUM_DUPLICATE_STATEMENT_SIZE)) {
             return false;
         }
 
