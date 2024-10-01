@@ -37,19 +37,25 @@ public final class DuplicateCodeFinder {
             }
         });
 
-        /*Map<Integer, List<Object>> collisions = new HashMap<>();
-        for (var key : this.occurrences.keySet()) {
-            this.collisions.computeIfAbsent(key.hashCode(), k -> new ArrayList<>()).add(key);
+        if (CoreUtil.isInDebugMode()) {
+            Map<Integer, List<Object>> collisions = new HashMap<>();
+            for (var key : this.occurrences.keySet()) {
+                collisions.computeIfAbsent(key.hashCode(), k -> new ArrayList<>()).add(key);
+            }
+
+            /*var mostCommonCollisions = collisions.values()
+                .stream()
+                .filter(list -> list.size() > 1)
+                .sorted((a, b) -> Integer.compare(b.size(), a.size()))
+                .limit(10)
+                .toList();*/
+
+            int numberOfDuplicateHashCodes = this.occurrences.size() - collisions.size();
+
+            if (numberOfDuplicateHashCodes > 20) {
+                throw new IllegalStateException("Too many hash collisions %d of %d elements.".formatted(numberOfDuplicateHashCodes, this.occurrences.size()));
+            }
         }
-
-        var mostCommonCollisions = collisions.values()
-            .stream()
-            .filter(list -> list.size() > 1)
-            .sorted((a, b) -> Integer.compare(b.size(), a.size()))
-            .limit(10)
-            .toList();
-        System.out.println("Number of duplicate hashCodes: " + (occurrences.size() - collisions.size()) + " of " + occurrences.size() + " elements");*/
-
     }
 
     public static void buildFor(CtModel model) {

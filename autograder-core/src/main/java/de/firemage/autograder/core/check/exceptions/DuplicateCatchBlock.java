@@ -76,7 +76,6 @@ public class DuplicateCatchBlock extends IntegratedCheck {
                     return;
                 }
 
-                // TODO: for large blocks this might trigger the duplicate code check, which would be two annotations for the same problem
                 List<CtCatch> catchers = ctTry.getCatchers();
                 // this likely happens for try-with blocks without a catch:
                 if (catchers.size() < 2) {
