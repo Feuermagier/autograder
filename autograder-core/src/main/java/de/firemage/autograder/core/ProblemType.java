@@ -58,6 +58,12 @@ public enum ProblemType implements AbstractProblemType {
     DUPLICATE_CATCH_BLOCK,
 
     /**
+     * Reports duplicate if blocks that could be merged by adjusting the condition.
+     */
+    @HasFalsePositives
+    DUPLICATE_IF_BLOCK,
+
+    /**
      * Reports unused assignments
      */
     @HasFalsePositives
