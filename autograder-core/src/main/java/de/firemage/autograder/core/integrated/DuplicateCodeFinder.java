@@ -37,25 +37,26 @@ public final class DuplicateCodeFinder {
             }
         });
 
+        /*
         if (CoreUtil.isInDebugMode()) {
             Map<Integer, List<Object>> collisions = new HashMap<>();
             for (var key : this.occurrences.keySet()) {
                 collisions.computeIfAbsent(key.hashCode(), k -> new ArrayList<>()).add(key);
             }
 
-            /*var mostCommonCollisions = collisions.values()
+            var mostCommonCollisions = collisions.values()
                 .stream()
                 .filter(list -> list.size() > 1)
                 .sorted((a, b) -> Integer.compare(b.size(), a.size()))
                 .limit(10)
-                .toList();*/
+                .toList();
 
             int numberOfDuplicateHashCodes = this.occurrences.size() - collisions.size();
 
             if (numberOfDuplicateHashCodes > 20) {
                 throw new IllegalStateException("Too many hash collisions %d of %d elements.".formatted(numberOfDuplicateHashCodes, this.occurrences.size()));
             }
-        }
+        }*/
     }
 
     public static void buildFor(CtModel model) {
