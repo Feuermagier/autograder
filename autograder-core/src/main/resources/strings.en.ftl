@@ -191,6 +191,7 @@ magic-string = The string '{$value}' should be in a constant. See the wiki artic
 loop-should-be-do-while = This loop should be a do-while loop, because the code before the loop is the same as the code in the loop: {$suggestion}
 
 loop-should-be-for = This loop should be a for-loop: {$suggestion}
+loop-should-be-while = This loop should be a while-loop: {$suggestion}
 
 # Naming
 bool-getter-name = For boolean getters it is recommended to use a verb as a prefix. For example '{$newName}' instead of '{$oldName}'.

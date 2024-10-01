@@ -3,7 +3,6 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
@@ -27,6 +26,15 @@ public class UseEntrySet extends IntegratedCheck {
             && ctInvocation.getExecutable().getSimpleName().equals("keySet");
     }
 
+    private static String makeSuggestion(CtInvocation<?> ctInvocation) {
+        String suggestion = "%s.entrySet()".formatted(ctInvocation.getTarget());
+        if (suggestion.startsWith(".")) {
+            suggestion = suggestion.substring(1);
+        }
+
+        return suggestion;
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtForEach>() {
@@ -34,7 +42,7 @@ public class UseEntrySet extends IntegratedCheck {
             public void process(CtForEach ctForEach) {
                 if (ctForEach.isImplicit()
                     || !ctForEach.getPosition().isValidPosition()
-                    || !(ExpressionUtil.resolveCtExpression(ctForEach.getExpression()) instanceof CtInvocation<?> ctInvocation)
+                    || !(ctForEach.getExpression() instanceof CtInvocation<?> ctInvocation)
                     || !hasInvokedKeySet(ctInvocation)
                     || !ctForEach.getExpression().getPosition().isValidPosition()) {
                     return;
@@ -61,7 +69,12 @@ public class UseEntrySet extends IntegratedCheck {
                 if (!invocations.isEmpty()) {
                     addLocalProblem(
                         ctForEach.getExpression(),
-                        new LocalizedMessage("suggest-replacement", Map.of("original", "keySet()", "suggestion", "entrySet()")),
+                        new LocalizedMessage(
+                            "suggest-replacement",
+                            Map.of(
+                                "original", ctInvocation,
+                                "suggestion", makeSuggestion(ctInvocation)
+                            )),
                         ProblemType.USE_ENTRY_SET
                     );
                 }

@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
-public class StatementUtil {
+public final class StatementUtil {
     private StatementUtil() {
     }
 
@@ -138,6 +138,12 @@ public class StatementUtil {
         }
 
         return tryMakeEffect(statements.get(0));
+    }
+
+    public static boolean isTerminal(CtStatement ctStatement) {
+        List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctStatement);
+
+        return !statements.isEmpty() && tryMakeEffect(statements.get(statements.size() - 1)).map(TerminalEffect.class::isInstance).orElse(false);
     }
 
     public static List<Effect> getCasesEffects(Iterable<? extends CtCase<?>> ctCases) {

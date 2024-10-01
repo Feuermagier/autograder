@@ -1,12 +1,12 @@
-package de.firemage.autograder.extra.check.general;
+package de.firemage.autograder.core.check.naming;
 
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.core.file.StringSourceInfo;
 import de.firemage.autograder.core.check.AbstractCheckTest;
-import de.firemage.autograder.api.JavaVersion;
+import de.firemage.autograder.core.file.StringSourceInfo;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -15,76 +15,79 @@ import java.util.Map;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
-class TestConstantNamingAndQualifierCheck extends AbstractCheckTest {
-    private static final List<ProblemType> PROBLEM_TYPES = List.of(
-        ProblemType.FIELD_SHOULD_BE_CONSTANT,
-        ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
-    );
+class TestBooleanIdentifierCheck extends AbstractCheckTest {
+    private static final List<ProblemType> PROBLEM_TYPES = List.of(ProblemType.BOOLEAN_GETTER_NOT_CALLED_IS);
 
-    private void assertProblem(Problem problem, String variable, String suggestion) {
+    private void assertName(Problem problem, String methodName, String newName) {
         assertEquals(
             this.linter.translateMessage(
                 new LocalizedMessage(
-                    "variable-should-be",
+                    "bool-getter-name",
                     Map.of(
-                        "variable", variable,
-                        "suggestion", suggestion
+                        "oldName", methodName,
+                        "newName", newName
                     )
-                )
-            ),
+                )),
             this.linter.translateMessage(problem.getExplanation())
         );
     }
 
     @Test
-    void testDefaultVisibility() throws LinterException, IOException {
+    void testGetter() throws LinterException, IOException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
                 public class Test {
-                    String exampleConstant = "example";
-                }
-                """
-        ), PROBLEM_TYPES);
-
-        assertProblem(problems.next(), "exampleConstant", "static final String EXAMPLE_CONSTANT = \"example\"");
-
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testOtherVisibility() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    private final int variable = 1;
-                }
-                """
-        ), PROBLEM_TYPES);
-
-        assertProblem(problems.next(), "variable", "private static final int VARIABLE = 1");
-
-        problems.assertExhausted();
-    }
-
-    @Test
-    void testLocalFinalVariableWithWrongNamingConvention() throws LinterException, IOException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    void foo() {
-                        final int DAMAGE = 1;
+                    public boolean getValue() { /*# not ok #*/
+                        return true;
                     }
                 }
                 """
         ), PROBLEM_TYPES);
 
-        assertProblem(problems.next(), "DAMAGE", "private static final int DAMAGE = 1");
+        assertName(problems.next(), "getValue", "isValue");
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCorrectlyNamedGetter() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public boolean hasValue() {
+                        return true;
+                    }
+
+                    public boolean isValue() {
+                        return true;
+                    }
+                    
+                    public boolean value() {
+                        return true;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testBooleanArray() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public boolean[] getValue() {
+                        return null;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
 
         problems.assertExhausted();
     }

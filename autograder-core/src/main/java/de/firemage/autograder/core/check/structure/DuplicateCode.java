@@ -4,26 +4,20 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.CoreUtil;
+import de.firemage.autograder.core.integrated.DuplicateCodeFinder;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.structure.StructuralElement;
-import de.firemage.autograder.core.integrated.structure.StructuralEqualsVisitor;
-import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtComment;
 import spoon.reflect.code.CtStatement;
-import spoon.reflect.code.CtStatementList;
 import spoon.reflect.cu.SourcePosition;
 import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.visitor.CtScanner;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -44,148 +38,48 @@ public class DuplicateCode extends IntegratedCheck {
         );
     }
 
-    private static int countStatements(CtStatement ctStatement) {
-        int count = ctStatement.getElements(ctElement -> ctElement instanceof CtStatement
-            && !(ctElement instanceof CtComment)
-            && !(ctElement instanceof CtStatementList)
-            && ctElement.getPosition().isValidPosition()
-            && !ctElement.isImplicit()
-        ).size();
-
-        return Math.max(count, 1);
+    private static boolean isAnyStatementIn(DuplicateCodeFinder.DuplicateCode duplicate, Collection<? extends CtElement> elements) {
+        return duplicate.left().stream().anyMatch(elements::contains) || duplicate.right().stream().anyMatch(elements::contains);
     }
 
-    private static <K, V> Iterable<Map.Entry<K, V>> zip(Iterable<K> keys, Iterable<V> values) {
-        return () -> new Iterator<>() {
-            private final Iterator<K> keyIterator = keys.iterator();
-            private final Iterator<V> valueIterator = values.iterator();
+    public static boolean isConsideredDuplicateCode(List<CtStatement> left, List<CtStatement> right) {
+        var duplicate = new DuplicateCodeFinder.DuplicateCode(left, right);
 
-            @Override
-            public boolean hasNext() {
-                return this.keyIterator.hasNext() && this.valueIterator.hasNext();
-            }
-
-            @Override
-            public Map.Entry<K, V> next() {
-                return Map.entry(this.keyIterator.next(), this.valueIterator.next());
-            }
-        };
-    }
-
-    private record CodeSegment(List<CtStatement> statements) implements Iterable<CtStatement> {
-        public CodeSegment {
-            statements = new ArrayList<>(statements);
+        if (!duplicate.isMoreThanOrEqualTo(MINIMUM_DUPLICATE_STATEMENT_SIZE)) {
+            return false;
         }
 
-        public static CodeSegment of(CtStatement... statement) {
-            return new CodeSegment(Arrays.asList(statement));
-        }
+        MethodUtil.UnnamedMethod leftMethod = MethodUtil.createMethodFrom(null, duplicate.left());
+        MethodUtil.UnnamedMethod rightMethod = MethodUtil.createMethodFrom(null, duplicate.right());
 
-        public void add(CtStatement ctStatement) {
-            this.statements.add(ctStatement);
-        }
-
-        public CtStatement getFirst() {
-            return this.statements.get(0);
-        }
-
-        public CtStatement getLast() {
-            return this.statements.get(this.statements.size() - 1);
-        }
-
-        public List<CtStatement> statements() {
-            return new ArrayList<>(this.statements);
-        }
-
-        @Override
-        public Iterator<CtStatement> iterator() {
-            return this.statements().iterator();
-        }
+        return leftMethod.canBeMethod() && rightMethod.canBeMethod();
     }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
-        Map<StructuralElement<CtStatement>, List<CtStatement>> occurrences = new HashMap<>();
-        staticAnalysis.getModel().processWith(new AbstractProcessor<CtStatement>() {
-            @Override
-            public void process(CtStatement ctStatement) {
-                if (ctStatement.isImplicit() || !ctStatement.getPosition().isValidPosition()) {
-                    return;
-                }
-
-                occurrences.computeIfAbsent(
-                    new StructuralElement<>(ctStatement),
-                    key -> new ArrayList<>()
-                ).add(ctStatement);
-            }
-        });
-
-        Map<Integer, List<Object>> collisions = new HashMap<>();
-        for (var key : occurrences.keySet()) {
-            collisions.computeIfAbsent(key.hashCode(), k -> new ArrayList<>()).add(key);
-        }
-
-        /*
-        var mostCommonCollisions = collisions.values()
-            .stream()
-            .filter(list -> list.size() > 1)
-            .sorted((a, b) -> Integer.compare(b.size(), a.size()))
-            .limit(10)
-            .toList();
-        System.out.println("Number of duplicate hashCodes: " + (occurrences.size() - collisions.size()) + " of " + occurrences.size() + " elements");*/
-
-        Set<CtElement> reported = new HashSet<>();
+        Set<CtElement> reported = Collections.newSetFromMap(new IdentityHashMap<>());
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             private void checkCtStatement(CtStatement ctStatement) {
                 if (ctStatement.isImplicit() || !ctStatement.getPosition().isValidPosition()) {
                     return;
                 }
 
-                List<CtStatement> duplicates = occurrences.get(new StructuralElement<>(ctStatement));
-
-                int initialSize = countStatements(ctStatement);
-                for (CtStatement duplicate : duplicates) {
-                    if (duplicate == ctStatement || reported.contains(duplicate) || reported.contains(ctStatement)) {
-                        continue;
-                    }
-
-                    int duplicateStatementSize = initialSize;
-
-                    CodeSegment leftCode = CodeSegment.of(ctStatement);
-                    CodeSegment rightCode = CodeSegment.of(duplicate);
-
-                    for (var entry : zip(StatementUtil.getNextStatements(ctStatement), StatementUtil.getNextStatements(duplicate))) {
-                        if (!StructuralEqualsVisitor.equals(entry.getKey(), entry.getValue())) {
-                            break;
-                        }
-
-                        leftCode.add(entry.getKey());
-                        rightCode.add(entry.getValue());
-                        duplicateStatementSize += countStatements(entry.getKey());
-                    }
-
-                    if (duplicateStatementSize < MINIMUM_DUPLICATE_STATEMENT_SIZE) {
-                        continue;
-                    }
-
-                    MethodUtil.UnnamedMethod leftMethod = MethodUtil.createMethodFrom(null, leftCode.statements());
-                    MethodUtil.UnnamedMethod rightMethod = MethodUtil.createMethodFrom(null, rightCode.statements());
-
-                    if (!leftMethod.canBeMethod() || !rightMethod.canBeMethod()) {
+                for (var duplicate : DuplicateCodeFinder.findDuplicates(ctStatement)) {
+                    if (isAnyStatementIn(duplicate, reported) || !isConsideredDuplicateCode(duplicate.left(), duplicate.right())) {
                         continue;
                     }
 
                     // prevent duplicate reporting of the same code segments
-                    reported.addAll(leftCode.statements());
-                    reported.addAll(rightCode.statements());
+                    reported.addAll(duplicate.left());
+                    reported.addAll(duplicate.right());
 
                     addLocalProblem(
                         ctStatement,
                         new LocalizedMessage(
                             "duplicate-code",
                             Map.of(
-                                "left", formatSourceRange(leftCode.getFirst(), leftCode.getLast()),
-                                "right", formatSourceRange(rightCode.getFirst(), rightCode.getLast())
+                                "left", formatSourceRange(duplicate.left().get(0), duplicate.left().get(duplicate.left().size() - 1)),
+                                "right", formatSourceRange(duplicate.right().get(0), duplicate.right().get(duplicate.right().size() - 1))
                             )
                         ),
                         ProblemType.DUPLICATE_CODE

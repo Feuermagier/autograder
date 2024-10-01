@@ -26,7 +26,7 @@ import java.util.Set;
     ProblemType.FIELD_SHOULD_BE_CONSTANT,
     ProblemType.LOCAL_VARIABLE_SHOULD_BE_CONSTANT
 })
-public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
+public class VariableShouldBeConstant extends IntegratedCheck {
     private static final Set<String> IGNORE_FIELDS = Set.of("serialVersionUID");
 
     private static String getVisibilityString(CtModifiable ctModifiable) {
@@ -67,9 +67,8 @@ public class ConstantNamingAndQualifierCheck extends IntegratedCheck {
                     return;
                 }
 
-                // only check primitive types and strings, because other types may be mutable like list
-                // and should therefore not be static, even if they are final
-                if (!ctVariable.getType().unbox().isPrimitive() && !TypeUtil.isString(ctVariable.getType())) {
+                // only immutable types can be constant, mutable types would be global state which should be avoided
+                if (!TypeUtil.isImmutable(ctVariable.getType())) {
                     return;
                 }
 

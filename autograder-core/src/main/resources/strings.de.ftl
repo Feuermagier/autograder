@@ -191,6 +191,7 @@ magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden
 loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
 
 loop-should-be-for = Diese Schleife sollte eine Zählschleife (for) sein: {$suggestion}
+loop-should-be-while = Diese Schleife sollte eine while Schleife sein: {$suggestion}
 
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.

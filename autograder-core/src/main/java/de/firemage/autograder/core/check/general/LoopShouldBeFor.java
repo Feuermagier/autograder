@@ -24,6 +24,7 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtUnaryOperator;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.code.CtWhile;
+import spoon.reflect.declaration.CtVariable;
 import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtFieldReference;
 
@@ -62,6 +63,48 @@ public class LoopShouldBeFor extends IntegratedCheck {
         }
     }
 
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <T> CtFieldRead<T> createUncheckedFieldRead(
+        CtExpression<T> targetExpression,
+        String fieldName
+    ) {
+        Factory factory = targetExpression.getFactory();
+        CtFieldReference<?> fieldReference = factory.createFieldReference();
+        fieldReference.setDeclaringType(targetExpression.getType().clone());
+        fieldReference.setSimpleName(fieldName);
+
+        CtFieldRead fieldRead = factory.createFieldRead();
+        fieldRead.setTarget(targetExpression.clone());
+        fieldRead.setVariable(fieldReference);
+
+        return fieldRead;
+    }
+
+    private static CtStatement findLastStatement(List<? extends CtStatement> statements, CtVariable<?> ctLocalVariable) {
+        // this finds the last statement that uses the control variable
+        // and ensures that it is an assignment to the control variable
+        for (int i = statements.size() - 1; i >= 0; i--) {
+            CtStatement statement = statements.get(i);
+
+            // ensure that the last statement is an assignment to the loop variable
+            if ((statement instanceof CtAssignment<?, ?> ctAssignment
+                && ctAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite
+                && ctVariableWrite.getVariable().equals(ctLocalVariable.getReference()))
+                || (statement instanceof CtUnaryOperator<?> ctUnaryOperator
+                && ctUnaryOperator.getOperand() instanceof CtVariableWrite<?> ctWrite
+                && ctWrite.getVariable().equals(ctLocalVariable.getReference()))) {
+                return statement;
+            }
+
+            // the control variable is used after the update statement or there is no update statement
+            if (UsesFinder.variableUses(ctLocalVariable).nestedIn(statement).hasAny()) {
+                return null;
+            }
+        }
+
+        return null;
+    }
+
     private static LoopSuggestion getCounter(CtLoop ctLoop) {
         List<CtStatement> statements = StatementUtil.getEffectiveStatements(ctLoop.getBody());
 
@@ -79,26 +122,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
             return null;
         }
 
-        CtStatement lastStatement = null;
-        for (int i = statements.size() - 1; i >= 0; i--) {
-            CtStatement statement = statements.get(i);
-
-            // ensure that the last statement is an assignment to the loop variable
-            if ((statement instanceof CtAssignment<?, ?> ctAssignment
-                && ctAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite
-                && ctVariableWrite.getVariable().equals(ctLocalVariable.getReference()))
-                || (statement instanceof CtUnaryOperator<?> ctUnaryOperator
-                && ctUnaryOperator.getOperand() instanceof CtVariableWrite<?> ctWrite
-                && ctWrite.getVariable().equals(ctLocalVariable.getReference()))) {
-                lastStatement = statement;
-                break;
-            }
-
-            // the control variable is used after the update statement or there is no update statement
-            if (UsesFinder.variableUses(ctLocalVariable).nestedIn(statement).hasAny()) {
-                return null;
-            }
-        }
+        CtStatement lastStatement = findLastStatement(statements, ctLocalVariable);
 
         // could not find an update statement => ignoring loop suggestion
         if (lastStatement == null) {
@@ -106,9 +130,8 @@ public class LoopShouldBeFor extends IntegratedCheck {
         }
 
         // ignore loops where the control variable is updated more than once in the body
-        CtStatement finalLastStatement = lastStatement;
         boolean isUpdatedMultipleTimes = statements.stream()
-            .filter(statement -> statement != finalLastStatement)
+            .filter(statement -> statement != lastStatement)
             .anyMatch(
                 statement -> UsesFinder.variableUses(ctLocalVariable).ofType(CtVariableWrite.class).nestedIn(statement).hasAny());
 
@@ -158,13 +181,7 @@ public class LoopShouldBeFor extends IntegratedCheck {
             CtExpression<?> upperBound;
 
             if (ctForEach.getExpression().getType().isArray()) {
-                CtFieldReference<?> arrayLengthReference = factory.createFieldReference();
-                arrayLengthReference.setDeclaringType(ctForEach.getExpression().getType().clone());
-                arrayLengthReference.setSimpleName("length");
-                CtFieldRead fieldRead = factory.createFieldRead();
-                fieldRead.setTarget(ctForEach.getExpression().clone());
-                fieldRead.setVariable(arrayLengthReference);
-                upperBound = fieldRead;
+                upperBound = createUncheckedFieldRead(ctForEach.getExpression(), "length");
             } else {
                 var methods = ctForEach.getExpression().getType().getTypeDeclaration().getMethodsByName("size");
                 if (methods.isEmpty()) {

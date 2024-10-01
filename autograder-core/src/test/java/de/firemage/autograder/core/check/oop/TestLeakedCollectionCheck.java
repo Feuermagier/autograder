@@ -985,4 +985,30 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+
+    @Test
+    void testSelfAssignment() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.Collection;
+
+                public class Zoo {
+                    private Collection<String> animals = null;
+
+                    public Zoo() {
+                        this.animals = animals;
+                    }
+
+                    public Collection<String> getAnimals() {
+                        return this.animals;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

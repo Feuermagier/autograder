@@ -116,6 +116,10 @@ public class FieldShouldBeFinal extends IntegratedCheck {
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
+        if (!staticAnalysis.getCodeModel().hasMainMethod()) {
+            return;
+        }
+
         staticAnalysis.processWith(new AbstractProcessor<CtField<?>>() {
             @Override
             public void process(CtField<?> ctField) {

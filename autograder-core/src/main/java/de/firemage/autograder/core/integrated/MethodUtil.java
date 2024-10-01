@@ -42,6 +42,15 @@ public final class MethodUtil {
         );
     }
 
+    /**
+     * Checks if the given executable reference has the given signature.
+     *
+     * @param ctExecutableReference the executable reference to check
+     * @param returnType the expected return type or null if the return type should not be checked
+     * @param methodName the name of the method
+     * @param parameterTypes the expected parameter types
+     * @return true if the signature matches, false otherwise
+     */
     public static boolean isSignatureEqualTo(
         CtExecutableReference<?> ctExecutableReference,
         Class<?> returnType,
@@ -51,7 +60,7 @@ public final class MethodUtil {
         TypeFactory factory = ctExecutableReference.getFactory().Type();
         return MethodUtil.isSignatureEqualTo(
             ctExecutableReference,
-            factory.createReference(returnType),
+            returnType == null ? null : factory.createReference(returnType),
             methodName,
             Arrays.stream(parameterTypes).map(factory::createReference).toArray(CtTypeReference[]::new)
         );
@@ -64,7 +73,7 @@ public final class MethodUtil {
         CtTypeReference<?>... parameterTypes
     ) {
         // check that they both return the same type
-        if (!TypeUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)) {
+        if (returnType != null && !TypeUtil.isTypeEqualTo(ctExecutableReference.getType(), returnType)) {
             return false;
         }
 

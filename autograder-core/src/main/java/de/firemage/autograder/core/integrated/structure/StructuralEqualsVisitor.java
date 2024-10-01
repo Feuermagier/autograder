@@ -3,6 +3,7 @@ package de.firemage.autograder.core.integrated.structure;
 import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.VariableUtil;
 import de.firemage.autograder.core.integrated.CoreUtil;
+import spoon.reflect.code.CtCatchVariable;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtLocalVariable;
 import spoon.reflect.code.CtVariableRead;
@@ -27,6 +28,12 @@ public final class StructuralEqualsVisitor extends EqualsVisitor {
     private final Set<Difference> differences;
 
     public record Difference(CtRole role, Object left, Object right) {}
+
+    public static Set<Difference> findDifferences(CtElement left, CtElement right) {
+        var visitor = new  StructuralEqualsVisitor();
+        visitor.checkEquals(left, right);
+        return visitor.differences();
+    }
 
     public StructuralEqualsVisitor() {
         this.differences = new LinkedHashSet<>();
@@ -78,7 +85,7 @@ public final class StructuralEqualsVisitor extends EqualsVisitor {
 
         // NOTE: element might be a collection of CtElements
 
-        if (role == CtRole.NAME && CoreUtil.isInstanceOfAny(element, CtLocalVariable.class, CtField.class, CtParameter.class)) {
+        if (role == CtRole.NAME && CoreUtil.isInstanceOfAny(element, CtLocalVariable.class, CtField.class, CtParameter.class, CtCatchVariable.class)) {
             return true;
         }
 

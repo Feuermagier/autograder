@@ -1,3 +1,0 @@
-naming.BooleanIdentifierCheck
-Boolean identifier should be prefixed by a verb like is
-Test.java:6

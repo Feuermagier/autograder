@@ -135,15 +135,13 @@ public final class TypeUtil {
     }
 
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
-        // NOTE: calling isSubtypeOf on CtTypeParameterReference will result in a crash
         CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
 
-        if (ctTypeReference.getTypeDeclaration() == null) {
+        if (ctTypeReference.getTypeDeclaration() == null || ctTypeReference instanceof CtTypeParameterReference) {
             return ctTypeReference.isSubtypeOf(expectedType.getReference());
         }
 
-        return !(ctTypeReference instanceof CtTypeParameterReference)
-            && UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
+        return UsesFinder.isSubtypeOf(ctTypeReference.getTypeDeclaration(), expectedType);
     }
 
     /**
@@ -194,8 +192,7 @@ public final class TypeUtil {
             }
 
             // primitive types and strings are immutable as well:
-            if (ctType.getReference().unbox().isPrimitive()
-                || isTypeEqualTo(ctType.getReference(), String.class)) {
+            if (ctType.getReference().unbox().isPrimitive() || isString(ctType.getReference()) || ctType.isEnum()) {
                 continue;
             }
 

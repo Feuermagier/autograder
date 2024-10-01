@@ -45,6 +45,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     void foo() {
                         this.value = "Value";
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -69,6 +71,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     public String toString() {
                         return this.value;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -90,6 +94,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     Test() {
                         this.value = 2;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -109,6 +115,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     Test() {
                         this.value = 2;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -132,6 +140,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     protected A(String value) {
                         this.value = value;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -152,6 +162,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     User() {
                         this.id = nextId++;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -172,6 +184,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     User() {
                         this.id = nextId;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -195,6 +209,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         nextId = 1;
                         this.id = nextId;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -216,6 +232,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         nextId = next;
                         this.id = next;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -234,6 +252,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         this.name = name;
                         this.id = id;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -258,6 +278,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     public int getId() {
                         return id;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -289,6 +311,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         public int getId() {
                             return id;
                         }
+
+                        public static void main(String[] args) {}
                     }
                     """
                 ),
@@ -329,6 +353,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         this.id = id;
                         this.name = name;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -361,6 +387,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     public User() {
                         // no name and id init -> name = null, id = 0
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -386,6 +414,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                             this.id = 1;
                         }
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -413,6 +443,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                             this.id = 0;
                         }
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -443,6 +475,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         
                         this.id = 5;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -469,6 +503,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
 
                         this.id = 0;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -494,6 +530,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                             this.id = 1;
                         }
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -520,6 +558,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     public void update() {
                         next += 1;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -542,6 +582,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                         this.name = name;
                         this.id = 0;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -557,6 +599,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
             """
                 public class User {
                     private int id = 1;
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -573,7 +617,9 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
             JavaVersion.JAVA_17,
             "User",
             """
-                public record User(int id, String name) {}
+                public record User(int id, String name) {
+                    public static void main(String[] args) {}
+                }
                 """
         ), PROBLEM_TYPES);
 
@@ -588,6 +634,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
             """
                 public record User(int id, String name) {
                     private static String ADMIN_NAME = "admin";
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);
@@ -613,6 +661,8 @@ class TestFieldShouldBeFinal extends AbstractCheckTest {
                     private void setUser(String name) {
                         this.name = name;
                     }
+
+                    public static void main(String[] args) {}
                 }
                 """
         ), PROBLEM_TYPES);

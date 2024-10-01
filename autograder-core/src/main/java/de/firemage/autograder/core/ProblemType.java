@@ -52,6 +52,18 @@ public enum ProblemType implements AbstractProblemType {
     SIMPLIFY_ARRAYS_FILL,
 
     /**
+     * Reports duplicate catch blocks that could be merged with a multi-catch block.
+     */
+    @HasFalsePositives
+    DUPLICATE_CATCH_BLOCK,
+
+    /**
+     * Reports duplicate if blocks that could be merged by adjusting the condition.
+     */
+    @HasFalsePositives
+    DUPLICATE_IF_BLOCK,
+
+    /**
      * Reports unused assignments
      */
     @HasFalsePositives
@@ -174,10 +186,22 @@ public enum ProblemType implements AbstractProblemType {
     MUTABLE_ENUM,
 
     /**
+     * Suggests using {@link String#substring(int)} instead of {@link String#substring(int, int)} when possible.
+     */
+    @HasFalsePositives
+    SIMPLIFY_STRING_SUBSTRING,
+
+    /**
      * Reports code where methods Character.isDigit are reimplemented (e.g. `c >= '0' && c <= '9'`).
      */
     @HasFalsePositives
     CHAR_RANGE,
+
+    /**
+     * Suggests using `Arrays.copyOf` instead of `System.arraycopy`.
+     */
+    @HasFalsePositives
+    USE_ARRAYS_COPY_OF,
 
     /**
      * Similar to {@link ProblemType#INCONSISTENT_COMMENT_LANGUAGE}, but reports comments where the AI thinks that the comment is neither german nor english.
@@ -429,6 +453,12 @@ public enum ProblemType implements AbstractProblemType {
     FIELD_SHOULD_BE_CONSTANT,
 
     /**
+     * Reports code where a local variable could be a constant.
+     */
+    @HasFalsePositives
+    LOCAL_VARIABLE_SHOULD_BE_CONSTANT,
+
+    /**
      * Tries to find classes that are exclusively used for constants.
      * <br>
      * Difficult to detect reliably and everyone has a different opinion on what a constant class is.
@@ -532,6 +562,14 @@ public enum ProblemType implements AbstractProblemType {
      */
     @HasFalsePositives
     LOOP_SHOULD_BE_FOR,
+
+    /**
+     * Reports loops that can be replaced with a while loop.
+     * <br>
+     * This check is not trivial and likely has false-positives.
+     */
+    @HasFalsePositives
+    LOOP_SHOULD_BE_WHILE,
 
     /**
      * Reports methods that do not have an override annotation, but override a method.
@@ -846,12 +884,6 @@ public enum ProblemType implements AbstractProblemType {
      */
     @HasFalsePositives
     USE_FORMAT_STRING,
-
-    /**
-     * Reports code where a local variable could be a constant.
-     */
-    @HasFalsePositives
-    LOCAL_VARIABLE_SHOULD_BE_CONSTANT,
 
     /**
      * Suggests using EnumMap or EnumSet.
