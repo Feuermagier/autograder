@@ -52,6 +52,12 @@ public enum ProblemType implements AbstractProblemType {
     SIMPLIFY_ARRAYS_FILL,
 
     /**
+     * Reports duplicate catch blocks that could be merged with a multi-catch block.
+     */
+    @HasFalsePositives
+    DUPLICATE_CATCH_BLOCK,
+
+    /**
      * Reports unused assignments
      */
     @HasFalsePositives

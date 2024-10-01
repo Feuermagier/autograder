@@ -1,6 +1,7 @@
 package de.firemage.autograder.core;
 
 import de.firemage.autograder.core.file.SourceInfo;
+import de.firemage.autograder.core.integrated.DuplicateCodeFinder;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.ModelBuildException;
@@ -249,6 +250,7 @@ public final class CodeModel implements AutoCloseable {
 
             MethodHierarchy.buildFor(model);
             UsesFinder.buildFor(model);
+            DuplicateCodeFinder.buildFor(model);
 
             // Only set the model at the end when everything has been initialized
             this.model = model;
