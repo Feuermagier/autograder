@@ -224,7 +224,7 @@ leaked-collection-return = The method '{$method}' returns a reference to the fie
 leaked-collection-constructor = The constructor '{$signature}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 leaked-collection-assign = The method '{$method}' assigns a reference to the field '{$field}'. This allows the field to be modified from the outside. Instead, a copy should be made before setting the field.
 
-method-abstract-exp = {$type}::{$method} should be abstract and not provide a default implementation
+method-should-be-abstract = {$type}::{$method} should be abstract and not provide a default implementation
 
 method-should-be-static = The method '{$name}' should be static, because it does not access instance attributes or methods.
 

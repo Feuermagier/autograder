@@ -4,8 +4,11 @@ import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
+import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtConstructorCall;
 import spoon.reflect.code.CtLiteral;
@@ -21,7 +24,7 @@ import java.util.Map;
 @ExecutableCheck(reportedProblems = {ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION})
 public class MethodShouldBeAbstractCheck extends IntegratedCheck {
     private static LocalizedMessage formatExplanation(CtMethod<?> method) {
-        return new LocalizedMessage("method-abstract-exp", Map.of(
+        return new LocalizedMessage("method-should-be-abstract", Map.of(
             "type", method.getDeclaringType().getQualifiedName(),
             "method", method.getSimpleName()
         ));
@@ -31,18 +34,20 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
     protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtClass<?>>() {
             @Override
-            public void process(CtClass<?> clazz) {
-                if (!clazz.isAbstract()) {
+            public void process(CtClass<?> ctClass) {
+                if (ctClass.isImplicit() || !ctClass.isAbstract()) {
                     return;
                 }
 
-                for (CtMethod<?> method : clazz.getMethods()) {
-                    if (!method.isPublic() && !method.isProtected()) {
-                        continue;
-                    }
-
-                    // False positives if the method overrides another method but is not correctly annotated
-                    if (method.isStatic() || method.isAbstract() || method.hasAnnotation(Override.class)) {
+                for (CtMethod<?> method : ctClass.getMethods()) {
+                    if (!method.isPublic() && !method.isProtected()
+                        || method.isStatic()
+                        || method.isAbstract()
+                        // skip methods that override another method
+                        || MethodHierarchy.isOverridingMethod(method)
+                        // skip methods that are never overridden (would never make sense to be abstract)
+                        || !MethodHierarchy.isOverriddenMethod(method)
+                        || MethodUtil.hasBeenInvoked(method)) {
                         continue;
                     }
 
@@ -50,22 +55,24 @@ public class MethodShouldBeAbstractCheck extends IntegratedCheck {
                     if (statements.isEmpty()) {
                         addLocalProblem(method, formatExplanation(method),
                             ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
-                    } else if (statements.size() == 1) {
-                        CtStatement statement = statements.get(0);
-                        if (statement instanceof CtReturn<?> ret
-                            && ret.getReturnedExpression() instanceof CtLiteral<?> literal
-                            && literal.getValue() == null) {
-                            addLocalProblem(method, formatExplanation(method),
-                                ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
-                        } else if (statement instanceof CtThrow ctThrow
-                            && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call) {
-                            String type = call.getType().getQualifiedName();
-                            if (type.equals("java.lang.UnsupportedOperationException") ||
-                                type.equals("java.lang.IllegalStateException")) {
-                                addLocalProblem(method, formatExplanation(method),
-                                    ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
-                            }
-                        }
+                        return;
+                    }
+
+                    if (statements.size() != 1) {
+                        return;
+                    }
+
+                    CtStatement statement = statements.get(0);
+                    if (statement instanceof CtReturn<?> ret
+                        && ret.getReturnedExpression() instanceof CtLiteral<?> literal
+                        && literal.getValue() == null) {
+                        addLocalProblem(method, formatExplanation(method),
+                            ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
+                    } else if (statement instanceof CtThrow ctThrow
+                        && ctThrow.getThrownExpression() instanceof CtConstructorCall<?> call
+                        && TypeUtil.isTypeEqualTo(call.getType(), java.lang.UnsupportedOperationException.class, java.lang.IllegalStateException.class)) {
+                        addLocalProblem(method, formatExplanation(method),
+                            ProblemType.METHOD_USES_PLACEHOLDER_IMPLEMENTATION);
                     }
                 }
             }

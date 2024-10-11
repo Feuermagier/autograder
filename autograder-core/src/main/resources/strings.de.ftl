@@ -225,7 +225,7 @@ leaked-collection-return = Die Methode '{$method}' gibt eine Referenz zu dem Fel
 leaked-collection-constructor = Der Konstruktor '{$signature}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
 leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
 
-method-abstract-exp = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
+method-should-be-abstract = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
 
 method-should-be-static = Die Methode '{$name}' sollte statisch sein, da sie auf keine Instanzattribute oder Methoden zugreift.
 
