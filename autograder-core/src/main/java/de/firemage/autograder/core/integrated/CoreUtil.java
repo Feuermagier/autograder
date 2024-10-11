@@ -137,6 +137,10 @@ public final class CoreUtil {
     }
 
     public static boolean isInstanceOfAny(Object object, Class<?>... classes) {
+        return isInstanceOfAny(object, Arrays.asList(classes));
+    }
+
+    public static boolean isInstanceOfAny(Object object, Iterable<Class<?>> classes) {
         for (Class<?> clazz : classes) {
             if (clazz.isInstance(object)) {
                 return true;
