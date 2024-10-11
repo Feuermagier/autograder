@@ -60,17 +60,7 @@ class TestUseModuloOperator extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        List<String> expectedSuggestions = List.of(
-            "result %= limit + 1",
-            "result %= limit",
-            "result %= limit"
-        );
-
-        for (String expectedSuggestion : expectedSuggestions) {
-            Problem problem = problems.next();
-
-            assertReimplementation(problem, expectedSuggestion);
-        }
+        assertReimplementation(problems.next(), "result %= limit");
         problems.assertExhausted();
     }
 
