@@ -658,4 +658,50 @@ class TestUseDifferentVisibility extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testOverrideEnum() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) {
+                                Command.call();
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Command",
+                    """
+                    enum Command {
+                        START_SESSION {
+                            @Override
+                            protected void execute() {}
+                        },
+                        END_SESSION {
+                            @Override
+                            protected void execute() {}
+                        };
+
+                        protected void execute() {}
+
+                        static void call() {
+                            for (var value : Command.values()) {
+                                value.execute();
+                            }
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertDifferentVisibility(problems.next(), "execute", "default");
+
+        problems.assertExhausted();
+    }
 }
