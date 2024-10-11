@@ -311,4 +311,66 @@ class TestExceptionMessageCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+
+    @Test
+    void testExceptionOverridingGetMessage() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "MyException",
+                    """
+                        public class MyException extends Exception {
+                            public String getMessage() {
+                                return "failed to start the application";
+                            }
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) throws Exception {
+                                throw new MyException(); /*# ok #*/
+                            }
+                        }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testEmptyException() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "MyException",
+                    """
+                        public class MyException extends Exception {
+                        }
+                        """
+                ),
+                Map.entry(
+                    "Main",
+                    """
+                        public class Main {
+                            public static void main(String[] args) throws Exception {
+                                throw new MyException();
+                            }
+                        }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        assertMissingMessage(problems.next());
+
+        problems.assertExhausted();
+    }
 }
