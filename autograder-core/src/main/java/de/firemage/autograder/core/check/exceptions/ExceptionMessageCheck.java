@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 
 import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
+import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
@@ -16,12 +17,21 @@ import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtThrow;
 import spoon.reflect.declaration.CtConstructor;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtMethod;
+import spoon.reflect.declaration.CtType;
 
 @ExecutableCheck(reportedProblems = ProblemType.EXCEPTION_WITHOUT_MESSAGE)
 public class ExceptionMessageCheck extends IntegratedCheck {
     private static boolean isExceptionWithoutMessage(CtExpression<?> expression) {
         if (!(expression instanceof CtConstructorCall<?> ctConstructorCall)
             || !TypeUtil.isSubtypeOf(expression.getType(), java.lang.Exception.class)) {
+            return false;
+        }
+
+        // consider overriding getMessage() as having a message
+        CtType<?> exceptionType = expression.getType().getTypeDeclaration();
+        CtMethod<?> getMessageMethod = exceptionType.getMethod("getMessage");
+        if (getMessageMethod != null && MethodHierarchy.isOverridingMethod(getMessageMethod)) {
             return false;
         }
 

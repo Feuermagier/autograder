@@ -3,9 +3,11 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtExecutableReferenceExpression;
 import spoon.reflect.code.CtFieldAccess;
@@ -20,6 +22,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.visitor.Filter;
 
+import java.util.List;
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.METHOD_SHOULD_BE_STATIC, ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC})
@@ -45,16 +48,31 @@ public class MethodShouldBeStatic extends IntegratedCheck {
                 && this.ctType.equals(ctTypeAccess.getAccessedType().getTypeDeclaration());
         }
 
+        private static final List<Class<?>> SUPPORTED_TYPES = List.of(
+            CtFieldAccess.class,
+            CtInvocation.class,
+            CtExecutableReferenceExpression.class
+        );
+
         @Override
         public boolean matches(CtElement element) {
-            if (element instanceof CtFieldAccess<?> ctFieldAccess) {
-                return this.isThisTypeAccess(ctFieldAccess);
-            } else if (element instanceof CtInvocation<?> ctInvocation) {
-                return this.isThisTypeAccess(ctInvocation);
-            } else if (element instanceof CtExecutableReferenceExpression<?, ?> ctExecutableReferenceExpression) {
-                return this.isThisTypeAccess(ctExecutableReferenceExpression);
+            // The following types can be a targeted expression:
+            // - CtArrayAccess
+            // - CtConstructorCall
+            // - CtExecutableReferenceExpression
+            // - CtFieldAccess
+            // - CtInvocation
+            // - CtNewClass
+            // - CtSuperAccess
+            // - CtThisAccess
+            if (element instanceof CtTargetedExpression<?,?> ctTargetedExpression && CoreUtil.isInstanceOfAny(ctTargetedExpression, SUPPORTED_TYPES)) {
+                return this.isThisTypeAccess(ctTargetedExpression);
             }
-            return false;
+
+            return element instanceof CtThisAccess<?> ctThisAccess
+                && ctThisAccess.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
+                && this.ctType.equals(ctTypeAccess.getAccessedType().getTypeDeclaration())
+                && !CoreUtil.isInstanceOfAny(element.getParent(), SUPPORTED_TYPES);
         }
     }
 

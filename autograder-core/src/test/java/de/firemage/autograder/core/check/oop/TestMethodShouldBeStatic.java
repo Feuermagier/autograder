@@ -274,4 +274,25 @@ class TestMethodShouldBeStatic extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testStandaloneThis() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Response",
+            """
+                public enum Response {
+                    IN_PROGRESS,
+                    SUCCESS,
+                    FAILURE;
+                    
+                    public boolean isFinished() {
+                        return this == SUCCESS || this == FAILURE;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

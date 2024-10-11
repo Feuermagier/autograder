@@ -16,6 +16,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtLocalVariable;
+import spoon.reflect.declaration.CtEnumValue;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtNamedElement;
@@ -61,6 +62,11 @@ public class LinguisticNamingCheck extends IntegratedCheck {
     }
 
     private <T> void checkCtVariable(CtVariable<T> ctVariable) {
+        // ignore enum values, which always have the same type as the enum
+        if (ctVariable instanceof CtEnumValue<T>) {
+            return;
+        }
+
         if (IGNORE_VARIABLES_WITH.stream().anyMatch(s -> ctVariable.getSimpleName().toLowerCase().contains(s))) {
             return;
         }

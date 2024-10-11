@@ -177,4 +177,22 @@ class TestLinguisticNamingCheck extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testEnumValue() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "ResultState",
+            """
+                public enum ResultState {
+                    SUCCESS,
+                    FAILURE,
+                    MUST_MOVE_OBSTACLE,
+                    WINNER;
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

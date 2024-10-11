@@ -26,10 +26,6 @@ import java.util.Set;
 @ExecutableCheck(reportedProblems = { ProblemType.USE_MODULO_OPERATOR })
 public class UseModuloOperator extends IntegratedCheck {
     private static final Set<BinaryOperatorKind> ALLOWED_OPERATORS = Set.of(
-        BinaryOperatorKind.LT,
-        BinaryOperatorKind.LE,
-        BinaryOperatorKind.GE,
-        BinaryOperatorKind.GT,
         BinaryOperatorKind.EQ
     );
 
@@ -53,6 +49,7 @@ public class UseModuloOperator extends IntegratedCheck {
 
         CtVariableReference<?> assignedVariable = ctVariableWrite.getVariable();
 
+        // this swaps the condition operands, if the assigned variable is on the right side
         CtBinaryOperator<Boolean> condition = ExpressionUtil.normalizeBy(
             (left, right) -> right instanceof CtVariableAccess<?> ctVariableAccess && ctVariableAccess.getVariable().equals(assignedVariable),
             ctBinaryOperator
@@ -64,13 +61,6 @@ public class UseModuloOperator extends IntegratedCheck {
             return;
         }
 
-        // if (variable >= 3) {
-        //    variable = 0;
-        // }
-        //
-        // is equal to
-        //
-        // variable %= 3;
         CtExpression<?> checkedValue = condition.getRightHandOperand();
 
         // for boxed types, one could check if the value is null,
@@ -79,7 +69,7 @@ public class UseModuloOperator extends IntegratedCheck {
             return;
         }
 
-        if (Set.of(BinaryOperatorKind.GE, BinaryOperatorKind.EQ).contains(condition.getKind())) {
+        if (condition.getKind() == BinaryOperatorKind.EQ) {
             addLocalProblem(
                 ctIf,
                 new LocalizedMessage(

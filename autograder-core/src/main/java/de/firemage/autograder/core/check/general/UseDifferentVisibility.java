@@ -85,6 +85,12 @@ public class UseDifferentVisibility extends IntegratedCheck {
             && (ctType.equals(declaringType)
             // special case for inner classes
             || ctTypeMember.getTopLevelType().equals(ctType))) {
+            // You can not override private methods. They are still in the same class, so the next visibility is default.
+            // See the "testOverrideEnum" for an example of when this can happen.
+            if (ctTypeMember instanceof CtMethod<?> ctMethod && MethodHierarchy.isOverriddenMethod(ctMethod)) {
+                return Visibility.DEFAULT;
+            }
+
             return Visibility.PRIVATE;
         }
 

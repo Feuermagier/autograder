@@ -8,6 +8,7 @@ import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableAccess;
 import spoon.reflect.code.CtVariableWrite;
 import spoon.reflect.declaration.CtElement;
+import spoon.reflect.declaration.CtExecutable;
 import spoon.reflect.declaration.CtField;
 import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.declaration.CtType;
@@ -308,5 +309,11 @@ public final class MethodUtil {
             .map(ctVariableAccess -> Map.entry(UsesFinder.getDeclaredVariable(ctVariableAccess), ctVariableAccess))
             .filter(entry -> !codeSegmentVariables.contains(entry.getKey()) && isDependency.test(entry.getKey()))
             .collect(Collectors.groupingBy(Map.Entry::getKey, IdentityHashMap::new, Collectors.mapping(Map.Entry::getValue, Collectors.toList())));
+    }
+
+
+    public static boolean hasBeenInvoked(CtExecutable<?> ctExecutable) {
+        // NOTE: at the moment, overrides are not considered uses -> every other use would be an invocation
+        return UsesFinder.getAllUses(ctExecutable).hasAny();
     }
 }
