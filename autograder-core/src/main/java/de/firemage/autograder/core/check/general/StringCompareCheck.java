@@ -35,8 +35,11 @@ public class StringCompareCheck extends IntegratedCheck {
 
                 if (isStringComparison(lhs, rhs)) {
                     addLocalProblem(operator, new LocalizedMessage(
-                            "string-cmp-exp",
-                            Map.of("lhs", lhs, "rhs", rhs)
+                            "suggest-replacement",
+                            Map.of(
+                                "original", operator.toString(),
+                                "replacement", "%s.equals(%s)".formatted(lhs, rhs)
+                            )
                         ),
                         ProblemType.STRING_COMPARE_BY_REFERENCE
                     );

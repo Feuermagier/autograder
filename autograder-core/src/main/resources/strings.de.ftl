@@ -24,18 +24,18 @@ common-reimplementation = Der Code kann vereinfacht werden zu '{$suggestion}'.
 use-string-formatted = '{$formatted}' ist schöner zu lesen.
 use-format-string = '{$formatted}' ist schöner zu lesen.
 
-optional-tri-state = Statt einem Optional boolean, sollte man ein enum verwenden.
+optional-tri-state = Statt einem Optional boolean, sollte ein enum verwendet werden.
 
 equals-hashcode-comparable-contract = Es müssen immer equals und hashCode zusammen überschrieben werden. Genauso muss wenn Comparable implementiert wird equals und hashCode überschrieben werden.
 
-use-enum-collection = Bei Maps wenn ein Enum als Key ist und bei Sets als Wert, sollte man EnumMap/EnumSet verwenden.
+use-enum-collection = Verwende bei Maps mit enum als Key oder bei sets als Wert EnumMap/EnumSet.
 
 compare-to-zero = Das Ergebnis von compareTo oder compare sollte nur mit 0 verglichen werden.
-                Es ist eine Implementierungsdetail, ob ein gegebener Typ streng die Werte
+                Es ist ein Implementierungsdetail, ob ein gegebener Typ die Werte
                 '-1, 0, +1' oder andere zurückgibt.
 equals-using-hashcode = Equals nur mit hashCode zu implementieren ist fehleranfällig.
-                        Hashes kollidieren häufig, was zu falschen Ergebnissen in equals führt.
-equals-unsafe-cast = Im Javadoc von equals steht, dass es false für inkompatible Typen zurückgeben soll.
+                        Hashes können kollidieren, wodurch es zu falschen Ergebnissen in equals kommen könnte.
+equals-unsafe-cast = Im JavaDoc von equals steht, dass es false für inkompatible Typen zurückgeben soll.
                     Diese Implementierung kann eine ClassCastException werfen.
 equals-incompatible-type = Ein Vergleich zwischen Objekten mit inkompatiblen Typen gibt immer false zurück
 inconsistent-hashcode = Das hashCode-Verhalten ist inkonsistent. Es wird in equals nicht verglichen, aber in hashCode verwendet.
@@ -47,7 +47,7 @@ equals-reference = == sollte in equals verwendet werden, um Gleichheit zu sich s
 array-as-key-of-set-or-map = Arrays überschreiben weder equals noch hashCode. Dementsprechend werden Vergleiche basierend
                             auf der Referenz gemacht und nicht auf dem Inhalt. Verwende stattdessen eine Liste.
 
-implement-comparable = Der Typ '{$name}' sollte `Comparable<{$name}>` implementieren, dann kann man sich den `Comparator` sparen.
+implement-comparable = Der Typ '{$name}' sollte 'Comparable<{$name}>' implementieren, dann kann man sich den 'Comparator' sparen.
 
 # Comment
 commented-out-code = Dieser auskommentierte Code sollte entfernt werden
@@ -58,24 +58,24 @@ comment-language-exp-german = Der Code enthält deutsche und englische Kommentar
 
 unnecessary-comment-empty = Dieser Kommentar ist leer und sollte daher entfernt werden
 
-javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im Javadoc-Kommentar nicht erwähnt
-javadoc-method-exp-param-unknown = Der JavaDoc-Kommentar erwähnt den Parameter '{$param}', dieser wird allerdings nicht deklariert
+javadoc-method-exp-param-missing = Der Parameter '{$param}' wird im JavaDoc nicht dokumentiert.
+javadoc-method-exp-param-unknown = Der JavaDoc dokumentiert den nicht existierenden Parameter '{$param}'.
 
 javadoc-unexpected-tag = Der JavaDoc-Kommentar sollte keinen '@{$tag}'-Tag haben.
 
-javadoc-type-exp-invalid-author = Im @author-Tag sollte dein u-Kürzel stehen: {$authors}
+javadoc-type-exp-invalid-author = Im @author-Tag sollte ein u-Kürzel stehen: {$authors}
 
-javadoc-stub-exp-desc = Die Beschreibung des Javadoc-Kommentars ist leer
+javadoc-stub-exp-desc = Die Beschreibung des JavaDoc-Kommentars ist leer
 javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}'
 javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
-javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception {$exp}
+javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception '{$exp}'
 
-javadoc-undocumented-throws = Die Exception {$exp} wird geworfen, aber nicht im Javadoc-Kommentar erwähnt.
+javadoc-undocumented-throws = Die Exception '{$exp}' wird geworfen, aber nicht im JavaDoc-Kommentar erwähnt.
 
 todo-comment = TODOs sollten nicht in der finalen Abgabe vorhanden sein.
 
 # Complexity
-use-diamond-operator = Du kannst die Typen in '< A, B, ... >' entfernen und stattdessen '<>' verwenden, siehe https://docs.oracle.com/javase/tutorial/java/generics/genTypeInference.html und https://stackoverflow.com/a/16352848/7766117
+use-diamond-operator = Die Typen in '< A, B, ... >' können entfernt werden, schreibe stattdessen '<>'.
 
 extends-object = Explizit von Object zu erben ist unnötig
 
@@ -87,8 +87,6 @@ redundant-modifier = Die folgenden Modifier sind redundant und sollten deswegen 
 
 redundant-return-exp = Unnötiges return
 
-redundant-boolean-equal = Es ist unnötig explizit zu überprüfen, ob eine Bedingung gleich true oder false ist. Schreibe stattdessen '{$suggestion}'.
-
 self-assignment-exp = Nutzlose Zuweisung von '{$rhs}' zu '{$lhs}'
 
 too-many-exceptions = Das Projekt definiert {$count} Exceptions. Das sind zu viele.
@@ -97,30 +95,27 @@ redundant-variable = Die Variable '{$name}' ist unnötig, verwende stattdessen d
 
 unused-import = Der Import '{$import}' wird nicht verwendet und sollte deswegen entfernt werden.
 
-use-operator-assignment-exp = Zuweisung kann zu '{$simplified}' vereinfacht werden
-
 complex-regex = Nichttriviale Regex brauchen einen erklärenden Kommentar (Score ist {$score}, maximal erlaubt ist {$max})
 
-redundant-catch = Eine exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
+redundant-catch = Eine Exception sollte nicht gefangen werden, um sie dann direkt wieder zu werfen.
 
 redundant-uninitialized-variable = Die Variable '{$variable}' wurde deklariert, aber der Wert '{$value}' wird nicht direkt zugewiesen. Schreibe stattdessen '{$suggestion}'.
 
-multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen. Also keine Deklarationen von mehreren Variablen oder Zuweisungen in einer Zeile.
+multiple-inline-statements = Es sollten nicht mehrere Aussagen in einer Zeile stehen.
 
-multi-threading = Multithreading ist nicht Teil der Vorlesung. Code der nur einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
+multi-threading = Multithreading wird nicht verwendet. Code der nur auf einem Thread ausgeführt wird, thread-safe zu schreiben, macht den Code unnötig komplex.
 
-try-catch-complexity = Die Komplexität von try-catch-Blöcken sollte möglichst gering gehalten werden. Es sollten weniger als {$max} Statements vorhanden sein. Versuche den Code in mehrere Methoden aufzuteilen bzw. nicht dringend benötigte Statements aus dem try-Block zu entfernen.
+try-catch-complexity = Die Komplexität von try-catch-Blöcken sollte möglichst gering gehalten werden.
+                       Es sollten weniger als {$max} Statements vorhanden sein. Versuche den Code in
+                       mehrere Methoden aufzuteilen bzw. nicht dringend benötigte Statements aus dem
+                       try-Block zu entfernen.
 
 redundant-else = Die 'else' ist unnötig. Schreibe '{$expected}' statt '{$given}'.
 
 redundant-assignment = Der Variable '{$variable}' wird hier ein Wert zugewiesen, der dann nie verwendet wird. Deswegen kann die Zuweisung entfernt werden.
 
 # Debug
-assert-used-exp = Assertions lassen das gesamte Programm abstürzen, wenn sie false sind.
-    Außerdem können sie deaktiviert werden, weswegen man sich nicht darauf verlassen kann,
-    dass bestimmte Bedingungen zutreffen. Sie sind super für Testzwecke, sollten aber nicht
-    Teil der finalen Lösung sein. Wenn du eine Invariante dokumentieren willst, verwende
-    einen Kommentar.
+assert-used = Assertions sollten nicht in der finalen Abgabe vorhanden sein. Verwende stattdessen Exceptions.
 
 print-stack-trace = Stack Traces sollten in der Abgabe nicht ausgegeben werden
 
@@ -130,18 +125,18 @@ custom-exception-inheritance-runtime = Die selbstdefinierte Exception '{$name}' 
 
 empty-catch-block = Leerer catch-Block
 
-exception-controlflow-caught = {$exception} wird geworfen und im umgebenden Block sofort wieder gefangen
-exception-controlflow-should-not-be-caught = {$exception} sollte man niemals fangen
+exception-controlflow-caught = '{$exception}' wird geworfen und im umgebenden Block sofort wieder gefangen
+exception-controlflow-should-not-be-caught = '{$exception}' sollte man niemals fangen
 
-runtime-exception-caught = RuntimeExceptions '{$exception}' sollten nicht gefangen werden
+runtime-exception-caught = RuntimeException '{$exception}' sollten nicht gefangen werden
 
 exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die erklärt was der Fehler ist und im Idealfall wie es zu dem Fehler kam.
 
-number-format-exception-ignored = NumberFormatException sollte gefangen werden und entweder behandelt oder durch eine eigene Exception ersetzt werden.
+number-format-exception-ignored = 'NumberFormatException' sollte gefangen werden und entweder behandelt oder durch eine eigene Exception ersetzt werden.
 
 # General
 
-compare-objects-exp = Implementiere eine equals-Methode für den Typ {$type} und verwende sie zum Vergleichen
+compare-objects-exp = Der Typ '{$type}' sollte 'equals' implementieren und nicht über 'toString' verglichen werden.
 
 variable-should-be = Die Variable '{$variable}' sollte '{$suggestion}' sein.
 
@@ -149,29 +144,25 @@ reassigned-parameter = Dem Parameter '{$name}' sollte kein neuer Wert zugewiesen
 
 double-brace-init = Die obskure 'Double Brace'-Syntax sollte vermieden werden
 
-missing-override = '{$name}' sollte eine '@Override'-Annotation haben, siehe https://stackoverflow.com/a/94411/7766117.
+missing-override = '{$name}' sollte eine '@Override'-Annotation haben.
 
-system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist System.lineSeparator() oder (falls es sich um einen format-String handelt) '%n'.
+system-specific-linebreak = Systemabhängiger Zeilenumbruch (\n) benutzt. Besser ist 'System.lineSeparator()' oder (falls es sich um einen format-String handelt) '%n'.
 
 field-should-be-final = Das Attribut '{$name}' sollte final sein.
 
-string-cmp-exp = Strings sollten nicht per Referenz, sonder mit der 'equals'-Methode verglichen werden: '{$lhs}.equals({$rhs})' statt '{$lhs} == {$rhs}'
+do-not-use-raw-types-exp = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type.
 
-do-not-use-raw-types-exp = Generische Typen sollten immer mit Typparameter angegeben werden und nie als Raw Type, siehe https://stackoverflow.com/a/2770692/7766117
+avoid-labels = Labels sollten vermieden werden.
 
-avoid-labels = Labels sollten vermieden werden. Siehe https://stackoverflow.com/a/33689582/7766117.
+avoid-shadowing = Die Variable '{$name}' verdeckt ein Attribut mit dem selben Namen. Abgesehen vom Konstruktor und settern, sollte man das vermeiden.
 
-avoid-shadowing = Die Variable '{$name}' verdeckt ein Attribut mit dem selben Namen. Abgesehen vom Konstruktor, sollte man das vermeiden.
-
-suppress-warnings = @SuppressWarnings unterdrückt Warnungen des Compilers oder von Checkstyle, anstatt das unterliegende Problem zu beheben.
+suppress-warnings = '@SuppressWarnings' unterdrückt Warnungen des Compilers oder Checkstyle, anstatt das unterliegende Problem zu beheben.
 
 scanner-closed = Scanner sollte geschlossen werden
 
 unchecked-type-cast = Es muss sicher gestellt werden, dass der Typ des Objekts mit dem Typ des Casts übereinstimmt. Ansonsten kann der Code abstürzen.
 
-compare-char-value = Hier wird '{$expression}' vom Typ char mit dem Wert {$intValue} verglichen. Es ist nicht offensichtlich für welchen Buchstabe der Wert steht, schreibe stattdessen '{$charValue}'.
-
-use-guard-clauses = Der Code bricht den normalen Kontrollfluss durch zum Beispiel ein return ab. if-else-Blöcke mit solchen Abbrüchen kann man mithilfe von sogenannten guard-clauses schöner schreiben. Das hat unter anderem den Vorteil, dass man doppelten Code leichter erkennt. Siehe für eine detaillierte Erklärung https://medium.com/@scadge/if-statements-design-guard-clauses-might-be-all-you-need-67219a1a981a oder https://deviq.com/design-patterns/guard-clause
+compare-char-value = Hier wird '{$expression}' vom Typ 'char' mit dem Wert '{$intValue}' verglichen. Es ist nicht offensichtlich für welchen Buchstabe der Wert steht, schreibe stattdessen '{$charValue}'.
 
 import-types = Statt den Pfad zum Typ anzugeben, sollte '{$type}' importiert werden. Datentypen aus dem selben Paket oder 'java.lang' müssen nicht explizit importiert werden.
 
@@ -186,7 +177,7 @@ binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwende
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
-magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden. Siehe Wiki Artikel zu Magic Strings.
+magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden.
 
 loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
 
@@ -196,7 +187,7 @@ loop-should-be-while = Diese Schleife sollte eine while Schleife sein: {$suggest
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
-constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben den Wert '{$value}'
+constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben dem Wert '{$value}'
 constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
 
 linguistic-naming-boolean = Der Name von '{$name}' deutet an, dass es vom Typ boolean ist oder diesen zurückgibt, stattdessen ist der Typ '{$type}'.
@@ -207,16 +198,16 @@ linguistic-naming-setter = Der Name von '{$name}' deutet an, dass es ein setter 
 variable-name-single-letter = Der Bezeichner '{$name}' ist nicht aussagekräftig
 variable-is-abbreviation = Unnötige Abkürzung '{$name}'
 variable-name-type-in-name = Der Bezeichner '{$name}' sollte nicht den Typ im Namen haben
-similar-identifier = Der Bezeichner '{$left}' ist sehr ähnlich zu '{$right}'. Das kann zu Verwechslungen und Tippfehlern führen, weswegen man diesen umbenennen sollte.
+similar-identifier = Der Bezeichner '{$left}' ist sehr ähnlich zu '{$right}'.
 
 type-has-descriptive-name-pre-suffix = Der Name enthält unnötige Präfixe oder Suffixe
-type-has-descriptive-name-exception = Eine Klasse die von Exception erbt, sollte 'Exception' am Ende ihres Namens haben
+type-has-descriptive-name-exception = Eine Klasse die von 'Exception' erbt, sollte 'Exception' am Ende ihres Namens haben
 
 package-naming-convention = Der Name eines Pakets sollte am besten ein Wort sein und alle Buchstaben sollten nach Konvention
                             klein sein. Außer dem Zeichen '_' sollten zudem keine Sonderzeichen auftreten. An folgenden Stellen wird das
                             nicht eingehalten: '{$positions}'
 
-variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine redundante Zahl am Ende.
+variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine unnötige Zahl am Ende.
 
 # OOP
 concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
@@ -225,7 +216,7 @@ leaked-collection-return = Die Methode '{$method}' gibt eine Referenz zu dem Fel
 leaked-collection-constructor = Der Konstruktor '{$signature}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
 leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
 
-method-should-be-abstract = {$type}::{$method} sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben
+method-should-be-abstract = '{$type}::{$method}' sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben.
 
 method-should-be-static = Die Methode '{$name}' sollte statisch sein, da sie auf keine Instanzattribute oder Methoden zugreift.
 
@@ -234,38 +225,48 @@ utility-exp-constructor = Utility-Klassen müssen genau einen privaten und param
 
 static-field-should-be-instance = Das statische Attribut '{$name}' sollte ein Instanzattribut sein.
 
-constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und nicht in einer separaten Klasse. Siehe https://stackoverflow.com/a/15056462/7766117
+constants-class-exp = Konstanten sollten in der Klasse gespeichert werden in der sie auch verwendet werden und
+                      nicht in einer separaten Klasse.
 
 empty-interface-exp = Interfaces sollten nicht leer sein.
 
 ui-input-separation = Eingaben sollten nicht im Programm verteilt sein. Wurde auch verwendet in {$first}.
 ui-output-separation = Ausgaben sollten nicht im Programm verteilt sein. Wurde auch verwendet in {$first}.
 
-do-not-use-system-exit = System.exit() darf nicht verwendet werden. Strukturiere deinen Code so, dass er sich natürlich beendet.
+do-not-use-system-exit = 'System.exit()' darf nicht verwendet werden. Strukturiere deinen Code so, dass er sich natürlich beendet.
 
 avoid-inner-classes = Jede Klasse sollte in einer eigenen Datei sein. Innere-Klassen sollten vermieden werden.
 
-mutable-enum = Enums sollten nicht veränderbar sein. Siehe https://stackoverflow.com/a/41199773/7766117
+mutable-enum = Enums sollten nicht veränderbar sein.
 
 should-be-enum-attribute = Die Werte vom switch sollten Attribute des enums sein. Alternativ sollte man eine Map verwenden.
 
-closed-set-of-values-switch = Der Switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge, die als enum modelliert werden sollte. Die Werte sind: '{$values}'.
-closed-set-of-values-list = Die Auflistung hat nur endlich viele Werte und sollte deswegen als enum modelliert werden. Die Werte sind: '{$values}'.
-closed-set-of-values-method = Die Methode gibt nur die Konstanten Werte '{$values}' zurück. Dabei handelt es sich um endlich viele, weswegen man das als enum modellieren sollte.
+closed-set-of-values-switch = Der Switch hat nur endlich viele cases. Dabei handelt es sich um eine abgeschlossene Menge,
+                              die als enum modelliert werden sollte. Die Werte sind: '{$values}'.
+closed-set-of-values-list = Die Auflistung hat nur endlich viele Werte und sollte deswegen als enum modelliert werden.
+                            Die Werte sind: '{$values}'.
+closed-set-of-values-method = Die Methode gibt nur die Konstanten Werte '{$values}' zurück. Dabei handelt es sich um
+                              endlich viele, weswegen man das als enum modellieren sollte.
 
-do-not-use-instanceof = instanceof sollte nicht verwendet werden. Siehe Ilias Wiki.
-do-not-use-instanceof-emulation = instanceof sollte nicht verwendet werden und auch nicht durch getClass oder ClassCastException emuliert werden. Siehe Ilias Wiki.
+do-not-use-instanceof = 'instanceof' sollte nicht verwendet werden.
+do-not-use-instanceof-emulation = 'instanceof' sollte nicht verwendet werden und auch nicht durch 'getClass' oder
+                                  'ClassCastException' emuliert werden.
 
 abstract-class-without-abstract-method = Abstrakte Klassen sollten mindestens eine abstrakte Methode haben.
-composition-over-inheritance = Die Oberklasse hat nur Felder. Statt Vererbung sollte hier Komposition verwendet werden. Zum Beispiel ein interface mit dem getter: '{$suggestion}'.
-should-be-interface = Die Klasse hat nur Methoden und keine Felder. Statt Vererbung sollte hier ein Interface mit Standard-Implementierungen verwendet werden.
+composition-over-inheritance = Die Oberklasse hat nur Felder. Statt Vererbung sollte hier Komposition verwendet werden.
+                               Zum Beispiel ein interface mit dem getter: '{$suggestion}'.
+should-be-interface = Die Klasse hat nur Methoden und keine Felder. Statt Vererbung sollte hier ein Interface mit
+                      Standard-Implementierungen verwendet werden.
 
-avoid-static-blocks = Statische Blöcke sollten vermieden werden, da sie keine objekt-orientierte Lösung darstellen und schlecht erweiterbar sind. Statische Blöcke sollten durch eine objektorientierte Lösung ersetzt werden (bspw. Konstruktoren).
+avoid-static-blocks = Statische Blöcke sollten vermieden werden, da sie keine objekt-orientierte Lösung darstellen und
+                      schlecht erweiterbar sind. Statische Blöcke sollten durch eine objektorientierte Lösung ersetzt
+                      werden (bspw. Konstruktoren).
 
 # Structure
 
 default-package = Das default-Paket sollte nicht verwendet werden. Die folgenden Klassen sind im default-Paket: {$positions}
-too-few-packages = Das Projekt hat mehr als {$max} Klassen, aber nur ein Paket. Du solltest dir eine sinnvolle Einteilung der Klassen in mehrere Pakete überlegen (bspw. nach den Kriterien commands, logic, ui, ...).
+too-few-packages = Das Projekt hat mehr als {$max} Klassen, aber nur ein Paket. Verwende mehrere Pakete um die
+                   Klassen sinvoll zu gruppieren.
 
 # Unnecessary
 

@@ -35,7 +35,7 @@ public class RedundantBooleanEqual extends IntegratedCheck {
         addLocalProblem(
             ctBinaryOperator,
             new LocalizedMessage(
-                "redundant-boolean-equal",
+                "common-reimplementation",
                 Map.of(
                     "suggestion", suggestion
                 )

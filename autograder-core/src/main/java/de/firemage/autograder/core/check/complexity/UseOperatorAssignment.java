@@ -5,6 +5,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.evaluator.OperatorHelper;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
@@ -39,8 +40,7 @@ public class UseOperatorAssignment extends IntegratedCheck {
     private boolean isCommutativeType(CtTypedElement<?> ctTypedElement) {
         return ctTypedElement.getType() == null
                || NON_COMMUTATIVE_TYPES.stream()
-                                       .map(ty -> ctTypedElement.getFactory().Type().createReference(ty))
-                                       .noneMatch(ty -> ty.equals(ctTypedElement.getType()));
+                                       .noneMatch(ty -> TypeUtil.isTypeEqualTo(ctTypedElement.getType(), ty));
     }
 
     private boolean isCommutative(BinaryOperatorKind binaryOperatorKind) {
@@ -106,8 +106,8 @@ public class UseOperatorAssignment extends IntegratedCheck {
                     addLocalProblem(
                         assignment,
                         new LocalizedMessage(
-                            "use-operator-assignment-exp",
-                            Map.of("simplified", simplifiedExpr)
+                            "common-reimplementation",
+                            Map.of("suggestion", simplifiedExpr)
                         ),
                         ProblemType.USE_OPERATOR_ASSIGNMENT
                     );
