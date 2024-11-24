@@ -38,6 +38,7 @@ import java.util.IdentityHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.SequencedSet;
 import java.util.Set;
 import java.util.stream.Stream;
 
@@ -78,16 +79,13 @@ public class UsesFinder {
      */
     @SuppressWarnings("rawtypes")
     public static CtElementStream<CtElement> getAllUses(CtNamedElement element) {
-        if (element instanceof CtVariable variable) {
-            return UsesFinder.variableUses(variable).asUntypedStream();
-        } else if (element instanceof CtTypeParameter typeParameter) {
-            return UsesFinder.typeParameterUses(typeParameter).asUntypedStream();
-        } else if (element instanceof CtExecutable executable) {
-            return UsesFinder.executableUses(executable).asUntypedStream();
-        } else if (element instanceof CtType type) {
-            return UsesFinder.typeUses(type).asUntypedStream();
-        }
-        throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
+        return switch (element) {
+            case CtVariable variable -> UsesFinder.variableUses(variable).asUntypedStream();
+            case CtTypeParameter typeParameter -> UsesFinder.typeParameterUses(typeParameter).asUntypedStream();
+            case CtExecutable executable -> UsesFinder.executableUses(executable).asUntypedStream();
+            case CtType type -> UsesFinder.typeUses(type).asUntypedStream();
+            default -> throw new IllegalArgumentException("Unsupported element: " + element.getClass().getName());
+        };
     }
 
     public static CtElementStream<CtVariableAccess<?>> variableUses(CtVariable<?> variable) {
@@ -183,7 +181,10 @@ public class UsesFinder {
     }
 
     public static CtVariable<?> getDeclaredVariable(CtVariableAccess<?> ctVariableAccess) {
-        return UsesFinder.getFor(ctVariableAccess).scanner.variableAccessDeclarations.getOrDefault(ctVariableAccess, null);
+        return UsesFinder.getFor(ctVariableAccess).scanner.variableAccessDeclarations.getOrDefault(
+            ctVariableAccess,
+            VariableUtil.getVariableDeclaration(ctVariableAccess.getVariable())
+        );
     }
     /**
      * The scanner searches for uses of supported code elements in a single pass over the entire model.
@@ -198,7 +199,7 @@ public class UsesFinder {
         private final Map<CtTypeParameter, List<CtTypeParameterReference>> typeParameterUses = new IdentityHashMap<>();
         private final Map<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
         private final Map<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
-        private final Map<CtType, Set<CtType>> subtypes = new IdentityHashMap<>();
+        private final Map<CtType, SequencedSet<CtType>> subtypes = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block

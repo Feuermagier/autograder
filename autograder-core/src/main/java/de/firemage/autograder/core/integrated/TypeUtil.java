@@ -137,6 +137,10 @@ public final class TypeUtil {
     public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, Class<?> expected) {
         CtType<?> expectedType = ctTypeReference.getFactory().Type().get(expected);
 
+        return isSubtypeOf(ctTypeReference, expectedType);
+    }
+
+    public static boolean isSubtypeOf(CtTypeReference<?> ctTypeReference, CtType<?> expectedType) {
         if (ctTypeReference.getTypeDeclaration() == null || ctTypeReference instanceof CtTypeParameterReference) {
             return ctTypeReference.isSubtypeOf(expectedType.getReference());
         }
