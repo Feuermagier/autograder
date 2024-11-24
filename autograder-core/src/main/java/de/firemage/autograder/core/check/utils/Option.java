@@ -33,8 +33,8 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
     }
 
     default <U> Option<U> map(Function<T, U> function) {
-	    if (this instanceof Some<T> someValue) {
-            return new Some<>(function.apply(someValue.value));
+        if (this instanceof Some<T>(T value)) {
+            return new Some<>(function.apply(value));
         } else if (this instanceof None<T>) {
             return new None<>();
         }
@@ -56,8 +56,8 @@ public sealed interface Option<T> extends Iterable<T> permits Option.Some, Optio
     }
 
     default Stream<T> stream() {
-        if (this instanceof Some<T> someValue) {
-            return Stream.of(someValue.value);
+        if (this instanceof Some<T>(T value)) {
+            return Stream.of(value);
         } else if (this instanceof None<T>) {
             return Stream.empty();
         }
