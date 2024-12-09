@@ -19,6 +19,9 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.USE_ENTRY_SET})
 public class UseEntrySet extends IntegratedCheck {
+    // If a map is iterated over and the key is used to get the value more than MINIMUM_GET_CALLS times, it suggests using entrySet
+    private static final int MINIMUM_GET_CALLS = 3;
+
     private static boolean hasInvokedKeySet(CtInvocation<?> ctInvocation) {
         return ctInvocation.getTarget() != null
             && ctInvocation.getExecutable() != null
@@ -66,7 +69,7 @@ public class UseEntrySet extends IntegratedCheck {
                         && ctVariableAccess.getVariable().equals(loopVariable.getReference()))
                     .toList();
 
-                if (!invocations.isEmpty()) {
+                if (invocations.size() >= MINIMUM_GET_CALLS) {
                     addLocalProblem(
                         ctForEach.getExpression(),
                         new LocalizedMessage(

@@ -56,6 +56,7 @@ class TestUseEntrySet extends AbstractCheckTest {
                             if (storedColors.get(color) > 0) {
                                 result.put(color, storedColors.get(color));
                             }
+                            System.out.println(storedColors.get(color));
                         }
                     }
                 }
@@ -132,10 +133,12 @@ class TestUseEntrySet extends AbstractCheckTest {
                     public void method() {
                         for (var mapKey : %s) {
                             %s
+                            %s
+                            %s
                         }
                     }
                 }
-                """.formatted(iterable, String.join("", body))
+                """.formatted(iterable, String.join("", body), String.join("", body), String.join("", body))
         ), PROBLEM_TYPES);
 
         if (suggestion != null) {
@@ -156,6 +159,7 @@ class TestUseEntrySet extends AbstractCheckTest {
                 public class Test {
                     private static <T extends Map<String, String>> void execute(T map) {
                         for (var mapKey : map.keySet()) {
+                            System.out.println(map.get(mapKey));
                             System.out.println(map.get(mapKey));
                             System.out.println(map.get(mapKey));
                         }
