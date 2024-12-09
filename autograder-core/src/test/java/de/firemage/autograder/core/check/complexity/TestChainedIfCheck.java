@@ -87,7 +87,6 @@ class TestChainedIfCheck extends AbstractCheckTest {
 
     @Test
     void testElseIfWithNestedIfNoElse() throws LinterException, IOException {
-        // TODO: again think of when this will be a problem with control flow?
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
