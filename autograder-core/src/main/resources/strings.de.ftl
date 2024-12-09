@@ -213,8 +213,8 @@ variable-redundant-number-suffix = Der Bezeichner '{$name}' enthält eine unnöt
 concrete-collection = Der Typ '{$type}' sollte durch eine Schnittstelle wie zum Beispiel 'List' oder 'Set' ersetzt werden.
 
 leaked-collection-return = Die Methode '{$method}' gibt eine Referenz zu dem Feld '{$field}' zurück. Dadurch ist es möglich das Feld von außerhalb zu verändern. Gebe stattdessen eine Kopie zurück.
-leaked-collection-constructor = Der Konstruktor '{$signature}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
-leaked-collection-assign = Die Methode '{$method}' weißt dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
+leaked-collection-constructor = Der Konstruktor '{$signature}' weist dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
+leaked-collection-assign = Die Methode '{$method}' weist dem Feld '{$field}' eine Referenz zu, dadurch ist es möglich das Feld von außerhalb zu verändern. Weise stattdessen eine Kopie dem Feld zu.
 
 method-should-be-abstract = '{$type}::{$method}' sollte abstrakt sein, anstatt eine Platzhalter-Implementierung anzugeben.
 
