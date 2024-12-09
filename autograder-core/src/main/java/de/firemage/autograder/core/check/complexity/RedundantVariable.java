@@ -38,7 +38,7 @@ public class RedundantVariable extends IntegratedCheck {
         return ctExpression instanceof CtSwitchExpression<?,?> || ctExpression.toString().length() > MAX_EXPRESSION_SIZE;
     }
 
-    private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead, CodeModel model) {
+    private void checkVariableRead(CtStatement ctStatement, CtVariableRead<?> ctVariableRead) {
         if (// the variable must be a local variable
             !(ctVariableRead.getVariable().getDeclaration() instanceof CtLocalVariable<?> ctLocalVariable)
             // it should not have any annotations (e.g. @SuppressWarnings("unchecked"))
@@ -82,19 +82,19 @@ public class RedundantVariable extends IntegratedCheck {
     protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
             @Override
-            public <T> void visitCtInvocation(CtInvocation<T> ctInvocation) {
-                if (!ctInvocation.getPosition().isValidPosition()
-                    || ctInvocation.isImplicit()
-                    // only check invocations with a single variable
-                    || ctInvocation.getArguments().size() != 1
-                    || !(ctInvocation.getArguments().get(0) instanceof CtVariableRead<?> ctVariableRead)) {
-                    super.visitCtInvocation(ctInvocation);
+            public <T> void visitCtLocalVariable(CtLocalVariable<T> ctLocalVariable) {
+                if (!ctLocalVariable.getPosition().isValidPosition()
+                    || ctLocalVariable.isImplicit()
+                    // only check local variables with a default expression
+                    || ctLocalVariable.getDefaultExpression() == null
+                    || !(ctLocalVariable.getDefaultExpression() instanceof CtVariableRead<?> ctVariableRead)) {
+                    super.visitCtLocalVariable(ctLocalVariable);
                     return;
                 }
 
-                checkVariableRead(ctInvocation, ctVariableRead, staticAnalysis.getCodeModel());
+                checkVariableRead(ctLocalVariable, ctVariableRead);
 
-                super.visitCtInvocation(ctInvocation);
+                super.visitCtLocalVariable(ctLocalVariable);
             }
 
             @Override
@@ -107,7 +107,7 @@ public class RedundantVariable extends IntegratedCheck {
                     return;
                 }
 
-                checkVariableRead(ctReturn, ctVariableRead, staticAnalysis.getCodeModel());
+                checkVariableRead(ctReturn, ctVariableRead);
 
                 super.visitCtReturn(ctReturn);
             }
