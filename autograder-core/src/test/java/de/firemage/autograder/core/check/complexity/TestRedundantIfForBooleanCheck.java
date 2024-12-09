@@ -7,6 +7,7 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 
 import java.io.IOException;
@@ -375,6 +376,30 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
                 }
                 """
         ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Disabled("This is a bug in Spoon, should be fixed by the PR spoon#6094")
+    @Test
+    void testMissingParensAroundStringConcatSuggestion() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    public boolean isRotation(String word, String rotation) {
+                        if (word.length() != rotation.length()) {
+                            return false;
+                        }
+
+                        return (word + word).contains(rotation);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsRedundant(problems.next(), "return word.length() == rotation.length() && (word + word).contains(rotation)");
 
         problems.assertExhausted();
     }
