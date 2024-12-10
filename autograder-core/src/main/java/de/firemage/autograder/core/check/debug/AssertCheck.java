@@ -15,7 +15,7 @@ public class AssertCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtAssert<?>>() {
             @Override
             public void process(CtAssert<?> element) {
-                addLocalProblem(element, new LocalizedMessage("assert-used-exp"), ProblemType.ASSERT);
+                addLocalProblem(element, new LocalizedMessage("assert-used"), ProblemType.ASSERT);
             }
         });
     }

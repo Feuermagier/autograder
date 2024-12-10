@@ -114,6 +114,8 @@ public class ConstantsHaveDescriptiveNamesCheck extends IntegratedCheck {
             case '_' -> List.of("underscore", "dash", "line");
             case '/', '\\' -> List.of("slash", "backslash");
             case '[', ']' -> List.of("bracket");
+            case '*' -> List.of("star", "asterisk");
+            case '+' -> List.of("plus");
             default -> Character.isAlphabetic(c) ? List.of(String.valueOf(Character.toLowerCase(c))) : null;
         };
     }

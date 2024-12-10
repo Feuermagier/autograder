@@ -936,6 +936,27 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
     }
 
     @Test
+    void testCompactConstructorImmutableMap() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.Map;
+                import java.util.Collection;
+                import java.util.HashMap;
+
+                public record Zoo(String name, Map<String, String> animals) {
+                    public Zoo {
+                        animals = Map.copyOf(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
     void testCompactConstructorLeakedAssign() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
@@ -962,6 +983,32 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
+    @Test
+    void testCompactConstructorLeakedAssignMap() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.Map;
+                import java.util.Collection;
+                import java.util.HashMap;
+
+                public record Zoo(String name, Map<String, String> animals) {
+                    public Zoo {
+                        animals = animals;
+                    }
+
+                    public Map<String, String> animals() {
+                        return new HashMap<>(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedConstructor(problems.next(), "Zoo(String, Map<String, String>)", "animals");
+
+        problems.assertExhausted();
+    }
 
     @Test
     void testCompactConstructorCopied() throws IOException, LinterException {
@@ -976,6 +1023,29 @@ class TestLeakedCollectionCheck extends AbstractCheckTest {
                 public record Zoo(String name, Collection<String> animals) {
                     public Zoo {
                         animals = new ArrayList<>(animals);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsLeakedReturn(problems.next(), "animals", "animals");
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testCompactConstructorCopiedMap() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Zoo",
+            """
+                import java.util.Map;
+                import java.util.Collection;
+                import java.util.HashMap;
+
+                public record Zoo(String name, Map<String, String> animals) {
+                    public Zoo {
+                        animals = new HashMap<>(animals);
                     }
                 }
                 """

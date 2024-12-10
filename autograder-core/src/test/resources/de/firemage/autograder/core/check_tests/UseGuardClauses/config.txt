@@ -1,8 +1,0 @@
-general.UseGuardClauses
-Use guard clauses to simplify code and make it more readable.
-Test.java:20-22
-Test.java:22-24
-Test.java:53-55
-Test.java:66-68
-Test.java:69-71
-Test.java:72-74

@@ -81,7 +81,7 @@ import java.util.stream.Collectors;
 })
 public class LeakedCollectionCheck extends IntegratedCheck {
     private static boolean isMutableType(CtTypedElement<?> ctTypedElement) {
-        return  ctTypedElement.getType().isArray() || TypeUtil.isSubtypeOf(ctTypedElement.getType(), java.util.Collection.class);
+        return  ctTypedElement.getType().isArray() || TypeUtil.isSubtypeOf(ctTypedElement.getType(), java.util.Collection.class) || TypeUtil.isSubtypeOf(ctTypedElement.getType(), java.util.Map.class);
     }
 
     /**
@@ -98,7 +98,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             return true;
         }
 
-        if (!TypeUtil.isSubtypeOf(ctVariable.getType(), java.util.Collection.class)) {
+        if (!TypeUtil.isSubtypeOf(ctVariable.getType(), java.util.Collection.class) && !TypeUtil.isSubtypeOf(ctVariable.getType(), java.util.Map.class)) {
             // not a collection
             return false;
         }
@@ -130,7 +130,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             }
 
             // we only care about arrays and collections for now
-            if (!TypeUtil.isSubtypeOf(ctExpression.getType(), java.util.Collection.class)) {
+            if (!TypeUtil.isSubtypeOf(ctExpression.getType(), java.util.Collection.class) && !TypeUtil.isSubtypeOf(ctExpression.getType(), java.util.Map.class)) {
                 // not a collection
                 return false;
             }
@@ -414,24 +414,6 @@ public class LeakedCollectionCheck extends IntegratedCheck {
         return ctReturn.setReturnedExpression((CtExpression) ctExpression);
     }
 
-    // The generated accessor method of a record does not have a real return statement.
-    // This method fixes that by creating the return statement.
-    private static CtMethod<?> fixRecordAccessor(CtRecord ctRecord, CtMethod<?> ctMethod) {
-        // TODO: remove when https://github.com/INRIA/spoon/pull/5801 is merged.
-        Factory factory = ctMethod.getFactory();
-        CtMethod<?> result = ctMethod.clone();
-        CtFieldRead ctFieldRead = factory.createFieldRead();
-
-        ctFieldRead.setTarget(null);
-        ctFieldRead.setVariable(ctRecord.getField(ctMethod.getSimpleName()).getReference());
-        ctFieldRead.setType(result.getType());
-
-        result.setBody(createCtReturn(ctFieldRead));
-        result.setParent(ctRecord);
-
-        return result;
-    }
-
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.getModel().getRootPackage().accept(new CtScanner() {
@@ -441,10 +423,6 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                 }
 
                 for (CtTypeMember ctTypeMember : ctType.getTypeMembers()) {
-                    if (ctType instanceof CtRecord ctRecord && ctTypeMember instanceof CtMethod<?> ctMethod && ctMethod.isImplicit()) {
-                        ctTypeMember = fixRecordAccessor(ctRecord, ctMethod);
-                    }
-
                     if (ctTypeMember instanceof CtConstructor<?> ctConstructor) {
                         checkCtExecutableAssign(ctConstructor);
                     } else if (ctTypeMember instanceof CtMethod<?> ctMethod) {
