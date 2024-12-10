@@ -37,6 +37,7 @@ import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
 import spoon.reflect.declaration.CtTypedElement;
 import spoon.reflect.declaration.CtVariable;
+import spoon.reflect.factory.Factory;
 import spoon.reflect.reference.CtTypeReference;
 import spoon.reflect.visitor.CtScanner;
 import spoon.reflect.visitor.filter.TypeFilter;
@@ -240,7 +241,9 @@ public class LeakedCollectionCheck extends IntegratedCheck {
 
         boolean foundPreviousAssignment = false;
         CtStatement currentStatement = ctVariableRead.getParent(CtStatement.class);
-        for (CtStatement ctStatement : StatementUtil.getEffectiveStatements(ctExecutable.getBody()).reversed()) {
+        var reversedStatements = new ArrayList<>(StatementUtil.getEffectiveStatements(ctExecutable.getBody()));
+        Collections.reverse(reversedStatements);
+        for (CtStatement ctStatement : reversedStatements) {
             if (!foundPreviousAssignment) {
                 if (ctStatement == currentStatement) {
                     foundPreviousAssignment = true;
@@ -279,7 +282,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
             List<CtExpression<?>> previousAssignees = findPreviousAssignee(ctVariableRead);
 
             if (!previousAssignees.isEmpty()) {
-                return findParameterReference(previousAssignees.getFirst(), ctExecutable);
+                return findParameterReference(previousAssignees.get(0), ctExecutable);
             }
 
             return Option.some((CtParameter<?>) ctVariableDeclaration);
@@ -420,13 +423,11 @@ public class LeakedCollectionCheck extends IntegratedCheck {
                 }
 
                 for (CtTypeMember ctTypeMember : ctType.getTypeMembers()) {
-                    switch (ctTypeMember) {
-                        case CtConstructor<?> ctConstructor -> checkCtExecutableAssign(ctConstructor);
-                        case CtMethod<?> ctMethod -> {
-                            checkCtExecutableReturn(ctMethod);
-                            checkCtExecutableAssign(ctMethod);
-                        }
-                        default -> {}
+                    if (ctTypeMember instanceof CtConstructor<?> ctConstructor) {
+                        checkCtExecutableAssign(ctConstructor);
+                    } else if (ctTypeMember instanceof CtMethod<?> ctMethod) {
+                        checkCtExecutableReturn(ctMethod);
+                        checkCtExecutableAssign(ctMethod);
                     }
                 }
             }
