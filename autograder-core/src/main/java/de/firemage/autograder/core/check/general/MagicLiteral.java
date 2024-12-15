@@ -43,24 +43,12 @@ public class MagicLiteral extends IntegratedCheck {
                 new LocalizedMessage(
                     "magic-literal",
                     Map.of(
-                        "value", formatValue(ctLiteral.getValue()),
+                        "value", ctLiteral.toString().replace("\n", "\\n").replace("\r", "\\r"),
                         "type", magicType
                     )
                 ),
                 ProblemType.MAGIC_LITERAL
             );
-        }
-    }
-
-    private static String formatValue(Object value) {
-        if (value == null) {
-            return "null";
-        } else if (value instanceof String string) {
-            return "\"%s\"".formatted(string.replace("\n", "\\n").replace("\r", "\\r"));
-        } else if (value instanceof Character) {
-            return "'%s'".formatted(value);
-        } else {
-            return value.toString();
         }
     }
 

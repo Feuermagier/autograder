@@ -63,9 +63,9 @@ class TestMagicLiteral extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertMagicLiteral(problems.next(), "Hello World");
-        assertMagicLiteral(problems.next(), "value");
-        assertMagicLiteral(problems.next(), "some error message");
+        assertMagicLiteral(problems.next(), "\"Hello World\"");
+        assertMagicLiteral(problems.next(), "\"value\"");
+        assertMagicLiteral(problems.next(), "\"some error message\"");
 
         problems.assertExhausted();
     }
@@ -124,7 +124,7 @@ class TestMagicLiteral extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertMagicLiteral(problems.next(), "NotThursday2");
+        assertMagicLiteral(problems.next(), "\"NotThursday2\"");
 
         problems.assertExhausted();
     }
@@ -178,10 +178,10 @@ class TestMagicLiteral extends AbstractCheckTest {
                 """
         ), PROBLEM_TYPES);
 
-        assertMagicLiteral(problems.next(), "Hello World");
-        assertMagicLiteral(problems.next(), "value");
-        assertMagicLiteral(problems.next(), "some error message");
-        assertMagicLiteral(problems.next(), "whatever");
+        assertMagicLiteral(problems.next(), "\"Hello World\"");
+        assertMagicLiteral(problems.next(), "\"value\"");
+        assertMagicLiteral(problems.next(), "\"some error message\"");
+        assertMagicLiteral(problems.next(), "\"whatever\"");
 
         problems.assertExhausted();
     }
@@ -203,7 +203,7 @@ class TestMagicLiteral extends AbstractCheckTest {
             " -0.0f          | false          ",
             " 0.0f           | false          ",
             " 1.0f           | false          ",
-            " 1.1f           | true           ",
+            " 1.1F           | true           ",
             " 0.0            | false          ",
         }
     )
@@ -229,7 +229,7 @@ class TestMagicLiteral extends AbstractCheckTest {
     }
 
     @Test
-    void testMagicNumbers() throws IOException, LinterException {
+    void testMagicNumber() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
@@ -241,24 +241,11 @@ class TestMagicLiteral extends AbstractCheckTest {
                         float magicFloat = 1.0f; //# ok
                         String empty = "" + 5;
                     }
-
-                    private static void doSomething(String string) {
-                        if (string.equals("value")) { //# not ok
-                            throw new IllegalStateException("some error message"); //# not ok
-                        }
-                    }
-
-                    private Function<String, String> getFunction() {
-                        return string -> "whatever"; //# not ok
-                    }
                 }
                 """
         ), PROBLEM_TYPES);
 
-        assertMagicLiteral(problems.next(), "Hello World");
-        assertMagicLiteral(problems.next(), "value");
-        assertMagicLiteral(problems.next(), "some error message");
-        assertMagicLiteral(problems.next(), "whatever");
+        assertMagicLiteral(problems.next(), "5");
 
         problems.assertExhausted();
     }

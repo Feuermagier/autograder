@@ -177,7 +177,7 @@ binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwende
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
-magic-literal = "{value} ist ein(e) magic {type}."
+magic-literal = "{$value} ist ein(e) magic {$type}."
 
 loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
 
