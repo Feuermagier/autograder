@@ -109,6 +109,10 @@ public final class MethodUtil {
         return MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
+    public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
+        return MethodHierarchy.isOverriddenMethod(ctMethod);
+    }
+
     /**
      * Checks if the given method is an invocation.
      * @param statement which is checked

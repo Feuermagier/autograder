@@ -180,7 +180,7 @@ binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'
 
 object-datatype = Instead of the datatype 'Object', the variable '{$variable}' should have a concrete or generic datatype.
 
-magic-string = The string '{$value}' should be in a constant.
+magic-literal = "{value} is a magic {type}."
 
 loop-should-be-do-while = This loop should be a do-while loop, because the code before the loop is the same as the code in the loop: {$suggestion}
 
