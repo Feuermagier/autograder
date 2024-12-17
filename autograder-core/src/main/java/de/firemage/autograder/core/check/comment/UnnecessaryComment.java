@@ -8,6 +8,7 @@ import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtComment;
+import spoon.reflect.code.CtJavaDoc;
 import spoon.reflect.declaration.CtElement;
 
 import java.util.ArrayList;
@@ -30,7 +31,7 @@ public class UnnecessaryComment extends IntegratedCheck {
         }
 
         for (CtComment ctComment : comments) {
-            if (ctComment.getContent().isBlank()) {
+            if (ctComment.getContent().isBlank() && !(ctComment instanceof CtJavaDoc ctJavaDoc && ctJavaDoc.getJavadocElements().isEmpty())) {
                 addLocalProblem(
                     ctComment,
                     new LocalizedMessage("unnecessary-comment-empty"),

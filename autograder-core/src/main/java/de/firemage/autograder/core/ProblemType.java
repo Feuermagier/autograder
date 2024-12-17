@@ -120,10 +120,9 @@ public enum ProblemType implements AbstractProblemType {
     IMPLEMENT_COMPARABLE,
 
     /**
-     * Reports magic strings.
+     * Reports magic literals.
      */
-    @HasFalsePositives
-    MAGIC_STRING,
+    MAGIC_LITERAL,
 
     /**
      * Checks if a constant has its value in its name. For example `public static final int TEN = 10;`.

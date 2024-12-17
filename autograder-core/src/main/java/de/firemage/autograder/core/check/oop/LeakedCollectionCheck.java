@@ -300,7 +300,7 @@ public class LeakedCollectionCheck extends IntegratedCheck {
 
         // a lambda like () -> true does not have a body, but an expression which is a return statement
         // this case is handled here
-        if (statements.isEmpty() && ctExecutable instanceof CtLambda<?> ctLambda) {
+        if (statements.isEmpty() && ctExecutable instanceof CtLambda<?> ctLambda && ctLambda.getExpression() != null) {
             statements = List.of(createCtReturn(ctLambda.getExpression().clone()));
         }
 
