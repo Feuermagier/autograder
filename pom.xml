@@ -35,13 +35,14 @@
         <url>https://github.com/Feuermagier/autograder/tree/main</url>
     </scm>
 
+    <!--
     <repositories>
         <repository>
             <id>spoon-snapshot</id>
             <name>Maven Repository for Spoon Snapshots</name>
             <url>https://oss.sonatype.org/content/repositories/snapshots/</url>
         </repository>
-    </repositories>
+    </repositories>-->
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
