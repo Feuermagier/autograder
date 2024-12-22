@@ -2,6 +2,7 @@ package de.firemage.autograder.core;
 
 import de.firemage.autograder.api.AbstractProblemType;
 import de.firemage.autograder.api.HasFalsePositives;
+import de.firemage.autograder.api.Translatable;
 
 public enum ProblemType implements AbstractProblemType {
     /**
@@ -10,7 +11,7 @@ public enum ProblemType implements AbstractProblemType {
      * Has false positives.
      */
     @HasFalsePositives
-    UI_INPUT_SEPARATION,
+    UI_INPUT_SEPARATION(new LocalizedMessage("p-ui-input-separation")),
 
     /**
      * If the code is split into multiple packages, all output must happen in one package. Otherwise, one class must do all output.
@@ -18,7 +19,7 @@ public enum ProblemType implements AbstractProblemType {
      * Has false positives.
      */
     @HasFalsePositives
-    UI_OUTPUT_SEPARATION,
+    UI_OUTPUT_SEPARATION(new LocalizedMessage("p-ui-output-separation")),
 
     /**
      * Checks for non-private inner types (static classes, interfaces, enums, local types)
@@ -26,104 +27,104 @@ public enum ProblemType implements AbstractProblemType {
      * This check ignores inner classes that are not static, because there are cases where
      * that can be useful.
      */
-    AVOID_INNER_CLASSES,
+    AVOID_INNER_CLASSES(new LocalizedMessage("p-avoid-inner-classes")),
 
     /**
      * Advises to use String.formatted instead of String.format for simple format strings
      */
     @HasFalsePositives
-    USE_STRING_FORMATTED,
+    USE_STRING_FORMATTED(new LocalizedMessage("p-use-string-formatted")),
 
     /**
      * Reports all java.util.Optional<Boolean> types
      */
-    OPTIONAL_TRI_STATE,
+    OPTIONAL_TRI_STATE(new LocalizedMessage("p-optional-tri-state")),
 
     /**
      * Reports all uses of labels.
      * <br>
      * For example `label: while (true) { ... }`
      */
-    AVOID_LABELS,
+    AVOID_LABELS(new LocalizedMessage("p-avoid-labels")),
 
     /**
      * Advises to use Arrays.fill(array, val) instead of Arrays.fill(array, val, 0, array.length)
      */
-    SIMPLIFY_ARRAYS_FILL,
+    SIMPLIFY_ARRAYS_FILL(new LocalizedMessage("p-simplify-arrays-fill")),
 
     /**
      * Reports duplicate catch blocks that could be merged with a multi-catch block.
      */
     @HasFalsePositives
-    DUPLICATE_CATCH_BLOCK,
+    DUPLICATE_CATCH_BLOCK(new LocalizedMessage("p-duplicate-catch-block")),
 
     /**
      * Reports duplicate if blocks that could be merged by adjusting the condition.
      */
     @HasFalsePositives
-    DUPLICATE_IF_BLOCK,
+    DUPLICATE_IF_BLOCK(new LocalizedMessage("p-duplicate-if-block")),
 
     /**
      * Reports unused assignments
      */
     @HasFalsePositives
-    REDUNDANT_ASSIGNMENT,
+    REDUNDANT_ASSIGNMENT(new LocalizedMessage("p-redundant-assignment")),
 
     /**
      * Reports local variables & fields that shadow files in parent classes, skipping constructors and simple setters
      */
     @HasFalsePositives
-    AVOID_SHADOWING,
+    AVOID_SHADOWING(new LocalizedMessage("p-avoid-shadowing")),
 
 
     /**
      * Suggests to use the `Collections.nCopies` method when applicable.
      */
     @HasFalsePositives
-    COLLECTIONS_N_COPIES,
+    COLLECTIONS_N_COPIES(new LocalizedMessage("p-collections-n-copies")),
 
     /**
      * Reports all calls to `System.exit`
      */
     @HasFalsePositives
-    DO_NOT_USE_SYSTEM_EXIT,
+    DO_NOT_USE_SYSTEM_EXIT(new LocalizedMessage("p-do-not-use-system-exit")),
 
     /**
      * Checks if a `Scanner` is closed anywhere in the project or closed through a try-with.
      */
     @HasFalsePositives
-    SCANNER_MUST_BE_CLOSED,
+    SCANNER_MUST_BE_CLOSED(new LocalizedMessage("p-scanner-must-be-closed")),
 
     /**
      * Reports when the equals/hashCode/Comparable contract is violated by not implementing equals or hashCode.
      */
     @HasFalsePositives
-    EQUALS_HASHCODE_COMPARABLE_CONTRACT,
+    EQUALS_HASHCODE_COMPARABLE_CONTRACT(new LocalizedMessage("p-equals-hashcode-comparable-contract")),
 
     /**
      * Reports when a type cast is performed without checking the type.
      * <br>
      * This uses the java compiler to find unchecked type casts. Therefore it should not have any false-positives/negatives.
      */
-    UNCHECKED_TYPE_CAST,
+    UNCHECKED_TYPE_CAST(new LocalizedMessage("p-unchecked-type-cast")),
 
     /**
      * Reports when there are more than some number (or percentage) of exceptions in a project.
      */
     @HasFalsePositives
-    TOO_MANY_EXCEPTIONS,
+    TOO_MANY_EXCEPTIONS(new LocalizedMessage("p-too-many-exceptions")),
 
     /**
      * Suggests implementing comparable instead of using a comparator.
      */
     @HasFalsePositives
-    IMPLEMENT_COMPARABLE,
+    IMPLEMENT_COMPARABLE(new LocalizedMessage("p-implement-comparable")),
 
     /**
      * Reports magic strings.
      */
     @HasFalsePositives
-    MAGIC_STRING,
+    MAGIC_STRING(new LocalizedMessage("p-magic-string")),
 
     /**
      * Checks if a constant has its value in its name. For example `public static final int TEN = 10;`.
@@ -133,19 +134,19 @@ public enum ProblemType implements AbstractProblemType {
      * This is currently solved by ignoring all constants where more than X% of the name is not the value.
      */
     @HasFalsePositives
-    CONSTANT_NAME_CONTAINS_VALUE,
+    CONSTANT_NAME_CONTAINS_VALUE(new LocalizedMessage("p-constant-name-contains-value")),
 
     /**
      * Reports all uses of deprecated collections like Vector, Hashtable, Stack, etc.
      */
     @HasFalsePositives
-    DEPRECATED_COLLECTION_USED,
+    DEPRECATED_COLLECTION_USED(new LocalizedMessage("p-deprecated-collection-used")),
 
     /**
      * When someone does for example list.size() == 0 instead of list.isEmpty().
      */
     @HasFalsePositives
-    COLLECTION_IS_EMPTY_REIMPLEMENTED,
+    COLLECTION_IS_EMPTY_REIMPLEMENTED(new LocalizedMessage("p-collection-is-empty-reimplemented")),
 
     /**
      * When someone does for example "".equals(str) instead of str.isEmpty().
@@ -1091,6 +1092,16 @@ public enum ProblemType implements AbstractProblemType {
      */
     @HasFalsePositives
     REDUNDANT_UNINITIALIZED_VARIABLE;
+
+    private final Translatable description;
+
+    ProblemType(Translatable description) {
+        this.description = description;
+    }
+
+    public Translatable getDescription() {
+        return description;
+    }
 
     /**
      * <strong>Used via reflection, so don't remove, even if your IDE shows no usages!</strong>
