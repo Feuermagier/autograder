@@ -139,6 +139,8 @@ exception-message = An exception should always have a message that explains what
 
 number-format-exception-ignored = 'NumberFormatException' should be caught and/or replaced by self-defined exception.
 
+try-block-size = None of the exceptions caught in the catch block are thrown in the lines {$lines}. These lines should be placed before or after the try-catch block.
+
 # General
 
 compare-objects-exp = Implement an equals method for type '{$type}' and use it for comparisons

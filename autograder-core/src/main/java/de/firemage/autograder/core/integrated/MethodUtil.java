@@ -133,6 +133,16 @@ public final class MethodUtil {
         return MethodUtil.isMainMethod(ctMethod);
     }
 
+    /**
+     * Returns the declaration of the given executable reference.
+     *
+     * @param ctExecutableReference the reference to get the declaration of
+     * @return the declaration or null if the declaration could not be found
+     */
+    public static CtExecutable<?> getExecutableDeclaration(CtExecutableReference<?> ctExecutableReference) {
+        return UsesFinder.getExecutableDeclaration(ctExecutableReference);
+    }
+
     public static boolean isGetter(CtMethod<?> method) {
         return method.getSimpleName().startsWith("get")
             && method.getParameters().isEmpty()

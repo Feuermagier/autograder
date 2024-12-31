@@ -134,6 +134,7 @@ exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die 
 
 number-format-exception-ignored = 'NumberFormatException' sollte gefangen werden und entweder behandelt oder durch eine eigene Exception ersetzt werden.
 
+try-block-size = Keine der im catch-Block gefangenen Exceptions, wird in den Zeilen {$lines} geworfen. Diese Zeilen sollten vor oder nach dem try-catch-Block stehen.
 # General
 
 compare-objects-exp = Der Typ '{$type}' sollte 'equals' implementieren und nicht über 'toString' verglichen werden.
