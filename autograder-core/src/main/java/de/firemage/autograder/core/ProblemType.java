@@ -120,10 +120,9 @@ public enum ProblemType implements AbstractProblemType {
     IMPLEMENT_COMPARABLE,
 
     /**
-     * Reports magic strings.
+     * Reports magic literals.
      */
-    @HasFalsePositives
-    MAGIC_STRING,
+    MAGIC_LITERAL,
 
     /**
      * Checks if a constant has its value in its name. For example `public static final int TEN = 10;`.
@@ -501,6 +500,14 @@ public enum ProblemType implements AbstractProblemType {
      */
     @HasFalsePositives
     TRY_CATCH_COMPLEXITY,
+
+    /**
+     * Reports code where the try block contains statements that do not throw an exception and could therefore be moved outside the try block.
+     * <br>
+     * It might have false-positives, because it is difficult to detect what code throws which exceptions.
+     */
+    @HasFalsePositives
+    TRY_BLOCK_SIZE,
 
     /**
      * Reports static blocks in classes.

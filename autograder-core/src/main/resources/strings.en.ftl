@@ -139,6 +139,8 @@ exception-message = An exception should always have a message that explains what
 
 number-format-exception-ignored = 'NumberFormatException' should be caught and/or replaced by self-defined exception.
 
+try-block-size = None of the exceptions caught in the catch block are thrown in the lines {$lines}. These lines should be placed before or after the try-catch block.
+
 # General
 
 compare-objects-exp = Implement an equals method for type '{$type}' and use it for comparisons
@@ -180,7 +182,7 @@ binary-operator-on-boolean = Instead of '|' and '&' one should use '||' and '&&'
 
 object-datatype = Instead of the datatype 'Object', the variable '{$variable}' should have a concrete or generic datatype.
 
-magic-string = The string '{$value}' should be in a constant.
+magic-literal = "{$value} is a magic {$type}."
 
 loop-should-be-do-while = This loop should be a do-while loop, because the code before the loop is the same as the code in the loop: {$suggestion}
 

@@ -73,6 +73,8 @@ public class TryCatchComplexity extends IntegratedCheck {
     private List<CtStatement> extractMethodInvocations(List<CtStatement> statements) {
         return statements.stream().filter(MethodUtil::isInvocation).toList();
     }
+
+    // TODO: this could be combined with the duplicatecode check code
     private void visitStatement(CtStatement statement, List<CtStatement> allStatements) {
         // The CtStatement may be null if the body of an if statement is empty. for example "if (true);"
         if (statement == null || allStatements.size() > MAX_ALLOWED_STATEMENTS) {

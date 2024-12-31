@@ -169,4 +169,29 @@ public final class StatementUtil {
 
         return effects;
     }
+
+    /**
+     * Factory method to create a {@link CtBlock} with the given statements.
+     *
+     * @param firstStatement the first statement of the block
+     * @param otherStatements the other statements of the block
+     * @return the created block, note that the statements are cloned
+     */
+    public static CtBlock<?> createCtBlock(CtStatement firstStatement, List<CtStatement> otherStatements) {
+        CtBlock ctBlock = firstStatement.getFactory().createCtBlock(firstStatement.clone());
+
+        for (CtStatement statement : otherStatements) {
+            ctBlock.addStatement(statement.clone());
+        }
+
+        return ctBlock;
+    }
+
+    public static CtBlock<?> createCtBlock(List<CtStatement> statements) {
+        if (statements.isEmpty()) {
+            return null;
+        }
+
+        return createCtBlock(statements.get(0), statements.subList(1, statements.size()));
+    }
 }
