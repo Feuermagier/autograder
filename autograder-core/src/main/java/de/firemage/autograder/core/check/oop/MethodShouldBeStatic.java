@@ -3,98 +3,56 @@ package de.firemage.autograder.core.check.oop;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.core.integrated.CoreUtil;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
-import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtExecutableReferenceExpression;
-import spoon.reflect.code.CtFieldAccess;
-import spoon.reflect.code.CtInvocation;
 import spoon.reflect.code.CtSuperAccess;
-import spoon.reflect.code.CtTargetedExpression;
 import spoon.reflect.code.CtThisAccess;
-import spoon.reflect.code.CtTypeAccess;
-import spoon.reflect.declaration.CtElement;
 import spoon.reflect.declaration.CtMethod;
-import spoon.reflect.declaration.CtType;
 import spoon.reflect.declaration.CtTypeMember;
-import spoon.reflect.visitor.Filter;
 
-import java.util.List;
 import java.util.Map;
 
 @ExecutableCheck(reportedProblems = { ProblemType.METHOD_SHOULD_BE_STATIC, ProblemType.METHOD_SHOULD_BE_STATIC_NOT_PUBLIC})
 public class MethodShouldBeStatic extends IntegratedCheck {
     /**
-     * Finds elements that access the given type through this. Accessing the same type through a different object is ok.
+     * This method checks if a given type member can be effectively static.
+     * <p>
+     * A type member is effectively static if it is already static or if it can be made static without
+     * changing any other code.
      *
-     * @param ctType the type to be accessed
+     * @param ctTypeMember the type member to check
+     * @return true if the type member can be static
      */
-    private record ThisAccessFilter(CtType<?> ctType) implements Filter<CtElement> {
-        private boolean isSuperTypeAccess(CtTargetedExpression<?, ?> ctTargetedExpression) {
-            return ctTargetedExpression.getTarget() instanceof CtSuperAccess<?> superAccess
-                && this.ctType.isSubtypeOf(superAccess.getType());
-        }
-
-        private boolean isThisTypeAccess(CtTargetedExpression<?, ?> ctTargetedExpression) {
-            if (this.isSuperTypeAccess(ctTargetedExpression)) {
-                return true;
-            }
-
-            return ctTargetedExpression.getTarget() instanceof CtThisAccess<?> thisAccess
-                && thisAccess.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-                && this.ctType.equals(ctTypeAccess.getAccessedType().getTypeDeclaration());
-        }
-
-        private static final List<Class<?>> SUPPORTED_TYPES = List.of(
-            CtFieldAccess.class,
-            CtInvocation.class,
-            CtExecutableReferenceExpression.class
-        );
-
-        @Override
-        public boolean matches(CtElement element) {
-            // The following types can be a targeted expression:
-            // - CtArrayAccess
-            // - CtConstructorCall
-            // - CtExecutableReferenceExpression
-            // - CtFieldAccess
-            // - CtInvocation
-            // - CtNewClass
-            // - CtSuperAccess
-            // - CtThisAccess
-            if (element instanceof CtTargetedExpression<?,?> ctTargetedExpression && CoreUtil.isInstanceOfAny(ctTargetedExpression, SUPPORTED_TYPES)) {
-                return this.isThisTypeAccess(ctTargetedExpression);
-            }
-
-            return element instanceof CtThisAccess<?> ctThisAccess
-                && ctThisAccess.getTarget() instanceof CtTypeAccess<?> ctTypeAccess
-                && this.ctType.equals(ctTypeAccess.getAccessedType().getTypeDeclaration())
-                && !CoreUtil.isInstanceOfAny(element.getParent(), SUPPORTED_TYPES);
-        }
-    }
-
     private static boolean isEffectivelyStatic(CtTypeMember ctTypeMember) {
         if (ctTypeMember.isStatic()) {
             return true;
         }
 
+        // for interfaces and abstract methods there exist different rules (e.g. default methods should obviously not be static)
         if (ctTypeMember.getDeclaringType().isInterface() || ctTypeMember.isAbstract()) {
             return false;
         }
 
+        // this handles the case where the type member is a method:
         if (ctTypeMember instanceof CtMethod<?> ctMethod) {
+            // if the method is used in combination with inheritance (overriding a parent method or being overridden by a child method),
+            // it cannot be static.
             if (MethodHierarchy.isOverridingMethod(ctMethod) || MethodHierarchy.isOverriddenMethod(ctMethod)) {
                 return false;
             }
 
+            // methods without a body can be static
             if (ctMethod.getBody() == null) {
                 return true;
             }
 
-            return ctMethod.getBody().filterChildren(new ThisAccessFilter(ctTypeMember.getDeclaringType())).first() == null;
+            // this checks if the method body accesses this or super, in which case it cannot be static.
+            //
+            // one could call here the getElements method instead, but that would be less efficient, because it would
+            // collect instances, and we only need to know if there is at least one instance.
+            return ctMethod.getBody().filterChildren(ctElement -> ctElement instanceof CtThisAccess<?> || ctElement instanceof CtSuperAccess<?>).first() == null;
         }
 
         return false;

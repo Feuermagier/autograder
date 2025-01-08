@@ -295,4 +295,76 @@ class TestMethodShouldBeStatic extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+
+    @Test
+    void testEnumInvocationWithThis() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Response",
+            """
+                import java.util.Map;
+
+                public enum Response {
+                    IN_PROGRESS,
+                    SUCCESS,
+                    FAILURE;
+                    
+                    private static final Map<Response, Response> NEXT = Map.of(
+                        IN_PROGRESS, SUCCESS,
+                        SUCCESS, FAILURE,
+                        FAILURE, FAILURE
+                    );
+
+                    public Response getNext() {
+                        return NEXT.get(this);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testImplicitThisMethodCall() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Response",
+            """
+                public enum Response {
+                    IN_PROGRESS,
+                    SUCCESS,
+                    FAILURE;
+                    
+                    public void doSomething() {
+                        System.out.println("Response was: " + this.toString());
+                    }
+
+                    public Response getNext() {
+                        doSomething();
+                        return SUCCESS;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+
+    @Test
+    void testEmptyConstructor() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Data",
+            """
+                public class Data {
+                    public Data() {}
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
