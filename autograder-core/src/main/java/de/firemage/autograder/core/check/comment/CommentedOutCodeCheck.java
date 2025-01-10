@@ -112,19 +112,19 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
     private static Collection<String> getDifferentVersions(String original) {
         Set<String> options = new HashSet<>();
         options.add(original.endsWith(";") ? original : original + ";");
-        options.add(formatClosedBlock(original));
+        options.add(formatBrackets(formatBrackets(formatBrackets(original, '{', '}'), '(', ')'), '[', ']'));
         return options;
     }
 
-    private static String formatClosedBlock(String original) {
-        int differenceClosing = StringUtils.countMatches(original, '}') - StringUtils.countMatches(original, '{');
-        if (differenceClosing == 0) {
+    private static String formatBrackets(String original, char opening, char closing) {
+        int difference = StringUtils.countMatches(original, closing) - StringUtils.countMatches(original, opening);
+        if (difference == 0) {
             return original;
         }
         
-        return differenceClosing > 0 
-                ? "{".repeat(differenceClosing) + original 
-                : original + "}".repeat(-differenceClosing);
+        return difference > 0 
+                ? String.valueOf(opening).repeat(difference) + original 
+                : original + String.valueOf(closing).repeat(-difference);
     }
 
     private static List<String> wrapAsBlock(Collection<String> differentVersions) {
