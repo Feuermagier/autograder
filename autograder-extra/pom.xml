@@ -5,7 +5,7 @@
     <parent>
         <artifactId>autograder-parent</artifactId>
         <groupId>de.firemage.autograder</groupId>
-        <version>0.6.5</version>
+        <version>0.6.6</version>
     </parent>
     <modelVersion>4.0.0</modelVersion>
 
@@ -16,7 +16,7 @@
 
     <properties>
         <surefire.version>3.5.2</surefire.version>
-        <pmd.version>7.8.0</pmd.version>
+        <pmd.version>7.9.0</pmd.version>
     </properties>
 
     <dependencies>

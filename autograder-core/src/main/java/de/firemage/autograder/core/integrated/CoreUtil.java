@@ -11,9 +11,14 @@ import spoon.reflect.declaration.CtType;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.IdentityHashMap;
 import java.util.Optional;
+import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.Consumer;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 /**
  * Utility class for functionality that does not fit in any other utility class.
@@ -71,6 +76,10 @@ public final class CoreUtil {
             // visit each compilation unit only once
             .distinct()
             .forEach(lambda);
+    }
+
+    public static <T> Collector<T, ?, Set<T>> toIdentitySet() {
+        return Collectors.toCollection(() -> Collections.newSetFromMap(new IdentityHashMap<>()));
     }
 
     /**

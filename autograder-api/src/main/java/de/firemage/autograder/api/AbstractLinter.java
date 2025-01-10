@@ -1,7 +1,11 @@
 package de.firemage.autograder.api;
 
+import fluent.bundle.FluentBundle;
+import fluent.bundle.FluentResource;
+
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Locale;
 import java.util.function.Consumer;
@@ -20,6 +24,7 @@ public interface AbstractLinter {
         private int threads;
         private ClassLoader classLoader;
         private int maxProblemsPerCheck = -1;
+        private List<FluentResource> messageOverrides = new ArrayList<>();
 
         private Builder(Locale locale) {
             this.locale = locale;
@@ -63,6 +68,15 @@ public interface AbstractLinter {
 
         public Locale getLocale() {
             return locale;
+        }
+
+        public Builder messagesOverride(FluentResource bundle) {
+            this.messageOverrides.add(bundle);
+            return this;
+        }
+
+        public List<FluentResource> getMessageOverrides() {
+            return this.messageOverrides;
         }
     }
 }

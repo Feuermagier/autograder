@@ -134,6 +134,7 @@ exception-message = Eine Exception sollte immer eine Nachricht dabei haben, die 
 
 number-format-exception-ignored = 'NumberFormatException' sollte gefangen werden und entweder behandelt oder durch eine eigene Exception ersetzt werden.
 
+try-block-size = Keine der im catch-Block gefangenen Exceptions, wird in den Zeilen {$lines} geworfen. Diese Zeilen sollten vor oder nach dem try-catch-Block stehen.
 # General
 
 compare-objects-exp = Der Typ '{$type}' sollte 'equals' implementieren und nicht über 'toString' verglichen werden.
@@ -177,7 +178,7 @@ binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwende
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
-magic-string = Der String '{$value}' sollte in eine Konstante ausgelagert werden.
+magic-literal = "{$value} ist ein(e) magic {$type}."
 
 loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
 

@@ -109,6 +109,10 @@ public final class MethodUtil {
         return MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
+    public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
+        return MethodHierarchy.isOverriddenMethod(ctMethod);
+    }
+
     /**
      * Checks if the given method is an invocation.
      * @param statement which is checked
@@ -127,6 +131,16 @@ public final class MethodUtil {
         }
 
         return MethodUtil.isMainMethod(ctMethod);
+    }
+
+    /**
+     * Returns the declaration of the given executable reference.
+     *
+     * @param ctExecutableReference the reference to get the declaration of
+     * @return the declaration or null if the declaration could not be found
+     */
+    public static CtExecutable<?> getExecutableDeclaration(CtExecutableReference<?> ctExecutableReference) {
+        return UsesFinder.getExecutableDeclaration(ctExecutableReference);
     }
 
     public static boolean isGetter(CtMethod<?> method) {

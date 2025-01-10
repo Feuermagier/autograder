@@ -101,4 +101,48 @@ class TestUnnecessaryComment extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testPartiallyFilledJavadoc() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(
+            StringSourceInfo.fromSourceString(
+                JavaVersion.JAVA_17,
+                "edu.kit.kastel.Main",
+                """
+                    package edu.kit.kastel;
+
+                    /**
+                     *
+                     * @author uxxxx
+                     */
+                    public class Main {
+                    }
+                    """
+            ),
+            PROBLEM_TYPES
+        );
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testPartiallyFilledJavadocNoPackage() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(
+            StringSourceInfo.fromSourceString(
+                JavaVersion.JAVA_17,
+                "Main",
+                """
+                    /**
+                     *
+                     * @author uxxxx
+                     */
+                    public class Main {
+                    }
+                    """
+            ),
+            PROBLEM_TYPES
+        );
+
+        problems.assertExhausted();
+    }
 }

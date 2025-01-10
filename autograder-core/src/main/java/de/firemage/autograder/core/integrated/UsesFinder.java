@@ -185,6 +185,11 @@ public class UsesFinder {
     public static CtVariable<?> getDeclaredVariable(CtVariableAccess<?> ctVariableAccess) {
         return UsesFinder.getFor(ctVariableAccess).scanner.variableAccessDeclarations.getOrDefault(ctVariableAccess, null);
     }
+
+    static CtExecutable<?> getExecutableDeclaration(CtExecutableReference<?> ctExecutableReference) {
+        return UsesFinder.getFor(ctExecutableReference).scanner.executableDeclarations.computeIfAbsent(ctExecutableReference, CtExecutableReference::getExecutableDeclaration);
+    }
+
     /**
      * The scanner searches for uses of supported code elements in a single pass over the entire model.
      * Since inserting into the hash map requires (amortized) constant time, usage search runs in O(n) time.
@@ -199,6 +204,7 @@ public class UsesFinder {
         private final Map<CtExecutable, List<CtElement>> executableUses = new IdentityHashMap<>();
         private final Map<CtType, List<CtTypeReference>> typeUses = new IdentityHashMap<>();
         private final Map<CtType, Set<CtType>> subtypes = new IdentityHashMap<>();
+        private final Map<CtExecutableReference, CtExecutable> executableDeclarations = new IdentityHashMap<>();
 
         // Caches the current instanceof pattern variables, since Spoon doesn't track them yet
         // We are conservative: A pattern introduces a variable until the end of the current block
@@ -335,6 +341,7 @@ public class UsesFinder {
         private void recordExecutableReference(CtExecutableReference reference, CtElement referencingElement) {
             var executable = reference.getExecutableDeclaration();
             if (executable != null) {
+                this.executableDeclarations.put(reference, executable);
                 var uses = this.executableUses.computeIfAbsent(executable, k -> new ArrayList<>());
                 uses.add(referencingElement);
             }

@@ -56,10 +56,22 @@ public final class Linter implements AbstractLinter {
             default -> throw new IllegalArgumentException("No translation available for the locale " + locale);
         };
         try {
-            FluentResource resource = FTLParser.parse(FTLStream.of(
-                new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
+            var fluentBuilder = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE);
+
+            // The name FluentBuilder#addResourceOverriding is a lie; it does not override preexisting messages
+
+            // message overrides
+            for (var bundle : builder.getMessageOverrides()) {
+                fluentBuilder.addResourceOverriding(bundle);
+            }
+
+            // default messages
+            FluentResource defaultMessages = FTLParser.parse(FTLStream.of(
+                    new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
             ));
-            this.fluentBundle = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE).addResource(resource).build();
+            fluentBuilder.addResourceOverriding(defaultMessages);
+
+            this.fluentBundle = fluentBuilder.build();
         } catch (IOException e) {
             throw new IllegalStateException(e);
         }
