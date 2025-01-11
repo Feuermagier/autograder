@@ -1,11 +1,12 @@
 package de.firemage.autograder.core.check.comment;
 
+import com.github.javaparser.ParseProblemException;
+import com.github.javaparser.StaticJavaParser;
+import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.CodePosition;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
-import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.ExecutableCheck;
-
 import de.firemage.autograder.core.file.SourcePath;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
@@ -15,8 +16,11 @@ import spoon.reflect.code.CtComment;
 import spoon.reflect.cu.SourcePosition;
 
 import java.nio.file.Path;
+import java.util.Collection;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.SortedSet;
@@ -44,7 +48,7 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
                 }
                 String content = comment.getContent().trim();
 
-                if (StringUtils.containsAny(content, ';', '{', '}', '=')) {
+                if (isValidCode(content)) {
                     var position = comment.getPosition();
                     files
                         .computeIfAbsent(position.getFile().toPath(), path -> new TreeSet<>(POSITION_COMPARATOR))
@@ -79,6 +83,59 @@ public class CommentedOutCodeCheck extends IntegratedCheck {
             });
             running.addProblem(sourcePath);
         });
+    }
+
+    private static boolean isValidCode(String content) {
+        return !content.isEmpty() && containsSpecialCharacters(content) && isValidCodeInternal(content);
+    }
+    
+    private static boolean containsSpecialCharacters(String content) {
+        return StringUtils.containsAny(content, ';', '{', '}', '=', '(', ')', '-', '<', '>', '?', ':', '+', '.', ',');
+    }
+
+    private static boolean isValidCodeInternal(String content) {
+        return prepareCode(content).stream().anyMatch(formatted -> {
+                    try {
+                        StaticJavaParser.parseBlock(formatted);
+                        return true;
+                    } catch (ParseProblemException e) {
+                        return false;
+                    }
+                });
+    }
+
+    private static List<String> prepareCode(String content) {
+        String stripped = content.strip();
+        return wrapAsBlock(getDifferentVersions(stripped));
+    }
+
+    private static Collection<String> getDifferentVersions(String original) {
+        Set<String> options = new HashSet<>();
+        options.add(original.endsWith(";") ? original : original + ";");
+        options.add(formatBrackets(formatBrackets(formatBrackets(original, '{', '}'), '(', ')'), '[', ']'));
+        return options;
+    }
+
+    private static String formatBrackets(String original, char opening, char closing) {
+        int difference = StringUtils.countMatches(original, closing) - StringUtils.countMatches(original, opening);
+        if (difference == 0) {
+            return original;
+        }
+        
+        return difference > 0 
+                ? String.valueOf(opening).repeat(difference) + original 
+                : original + String.valueOf(closing).repeat(-difference);
+    }
+
+    private static List<String> wrapAsBlock(Collection<String> differentVersions) {
+        return differentVersions.stream()
+                .map(content -> {
+                    if (!content.startsWith("{") || !content.endsWith("}")) {
+                        return "{" + content + "}";
+                    }
+                    return content;
+                })
+                .toList();
     }
 
     private final class RunningPosition {
