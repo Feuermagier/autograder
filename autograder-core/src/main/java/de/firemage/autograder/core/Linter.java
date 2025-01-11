@@ -1,28 +1,20 @@
 package de.firemage.autograder.core;
 
+import de.firemage.autograder.api.AbstractLinter;
 import de.firemage.autograder.api.AbstractProblemType;
 import de.firemage.autograder.api.CheckConfiguration;
-import de.firemage.autograder.api.AbstractLinter;
+import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
-import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
-import de.firemage.autograder.core.parallel.AnalysisResult;
-import de.firemage.autograder.core.parallel.AnalysisScheduler;
-import fluent.bundle.FluentBundle;
-import fluent.bundle.FluentResource;
-import fluent.functions.icu.ICUFunctionFactory;
-import fluent.syntax.parser.FTLParser;
-import fluent.syntax.parser.FTLStream;
 import org.reflections.Reflections;
 import org.reflections.scanners.Scanners;
 import org.reflections.util.ConfigurationBuilder;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -38,9 +30,9 @@ import java.util.stream.Collectors;
 public final class Linter implements AbstractLinter {
     private final int threads;
     private final TempLocation tempLocation;
-    private final FluentBundle fluentBundle;
     private final ClassLoader classLoader;
     private final int maxProblemsPerCheck;
+    private final Translations translations;
 
     public static Linter defaultLinter(Locale locale) {
         return new Linter(AbstractLinter.builder(locale));
@@ -49,41 +41,15 @@ public final class Linter implements AbstractLinter {
     public Linter(
         AbstractLinter.Builder builder
     ) {
-        var locale = builder.getLocale();
-        String filename = switch (locale.getLanguage()) {
-            case "de" -> "/strings.de.ftl";
-            case "en" -> "/strings.en.ftl";
-            default -> throw new IllegalArgumentException("No translation available for the locale " + locale);
-        };
-        try {
-            var fluentBuilder = FluentBundle.builder(locale, ICUFunctionFactory.INSTANCE);
-
-            // The name FluentBuilder#addResourceOverriding is a lie; it does not override preexisting messages
-
-            // message overrides
-            for (var bundle : builder.getMessageOverrides()) {
-                fluentBuilder.addResourceOverriding(bundle);
-            }
-
-            // default messages
-            FluentResource defaultMessages = FTLParser.parse(FTLStream.of(
-                    new String(this.getClass().getResourceAsStream(filename).readAllBytes(), StandardCharsets.UTF_8)
-            ));
-            fluentBuilder.addResourceOverriding(defaultMessages);
-
-            this.fluentBundle = fluentBuilder.build();
-        } catch (IOException e) {
-            throw new IllegalStateException(e);
-        }
-
+        this.translations = new Translations(builder.getLocale(), builder.getMessageOverrides(), builder.getConditionalOverrides());
         this.tempLocation = builder.getTempLocation() != null ? (TempLocation) builder.getTempLocation() : TempLocation.random();
         this.threads = builder.getThreads();
         this.classLoader = builder.getClassLoader();
         this.maxProblemsPerCheck = builder.getMaxProblemsPerCheck();
     }
 
-    public FluentBundle getFluentBundle() {
-        return fluentBundle;
+    public Translations getTranslations() {
+        return translations;
     }
 
     @Override
@@ -232,14 +198,9 @@ public final class Linter implements AbstractLinter {
         return result;
     }
 
+    @Override
     public String translateMessage(Translatable message) {
-        String output = message.format(this.fluentBundle);
-
-        if (output.startsWith("Unknown messageID '")) {
-            throw new IllegalStateException(output);
-        }
-
-        return output;
+        return message.format(this.translations);
     }
 
     private static final Collection<Class<?>> CHECKS = new LinkedHashSet<>(

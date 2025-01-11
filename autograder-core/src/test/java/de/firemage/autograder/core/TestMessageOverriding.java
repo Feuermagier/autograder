@@ -53,4 +53,52 @@ public class TestMessageOverriding {
         String msg = linter.translateMessage(new LocalizedMessage("status-model"));
         assertEquals("Building the code model", msg);
     }
+
+    @Test
+    void testConditionalMessageOverride() {
+        var builder = AbstractLinter.builder(Locale.ENGLISH)
+                .conditionalOverride(ProblemType.AVOID_LABELS, "avoid-labels", "Foo Bar");
+        var linter = new Linter(builder);
+        String msg = linter.translateMessage(new LocalizedMessageForProblem(new LocalizedMessage("avoid-labels"), ProblemType.AVOID_LABELS));
+        assertEquals("Foo Bar", msg);
+    }
+
+    @Test
+    void testMultipleConditionalMessageOverrides() {
+        var builder = AbstractLinter.builder(Locale.ENGLISH)
+                .conditionalOverride(ProblemType.AVOID_SHADOWING, "avoid-shadowing", "1234")
+                .conditionalOverride(ProblemType.AVOID_LABELS, "avoid-labels", "Foo Bar");
+        var linter = new Linter(builder);
+
+        String msg = linter.translateMessage(new LocalizedMessageForProblem(new LocalizedMessage("avoid-labels"), ProblemType.AVOID_LABELS));
+        assertEquals("Foo Bar", msg);
+
+        String msg2 = linter.translateMessage(new LocalizedMessageForProblem(new LocalizedMessage("avoid-shadowing"), ProblemType.AVOID_SHADOWING));
+        assertEquals("1234", msg2);
+    }
+
+    @Test
+    void testMultipleConditionalMessageOverridesForSameProblemType() {
+        var builder = AbstractLinter.builder(Locale.ENGLISH)
+                .conditionalOverride(ProblemType.AVOID_SHADOWING, "avoid-shadowing", "1234")
+                .conditionalOverride(ProblemType.AVOID_SHADOWING, "avoid-labels", "Foo Bar");
+        var linter = new Linter(builder);
+
+        String msg = linter.translateMessage(new LocalizedMessageForProblem(new LocalizedMessage("avoid-labels"), ProblemType.AVOID_SHADOWING));
+        assertEquals("Foo Bar", msg);
+
+        String msg2 = linter.translateMessage(new LocalizedMessageForProblem(new LocalizedMessage("avoid-shadowing"), ProblemType.AVOID_SHADOWING));
+        assertEquals("1234", msg2);
+    }
+
+    @Test
+    void testConditionalMessageOverrideForSameProblemType() {
+        var builder = AbstractLinter.builder(Locale.ENGLISH)
+                .conditionalOverride(ProblemType.AVOID_SHADOWING, "avoid-shadowing", "1234");
+        var linter = new Linter(builder);
+
+        String msg = linter.translateMessage(new LocalizedMessageForProblem(new LocalizedMessage("avoid-labels"), ProblemType.AVOID_SHADOWING));
+        assertEquals("Labels should be avoided.", msg);
+
+    }
 }

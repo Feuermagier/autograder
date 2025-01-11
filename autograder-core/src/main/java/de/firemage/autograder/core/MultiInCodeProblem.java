@@ -42,7 +42,7 @@ public class MultiInCodeProblem extends Problem {
                         problems.stream().map(Problem::getPosition)
                     )
                 )
-            ).format(bundle);
+            ).tryFormat(bundle);
         };
     }
 

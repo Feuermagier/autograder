@@ -1,13 +1,14 @@
 package de.firemage.autograder.api;
 
-import fluent.bundle.FluentBundle;
 import fluent.bundle.FluentResource;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.function.Consumer;
 
 public interface AbstractLinter {
@@ -25,6 +26,7 @@ public interface AbstractLinter {
         private ClassLoader classLoader;
         private int maxProblemsPerCheck = -1;
         private List<FluentResource> messageOverrides = new ArrayList<>();
+        private Map<AbstractProblemType, List<String>> conditionalOverrides = new HashMap<>();
 
         private Builder(Locale locale) {
             this.locale = locale;
@@ -70,6 +72,11 @@ public interface AbstractLinter {
             return locale;
         }
 
+        /**
+         * Add message overrides that always apply, regardless of problem type. Conditional overrides take precedence.
+         * @param bundle
+         * @return this
+         */
         public Builder messagesOverride(FluentResource bundle) {
             this.messageOverrides.add(bundle);
             return this;
@@ -77,6 +84,23 @@ public interface AbstractLinter {
 
         public List<FluentResource> getMessageOverrides() {
             return this.messageOverrides;
+        }
+
+        /**
+         * Add a message override that only applies if the message was emitted for the specified problem type.
+         * Conditional overrides override all other overrides. The (problemType, key) pair must be unique.
+         * @param problemType
+         * @param key
+         * @param value
+         * @return this
+         */
+        public Builder conditionalOverride(AbstractProblemType problemType, String key, String value) {
+            this.conditionalOverrides.computeIfAbsent(problemType, k -> new ArrayList<>()).add(key + " = " + value);
+            return this;
+        }
+
+        public Map<AbstractProblemType, List<String>> getConditionalOverrides() {
+            return this.conditionalOverrides;
         }
     }
 }
