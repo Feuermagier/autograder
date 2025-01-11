@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated;
 
 import de.firemage.autograder.core.CodePosition;
+import de.firemage.autograder.core.LocalizedMessageForProblem;
 import de.firemage.autograder.core.Problem;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
@@ -19,11 +20,11 @@ public abstract class IntegratedCheck implements Check {
     protected IntegratedCheck() {}
 
     protected void addLocalProblem(CtElement element, Translatable explanation, ProblemType problemType) {
-        this.problems.add(new IntegratedInCodeProblem(this, element, explanation, problemType, this.sourceInfo));
+        this.problems.add(new IntegratedInCodeProblem(this, element, new LocalizedMessageForProblem(explanation, problemType), problemType, this.sourceInfo));
     }
 
     protected void addLocalProblem(CodePosition position, Translatable explanation, ProblemType problemType) {
-        this.problems.add(new Problem(this, position, explanation, problemType) {});
+        this.problems.add(new Problem(this, position, new LocalizedMessageForProblem(explanation, problemType), problemType) {});
     }
 
     public List<Problem> run(StaticAnalysis staticAnalysis, SourceInfo sourceInfo) {
