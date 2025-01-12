@@ -99,6 +99,16 @@ public interface AbstractLinter {
             return this;
         }
 
+        /**
+         * Sets all conditional overrides, discarding all previously set conditional overrides.
+         * @param conditionalOverrides
+         * @return
+         */
+        public Builder setConditionalOverrides(Map<AbstractProblemType, List<String>> conditionalOverrides) {
+            this.conditionalOverrides = new HashMap<>(conditionalOverrides);
+            return this;
+        }
+
         public Map<AbstractProblemType, List<String>> getConditionalOverrides() {
             return this.conditionalOverrides;
         }
