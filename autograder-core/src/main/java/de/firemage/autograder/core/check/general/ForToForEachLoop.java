@@ -10,6 +10,7 @@ import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.MethodUtil;
 import de.firemage.autograder.core.integrated.TypeUtil;
 import de.firemage.autograder.core.integrated.UsesFinder;
+import de.firemage.autograder.core.integrated.VariableUtil;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.CtArrayRead;
 import spoon.reflect.code.CtBodyHolder;
@@ -146,12 +147,19 @@ public class ForToForEachLoop extends IntegratedCheck {
         return Optional.empty();
     }
 
+    private static boolean isMutatingCollectionMethod(CtVariable<?> iterable, CtInvocation<?> ctInvocation) {
+        return ctInvocation.getTarget() instanceof CtVariableAccess<?> variableAccess
+            && variableAccess.getVariable() != null
+            && VariableUtil.getVariableDeclaration(variableAccess.getVariable()) == iterable
+            && ctInvocation.getExecutable().getSimpleName().matches("add|remove|clear|put|addAll|removeAll|retainAll");
+    }
+
     @Override
     protected void check(StaticAnalysis staticAnalysis) {
         staticAnalysis.processWith(new AbstractProcessor<CtFor>() {
             @Override
             public void process(CtFor ctFor) {
-                if (ctFor.isImplicit() || !ctFor.getPosition().isValidPosition()) {
+                if (ctFor.isImplicit() || !ctFor.getPosition().isValidPosition() || ctFor.getBody() == null) {
                     return;
                 }
 
@@ -167,6 +175,12 @@ public class ForToForEachLoop extends IntegratedCheck {
 
                 CtVariable<?> iterable = findIterable(forLoopRange).orElse(null);
                 if (iterable == null) {
+                    return;
+                }
+
+                if (UsesFinder.variableUses(iterable).nestedIn(ctFor.getBody()).anyMatch(access ->
+                    access.getParent() instanceof CtInvocation<?> ctInvocation && isMutatingCollectionMethod(iterable, ctInvocation))) {
+                    // if certain methods are called on the iterable, it cannot be used in a for-each loop
                     return;
                 }
 

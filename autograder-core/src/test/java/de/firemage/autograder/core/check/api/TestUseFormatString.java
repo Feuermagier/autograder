@@ -167,4 +167,49 @@ class TestUseFormatString extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testOnlyLiterals() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Field",
+            """
+                public class Field {
+                    private static final String SOME_CONSTANT = "This is a constant string.";
+                    private String left;
+                    private int number;
+                    private String right;
+
+                    @Override
+                    public String toString() {
+                        return "a" + "b" + SOME_CONSTANT + SOME_CONSTANT;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+    @Test
+    void testOnlyVariables() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Field",
+            """
+                public class Field {
+                    private String left;
+                    private int number;
+                    private String right;
+
+                    @Override
+                    public String toString() {
+                        return left + number + right + number + left + right + number;
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }

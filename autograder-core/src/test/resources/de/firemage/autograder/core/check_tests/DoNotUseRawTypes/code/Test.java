@@ -16,12 +16,12 @@ public class Test {
     }
 
     void example1() {
-        List /*# not ok #*/ aList = new ArrayList();
+        List /*# not ok #*/ aList = new ArrayList /*# not ok #*/();
         String s = "Hello World!";
         aList.add(s);
         String c = (String)aList.get(0);
         for (Map.Entry<String, String> entry : l4.entrySet()) {} /*# ok #*/
     }
 
-    private Map<String, String> subnets = new HashMap(); /*# ok #*/
+    private Map<String, String> subnets = new HashMap(); /*# not ok #*/
 }

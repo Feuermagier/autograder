@@ -8,6 +8,7 @@ import de.firemage.autograder.api.LinterException;
 import de.firemage.autograder.api.Translatable;
 import de.firemage.autograder.core.check.Check;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.file.SourcePath;
 import de.firemage.autograder.core.file.TempLocation;
 import de.firemage.autograder.core.file.UploadedFile;
 import org.reflections.Reflections;
@@ -18,12 +19,14 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Set;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
@@ -66,6 +69,62 @@ public final class Linter implements AbstractLinter {
     ) throws LinterException, IOException {
         var checks = this.findChecksForProblemTypes(checkConfiguration.problemsToReport());
         return this.checkFile(file, checkConfiguration, checks, statusConsumer);
+    }
+
+    private static List<Problem> filterProblematicAnnotations(List<Problem> problems) {
+        // HACK: for the following issue:
+        //       https://github.com/Feuermagier/autograder/issues/672
+
+        List<Problem> problematicAnnotations = new ArrayList<>();
+        List<Problem> result = new ArrayList<>();
+        for (Problem problem : problems) {
+            // skip unrelated problems:
+            if (!Set.of(ProblemType.UNUSED_DIAMOND_OPERATOR, ProblemType.UNCHECKED_TYPE_CAST, ProblemType.DO_NOT_USE_RAW_TYPES).contains(problem.getProblemType())) {
+                result.add(problem);
+                continue;
+            }
+
+            problematicAnnotations.add(problem);
+        }
+
+        record CodeByLineKey(SourcePath file, int startLine) {
+            CodeByLineKey(CodePosition position) {
+                this(position.file(), position.startLine());
+            }
+        }
+
+        Map<CodeByLineKey, List<Problem>> problemsByLine = new HashMap<>();
+        for (Problem problem : problematicAnnotations) {
+            CodeByLineKey position = new CodeByLineKey(problem.getPosition());
+            problemsByLine.computeIfAbsent(position, key -> new ArrayList<>()).add(problem);
+        }
+
+        for (var entry : problemsByLine.entrySet()) {
+            if (entry.getValue().size() == 1) {
+                result.add(entry.getValue().get(0));
+                continue;
+            }
+
+            // at least two problems on the same line
+            // check if they are all of the three problems:
+            Set<ProblemType> problemTypes = entry.getValue()
+                .stream()
+                .map(Problem::getProblemType)
+                .collect(Collectors.toSet());
+
+            if (problemTypes.equals(Set.of(ProblemType.UNUSED_DIAMOND_OPERATOR, ProblemType.UNCHECKED_TYPE_CAST, ProblemType.DO_NOT_USE_RAW_TYPES))) {
+                // only keep the raw type annotations
+                entry.getValue()
+                    .stream()
+                    .filter(problem -> problem.getProblemType() == ProblemType.DO_NOT_USE_RAW_TYPES)
+                    .forEach(result::add);
+            } else {
+                // keep all problems
+                result.addAll(entry.getValue());
+            }
+        }
+
+        return result;
     }
 
     public List<Problem> checkFile(
@@ -139,6 +198,8 @@ public final class Linter implements AbstractLinter {
                 ));
             }
         }
+
+        unreducedProblems = filterProblematicAnnotations(unreducedProblems);
 
         if (!checkConfiguration.problemsToReport().isEmpty()) {
             unreducedProblems = unreducedProblems

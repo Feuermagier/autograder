@@ -7,8 +7,9 @@ import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.AbstractCheckTest;
 import de.firemage.autograder.api.JavaVersion;
 import de.firemage.autograder.core.file.StringSourceInfo;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 
 import java.io.IOException;
 import java.util.List;
@@ -205,6 +206,29 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
     }
 
     @Test
+    void testIfWithLargeConditions() throws IOException, LinterException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Test",
+            """
+                public class Test {
+                    boolean test(boolean a, boolean b, boolean c, boolean d, boolean e, boolean f) {
+                        if (a && b && !c) {
+                            return true;
+                        } else {
+                            return e || f;
+                        }
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        assertEqualsRedundant(problems.next(), "return a && b && !c || (e || f)");
+
+        problems.assertExhausted();
+    }
+
+    @Test
     void testIfWithExtraStatement() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
@@ -226,88 +250,59 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
-    @Test
-    void testPartialLiteralReturn() throws IOException, LinterException {
+
+    @ParameterizedTest
+    @CsvSource(
+        delimiter = ';',
+        useHeadersInDisplayName = true,
+        // the condition for the then is always "isSafe"
+        value = {
+            " Then            ; Else              ; Suggestion                                       ",
+            // all possible combinations of conditions where they are partially literals:
+            " isEdgeLegal     ; true              ; !isSafe || isEdgeLegal                           ",
+            " isEdgeLegal     ; false             ; isSafe && isEdgeLegal                            ",
+            " true            ; isEdgeSafe        ; isSafe || isEdgeSafe                             ",
+            " false           ; isEdgeSafe        ; !isSafe && isEdgeSafe                            ",
+            // all possible combinations where the then and else are both literals
+            // " true            ; true              ; true                                             ",
+            " true            ; false             ; isSafe                                           ",
+            " false           ; true              ; !isSafe                                          ",
+            // " false           ; false             ; false                                            ",
+            // all possible combinations where the then and else are both non-literals
+            // " isEdgeLegal     ; isEdgeSafe        ; isSafe && isEdgeLegal || !isSafe && isEdgeSafe   ",
+        }
+    )
+    void testIfElseReturn(String thenValue, String elseValue, String suggestion) throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
             JavaVersion.JAVA_17,
             "Test",
             """
-                public class Test {
-                    boolean doA(int a) {
-                        if (a == 0) {
-                            return a == 1;
-                        }
-
-                        return true;
+            public class Test {
+                boolean testA(boolean isSafe, boolean isEdgeLegal, boolean isEdgeSafe) {
+                    if (isSafe) {
+                        return %s;
                     }
 
-                    boolean doB(int a) {
-                        if (a == 2) {
-                            return true;
-                        }
-
-                        return a == 3;
-                    }
-
-                    boolean doC(int a) {
-                        if (a == 4) {
-                            return false;
-                        }
-
-                        return a == 5;
-                    }
-                    
-                    boolean doD(int a) {
-                        if (a == 6) {
-                            return a == 7;
-                        }
-
-                        return false;
+                    return %s;
+                }
+                
+                boolean testB(boolean isSafe, boolean isEdgeLegal, boolean isEdgeSafe) {
+                    if (isSafe) {
+                        return %s;
+                    } else {
+                        return %s;
                     }
                 }
-                """
+            }""".formatted(thenValue, elseValue, thenValue, elseValue)
         ), PROBLEM_TYPES);
 
-        assertEqualsRedundant(problems.next(), "return a == 0 && a == 1 || a != 0");
-        assertEqualsRedundant(problems.next(), "return a == 2 || a == 3");
-        assertEqualsRedundant(problems.next(), "return a != 4 && a == 5");
-        assertEqualsRedundant(problems.next(), "return a == 6 && a == 7");
+        if (suggestion != null) {
+            assertEqualsRedundant(problems.next(), "return %s".formatted(suggestion));
+            assertEqualsRedundant(problems.next(), "return %s".formatted(suggestion));
+        }
 
         problems.assertExhausted();
     }
-
-    @Test
-    void testNonLiteralReturn() throws IOException, LinterException {
-        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
-            JavaVersion.JAVA_17,
-            "Test",
-            """
-                public class Test {
-                    boolean doA(int a) {
-                        if (a == 0) {
-                            return a == 1;
-                        }
-
-                        return a == 2;
-                    }
-
-                    boolean doB(int a) {
-                        if (a == 3) {
-                            return a == 4;
-                        } else {
-                            return a == 5;
-                        }
-                    }
-                }
-                """
-        ), PROBLEM_TYPES);
-
-        assertEqualsRedundant(problems.next(), "return a == 0 && a == 1 || a == 2");
-        assertEqualsRedundant(problems.next(), "return a == 3 && a == 4 || a == 5");
-
-        problems.assertExhausted();
-    }
-
 
     @Test
     void testInEquals() throws IOException, LinterException {
@@ -380,7 +375,6 @@ class TestRedundantIfForBooleanCheck extends AbstractCheckTest {
         problems.assertExhausted();
     }
 
-    @Disabled("This is a bug in Spoon, should be fixed by the PR spoon#6094")
     @Test
     void testMissingParensAroundStringConcatSuggestion() throws IOException, LinterException {
         ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(

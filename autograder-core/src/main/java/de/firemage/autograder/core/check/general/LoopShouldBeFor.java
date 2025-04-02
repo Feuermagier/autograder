@@ -87,12 +87,12 @@ public class LoopShouldBeFor extends IntegratedCheck {
             CtStatement statement = statements.get(i);
 
             // ensure that the last statement is an assignment to the loop variable
-            if ((statement instanceof CtAssignment<?, ?> ctAssignment
+            if (statement instanceof CtAssignment<?, ?> ctAssignment
                 && ctAssignment.getAssigned() instanceof CtVariableWrite<?> ctVariableWrite
-                && ctVariableWrite.getVariable().equals(ctLocalVariable.getReference()))
-                || (statement instanceof CtUnaryOperator<?> ctUnaryOperator
+                && ctVariableWrite.getVariable().equals(ctLocalVariable.getReference())
+                || statement instanceof CtUnaryOperator<?> ctUnaryOperator
                 && ctUnaryOperator.getOperand() instanceof CtVariableWrite<?> ctWrite
-                && ctWrite.getVariable().equals(ctLocalVariable.getReference()))) {
+                && ctWrite.getVariable().equals(ctLocalVariable.getReference())) {
                 return statement;
             }
 

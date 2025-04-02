@@ -3,6 +3,7 @@ package de.firemage.autograder.core.check.api;
 import de.firemage.autograder.core.LocalizedMessage;
 import de.firemage.autograder.core.ProblemType;
 import de.firemage.autograder.core.check.ExecutableCheck;
+import de.firemage.autograder.core.integrated.ExpressionUtil;
 import de.firemage.autograder.core.integrated.ForLoopRange;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.VariableUtil;
@@ -17,8 +18,6 @@ import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtFieldAccess;
 import spoon.reflect.code.CtFor;
 import spoon.reflect.code.CtLiteral;
-import spoon.reflect.code.CtNewArray;
-import spoon.reflect.code.CtNewClass;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.code.CtVariableRead;
 import spoon.reflect.declaration.CtVariable;
@@ -28,6 +27,10 @@ import java.util.Map;
 
 @ExecutableCheck(reportedProblems = {ProblemType.COMMON_REIMPLEMENTATION_ARRAYS_FILL})
 public class UseArraysFill extends IntegratedCheck {
+    private static boolean canBeAssigned(CtExpression<?> ctExpression) {
+        // This could be expanded to allow more expressions if needed
+        return ExpressionUtil.isConstantExpressionOr(ctExpression, e -> false);
+    }
 
     private void checkArraysFill(CtFor ctFor) {
         ForLoopRange forLoopRange = ForLoopRange.fromCtFor(ctFor).orElse(null);
@@ -42,20 +45,15 @@ public class UseArraysFill extends IntegratedCheck {
             || !(index.getVariable().equals(forLoopRange.loopVariable()))) {
             return;
         }
+        CtExpression<?> assignmentExpression = ctAssignment.getAssignment();
 
         CtVariable<?> loopVariable = (CtVariable<?>) VariableUtil.getReferenceDeclaration(forLoopRange.loopVariable());
         // return if the for loop uses the loop variable (would not be a simple repetition)
-        if (UsesFinder.variableUses(loopVariable).nestedIn(ctAssignment.getAssignment()).hasAny()) {
+        if (UsesFinder.variableUses(loopVariable).nestedIn(assignmentExpression).hasAny()) {
             return;
         }
 
-        // ignore new array or new class assignments
-        if (ctAssignment.getAssignment() instanceof CtNewClass<?> || ctAssignment.getAssignment() instanceof CtNewArray<?>) {
-            return;
-        }
-
-        CtExpression<?> rhs = ctAssignment.getAssignment();
-        if (!TypeUtil.isImmutable(rhs.getType())) {
+        if (!canBeAssigned(assignmentExpression)) {
             return;
         }
 
@@ -63,7 +61,7 @@ public class UseArraysFill extends IntegratedCheck {
             ctArrayWrite.getTarget(),
             forLoopRange.start(),
             forLoopRange.end(),
-            ctAssignment.getAssignment()
+            assignmentExpression
         );
         if (forLoopRange.start() instanceof CtLiteral<Integer> ctLiteral
             && ctLiteral.getValue() == 0
@@ -72,7 +70,7 @@ public class UseArraysFill extends IntegratedCheck {
             && fieldAccess.getVariable().getSimpleName().equals("length")) {
             suggestion = "Arrays.fill(%s, %s)".formatted(
                 ctArrayWrite.getTarget(),
-                ctAssignment.getAssignment()
+                assignmentExpression
             );
         }
 

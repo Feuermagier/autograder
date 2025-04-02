@@ -6,7 +6,6 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import spoon.processing.AbstractProcessor;
-import spoon.reflect.code.CtExpression;
 import spoon.reflect.declaration.CtType;
 import spoon.reflect.path.CtRole;
 import spoon.reflect.reference.CtTypeReference;
@@ -28,13 +27,8 @@ public class DoNotUseRawTypes extends IntegratedCheck {
             return false;
         }
 
-        // ignore types in expressions like 'new ArrayList()'
-        if (ctTypeReference.getParent(CtExpression.class) != null) {
-            return false;
-        }
-
         return declaration.getFormalCtTypeParameters().size() != ctTypeReference.getActualTypeArguments().size();
-    } //
+    }
 
     @Override
     protected void check(StaticAnalysis staticAnalysis) {

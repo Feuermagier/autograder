@@ -6,6 +6,7 @@ import de.firemage.autograder.core.check.ExecutableCheck;
 import de.firemage.autograder.core.integrated.IntegratedCheck;
 import de.firemage.autograder.core.integrated.MethodHierarchy;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
+import de.firemage.autograder.core.integrated.TypeUtil;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtBinaryOperator;
 import spoon.reflect.code.CtCatch;
@@ -16,11 +17,42 @@ import spoon.reflect.declaration.CtMethod;
 import spoon.reflect.reference.CtExecutableReference;
 import spoon.reflect.visitor.CtScanner;
 
+import java.util.Set;
+
 @ExecutableCheck(reportedProblems = { ProblemType.INSTANCEOF, ProblemType.INSTANCEOF_EMULATION })
-public class InstanceOf extends IntegratedCheck {
+public class Instanceof extends IntegratedCheck {
+    private static final Set<String> FORBIDDEN_CLASS_METHODS = Set.of(
+        "descriptorString",
+        "getCanonicalName",
+        "getName",
+        "getSimpleName",
+        "getTypeName",
+        "isAssignableFrom",
+        "isInstance"
+        /*, "toString" */
+    );
+
     private static boolean isInAllowedContext(CtElement ctElement) {
         CtMethod<?> ctMethod = ctElement.getParent(CtMethod.class);
         return ctMethod != null && MethodHierarchy.isOverridingMethod(ctMethod);
+    }
+
+    private static boolean isInstanceofEmulation(CtInvocation<?> ctInvocation) {
+        CtExecutableReference<?> ctExecutableReference = ctInvocation.getExecutable();
+
+        // check if Object#getClass() is called, which would return a Class object.
+        //
+        // This uses the subtype method, because the type of the reference might be a different generic type
+        // than the one in the literal
+        if (TypeUtil.isSubtypeOf(ctExecutableReference.getType(), java.lang.Class.class)
+            && ctExecutableReference.getSimpleName().equals("getClass")) {
+            return true;
+        }
+
+        return ctExecutableReference.getDeclaringType() != null &&
+            TypeUtil.isSubtypeOf(ctExecutableReference.getDeclaringType(), Class.class) &&
+            FORBIDDEN_CLASS_METHODS.contains(ctExecutableReference.getSimpleName());
+
     }
 
     @Override
@@ -53,10 +85,7 @@ public class InstanceOf extends IntegratedCheck {
                     return;
                 }
 
-                CtExecutableReference<?> ctExecutableReference = ctInvocation.getExecutable();
-
-                if (ctExecutableReference.getType().getQualifiedName().equals("java.lang.Class")
-                        && ctExecutableReference.getSimpleName().equals("getClass")) {
+                if (isInstanceofEmulation(ctInvocation)) {
                     addLocalProblem(
                         ctInvocation,
                         new LocalizedMessage("do-not-use-instanceof-emulation"),

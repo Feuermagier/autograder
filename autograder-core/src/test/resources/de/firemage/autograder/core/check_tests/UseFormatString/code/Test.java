@@ -3,8 +3,8 @@ package de.firemage.autograder.core.check_tests.UseFormatString.code;
 public class Test {
     public static void main(String[] args) {
         String value;
-        value = "a" + "b" + "c"; /*# not ok #*/
-        value = "Hello " + 1 + " " + 3.14f; /*# not ok #*/
+        value = "a" + "b" + "c"; /*# ok #*/
+        value = "Hello " + 1 + " " + 3.14f; /*# ok #*/
     }
 }
 
@@ -29,8 +29,8 @@ class TestStringBuilder {
         final String c = "cee";
         StringBuilder stringBuilder = new StringBuilder();
 
-        stringBuilder.append("a").append("b").append("c"); /*# not ok #*/
-        stringBuilder.append("Hello ").append(1).append(" ").append(3.14f); /*# not ok #*/
+        stringBuilder.append("a").append("b").append("c"); /*# ok #*/
+        stringBuilder.append("Hello ").append(1).append(" ").append(3.14f); /*# ok #*/
         stringBuilder.append("singleValue"); /*# ok #*/
         stringBuilder.append(a).append(" b ").append(c); /*# not ok #*/
         stringBuilder.append(a).append(" ").append(1).append(" ").append(b); /*# not ok #*/

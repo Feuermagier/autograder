@@ -65,10 +65,8 @@ javadoc-unexpected-tag = Der JavaDoc-Kommentar sollte keinen '@{$tag}'-Tag haben
 
 javadoc-type-exp-invalid-author = Im @author-Tag sollte ein u-Kürzel stehen: {$authors}
 
-javadoc-stub-exp-desc = Die Beschreibung des JavaDoc-Kommentars ist leer
-javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}'
-javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
-javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception '{$exp}'
+javadoc-stub-description = Die Beschreibung des JavaDoc-Kommentars ist leer
+javadoc-stub-tag = Nichtssagende Beschreibung für '{$tag}'
 
 javadoc-undocumented-throws = Die Exception '{$exp}' wird geworfen, aber nicht im JavaDoc-Kommentar erwähnt.
 
@@ -178,7 +176,7 @@ binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwende
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
-magic-literal = "{$value} ist ein(e) magic {$type}."
+magic-literal = {$value} ist ein(e) magic {$type}.
 
 loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
 
@@ -188,8 +186,8 @@ loop-should-be-while = Diese Schleife sollte eine while Schleife sein: {$suggest
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
-constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben dem Wert '{$value}'
-constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
+constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben dem Wert {$value}
+constants-name-exp-value = Der Wert {$value} der Konstante '{$name}' sollte nicht im Namen vorkommen
 
 linguistic-naming-boolean = Der Name von '{$name}' deutet an, dass es vom Typ boolean ist oder diesen zurückgibt, stattdessen ist der Typ '{$type}'.
 linguistic-naming-getter = Der Name von '{$name}' deutet an, dass es einen Wert zurückgibt, was aber nicht der Fall ist.

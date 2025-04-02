@@ -1,5 +1,0 @@
-oop.InstanceOf
-Detect instanceof and its emulation.
-Test.java:12
-Test.java:16
-Test.java:23-25

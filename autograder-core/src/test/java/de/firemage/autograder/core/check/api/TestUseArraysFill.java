@@ -127,8 +127,6 @@ class TestUseArraysFill extends AbstractCheckTest {
             )
         ), PROBLEM_TYPES);
 
-        assertEqualsReimplementation(problems.next(), "Arrays.fill(field, PlayingFieldEntry.FREE)");
-
         problems.assertExhausted();
     }
 
@@ -151,6 +149,40 @@ class TestUseArraysFill extends AbstractCheckTest {
                             for (int i = 0; i < field.length; i++) {
                                 field[i] = PlayingFieldEntry.FREE;
                             }
+                        }
+                    }
+                    """
+                )
+            )
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
+
+
+    @Test
+    void testAssignedInvocation() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceStrings(
+            JavaVersion.JAVA_17,
+            Map.ofEntries(
+                Map.entry(
+                    "Main",
+                    """
+                    import java.util.LinkedList;
+
+                    public class Main {
+                        public static int[] reversePath(LinkedList<Integer> orderedPath) {
+                            int[] reversePath = new int[orderedPath.size()];
+                            int size = orderedPath.size();
+                            for (int i = 0; i < size; i++) {
+                                reversePath[i] = orderedPath.removeFirst();
+                            }
+                            
+                            return reversePath;
+                        }
+
+                        public static void main(String[] args) {
+                            System.out.println(reversePath(new LinkedList<>()));
                         }
                     }
                     """

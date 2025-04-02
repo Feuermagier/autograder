@@ -10,12 +10,17 @@ import de.firemage.autograder.core.integrated.StatementUtil;
 import de.firemage.autograder.core.integrated.StaticAnalysis;
 import de.firemage.autograder.core.integrated.effects.AssignmentEffect;
 import de.firemage.autograder.core.integrated.effects.Effect;
+import de.firemage.autograder.core.integrated.evaluator.Evaluator;
+import de.firemage.autograder.core.integrated.evaluator.algebra.ApplyAbsorptionLaw;
+import de.firemage.autograder.core.integrated.evaluator.fold.EvaluateLiteralOperations;
+import de.firemage.autograder.core.integrated.evaluator.fold.EvaluatePartialLiteralOperations;
 import spoon.processing.AbstractProcessor;
 import spoon.reflect.code.BinaryOperatorKind;
 import spoon.reflect.code.CtAssignment;
 import spoon.reflect.code.CtBlock;
 import spoon.reflect.code.CtExpression;
 import spoon.reflect.code.CtIf;
+import spoon.reflect.code.CtLiteral;
 import spoon.reflect.code.CtReturn;
 import spoon.reflect.code.CtStatement;
 import spoon.reflect.declaration.CtMethod;
@@ -48,7 +53,7 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
         if (thenEffect == null
             || elseEffect == null
             || !thenEffect.isSameEffect(elseEffect)
-            || (!(thenStmt instanceof CtReturn<?>) && !(thenStmt instanceof CtAssignment<?, ?>))
+            || !(thenStmt instanceof CtReturn<?>) && !(thenStmt instanceof CtAssignment<?, ?>)
             || thenEffect.value().isEmpty()
             || elseEffect.value().isEmpty()) {
             return;
@@ -62,60 +67,32 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
             return;
         }
 
-        Boolean thenLiteral = ExpressionUtil.tryGetBooleanLiteral(thenValue).orElse(null);
-        Boolean elseLiteral = ExpressionUtil.tryGetBooleanLiteral(elseValue).orElse(null);
-
-        // skip non-sense like if (a) return true else return true
-        if (thenLiteral != null && thenLiteral.equals(elseLiteral)) {
+        // skip duplicate values that are identical, because this would conflict with the DuplicateIfBlockCheck
+        if (thenValue.equals(elseValue)) {
             return;
         }
 
-        CtExpression<?> thenCondition = null;
-
-        if (thenLiteral == null) {
-            // if it does not return a literal, both the condition and the return value must be true
-            thenCondition = FactoryUtil.createBinaryOperator(
-                condition,
-                thenValue,
-                BinaryOperatorKind.AND
-            );
-        } else if (thenLiteral) {
-            // if it returns true, then the if condition must be true
-            thenCondition = condition;
+        // skip if neither of the values is a literal
+        if (!(thenValue instanceof CtLiteral<?>) && !(elseValue instanceof CtLiteral<?>)) {
+            return;
         }
 
-        CtExpression<?> combinedCondition = thenCondition;
+        // The code if (condition) { return thenValue; } else { return elseValue; } is equivalent to
+        // return condition && thenValue || !condition && elseValue;
+        //
+        // Depending on the code, the suggestion can be simplified, for example a && true is equivalent to a.
+        // The following code will apply these simplifications to the suggestion.
 
-        if (elseLiteral == null) {
-            // if it does not return a literal in the else, either the thenCondition or the elseCondition must be true
-            //
-            // if (a) { return b; } else { return c; } -> return a && b || c;
-
-            if (thenCondition == null) {
-                combinedCondition = FactoryUtil.createBinaryOperator(
-                    ExpressionUtil.negate(condition),
-                    elseValue,
-                    BinaryOperatorKind.AND
-                );
-            } else {
-                combinedCondition = FactoryUtil.createBinaryOperator(
-                    combinedCondition,
-                    elseValue,
-                    BinaryOperatorKind.OR
-                );
-            }
-        } else if (elseLiteral) {
-            // if it does return true, then the if condition must be false
-            if (thenCondition == null) {
-                combinedCondition = ExpressionUtil.negate(condition);
-            } else {
-                combinedCondition = FactoryUtil.createBinaryOperator(
-                    combinedCondition,
-                    ExpressionUtil.negate(condition),
-                    BinaryOperatorKind.OR
-                );
-            }
-        }
+        Evaluator evaluator = new Evaluator(
+            EvaluateLiteralOperations.create(),
+            EvaluatePartialLiteralOperations.create(),
+            ApplyAbsorptionLaw.create()
+        );
+        CtExpression<?> combinedCondition = evaluator.evaluate(FactoryUtil.createBinaryOperator(
+            FactoryUtil.createBinaryOperator(condition, thenValue, BinaryOperatorKind.AND),
+            FactoryUtil.createBinaryOperator(ExpressionUtil.negate(condition), elseValue, BinaryOperatorKind.AND),
+            BinaryOperatorKind.OR
+        ));
 
         addLocalProblem(
             condition,
@@ -140,8 +117,6 @@ public class RedundantIfForBooleanCheck extends IntegratedCheck {
                 }
 
                 List<CtStatement> statements = StatementUtil.getEffectiveStatements(block);
-
-                // TODO: write test
 
                 for (int i = 0; i < statements.size(); i++) {
                     CtStatement statement = statements.get(i);

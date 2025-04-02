@@ -13,18 +13,25 @@ import spoon.reflect.declaration.CtMethod;
 
 import java.util.Map;
 
-@ExecutableCheck(reportedProblems = {ProblemType.JAVADOC_STUB_DESCRIPTION, ProblemType.JAVADOC_STUB_RETURN_TAG,
-    ProblemType.JAVADOC_STUB_THROWS_TAG, ProblemType.JAVADOC_STUB_PARAMETER_TAG})
+@ExecutableCheck(reportedProblems = {
+    ProblemType.JAVADOC_STUB_DESCRIPTION, ProblemType.JAVADOC_STUB_RETURN_TAG,
+    ProblemType.JAVADOC_STUB_THROWS_TAG, ProblemType.JAVADOC_STUB_PARAMETER_TAG
+})
 public class JavadocStubCheck extends IntegratedCheck {
-    private final boolean allowGettersSettersWithEmptyDescription;
+    private static final boolean ALLOW_GETTER_SETTER_WITH_EMPTY_DESCRIPTION = true;
 
-    public JavadocStubCheck(boolean allowGettersSettersWithEmptyDescription) {
-        super();
-        this.allowGettersSettersWithEmptyDescription = allowGettersSettersWithEmptyDescription;
-    }
+    private static String formatTag(CtJavaDocTag tag) {
+        String result = tag.getType().toString();
 
-    public JavadocStubCheck() {
-        this(true);
+        if (tag.getParam() != null && !tag.getParam().isEmpty()) {
+            result += " " + tag.getParam();
+        }
+
+        if (tag.getContent() != null && !tag.getContent().isEmpty()) {
+            result += " " + tag.getContent();
+        }
+
+        return result;
     }
 
     @Override
@@ -32,39 +39,41 @@ public class JavadocStubCheck extends IntegratedCheck {
         staticAnalysis.processWith(new AbstractProcessor<CtJavaDoc>() {
             @Override
             public void process(CtJavaDoc javadoc) {
-                if (allowGettersSettersWithEmptyDescription
+                // skip methods that were overridden
+                if (MethodUtil.isInOverridingMethod(javadoc)) {
+                    return;
+                }
+
+                if (!(ALLOW_GETTER_SETTER_WITH_EMPTY_DESCRIPTION
                     && javadoc.getParent() instanceof CtMethod<?> method
-                    && (MethodUtil.isGetter(method) || MethodUtil.isSetter(method))) {
-                    // Setters and Getters are okay
-                } else if (isDefaultValueDescription(javadoc.getContent())) {
-                    addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-desc"),
-                        ProblemType.JAVADOC_STUB_DESCRIPTION);
+                    && (MethodUtil.isGetter(method) || MethodUtil.isSetter(method)))
+                    && isDefaultValueDescription(javadoc.getContent())) {
+                    addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-description"), ProblemType.JAVADOC_STUB_DESCRIPTION);
                 }
 
                 for (CtJavaDocTag tag : javadoc.getTags()) {
-                    switch (tag.getType()) {
-                        case PARAM -> {
-                            if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc,
-                                    new LocalizedMessage("javadoc-stub-exp-param", Map.of("param", tag.getParam())),
-                                    ProblemType.JAVADOC_STUB_PARAMETER_TAG);
-                            }
-                        }
-                        case RETURN -> {
-                            if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc, new LocalizedMessage("javadoc-stub-exp-return"),
-                                    ProblemType.JAVADOC_STUB_RETURN_TAG);
-                            }
-                        }
-                        case THROWS -> {
-                            if (isDefaultValueDescription(tag.getContent())) {
-                                addLocalProblem(javadoc,
-                                    new LocalizedMessage("javadoc-stub-exp-throws", Map.of("exp", tag.getParam())),
-                                    ProblemType.JAVADOC_STUB_THROWS_TAG);
-                            }
-                        }
-                        default -> {
-                        }
+                    if (tag.getContent() == null || !isDefaultValueDescription(tag.getContent())) {
+                        continue;
+                    }
+
+                    ProblemType problemType = switch (tag.getType()) {
+                        case PARAM -> ProblemType.JAVADOC_STUB_PARAMETER_TAG;
+                        case RETURN -> ProblemType.JAVADOC_STUB_RETURN_TAG;
+                        case THROWS -> ProblemType.JAVADOC_STUB_THROWS_TAG;
+                        default -> null;
+                    };
+
+                    if (problemType != null) {
+                        addLocalProblem(
+                            javadoc,
+                            new LocalizedMessage(
+                                "javadoc-stub-tag",
+                                Map.of(
+                                    "tag", formatTag(tag)
+                                )
+                            ),
+                            problemType
+                        );
                     }
                 }
             }

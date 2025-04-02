@@ -109,6 +109,20 @@ public final class MethodUtil {
         return MethodHierarchy.isOverridingMethod(ctMethod);
     }
 
+    /**
+     * Checks if the given method is overriding another method (effectively if the method can have an {@code @Override} annotation).
+     * @param ctMethod the method to check
+     * @return true if the method is overriding another method, false otherwise
+     */
+    public static boolean isOverridingMethod(CtMethod<?> ctMethod) {
+        return MethodHierarchy.isOverridingMethod(ctMethod);
+    }
+
+    /**
+     * Checks if the given method is overridden by another method.
+     * @param ctMethod the method to check
+     * @return true if the method is overridden by another method, false otherwise
+     */
     public static boolean isOverriddenMethod(CtMethod<?> ctMethod) {
         return MethodHierarchy.isOverriddenMethod(ctMethod);
     }
