@@ -178,7 +178,7 @@ binary-operator-on-boolean = Statt '|' und '&' sollte man '||' und '&&' verwende
 
 object-datatype = Statt dem Datentyp 'Object', sollte die Variable '{$variable}' einen konkreten oder generischen Datentyp haben.
 
-magic-literal = "{$value} ist ein(e) magic {$type}."
+magic-literal = {$value} ist ein(e) magic {$type}.
 
 loop-should-be-do-while = Diese Schleife sollte eine do-while Schleife sein, weil der Code vor der Schleife, der gleiche wie in der Schleife ist: {$suggestion}
 
@@ -188,8 +188,8 @@ loop-should-be-while = Diese Schleife sollte eine while Schleife sein: {$suggest
 # Naming
 bool-getter-name = Für boolean getter bietet es sich an ein Verb als Präfix zu verwenden. Zum Beispiel '{$newName}' statt '{$oldName}'.
 
-constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben dem Wert '{$value}'
-constants-name-exp-value = Der Wert '{$value}' der Konstante '{$name}' sollte nicht im Namen vorkommen
+constants-name-exp = Der Name '{$name}' ist nicht aussagekräftig gegeben dem Wert {$value}
+constants-name-exp-value = Der Wert {$value} der Konstante '{$name}' sollte nicht im Namen vorkommen
 
 linguistic-naming-boolean = Der Name von '{$name}' deutet an, dass es vom Typ boolean ist oder diesen zurückgibt, stattdessen ist der Typ '{$type}'.
 linguistic-naming-getter = Der Name von '{$name}' deutet an, dass es einen Wert zurückgibt, was aber nicht der Fall ist.
