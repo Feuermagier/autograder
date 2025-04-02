@@ -429,4 +429,33 @@ class TestForToForEachLoop extends AbstractCheckTest {
 
         problems.assertExhausted();
     }
+
+    @Test
+    void testMutatingCollection() throws LinterException, IOException {
+        ProblemIterator problems = this.checkIterator(StringSourceInfo.fromSourceString(
+            JavaVersion.JAVA_17,
+            "Main",
+            """
+                import java.util.ArrayList;
+                import java.util.List;
+                
+                public class Main {
+                    public static void main(String[] args) {
+                        var list = new ArrayList<>(List.of("a", "toRemove", "b", "toRemove"));
+                        \s
+                        for (int i = 0; i < list.size(); i++) {
+                            var e = list.get(i);
+                            if (e.equals("toRemove")) {
+                                list.remove(e);
+                            }
+                        }
+                        \s
+                        System.out.println(list);
+                    }
+                }
+                """
+        ), PROBLEM_TYPES);
+
+        problems.assertExhausted();
+    }
 }
