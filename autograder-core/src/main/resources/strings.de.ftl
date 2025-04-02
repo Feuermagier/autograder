@@ -65,10 +65,8 @@ javadoc-unexpected-tag = Der JavaDoc-Kommentar sollte keinen '@{$tag}'-Tag haben
 
 javadoc-type-exp-invalid-author = Im @author-Tag sollte ein u-Kürzel stehen: {$authors}
 
-javadoc-stub-exp-desc = Die Beschreibung des JavaDoc-Kommentars ist leer
-javadoc-stub-exp-param = Nichtssagende Beschreibung für den Parameter '{$param}'
-javadoc-stub-exp-return = Nichtssagende Beschreibung für den Rückgabewert
-javadoc-stub-exp-throws = Nichtssagende Beschreibung für die Exception '{$exp}'
+javadoc-stub-description = Die Beschreibung des JavaDoc-Kommentars ist leer
+javadoc-stub-tag = Nichtssagende Beschreibung für '{$tag}'
 
 javadoc-undocumented-throws = Die Exception '{$exp}' wird geworfen, aber nicht im JavaDoc-Kommentar erwähnt.
 

@@ -50,7 +50,6 @@ public class Instanceof extends IntegratedCheck {
         }
 
         return ctExecutableReference.getDeclaringType() != null &&
-            // TODO: this would not work
             TypeUtil.isSubtypeOf(ctExecutableReference.getDeclaringType(), Class.class) &&
             FORBIDDEN_CLASS_METHODS.contains(ctExecutableReference.getSimpleName());
 

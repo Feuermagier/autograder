@@ -66,10 +66,8 @@ javadoc-unexpected-tag = The JavaDoc comment should not have an '@{$tag}' tag.
 
 javadoc-type-exp-invalid-author = The @author tag should contain a u-shorthand: {$authors}
 
-javadoc-stub-exp-desc = Javadoc has an empty description
-javadoc-stub-exp-param = Stub description for parameter {$param}
-javadoc-stub-exp-return = Stub description for return value
-javadoc-stub-exp-throws = Stub description for exception {$exp}
+javadoc-stub-description = Javadoc has an empty description
+javadoc-stub-tag = Stub description for '{$tag}'
 
 javadoc-undocumented-throws = The exception {$exp} is thrown, but not mentioned in the javadoc comment.
 
