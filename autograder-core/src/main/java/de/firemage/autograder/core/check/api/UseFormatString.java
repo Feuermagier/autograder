@@ -83,8 +83,6 @@ public class UseFormatString extends IntegratedCheck {
         StringBuilder formatString = new StringBuilder();
         Collection<String> args = new ArrayList<>();
 
-        // true if the formatString has a %n placeholder
-        boolean hasInlineNewline = false;
         for (CtExpression<?> ctExpression : ctExpressions) {
             if (ExpressionUtil.resolveConstant(ctExpression) instanceof CtLiteral<?> literal
                 && literal.getValue() != null
@@ -97,7 +95,6 @@ public class UseFormatString extends IntegratedCheck {
                 if (ctLiteral.getValue() instanceof String value) {
                     // replace a system-dependant newline with %n
                     if (value.equals("\n")) {
-                        hasInlineNewline = true;
                         formatString.append("%n");
                     } else {
                         formatString.append(value);
@@ -119,15 +116,9 @@ public class UseFormatString extends IntegratedCheck {
             args.add(ctExpression.toString());
         }
 
-        if (args.isEmpty() && formatString.length() >= MAXIMUM_STRING_LENGTH_IN_LINE) {
-            return null;
-        }
-
-        if (args.isEmpty() && !hasInlineNewline) {
-            return "\"%s\"".formatted(formatString.toString());
-        }
-
-        if (hasInlineNewline && args.isEmpty()) {
+        // if the format string only contains literals, there is no benefit in using a format string:
+        // "abc%n".formatted()
+        if (args.isEmpty()) {
             return null;
         }
 
@@ -170,7 +161,9 @@ public class UseFormatString extends IntegratedCheck {
         }
 
         String formattedString = this.buildFormattedString(args);
-        if (formattedString == null) return;
+        if (formattedString == null) {
+            return;
+        }
 
         this.addLocalProblem(
             ctElement,
