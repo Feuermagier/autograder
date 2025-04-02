@@ -1,6 +1,7 @@
 package de.firemage.autograder.core.integrated.evaluator.fold;
 
 import de.firemage.autograder.core.integrated.ExpressionUtil;
+import de.firemage.autograder.core.integrated.FactoryUtil;
 import de.firemage.autograder.core.integrated.evaluator.Evaluator;
 import de.firemage.autograder.core.integrated.evaluator.OperatorHelper;
 import spoon.SpoonException;
@@ -172,7 +173,7 @@ public final class EvaluateLiteralOperations implements Fold {
                 throw new UnsupportedOperationException("Unsupported Operator '%s'".formatted(ctBinaryOperator.getKind()));
         };
 
-        return (CtLiteral<T>) ctBinaryOperator.getFactory().createLiteral(value);
+        return FactoryUtil.makeLiteral(operatorType, (T) value);
     }
 
     @Override
@@ -208,6 +209,6 @@ public final class EvaluateLiteralOperations implements Fold {
                 throw new UnsupportedOperationException("Unsupported Operator '%s'".formatted(ctUnaryOperator.getKind()));
         };
 
-        return (CtLiteral<T>) ctUnaryOperator.getFactory().createLiteral(value);
+        return FactoryUtil.makeLiteral(operatorType, (T) value);
     }
 }

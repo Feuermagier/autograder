@@ -32,7 +32,7 @@ public class MagicLiteral extends IntegratedCheck {
         CtMethod<?> parentMethod = ctLiteral.getParent(CtMethod.class);
         // allow magic literals in hashCode methods (some implementations use prime numbers)
         if (parentMethod != null && TypeUtil.isTypeEqualTo(parentMethod.getType(), int.class) && parentMethod.getSimpleName().equals("hashCode")
-            && MethodUtil.isOverriddenMethod(parentMethod)) {
+            && MethodUtil.isOverridingMethod(parentMethod)) {
             return;
         }
 
