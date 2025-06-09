@@ -39,6 +39,7 @@ deploy:
         url: https://central.sonatype.com/api/v1/publisher
         username: ${env.JRELEASER_NEXUS2_MAVEN_CENTRAL_USERNAME}
         password: ${env.JRELEASER_NEXUS2_MAVEN_CENTRAL_PASSWORD}
+        authorization: BEARER
         stagingRepositories:
           - target/staging-deploy
 
