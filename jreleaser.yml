@@ -40,6 +40,8 @@ deploy:
         username: ${env.JRELEASER_MAVEN_CENTRAL_USERNAME}
         password: ${env.JRELEASER_MAVEN_CENTRAL_PASSWORD}
         authorization: BEARER
+        stagingRepositories:
+          - target/staging-deploy
 
 distributions:
   helloworld:
