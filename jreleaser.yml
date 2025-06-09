@@ -37,8 +37,8 @@ deploy:
       sonatype:
         active: ALWAYS
         url: https://central.sonatype.com/api/v1/publisher
-        username: ${JRELEASER_NEXUS2_MAVEN_CENTRAL_USERNAME}
-        password: ${JRELEASER_NEXUS2_MAVEN_CENTRAL_PASSWORD}
+        username: ${env.JRELEASER_NEXUS2_MAVEN_CENTRAL_USERNAME}
+        password: ${env.JRELEASER_NEXUS2_MAVEN_CENTRAL_PASSWORD}
         stagingRepositories:
           - target/staging-deploy
 
