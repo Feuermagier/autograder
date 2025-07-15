@@ -39,7 +39,7 @@ deploy:
         url: https://central.sonatype.com/api/v1/publisher
         username: ${env.JRELEASER_MAVEN_CENTRAL_USERNAME}
         password: ${env.JRELEASER_MAVEN_CENTRAL_PASSWORD}
-        authorization: BEARER
+        authorization: BASIC
         stagingRepositories:
           - target/staging-deploy
 
