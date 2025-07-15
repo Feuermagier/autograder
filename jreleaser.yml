@@ -34,12 +34,13 @@ release:
 deploy:
   maven:
     mavenCentral:
-      sonatype:
+      autograder:
         active: ALWAYS
         url: https://central.sonatype.com/api/v1/publisher
-        username: ${env.JRELEASER_MAVEN_CENTRAL_USERNAME}
+        username: JOX2rY
         password: ${env.JRELEASER_MAVEN_CENTRAL_PASSWORD}
         authorization: BEARER
+        applyMavenCentralRules: true
         stagingRepositories:
           - target/staging-deploy
 
